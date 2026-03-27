@@ -1,90 +1,82 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-import { verifyToken } from './src/utils/auth/verify-token'
+import {
+  isFloorRole,
+  isOfficeRole,
+  verifyAccessTokenFromRequest,
+} from '@/lib/auth/middleware'
+import { verifyToken, type AccessTokenPayload } from '@/lib/auth/jwt'
 
-// Define protected and public routes
-const protectedRoutes = [
-  '/users',
-  // Add other protected routes here
-]
+const PUBLIC_PATHS = ['/', '/login', '/floor']
+const PUBLIC_API_PATHS = ['/api/auth/login', '/api/auth/floor/login', '/api/auth/refresh']
 
-const protectedApiRoutes = [
-  '/api/user',
-  '/api/location',
-  // Add other protected API routes here
-]
+const getTokenFromCookie = (request: NextRequest): string | null => {
+  return request.cookies.get('access_token')?.value ?? null
+}
 
-const publicApiRoutes = [
-  '/api/auth/login',
-  // Add other public API routes here
-]
+const resolveAuthPayload = (request: NextRequest): AccessTokenPayload | null => {
+  const headerPayload = verifyAccessTokenFromRequest(request)
+  if (headerPayload) return headerPayload
 
-export async function middleware(request: NextRequest) {
+  const cookieToken = getTokenFromCookie(request)
+  if (!cookieToken) return null
+
+  try {
+    return verifyToken<AccessTokenPayload>(cookieToken)
+  } catch {
+    return null
+  }
+}
+
+const isPublicPath = (pathname: string): boolean => PUBLIC_PATHS.includes(pathname)
+const isPublicApiPath = (pathname: string): boolean =>
+  PUBLIC_API_PATHS.some((apiPath) => pathname.startsWith(apiPath))
+
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Check if route needs protection
-  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
-  const isProtectedApi = protectedApiRoutes.some((route) => pathname.startsWith(route))
-  const isPublicApi = publicApiRoutes.some((route) => pathname.startsWith(route))
-
-  // Allow public API routes without authentication
-  if (isPublicApi) {
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.match(/\.(?:svg|png|jpg|jpeg|gif|webp|ico)$/)
+  ) {
     return NextResponse.next()
   }
 
-  // Check for protected routes or APIs
-  if (isProtectedRoute || isProtectedApi) {
-    const authHeader = request.headers.get('authorization')
-    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
-
-    if (!token) {
-      // No token provided
-      if (isProtectedApi) {
-        return NextResponse.json({ error: 'Unauthorized - No token provided' }, { status: 401 })
-      }
-      // Redirect to login for web routes
-      return NextResponse.redirect(new URL('/', request.url))
-    }
-
-    // Verify token
-    const validation = await verifyToken(token)
-
-    if (!validation.valid) {
-      // Invalid token
-      if (isProtectedApi) {
-        return NextResponse.json({ error: `Unauthorized - ${validation.error}` }, { status: 401 })
-      }
-      // Redirect to login for web routes
-      return NextResponse.redirect(new URL('/', request.url))
-    }
-
-    // Token is valid - attach user info to request headers
-    const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-user-id', validation.userId!)
-    requestHeaders.set('x-user-email', validation.email!)
-
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    })
+  if (isPublicPath(pathname) || isPublicApiPath(pathname)) {
+    return NextResponse.next()
   }
 
-  // Allow all other routes
-  return NextResponse.next()
+  const payload = resolveAuthPayload(request)
+
+  if (!payload) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  if (pathname.startsWith('/dashboard') && !isOfficeRole(payload.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  if (pathname.startsWith('/warehouse') && !isFloorRole(payload.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  if (pathname === '/login' || pathname === '/floor') {
+    const target = isOfficeRole(payload.role) ? '/dashboard' : '/warehouse'
+    return NextResponse.redirect(new URL(target, request.url))
+  }
+
+  const headers = new Headers(request.headers)
+  headers.set('x-user-id', payload.userId)
+  headers.set('x-user-role', payload.role)
+
+  return NextResponse.next({ request: { headers } })
 }
 
-// Configure which routes to run middleware on
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (images, etc.)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: '/:path*',
 }
