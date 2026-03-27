@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios'
 
-import { logger } from '@/utils/logger/client-logger'
+import { logger } from '@/utils/components/logger/client-logger'
 
 const api = axios.create({
   baseURL: '/api',
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 })
 
 // Request interceptor - attach token to all requests
@@ -27,10 +27,10 @@ api.interceptors.request.use(
       tokenPreview: token ? `${token.substring(0, 20)}...` : null,
       headers: {
         ...config.headers,
-        Authorization: token ? 'Bearer [TOKEN]' : undefined,
+        Authorization: token ? 'Bearer [TOKEN]' : undefined
       },
       data: config.data,
-      params: config.params,
+      params: config.params
     }
 
     console.log('[REQUEST]', requestLog)
@@ -49,7 +49,7 @@ api.interceptors.request.use(
   (error) => {
     logger.error('Axios request interceptor error', { error: error.message })
     return Promise.reject(error)
-  },
+  }
 )
 
 // Response interceptor - handle 401 errors
@@ -64,7 +64,7 @@ api.interceptors.response.use(
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
-      data: response.data,
+      data: response.data
     }
 
     console.log('[RESPONSE]', responseLog)
@@ -83,7 +83,7 @@ api.interceptors.response.use(
       statusText: error.response?.statusText,
       responseData: error.response?.data,
       hadAuthHeader: !!error.config?.headers?.Authorization,
-      message: error.message,
+      message: error.message
     }
 
     console.error('[ERROR_RESPONSE]', errorLog)
@@ -98,7 +98,7 @@ api.interceptors.response.use(
         console.log('[Axios Interceptor] Token was sent but rejected - removing token and redirecting')
         logger.error('Token was rejected by server - removing and redirecting', {
           url: error.config?.url,
-          tokenWasSent: true,
+          tokenWasSent: true
         })
         localStorage.removeItem('authToken')
 
@@ -110,13 +110,13 @@ api.interceptors.response.use(
         console.log('[Axios Interceptor] No token was sent with request - not redirecting')
         logger.warn('401 error but no token was sent - not redirecting', {
           url: error.config?.url,
-          tokenWasSent: false,
+          tokenWasSent: false
         })
       }
     }
 
     return Promise.reject(error)
-  },
+  }
 )
 
 export default api
@@ -145,7 +145,7 @@ export async function authenticatedCall<T = any>(
     data?: any
     params?: any
     headers?: Record<string, string>
-  },
+  }
 ): Promise<T> {
   const { method = 'GET', data, params, headers } = options || {}
 
@@ -158,8 +158,8 @@ export async function authenticatedCall<T = any>(
     params,
     headers: {
       ...headers,
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
+      ...(token && { Authorization: `Bearer ${token}` })
+    }
   }
 
   const response = await api.request<T>(config)
@@ -183,5 +183,5 @@ export const apiClient = {
     authenticatedCall<T>(url, { method: 'PATCH', data }),
 
   delete: <T = any>(url: string, data?: any) =>
-    authenticatedCall<T>(url, { method: 'DELETE', data }),
+    authenticatedCall<T>(url, { method: 'DELETE', data })
 }

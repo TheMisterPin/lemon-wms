@@ -12,16 +12,16 @@ import { LayoutWrapper } from '../components/layout-wrapper'
 import type { Metadata } from 'next'
 const mavenPro = Maven_Pro({
   variable: '--font-maven-pro',
-  subsets: ['latin'],
+  subsets: ['latin']
 })
 
 export const metadata: Metadata = {
   title: 'Boxmas',
-  description: 'Manage your boxes with ease',
+  description: 'Manage your boxes with ease'
 }
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -33,7 +33,9 @@ export default function RootLayout({
         <TooltipProvider>
           <ErrorModalProvider>
             <AuthProvider>
-              <LayoutWrapper>{children}</LayoutWrapper>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
               <ErrorModal />
             </AuthProvider>
           </ErrorModalProvider>

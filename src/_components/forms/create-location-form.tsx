@@ -14,13 +14,13 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 
-import { createLocationformSchema } from '../../utils/forms/schemas/create-location-form'
+import { createLocationformSchema } from '../../utils/components/forms/schemas/create-location-form'
 
 interface CreateLocationFormProps {
   onSuccess?: () => void;
@@ -33,9 +33,9 @@ export function CreateLocationForm({ onSuccess }: CreateLocationFormProps) {
   const form = useForm<z.infer<typeof createLocationformSchema>>({
     resolver: zodResolver(createLocationformSchema as any),
     defaultValues: {
-      name: '',
+      name: ''
     },
-    mode: 'onSubmit',
+    mode: 'onSubmit'
   })
 
   async function onSubmit(values: z.infer<typeof createLocationformSchema>) {
@@ -61,7 +61,9 @@ export function CreateLocationForm({ onSuccess }: CreateLocationFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location Name</FormLabel>
+              <FormLabel>
+Location Name
+              </FormLabel>
               <FormControl>
                 <Input placeholder="Living Room" {...field} />
               </FormControl>

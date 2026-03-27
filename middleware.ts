@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+import { verifyToken, type AccessTokenPayload } from '@/lib/auth/jwt'
 import {
   isFloorRole,
   isOfficeRole,
-  verifyAccessTokenFromRequest,
+  verifyAccessTokenFromRequest
 } from '@/lib/auth/middleware'
-import { verifyToken, type AccessTokenPayload } from '@/lib/auth/jwt'
 
 const PUBLIC_PATHS = ['/', '/login', '/floor']
 const PUBLIC_API_PATHS = ['/api/auth/login', '/api/auth/floor/login', '/api/auth/refresh']
@@ -17,10 +17,14 @@ const getTokenFromCookie = (request: NextRequest): string | null => {
 
 const resolveAuthPayload = (request: NextRequest): AccessTokenPayload | null => {
   const headerPayload = verifyAccessTokenFromRequest(request)
-  if (headerPayload) return headerPayload
+  if (headerPayload) {
+    return headerPayload
+  }
 
   const cookieToken = getTokenFromCookie(request)
-  if (!cookieToken) return null
+  if (!cookieToken) {
+    return null
+  }
 
   try {
     return verifyToken<AccessTokenPayload>(cookieToken)
@@ -78,5 +82,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/:path*',
+  matcher: '/:path*'
 }

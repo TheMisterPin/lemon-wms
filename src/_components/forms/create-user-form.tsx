@@ -15,13 +15,13 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { useErrorModal } from '@/hooks'
 
-import { createUserformSchema } from '../../utils/forms/schemas/create-user-form'
+import { createUserformSchema } from '../../utils/components/forms/schemas/create-user-form'
 
 export function CreateUserForm() {
   const [serverSuccess, setServerSuccess] = useState<string | null>(null)
@@ -32,9 +32,9 @@ export function CreateUserForm() {
     defaultValues: {
       name: '',
       email: '',
-      password: '',
+      password: ''
     },
-    mode: 'onSubmit',
+    mode: 'onSubmit'
   })
 
   async function onSubmit(values: z.infer<typeof createUserformSchema>) {
@@ -44,9 +44,9 @@ export function CreateUserForm() {
       const res = await fetch('/api/user', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(values)
       })
 
       if (!res.ok) {
@@ -73,7 +73,9 @@ export function CreateUserForm() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>
+Name
+                </FormLabel>
                 <FormControl>
                   <Input autoComplete="name" placeholder="Jane Doe" {...field} />
                 </FormControl>
@@ -87,7 +89,9 @@ export function CreateUserForm() {
             name="email"
             render={({ field }) => (
               <FormItem className="my-auto">
-                <FormLabel>Email</FormLabel>
+                <FormLabel>
+Email
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="email"
@@ -106,7 +110,9 @@ export function CreateUserForm() {
             name="password"
             render={({ field }) => (
               <FormItem className="my-auto">
-                <FormLabel>Password</FormLabel>
+                <FormLabel>
+Password
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="password"

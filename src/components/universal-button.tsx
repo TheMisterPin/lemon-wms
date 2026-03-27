@@ -19,7 +19,7 @@ export const UniversalButton: React.FC<UniversalButtonProps> = ({
   text,
   icon: Icon,
   onClick,
-  variant = 'default',
+  variant = 'default'
 }) => {
   const renderContent = () => {
     switch (type) {

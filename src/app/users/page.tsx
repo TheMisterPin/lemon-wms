@@ -35,14 +35,21 @@ export default function UserList() {
   }
 
   if (error) {
-    return <div>Error: {error}</div>
+    return <div>
+Error:
+      {error}
+    </div>
   }
 
   return (
     <div>
-      <h1>User List</h1>
+      <h1>
+User List
+      </h1>
       {users.length === 0 ? (
-        <p>No users found</p>
+        <p>
+No users found
+        </p>
       ) : (
         <div>
           {users.map((user) => (

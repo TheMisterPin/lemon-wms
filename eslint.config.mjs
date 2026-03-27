@@ -14,11 +14,11 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
     'src/generated/**',
-    'src/components/ui/**',
+    'src/components/ui/**'
   ]),
   {
     plugins: {
-      'unused-imports': unusedImports,
+      'unused-imports': unusedImports
     },
     rules: {
       // Airbnb-style base rules
@@ -35,8 +35,8 @@ const eslintConfig = defineConfig([
           'vars': 'all',
           'varsIgnorePattern': '^_',
           'args': 'after-used',
-          'argsIgnorePattern': '^_',
-        },
+          'argsIgnorePattern': '^_'
+        }
       ],
       'import/order': [
         'error',
@@ -48,31 +48,31 @@ const eslintConfig = defineConfig([
             ['parent', 'sibling'],
             'index',
             'object',
-            'type',
+            'type'
           ],
           'pathGroups': [
             {
               'pattern': 'react',
               'group': 'external',
-              'position': 'before',
+              'position': 'before'
             },
             {
               'pattern': 'next/**',
               'group': 'external',
-              'position': 'before',
+              'position': 'before'
             },
             {
               'pattern': '@/**',
-              'group': 'internal',
-            },
+              'group': 'internal'
+            }
           ],
           'pathGroupsExcludedImportTypes': ['react', 'next'],
           'newlines-between': 'always',
           'alphabetize': {
             'order': 'asc',
-            'caseInsensitive': true,
-          },
-        },
+            'caseInsensitive': true
+          }
+        }
       ],
 
       // Space after functions
@@ -81,8 +81,8 @@ const eslintConfig = defineConfig([
         {
           'anonymous': 'always',
           'named': 'never',
-          'asyncArrow': 'always',
-        },
+          'asyncArrow': 'always'
+        }
       ],
 
       // Array/Object formatting - one element per line for multiline
@@ -94,12 +94,12 @@ const eslintConfig = defineConfig([
           'ObjectExpression': { 'multiline': true, 'consistent': true },
           'ObjectPattern': { 'multiline': true, 'consistent': true },
           'ImportDeclaration': { 'multiline': true, 'consistent': true },
-          'ExportDeclaration': { 'multiline': true, 'consistent': true },
-        },
+          'ExportDeclaration': { 'multiline': true, 'consistent': true }
+        }
       ],
 
       // Additional Airbnb-style rules
-      'comma-dangle': ['error', 'always-multiline'],
+      'comma-dangle': ['error', 'never'],
       'no-unused-vars': 'off', // Using unused-imports instead
       'no-console': ['warn', { 'allow': ['warn', 'error'] }],
       'eqeqeq': ['error', 'always'],
@@ -113,8 +113,17 @@ const eslintConfig = defineConfig([
       'no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 0 }],
       'no-trailing-spaces': 'error',
       'eol-last': ['error', 'always'],
-    },
-  },
+
+      // Function declarations
+      'padding-line-between-statements': [
+        'error',
+        { blankLine: 'always', prev: '*', next: 'function' }
+      ],
+
+      // JSX rules
+      'react/jsx-one-expression-per-line': 'error'
+    }
+  }
 ])
 
 export default eslintConfig

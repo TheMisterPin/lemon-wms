@@ -17,13 +17,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Box, Location } from '@/types'
-import { logger } from '@/utils/logger/client-logger'
+import { logger } from '@/utils/components/logger/client-logger'
 
 export default function LocationBoxesPage() {
   const params = useParams<{ id: string }>()
@@ -57,7 +57,7 @@ export default function LocationBoxesPage() {
       logger.error('Failed to fetch location name', {
         error: error?.message,
         status: error?.response?.status,
-        responseData: error?.response?.data,
+        responseData: error?.response?.data
       })
     }
   }
@@ -77,7 +77,7 @@ export default function LocationBoxesPage() {
       logger.info('Fetching boxes', {
         tokenExists: !!token,
         pathname: window.location.pathname,
-        locationId,
+        locationId
       })
 
       const data = await apiClient.get<Box[]>('/box', { locationId })
@@ -89,7 +89,7 @@ export default function LocationBoxesPage() {
       logger.error('Failed to fetch boxes', {
         error: error?.message,
         status: error?.response?.status,
-        responseData: error?.response?.data,
+        responseData: error?.response?.data
       })
       openModal(error?.response?.data?.error ?? 'Failed to fetch boxes')
     } finally {
@@ -105,7 +105,9 @@ export default function LocationBoxesPage() {
   if (fetchingBoxes) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div>Loading...</div>
+        <div>
+Loading...
+        </div>
       </div>
     )
   }
@@ -133,7 +135,9 @@ export default function LocationBoxesPage() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Create New Box</DialogTitle>
+                  <DialogTitle>
+Create New Box
+                  </DialogTitle>
                 </DialogHeader>
                 {locationId && (
                   <CreateBoxForm onSuccess={handleBoxCreated} locationId={locationId} />

@@ -13,13 +13,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Location } from '@/types'
-import { logger } from '@/utils/logger/client-logger'
+import { logger } from '@/utils/components/logger/client-logger'
 
 export default function LocationsPage() {
   const [locations, setLocations] = useState<Location[]>([])
@@ -41,7 +41,7 @@ export default function LocationsPage() {
 
       logger.info('Fetching locations', {
         tokenExists: !!token,
-        pathname: window.location.pathname,
+        pathname: window.location.pathname
       })
 
       const data = await apiClient.get<Location[]>('/location')
@@ -53,7 +53,7 @@ export default function LocationsPage() {
       logger.error('Failed to fetch locations', {
         error: error?.message,
         status: error?.response?.status,
-        responseData: error?.response?.data,
+        responseData: error?.response?.data
       })
       openModal(error?.response?.data?.error ?? 'Failed to fetch locations')
     } finally {
@@ -69,7 +69,9 @@ export default function LocationsPage() {
   if (fetchingLocations) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div>Loading...</div>
+        <div>
+Loading...
+        </div>
       </div>
     )
   }
@@ -79,14 +81,18 @@ export default function LocationsPage() {
       <div className="flex flex-1 flex-col gap-4 p-4">
         <div className="container h-full p-4 border-2  border-slate-400/50 rounded-md justify-around ">
           <div className="mb-6 flex  gap-4 items-center justify-between px-10">
-            <h1 className="text-2xl font-bold bg-linear-to-t from-stone-800/75 to-slate-700/75 text-transparent bg-clip-text">Locations</h1>
+            <h1 className="text-2xl font-bold bg-linear-to-t from-stone-800/75 to-slate-700/75 text-transparent bg-clip-text">
+Locations
+            </h1>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <PlusCircle className=" h-6 w-6 text-stone-600" />
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Create New Location</DialogTitle>
+                  <DialogTitle>
+Create New Location
+                  </DialogTitle>
                 </DialogHeader>
                 <CreateLocationForm onSuccess={handleLocationCreated} />
               </DialogContent>

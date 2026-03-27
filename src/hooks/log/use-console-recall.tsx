@@ -96,7 +96,7 @@ export function useConsoleRecall(): ConsoleRecallState {
         .slice(-50) // Show last 50 logs
         .map(
           (log: any) =>
-            `<div style="margin-bottom: 2px; color: ${getLogColor(log.type)};">[${log.timestamp}] ${log.type.toUpperCase()}: ${log.message}</div>`,
+            `<div style="margin-bottom: 2px; color: ${getLogColor(log.type)};">[${log.timestamp}] ${log.type.toUpperCase()}: ${log.message}</div>`
         )
         .join('')
 
@@ -125,7 +125,7 @@ export function useConsoleRecall(): ConsoleRecallState {
     isConsoleVisible,
     toggleConsole,
     showConsole,
-    hideConsole,
+    hideConsole
   }
 }
 

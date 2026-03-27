@@ -21,7 +21,7 @@ export async function uploadToImgbb(file: File): Promise<string> {
 
   const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
     method: 'POST',
-    body: formData,
+    body: formData
   })
 
   if (!response.ok) {

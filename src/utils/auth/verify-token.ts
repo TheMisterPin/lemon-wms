@@ -30,7 +30,7 @@ export async function verifyToken(token: string): Promise<TokenValidationResult>
     // Step 2: Check if token exists in database (not revoked)
     const session = await prisma.session.findUnique({
       where: { token },
-      include: { user: true },
+      include: { user: true }
     })
 
     if (!session) {
@@ -47,13 +47,13 @@ export async function verifyToken(token: string): Promise<TokenValidationResult>
     // Step 4: Update last used timestamp
     await prisma.session.update({
       where: { id: session.id },
-      data: { lastUsedAt: new Date() },
+      data: { lastUsedAt: new Date() }
     })
 
     return {
       valid: true,
       userId: decoded.userId,
-      email: decoded.email,
+      email: decoded.email
     }
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
@@ -73,9 +73,9 @@ export async function cleanupExpiredTokens(): Promise<number> {
   const result = await prisma.session.deleteMany({
     where: {
       expiresAt: {
-        lt: new Date(),
-      },
-    },
+        lt: new Date()
+      }
+    }
   })
   return result.count
 }

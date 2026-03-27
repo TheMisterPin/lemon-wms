@@ -16,7 +16,7 @@ export const getBearerToken = (request: NextRequest): string | null => {
 }
 
 export const verifyAccessTokenFromRequest = (
-  request: NextRequest,
+  request: NextRequest
 ): AccessTokenPayload | null => {
   const token = getBearerToken(request)
   if (!token) {

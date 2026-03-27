@@ -4,7 +4,7 @@ import {
   clearRefreshTokenCookie,
   findValidRefreshToken,
   readRefreshTokenCookie,
-  revokeRefreshToken,
+  revokeRefreshToken
 } from '@/lib/auth/session'
 
 export async function POST() {

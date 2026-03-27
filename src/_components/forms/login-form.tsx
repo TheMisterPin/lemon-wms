@@ -17,13 +17,13 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { useAuth } from '@/hooks'
 import { useErrorModal } from '@/hooks'
-import { loginFormSchema } from '@/utils/forms/schemas/login-form'
+import { loginFormSchema } from '@/utils/components/forms/schemas/login-form'
 
 export function LoginForm() {
   const [serverSuccess, setServerSuccess] = useState<string | null>(null)
@@ -35,9 +35,9 @@ export function LoginForm() {
     resolver: zodResolver(loginFormSchema as any),
     defaultValues: {
       email: '',
-      password: '',
+      password: ''
     },
-    mode: 'onSubmit',
+    mode: 'onSubmit'
   })
 
   async function onSubmit(values: z.infer<typeof loginFormSchema>) {
@@ -70,7 +70,9 @@ export function LoginForm() {
             name="email"
             render={({ field }) => (
               <FormItem className="my-auto">
-                <FormLabel>Email</FormLabel>
+                <FormLabel>
+Email
+                </FormLabel>
                 <FormControl>
                   <Input autoComplete="email" placeholder="jane@example.com" {...field} />
                 </FormControl>
@@ -84,7 +86,9 @@ export function LoginForm() {
             name="password"
             render={({ field }) => (
               <FormItem className=" my-auto">
-                <FormLabel>Password</FormLabel>
+                <FormLabel>
+Password
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="password"

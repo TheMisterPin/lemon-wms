@@ -14,8 +14,8 @@ import { Separator } from '@/components/ui/separator'
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Box } from '@/types'
+import { logger } from '@/utils/components/logger/client-logger'
 import { downloadBoxQrPdf } from '@/utils/label/qr'
-import { logger } from '@/utils/logger/client-logger'
 
 export default function BoxDetailPage() {
   const params = useParams<{ id: string }>()
@@ -46,7 +46,7 @@ export default function BoxDetailPage() {
       logger.error('Failed to fetch box', {
         error: error?.message,
         status: error?.response?.status,
-        responseData: error?.response?.data,
+        responseData: error?.response?.data
       })
       openModal(error?.response?.data?.error ?? 'Failed to fetch box')
     } finally {
@@ -62,7 +62,7 @@ export default function BoxDetailPage() {
       await downloadBoxQrPdf(boxId)
     } catch (error: any) {
       logger.error('Failed to generate QR PDF', {
-        error: error?.message,
+        error: error?.message
       })
       openModal('Failed to generate QR')
     }
@@ -71,7 +71,9 @@ export default function BoxDetailPage() {
   if (fetchingBox) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div>Loading...</div>
+        <div>
+Loading...
+        </div>
       </div>
     )
   }
@@ -79,7 +81,9 @@ export default function BoxDetailPage() {
   if (!box) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div>Box not found.</div>
+        <div>
+Box not found.
+        </div>
       </div>
     )
   }
@@ -113,7 +117,9 @@ export default function BoxDetailPage() {
           <Separator className="bg-linear-to-b from-stone-800/75 to-slate-700/75" />
           <div className="flex flex-col gap-4 pt-4">
             <div className="rounded-md border border-slate-400/50 bg-linear-to-r from-gray-50 to-stone-100/75 p-4">
-              <div className="text-sm font-medium text-slate-700">Closed Box</div>
+              <div className="text-sm font-medium text-slate-700">
+Closed Box
+              </div>
               {box.closedImage ? (
                 <a
                   href={box.closedImage}
@@ -129,11 +135,15 @@ export default function BoxDetailPage() {
                   />
                 </a>
               ) : (
-                <div className="text-sm text-muted-foreground mt-2">No photo yet.</div>
+                <div className="text-sm text-muted-foreground mt-2">
+No photo yet.
+                </div>
               )}
             </div>
             <div className="rounded-md border border-slate-400/50 bg-linear-to-r from-gray-50 to-stone-100/75 p-4">
-              <div className="text-sm font-medium text-slate-700">Contents</div>
+              <div className="text-sm font-medium text-slate-700">
+Contents
+              </div>
               {box.contentsImage ? (
                 <a
                   href={box.contentsImage}
@@ -149,7 +159,9 @@ export default function BoxDetailPage() {
                   />
                 </a>
               ) : (
-                <div className="text-sm text-muted-foreground mt-2">No photo yet.</div>
+                <div className="text-sm text-muted-foreground mt-2">
+No photo yet.
+                </div>
               )}
             </div>
           </div>

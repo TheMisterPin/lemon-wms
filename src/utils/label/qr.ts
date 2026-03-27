@@ -37,14 +37,14 @@ export async function downloadBoxQrPdf(boxId: string, baseUrl?: string): Promise
     y: page.getHeight() - 50,
     size: 16,
     font,
-    color: rgb(0.12, 0.12, 0.12),
+    color: rgb(0.12, 0.12, 0.12)
   })
 
   page.drawImage(pngImage, {
     x,
     y,
     width: imgWidth,
-    height: imgHeight,
+    height: imgHeight
   })
 
   page.drawText(boxUrl, {
@@ -52,7 +52,7 @@ export async function downloadBoxQrPdf(boxId: string, baseUrl?: string): Promise
     y: 40,
     size: 10,
     font,
-    color: rgb(0.25, 0.25, 0.25),
+    color: rgb(0.25, 0.25, 0.25)
   })
 
   const pdfBytes = await pdfDoc.save()

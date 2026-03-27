@@ -6,7 +6,7 @@ import {
   persistRefreshToken,
   readRefreshTokenCookie,
   revokeRefreshToken,
-  setRefreshTokenCookie,
+  setRefreshTokenCookie
 } from '@/lib/auth/session'
 
 export async function POST() {
@@ -25,7 +25,7 @@ export async function POST() {
 
   const accessToken = signAccessToken({
     userId: existing.user.id,
-    role: existing.user.role,
+    role: existing.user.role
   })
   const nextRefresh = signRefreshToken({ userId: existing.user.id })
 
@@ -34,7 +34,7 @@ export async function POST() {
     rawToken: nextRefresh,
     deviceLabel: existing.deviceLabel,
     deviceId: existing.deviceId ?? undefined,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   })
   await setRefreshTokenCookie(nextRefresh)
 

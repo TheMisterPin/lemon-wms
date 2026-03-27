@@ -16,7 +16,7 @@ export default function CreateUserModal() {
         text: 'Add User',
         icon: Plus,
         onClick: () => {},
-        variant: 'outline',
+        variant: 'outline'
       }}
       title="Create User"
     >

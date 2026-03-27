@@ -10,14 +10,14 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   Item,
   ItemContent,
   ItemMedia,
-  ItemTitle,
+  ItemTitle
 } from '@/components/ui/item'
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
@@ -114,7 +114,9 @@ export function LocationCard({ onUpdated, ...location } : LocationCardProps) {
       <Dialog open={actionsOpen} onOpenChange={setActionsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Location Options</DialogTitle>
+            <DialogTitle>
+Location Options
+            </DialogTitle>
           </DialogHeader>
           <div className="flex gap-3">
             <Button type="button" onClick={() => {
@@ -132,11 +134,15 @@ export function LocationCard({ onUpdated, ...location } : LocationCardProps) {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Location</DialogTitle>
+            <DialogTitle>
+Edit Location
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <div className="text-sm font-medium">Name</div>
+              <div className="text-sm font-medium">
+Name
+              </div>
               <Input value={name} onChange={(event) => setName(event.target.value)} />
             </div>
             <Button type="button" onClick={handleSave}>

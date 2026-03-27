@@ -17,7 +17,9 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     <div className="flex min-h-screen flex-col bg-gray-100">
       <Header onMenuClick={() => setSidebarOpen(true)} />
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-      <main className="bg-linear-to-r from-gray-200 to-slate-200  flex flex-1 ">{children}</main>
+      <main className="bg-linear-to-r from-gray-200 to-slate-200  flex flex-1 ">
+        {children}
+      </main>
       <Footer />
     </div>
   )

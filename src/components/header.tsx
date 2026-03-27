@@ -19,13 +19,17 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         <Link href="/" className="flex items-center gap-2 font-semibold text-neutral-200">
           <Box className="h-6 w-6" />
-          <span>BoxMas</span>
+          <span>
+BoxMas
+          </span>
         </Link>
 
         <div className="flex flex-1 items-center justify-end ">
           <Button variant="ghost" size="icon" onClick={onMenuClick}>
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle menu</span>
+            <span className="sr-only">
+Toggle menu
+            </span>
           </Button>
         </div>
       </div>

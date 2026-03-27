@@ -29,7 +29,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
   const setComponentLoading = useCallback((componentId: string, loading: boolean, message?: string) => {
     setComponentLoadingState((prev) => ({
       ...prev,
-      [componentId]: { isLoading: loading, message, component: componentId },
+      [componentId]: { isLoading: loading, message, component: componentId }
     }))
   }, [])
 
@@ -45,7 +45,7 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
         componentLoading,
         setGlobalLoading,
         setComponentLoading,
-        clearAllLoading,
+        clearAllLoading
       }}
     >
       {children}
@@ -69,7 +69,7 @@ export function useGlobalLoading() {
     (message?: string) => {
       setGlobalLoading(true, message)
     },
-    [setGlobalLoading],
+    [setGlobalLoading]
   )
 
   const stopLoading = useCallback(() => {
@@ -80,7 +80,7 @@ export function useGlobalLoading() {
     isLoading: globalLoading.isLoading,
     message: globalLoading.message,
     startLoading,
-    stopLoading,
+    stopLoading
   }
 }
 
@@ -92,7 +92,7 @@ export function useComponentLoading(componentId: string) {
     (message?: string) => {
       setComponentLoading(componentId, true, message)
     },
-    [componentId, setComponentLoading],
+    [componentId, setComponentLoading]
   )
 
   const stopLoading = useCallback(() => {
@@ -103,6 +103,6 @@ export function useComponentLoading(componentId: string) {
     isLoading: loading.isLoading,
     message: loading.message,
     startLoading,
-    stopLoading,
+    stopLoading
   }
 }

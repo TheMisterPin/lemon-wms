@@ -4,7 +4,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-
   // Use ESLint as the default formatter for JS/TS files
   "[javascript]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
@@ -18,7 +17,6 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
-
   // ESLint settings
   "eslint.enable": true,
   "eslint.validate": [
@@ -27,7 +25,6 @@
     "typescript",
     "typescriptreact"
   ],
-
   // Disable other formatters to avoid conflicts
   "prettier.enable": false
 }

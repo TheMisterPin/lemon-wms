@@ -13,7 +13,7 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetTitle,
+  SheetTitle
 } from '@/components/ui/sheet'
 import { useAuth } from '@/hooks'
 
@@ -36,7 +36,9 @@ export function Sidebar({ open, onOpenChange }: SidebarProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className='items-center'>
         <SheetHeader className='bg-linear-to-l from-slate-200 to-slate-100 w-full '>
-          <SheetTitle>Menu</SheetTitle>
+          <SheetTitle>
+Menu
+          </SheetTitle>
         </SheetHeader>
         <div className="flex flex-col gap-4 py-4">
           {isAuthenticated && (

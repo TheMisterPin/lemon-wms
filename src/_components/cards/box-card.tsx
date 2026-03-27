@@ -11,14 +11,14 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   Item,
   ItemContent,
   ItemMedia,
-  ItemTitle,
+  ItemTitle
 } from '@/components/ui/item'
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
@@ -108,7 +108,7 @@ export function BoxCard(props : BoxCardProps) {
         name,
         description,
         closedImage,
-        contentsImage,
+        contentsImage
       })
       setEditOpen(false)
       if (onUpdated) {
@@ -138,7 +138,9 @@ export function BoxCard(props : BoxCardProps) {
             {box?.name ?? 'Box'}
           </ItemTitle>
           {box?.description && (
-            <div className="text-sm text-muted-foreground">{box.description}</div>
+            <div className="text-sm text-muted-foreground">
+              {box.description}
+            </div>
           )}
         </ItemContent>
       </Item>
@@ -146,7 +148,9 @@ export function BoxCard(props : BoxCardProps) {
       <Dialog open={actionsOpen} onOpenChange={setActionsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Box Options</DialogTitle>
+            <DialogTitle>
+Box Options
+            </DialogTitle>
           </DialogHeader>
           <div className="flex gap-3">
             <Button type="button" onClick={() => {
@@ -164,19 +168,27 @@ export function BoxCard(props : BoxCardProps) {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Box</DialogTitle>
+            <DialogTitle>
+Edit Box
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <div className="text-sm font-medium">Name</div>
+              <div className="text-sm font-medium">
+Name
+              </div>
               <Input value={name} onChange={(event) => setName(event.target.value)} />
             </div>
             <div>
-              <div className="text-sm font-medium">Description</div>
+              <div className="text-sm font-medium">
+Description
+              </div>
               <Input value={description} onChange={(event) => setDescription(event.target.value)} />
             </div>
             <div>
-              <div className="text-sm font-medium">Closed Box Photo</div>
+              <div className="text-sm font-medium">
+Closed Box Photo
+              </div>
               <Input
                 type="file"
                 accept="image/*"
@@ -200,11 +212,15 @@ export function BoxCard(props : BoxCardProps) {
                 }}
               />
               {uploadingClosed && (
-                <div className="text-sm text-muted-foreground">Uploading closed-box photo...</div>
+                <div className="text-sm text-muted-foreground">
+Uploading closed-box photo...
+                </div>
               )}
             </div>
             <div>
-              <div className="text-sm font-medium">Contents Photo</div>
+              <div className="text-sm font-medium">
+Contents Photo
+              </div>
               <Input
                 type="file"
                 accept="image/*"
@@ -228,7 +244,9 @@ export function BoxCard(props : BoxCardProps) {
                 }}
               />
               {uploadingContents && (
-                <div className="text-sm text-muted-foreground">Uploading contents photo...</div>
+                <div className="text-sm text-muted-foreground">
+Uploading contents photo...
+                </div>
               )}
             </div>
             <Button type="button" onClick={handleSave}>

@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog'
 
 import { UniversalButton, UniversalButtonProps } from './universal-button'
@@ -27,7 +27,9 @@ export function UniversalModal(props : UniversalModalProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>
+            {title}
+          </DialogTitle>
         </DialogHeader>
         {children}
         <DialogFooter className="h-1/6 bg-blue-950">

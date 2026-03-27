@@ -15,7 +15,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useErrorModal } from '@/hooks'
@@ -23,7 +23,7 @@ import { apiClient } from '@/lib/axios'
 import { Location } from '@/types'
 import { uploadToImgbb } from '@/utils/media/upload-imgbb'
 
-import { createBoxFormSchema } from '../../utils/forms/schemas/create-box-form'
+import { createBoxFormSchema } from '../../utils/components/forms/schemas/create-box-form'
 
 interface CreateBoxFormProps {
   onSuccess?: () => void;
@@ -44,9 +44,9 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
       name: '',
       description: '',
       closedImage: '',
-      contentsImage: '',
+      contentsImage: ''
     },
-    mode: 'onSubmit',
+    mode: 'onSubmit'
   })
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
     try {
       await apiClient.post('/box', {
         ...values,
-        locationId: resolvedLocationId,
+        locationId: resolvedLocationId
       })
       setServerSuccess('Box created.')
       form.reset()
@@ -93,7 +93,9 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Box Name</FormLabel>
+              <FormLabel>
+Box Name
+              </FormLabel>
               <FormControl>
                 <Input placeholder="Kitchen Storage" {...field} />
               </FormControl>
@@ -104,7 +106,9 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
 
         {!locationId && (
           <FormItem>
-            <FormLabel>Location</FormLabel>
+            <FormLabel>
+Location
+            </FormLabel>
             <FormControl>
               <select
                 className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
@@ -126,7 +130,9 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>
+Description
+              </FormLabel>
               <FormControl>
                 <Input placeholder="Optional details" {...field} />
               </FormControl>
@@ -140,7 +146,9 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
           name="closedImage"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Closed Box Photo</FormLabel>
+              <FormLabel>
+Closed Box Photo
+              </FormLabel>
               <FormControl>
                 <Input
                   type="file"
@@ -166,7 +174,9 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
                 />
               </FormControl>
               {uploadingClosed && (
-                <p className="text-sm text-muted-foreground">Uploading closed-box photo...</p>
+                <p className="text-sm text-muted-foreground">
+Uploading closed-box photo...
+                </p>
               )}
               <FormMessage />
             </FormItem>
@@ -178,7 +188,9 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
           name="contentsImage"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Contents Photo</FormLabel>
+              <FormLabel>
+Contents Photo
+              </FormLabel>
               <FormControl>
                 <Input
                   type="file"
@@ -204,7 +216,9 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
                 />
               </FormControl>
               {uploadingContents && (
-                <p className="text-sm text-muted-foreground">Uploading contents photo...</p>
+                <p className="text-sm text-muted-foreground">
+Uploading contents photo...
+                </p>
               )}
               <FormMessage />
             </FormItem>

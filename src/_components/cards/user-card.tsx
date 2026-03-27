@@ -4,7 +4,7 @@ import {
   Item,
   ItemContent,
   ItemMedia,
-  ItemTitle,
+  ItemTitle
 } from '@/components/ui/item'
 import { User } from '@/types'
 
@@ -16,7 +16,9 @@ export function UserCard(user : User) {
         <InboxIcon />
       </ItemMedia>
       <ItemContent>
-        <ItemTitle>{user.name}</ItemTitle>
+        <ItemTitle>
+          {user.name}
+        </ItemTitle>
       </ItemContent>
     </Item>
 

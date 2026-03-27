@@ -6,7 +6,7 @@ import { BasicResponse } from '@/types/responses/basic-response'
 export const getUserByEmail = async (email: string): Promise<BasicResponse> => {
   try {
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email }
     })
     if (user) {
       return { success: true, data: user }
@@ -33,7 +33,7 @@ export const getAllUsers = async (): Promise<BasicResponse> => {
 export const checkUser = async (email: string): Promise<boolean> => {
   try {
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email }
     })
     return !!user
   } catch (error) {
@@ -66,7 +66,7 @@ export const checkPassword = async (email: string, password: string): Promise<Ba
       const hashedPassword = await bcrypt.hash(password, 10)
       await prisma.user.update({
         where: { id: user.id },
-        data: { password: hashedPassword },
+        data: { password: hashedPassword }
       })
     }
   }

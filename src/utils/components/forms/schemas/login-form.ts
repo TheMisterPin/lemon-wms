@@ -7,5 +7,5 @@ export const loginFormSchema = z.object({
     .nonempty('Email is required.'),
   password: z
     .string()
-    .nonempty('Password is required.'),
+    .nonempty('Password is required.')
 })

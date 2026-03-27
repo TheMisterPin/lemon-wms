@@ -16,9 +16,9 @@ class ClientLogger {
       await fetch('/api/logs', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(entry),
+        body: JSON.stringify(entry)
       })
     } catch (error) {
       // Fail silently to avoid recursive errors
@@ -29,7 +29,7 @@ class ClientLogger {
   private createLogEntry(
     level: LogEntry['level'],
     message: string,
-    data?: any,
+    data?: any
   ): LogEntry {
     return {
       timestamp: new Date().toISOString(),
@@ -37,7 +37,7 @@ class ClientLogger {
       message,
       data,
       url: window.location.href,
-      userAgent: navigator.userAgent,
+      userAgent: navigator.userAgent
     }
   }
 

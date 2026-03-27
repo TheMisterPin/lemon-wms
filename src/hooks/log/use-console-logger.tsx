@@ -35,7 +35,7 @@ export function useConsoleLogger() {
       log: console.log,
       error: console.error,
       warn: console.warn,
-      info: console.info,
+      info: console.info
     }
 
     const addLogEntry = (type: LogEntry['type'], args: any[]) => {
@@ -43,7 +43,7 @@ export function useConsoleLogger() {
         id: Date.now() + Math.random().toString(36).substr(2, 9),
         timestamp: new Date().toISOString(),
         type,
-        message: args.map((arg) => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg))).join(' '),
+        message: args.map((arg) => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg))).join(' ')
       }
 
       // Use setTimeout to defer state update and avoid updating during render
@@ -84,7 +84,7 @@ export function useConsoleLogger() {
         timestamp: new Date().toISOString(),
         type: 'error',
         message: event.message,
-        stack: event.error?.stack,
+        stack: event.error?.stack
       }
 
       setTimeout(() => {
@@ -102,7 +102,7 @@ export function useConsoleLogger() {
         id: Date.now() + Math.random().toString(36).substr(2, 9),
         timestamp: new Date().toISOString(),
         type: 'error',
-        message: `Unhandled Promise Rejection: ${event.reason}`,
+        message: `Unhandled Promise Rejection: ${event.reason}`
       }
 
       setTimeout(() => {

@@ -7,13 +7,13 @@ interface EncodeImageOptions {
 
 export async function encodeImageFile(
   file: File,
-  options: EncodeImageOptions = {},
+  options: EncodeImageOptions = {}
 ): Promise<string> {
   const {
     maxWidth = 1280,
     maxHeight = 1280,
     quality = 0.75,
-    maxBytes = 900000,
+    maxBytes = 900000
   } = options
 
   const sourceUrl = await new Promise<string>((resolve, reject) => {
@@ -33,7 +33,7 @@ export async function encodeImageFile(
   const scale = Math.min(
     1,
     maxWidth / image.width || 1,
-    maxHeight / image.height || 1,
+    maxHeight / image.height || 1
   )
 
   const canvas = document.createElement('canvas')

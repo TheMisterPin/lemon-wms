@@ -2,7 +2,7 @@ import {
   Item,
   ItemContent,
   ItemMedia,
-  ItemTitle,
+  ItemTitle
 } from '@/components/ui/item'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -14,7 +14,9 @@ export function UniversalLoader({ message }: {message: string}) {
           <Spinner />
         </ItemMedia>
         <ItemContent>
-          <ItemTitle className="line-clamp-1">{message}</ItemTitle>
+          <ItemTitle className="line-clamp-1">
+            {message}
+          </ItemTitle>
         </ItemContent>
       </Item>
     </div>

@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 import { useErrorModal } from '@/hooks/ui/error-modal-context'
 import api from '@/lib/axios'
-import { logger } from '@/utils/logger/client-logger'
+import { logger } from '@/utils/components/logger/client-logger'
 
 interface User {
   id: string;
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logger.info('Auth context initializing', {
       tokenExists: !!token,
       tokenPreview: token ? `${token.substring(0, 20)}...` : null,
-      pathname: window.location.pathname,
+      pathname: window.location.pathname
     })
 
     if (token) {
@@ -59,13 +59,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const userData = {
           id: payload.userId,
           email: payload.email,
-          name: payload.email, // Using email as name for now
+          name: payload.email // Using email as name for now
         }
         setUser(userData)
 
         logger.info('User loaded from token', {
           userId: userData.id,
-          email: userData.email,
+          email: userData.email
         })
       } catch (error) {
         logger.error('Failed to parse token - removing it', { error })
@@ -87,7 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logger.info('Login successful - storing token', {
         userId: userData.id,
         email: userData.email,
-        tokenPreview: token ? `${token.substring(0, 20)}...` : null,
+        tokenPreview: token ? `${token.substring(0, 20)}...` : null
       })
 
       localStorage.setItem('authToken', token)
@@ -97,7 +97,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const storedToken = localStorage.getItem('authToken')
       logger.info('Token verification after storage', {
         tokenStored: !!storedToken,
-        tokensMatch: storedToken === token,
+        tokensMatch: storedToken === token
       })
 
       return true
@@ -154,7 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     logoutAllDevices,
     isAuthenticated: !!user,
-    loading,
+    loading
   }
 
   return (

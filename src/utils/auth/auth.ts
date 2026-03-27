@@ -26,6 +26,6 @@ export async function getAuthFromRequest(req: NextRequest): Promise<AuthResult> 
   return {
     valid: true,
     userId: validation.userId,
-    email: validation.email,
+    email: validation.email
   }
 }
