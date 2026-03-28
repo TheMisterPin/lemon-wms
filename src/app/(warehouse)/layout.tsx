@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-
 export default function WarehouseLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen min-w-[375px] bg-zinc-950 p-4 text-zinc-100">

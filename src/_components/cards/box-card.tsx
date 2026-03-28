@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { useRef, useState } from 'react'
-
 import { useRouter } from 'next/navigation'
-
 import { BoxIcon } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -24,12 +20,10 @@ import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Box } from '@/types'
 import { uploadToImgbb } from '@/utils/media/upload-imgbb'
-
 interface BoxCardProps {
   box: Box;
   onUpdated?: () => void;
 }
-
 export function BoxCard(props : BoxCardProps) {
   const { box, onUpdated } = props
   const boxId = box?.id
@@ -39,14 +33,12 @@ export function BoxCard(props : BoxCardProps) {
   const [editOpen, setEditOpen] = useState(false)
   const [longPressTriggered, setLongPressTriggered] = useState(false)
   const pressTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   const [name, setName] = useState(box?.name ?? '')
   const [description, setDescription] = useState(box?.description ?? '')
   const [closedImage, setClosedImage] = useState<string>(box?.closedImage ?? '')
   const [contentsImage, setContentsImage] = useState<string>(box?.contentsImage ?? '')
   const [uploadingClosed, setUploadingClosed] = useState(false)
   const [uploadingContents, setUploadingContents] = useState(false)
-
   const startPress = () => {
     setLongPressTriggered(false)
     if (pressTimeout.current) {
@@ -57,36 +49,33 @@ export function BoxCard(props : BoxCardProps) {
       setLongPressTriggered(true)
     }, 500)
   }
-
   const cancelPress = () => {
     if (pressTimeout.current) {
       clearTimeout(pressTimeout.current)
       pressTimeout.current = null
     }
   }
-
   const handleClick = () => {
     if (longPressTriggered) {
       return
     }
     if (!boxId) {
       openModal('Box id is missing')
+
       return
     }
     router.push(`/box/${boxId}`)
   }
-
   const handleDelete = async () => {
     const confirmed = window.confirm('Delete this box?')
     if (!confirmed) {
       return
     }
-
     if (!boxId) {
       openModal('Box id is missing')
+
       return
     }
-
     try {
       await apiClient.delete(`/box/${boxId}`)
       setActionsOpen(false)
@@ -97,10 +86,10 @@ export function BoxCard(props : BoxCardProps) {
       openModal(error?.response?.data?.error ?? 'Failed to delete box')
     }
   }
-
   const handleSave = async () => {
     if (!boxId) {
       openModal('Box id is missing')
+
       return
     }
     try {
@@ -144,7 +133,6 @@ export function BoxCard(props : BoxCardProps) {
           )}
         </ItemContent>
       </Item>
-
       <Dialog open={actionsOpen} onOpenChange={setActionsOpen}>
         <DialogContent>
           <DialogHeader>
@@ -164,7 +152,6 @@ Box Options
           </div>
         </DialogContent>
       </Dialog>
-
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
@@ -197,6 +184,7 @@ Closed Box Photo
                   const file = event.target.files?.[0]
                   if (!file) {
                     setClosedImage('')
+
                     return
                   }
                   try {
@@ -229,6 +217,7 @@ Contents Photo
                   const file = event.target.files?.[0]
                   if (!file) {
                     setContentsImage('')
+
                     return
                   }
                   try {

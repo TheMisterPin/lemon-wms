@@ -1,19 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
 'use client'
-
 import { useState, useEffect, useCallback } from 'react'
-
 interface ConsoleRecallState {
   isConsoleVisible: boolean
   toggleConsole: () => void
   showConsole: () => void
   hideConsole: () => void
 }
-
 export function useConsoleRecall(): ConsoleRecallState {
   const [isConsoleVisible, setIsConsoleVisible] = useState(false)
-
   // Load initial state from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('console-recall-visible')
@@ -21,24 +17,19 @@ export function useConsoleRecall(): ConsoleRecallState {
       setIsConsoleVisible(JSON.parse(saved))
     }
   }, [])
-
   // Save state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('console-recall-visible', JSON.stringify(isConsoleVisible))
   }, [isConsoleVisible])
-
   const toggleConsole = useCallback(() => {
     setIsConsoleVisible((prev) => !prev)
   }, [])
-
   const showConsole = useCallback(() => {
     setIsConsoleVisible(true)
   }, [])
-
   const hideConsole = useCallback(() => {
     setIsConsoleVisible(false)
   }, [])
-
   // Add console recall functionality when visible
   useEffect(() => {
     if (isConsoleVisible) {
@@ -62,7 +53,6 @@ export function useConsoleRecall(): ConsoleRecallState {
         border: 1px solid #333;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
       `
-
       const header = document.createElement('div')
       header.style.cssText = `
         display: flex;
@@ -76,7 +66,6 @@ export function useConsoleRecall(): ConsoleRecallState {
         <span style="color: #00ff00; font-weight: bold;">Console Recall</span>
         <button id="close-console" style="background: none; border: none; color: #ff0000; cursor: pointer; font-size: 16px;">×</button>
       `
-
       const logContainer = document.createElement('div')
       logContainer.id = 'console-log-container'
       logContainer.style.cssText = `
@@ -85,11 +74,9 @@ export function useConsoleRecall(): ConsoleRecallState {
         white-space: pre-wrap;
         word-break: break-word;
       `
-
       consoleOverlay.appendChild(header)
       consoleOverlay.appendChild(logContainer)
       document.body.appendChild(consoleOverlay)
-
       // Load existing logs from localStorage
       const existingLogs = JSON.parse(localStorage.getItem('console-logs') || '[]')
       logContainer.innerHTML = existingLogs
@@ -99,10 +86,8 @@ export function useConsoleRecall(): ConsoleRecallState {
             `<div style="margin-bottom: 2px; color: ${getLogColor(log.type)};">[${log.timestamp}] ${log.type.toUpperCase()}: ${log.message}</div>`
         )
         .join('')
-
       // Auto-scroll to bottom
       logContainer.scrollTop = logContainer.scrollHeight
-
       // Close button functionality
       const closeButton = document.getElementById('close-console')
       if (closeButton) {

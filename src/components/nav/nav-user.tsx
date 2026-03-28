@@ -7,7 +7,6 @@ import {
   LogOut,
   Sparkles
 } from 'lucide-react'
-
 import {
   Avatar,
   AvatarFallback,
@@ -38,6 +37,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>

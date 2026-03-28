@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-
 import { useState } from 'react'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import { UserRoundPlus } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -20,13 +17,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { useErrorModal } from '@/hooks'
-
 import { createUserformSchema } from '../../utils/components/forms/schemas/create-user-form'
-
 export function CreateUserForm() {
   const [serverSuccess, setServerSuccess] = useState<string | null>(null)
   const { openModal } = useErrorModal()
-
   const form = useForm<z.infer<typeof createUserformSchema>>({
     resolver: zodResolver(createUserformSchema as any),
     defaultValues: {
@@ -39,7 +33,6 @@ export function CreateUserForm() {
 
   async function onSubmit(values: z.infer<typeof createUserformSchema>) {
     setServerSuccess(null)
-
     try {
       const res = await fetch('/api/user', {
         method: 'POST',
@@ -48,15 +41,14 @@ export function CreateUserForm() {
         },
         body: JSON.stringify(values)
       })
-
       if (!res.ok) {
         const payload = (await res.json().catch(() => null)) as
           | { error?: string }
           | null
         openModal(payload?.error ?? 'Failed to create user')
+
         return
       }
-
       setServerSuccess('User created.')
       form.reset()
     } catch {
@@ -83,7 +75,6 @@ Name
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="email"
@@ -104,7 +95,6 @@ Email
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="password"
@@ -133,7 +123,6 @@ Password
         )}
         <div className='mx-auto w-2/3'>
           <Button type="submit" className='w-full bg-linear-to-r hover:bg-linear-to-l from-slate-500 to-slate-700 mt-4 transition-all duration-150' disabled={form.formState.isSubmitting}>
-
             {form.formState.isSubmitting ? <Spinner /> : <UserRoundPlus />}
             {form.formState.isSubmitting ? 'Creating...' : 'Sign Up'}
           </Button>

@@ -2,14 +2,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-
 import React, { useEffect, useState } from 'react'
-
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-
 import { ChevronLeft, PlusCircle } from 'lucide-react'
-
 import { BoxCard } from '@/_components/cards/box-card'
 import { CreateBoxForm } from '@/_components/forms/create-box-form'
 import {
@@ -24,17 +20,14 @@ import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Box, Location } from '@/types'
 import { logger } from '@/utils/components/logger/client-logger'
-
 export default function LocationBoxesPage() {
   const params = useParams<{ id: string }>()
   const locationId = Array.isArray(params?.id) ? params.id[0] : params?.id
-
   const [boxes, setBoxes] = useState<Box[]>([])
   const [locationName, setLocationName] = useState('Location')
   const [fetchingBoxes, setFetchingBoxes] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const { openModal } = useErrorModal()
-
   useEffect(() => {
     if (locationId) {
       fetchBoxes()
@@ -43,12 +36,10 @@ export default function LocationBoxesPage() {
       setFetchingBoxes(false)
     }
   }, [locationId])
-
   const fetchLocationName = async () => {
     if (!locationId) {
       return
     }
-
     try {
       const locations = await apiClient.get<Location[]>('/location')
       const match = locations.find((location) => location.id === locationId)
@@ -61,25 +52,21 @@ export default function LocationBoxesPage() {
       })
     }
   }
-
   const fetchBoxes = async () => {
     if (!locationId) {
       return
     }
-
     setFetchingBoxes(true)
     try {
       // Debug: Check if token exists
       const token = localStorage.getItem('authToken')
       console.log('Token exists:', !!token)
       console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'null')
-
       logger.info('Fetching boxes', {
         tokenExists: !!token,
         pathname: window.location.pathname,
         locationId
       })
-
       const data = await apiClient.get<Box[]>('/box', { locationId })
       setBoxes(data)
       logger.info('Boxes fetched successfully', { count: data.length })
@@ -96,12 +83,10 @@ export default function LocationBoxesPage() {
       setFetchingBoxes(false)
     }
   }
-
   const handleBoxCreated = () => {
     setDialogOpen(false)
     fetchBoxes()
   }
-
   if (fetchingBoxes) {
     return (
       <div className="flex flex-1 items-center justify-center">

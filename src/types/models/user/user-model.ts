@@ -6,7 +6,5 @@ export interface API_User {
   createdAt: string;
   updatedAt: string;
 }
-
 export type User = Pick<API_User, 'id' | 'name'>;
-
 export type AuthUser = Pick<API_User, 'id' | 'email' | 'password'>;

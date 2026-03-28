@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-
 import React, { useEffect, useState } from 'react'
-
 import { PlusCircle } from 'lucide-react'
-
 import { BoxCard } from '@/_components/cards/box-card'
 import { CreateBoxForm } from '@/_components/forms/create-box-form'
 import {
@@ -20,31 +17,26 @@ import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Box, Location } from '@/types'
 import { logger } from '@/utils/components/logger/client-logger'
-
 export default function BoxesPage() {
   const [boxes, setBoxes] = useState<Box[]>([])
   const [locations, setLocations] = useState<Location[]>([])
   const [fetchingBoxes, setFetchingBoxes] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const { openModal } = useErrorModal()
-
   useEffect(() => {
     fetchBoxes()
     fetchLocations()
   }, [])
-
   const fetchBoxes = async () => {
     setFetchingBoxes(true)
     try {
       const token = localStorage.getItem('authToken')
       console.log('Token exists:', !!token)
       console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'null')
-
       logger.info('Fetching boxes', {
         tokenExists: !!token,
         pathname: window.location.pathname
       })
-
       const data = await apiClient.get<Box[]>('/box')
       setBoxes(data)
       logger.info('Boxes fetched successfully', { count: data.length })
@@ -61,7 +53,6 @@ export default function BoxesPage() {
       setFetchingBoxes(false)
     }
   }
-
   const fetchLocations = async () => {
     try {
       const data = await apiClient.get<Location[]>('/location')
@@ -74,12 +65,10 @@ export default function BoxesPage() {
       })
     }
   }
-
   const handleBoxCreated = () => {
     setDialogOpen(false)
     fetchBoxes()
   }
-
   if (fetchingBoxes) {
     return (
       <div className="flex flex-1 items-center justify-center">

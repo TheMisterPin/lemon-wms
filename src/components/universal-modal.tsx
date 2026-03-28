@@ -1,5 +1,4 @@
 'use client'
-
 import {
   Dialog,
   DialogContent,
@@ -8,18 +7,16 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-
 import { UniversalButton, UniversalButtonProps } from './universal-button'
-
 export interface UniversalModalProps {
  buttonConfig : UniversalButtonProps;
 children: React.ReactNode;
 title : string;
 }
-
 export function UniversalModal(props : UniversalModalProps) {
   const { buttonConfig, children, title } = props
   const { type, text, icon, onClick } = buttonConfig
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -33,7 +30,6 @@ export function UniversalModal(props : UniversalModalProps) {
         </DialogHeader>
         {children}
         <DialogFooter className="h-1/6 bg-blue-950">
-
         </DialogFooter>
       </DialogContent>
     </Dialog>

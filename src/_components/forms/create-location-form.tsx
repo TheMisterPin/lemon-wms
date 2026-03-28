@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-
 import { useState } from 'react'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -19,17 +16,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
-
 import { createLocationformSchema } from '../../utils/components/forms/schemas/create-location-form'
-
 interface CreateLocationFormProps {
   onSuccess?: () => void;
 }
-
 export function CreateLocationForm({ onSuccess }: CreateLocationFormProps) {
   const [serverSuccess, setServerSuccess] = useState<string | null>(null)
   const { openModal } = useErrorModal()
-
   const form = useForm<z.infer<typeof createLocationformSchema>>({
     resolver: zodResolver(createLocationformSchema as any),
     defaultValues: {
@@ -40,7 +33,6 @@ export function CreateLocationForm({ onSuccess }: CreateLocationFormProps) {
 
   async function onSubmit(values: z.infer<typeof createLocationformSchema>) {
     setServerSuccess(null)
-
     try {
       await apiClient.post('/location', values)
       setServerSuccess('Location created.')
@@ -71,13 +63,11 @@ Location Name
             </FormItem>
           )}
         />
-
         {serverSuccess && (
           <p className="text-sm" role="status">
             {serverSuccess}
           </p>
         )}
-
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Creating...' : 'Create Location'}
         </Button>

@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRef, useState } from 'react'
-
 import { useRouter } from 'next/navigation'
-
 import { Building2 } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -22,11 +19,9 @@ import {
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Location } from '@/types'
-
 interface LocationCardProps extends Location {
   onUpdated?: () => void;
 }
-
 export function LocationCard({ onUpdated, ...location } : LocationCardProps) {
   const router = useRouter()
   const { openModal } = useErrorModal()
@@ -35,7 +30,6 @@ export function LocationCard({ onUpdated, ...location } : LocationCardProps) {
   const [longPressTriggered, setLongPressTriggered] = useState(false)
   const [name, setName] = useState(location.name)
   const pressTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   const startPress = () => {
     setLongPressTriggered(false)
     if (pressTimeout.current) {
@@ -46,27 +40,23 @@ export function LocationCard({ onUpdated, ...location } : LocationCardProps) {
       setLongPressTriggered(true)
     }, 500)
   }
-
   const cancelPress = () => {
     if (pressTimeout.current) {
       clearTimeout(pressTimeout.current)
       pressTimeout.current = null
     }
   }
-
   const handleClick = () => {
     if (longPressTriggered) {
       return
     }
     router.push(`/location/${location.id}`)
   }
-
   const handleDelete = async () => {
     const confirmed = window.confirm('Delete this location?')
     if (!confirmed) {
       return
     }
-
     try {
       await apiClient.delete(`/location/${location.id}`)
       setActionsOpen(false)
@@ -77,7 +67,6 @@ export function LocationCard({ onUpdated, ...location } : LocationCardProps) {
       openModal(error?.response?.data?.error ?? 'Failed to delete location')
     }
   }
-
   const handleSave = async () => {
     try {
       await apiClient.patch(`/location/${location.id}`, { name })
@@ -110,7 +99,6 @@ export function LocationCard({ onUpdated, ...location } : LocationCardProps) {
           </ItemTitle>
         </ItemContent>
       </Item>
-
       <Dialog open={actionsOpen} onOpenChange={setActionsOpen}>
         <DialogContent>
           <DialogHeader>
@@ -130,7 +118,6 @@ Location Options
           </div>
         </DialogContent>
       </Dialog>
-
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>

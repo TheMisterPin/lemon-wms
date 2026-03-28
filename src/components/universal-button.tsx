@@ -1,11 +1,7 @@
 'use client'
-
 import React from 'react'
-
 import { LucideIcon } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
-
 export interface UniversalButtonProps {
   type: 'full' | 'icon' | 'simple';
   text: string;
@@ -13,7 +9,6 @@ export interface UniversalButtonProps {
   onClick: () => void;
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
 }
-
 export const UniversalButton: React.FC<UniversalButtonProps> = ({
   type,
   text,
@@ -38,7 +33,6 @@ export const UniversalButton: React.FC<UniversalButtonProps> = ({
       return text
     }
   }
-
   const getSize = () => {
     switch (type) {
     case 'icon':

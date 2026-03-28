@@ -1,13 +1,9 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-
 import { useEffect, useState } from 'react'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -22,22 +18,18 @@ import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Location } from '@/types'
 import { uploadToImgbb } from '@/utils/media/upload-imgbb'
-
 import { createBoxFormSchema } from '../../utils/components/forms/schemas/create-box-form'
-
 interface CreateBoxFormProps {
   onSuccess?: () => void;
   locationId?: string;
   locations?: Location[];
 }
-
 export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFormProps) {
   const [serverSuccess, setServerSuccess] = useState<string | null>(null)
   const [selectedLocationId, setSelectedLocationId] = useState(locationId ?? '')
   const [uploadingClosed, setUploadingClosed] = useState(false)
   const [uploadingContents, setUploadingContents] = useState(false)
   const { openModal } = useErrorModal()
-
   const form = useForm<z.infer<typeof createBoxFormSchema>>({
     resolver: zodResolver(createBoxFormSchema as any),
     defaultValues: {
@@ -48,13 +40,12 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
     },
     mode: 'onSubmit'
   })
-
   useEffect(() => {
     if (locationId) {
       setSelectedLocationId(locationId)
+
       return
     }
-
     if (!selectedLocationId && locations?.length) {
       setSelectedLocationId(locations[0].id)
     }
@@ -63,13 +54,12 @@ export function CreateBoxForm({ onSuccess, locationId, locations }: CreateBoxFor
 
   async function onSubmit(values: z.infer<typeof createBoxFormSchema>) {
     setServerSuccess(null)
-
     const resolvedLocationId = locationId ?? selectedLocationId
     if (!resolvedLocationId) {
       openModal('Please select a location')
+
       return
     }
-
     try {
       await apiClient.post('/box', {
         ...values,
@@ -103,7 +93,6 @@ Box Name
             </FormItem>
           )}
         />
-
         {!locationId && (
           <FormItem>
             <FormLabel>
@@ -124,7 +113,6 @@ Location
             </FormControl>
           </FormItem>
         )}
-
         <FormField
           control={form.control}
           name="description"
@@ -140,7 +128,6 @@ Description
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="closedImage"
@@ -158,6 +145,7 @@ Closed Box Photo
                     const file = event.target.files?.[0]
                     if (!file) {
                       field.onChange('')
+
                       return
                     }
                     try {
@@ -182,7 +170,6 @@ Uploading closed-box photo...
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="contentsImage"
@@ -200,6 +187,7 @@ Contents Photo
                     const file = event.target.files?.[0]
                     if (!file) {
                       field.onChange('')
+
                       return
                     }
                     try {
@@ -224,13 +212,11 @@ Uploading contents photo...
             </FormItem>
           )}
         />
-
         {serverSuccess && (
           <p className="text-sm" role="status">
             {serverSuccess}
           </p>
         )}
-
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Creating...' : 'Create Box'}
         </Button>

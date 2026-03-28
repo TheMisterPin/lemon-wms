@@ -2,29 +2,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-
 import React, { useEffect, useState } from 'react'
-
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-
 import { ChevronLeft, QrCode } from 'lucide-react'
-
 import { Separator } from '@/components/ui/separator'
 import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Box } from '@/types'
 import { logger } from '@/utils/components/logger/client-logger'
 import { downloadBoxQrPdf } from '@/utils/label/qr'
-
 export default function BoxDetailPage() {
   const params = useParams<{ id: string }>()
   const boxId = Array.isArray(params?.id) ? params.id[0] : params?.id
-
   const [box, setBox] = useState<Box | null>(null)
   const [fetchingBox, setFetchingBox] = useState(true)
   const { openModal } = useErrorModal()
-
   useEffect(() => {
     if (boxId) {
       fetchBox()
@@ -32,12 +25,10 @@ export default function BoxDetailPage() {
       setFetchingBox(false)
     }
   }, [boxId])
-
   const fetchBox = async () => {
     if (!boxId) {
       return
     }
-
     setFetchingBox(true)
     try {
       const data = await apiClient.get<Box>(`/box/${boxId}`)
@@ -53,7 +44,6 @@ export default function BoxDetailPage() {
       setFetchingBox(false)
     }
   }
-
   const handleDownloadQr = async () => {
     if (!boxId) {
       return
@@ -67,7 +57,6 @@ export default function BoxDetailPage() {
       openModal('Failed to generate QR')
     }
   }
-
   if (fetchingBox) {
     return (
       <div className="flex flex-1 items-center justify-center">
@@ -77,7 +66,6 @@ Loading...
       </div>
     )
   }
-
   if (!box) {
     return (
       <div className="flex flex-1 items-center justify-center">

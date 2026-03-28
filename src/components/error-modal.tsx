@@ -1,10 +1,7 @@
 'use client'
 import { AlertTriangle } from 'lucide-react'
-
 import { useErrorModal } from '@/hooks'
-
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
-
 export function ErrorModal() {
   const { isOpen, message, closeModal } = useErrorModal()
 

@@ -1,5 +1,4 @@
 import Link from 'next/link'
-
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 p-8 text-center">

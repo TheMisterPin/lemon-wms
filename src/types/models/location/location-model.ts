@@ -1,4 +1,3 @@
-
 export interface API_Location {
   id: string;
   name: string;
@@ -6,5 +5,4 @@ export interface API_Location {
   createdAt: string;
   updatedAt: string;
 }
-
 export type Location = Pick<API_Location, 'id' | 'name' | 'icon'>;

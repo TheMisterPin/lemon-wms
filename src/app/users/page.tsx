@@ -1,16 +1,12 @@
 'use client'
-
 import React, { useState, useEffect } from 'react'
-
 import { UserCard } from '@/_components/cards/user-card'
 import { UniversalLoader } from '@/components/universal-loader'
 import { User } from '@/types/models/user/user-model'
-
 export default function UserList() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -26,14 +22,11 @@ export default function UserList() {
         setLoading(false)
       }
     }
-
     fetchUsers()
   }, [])
-
   if (loading) {
     return <UniversalLoader message="Loading users..." />
   }
-
   if (error) {
     return <div>
 Error:

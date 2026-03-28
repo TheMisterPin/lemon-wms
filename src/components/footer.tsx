@@ -1,5 +1,4 @@
 import React from 'react'
-
 export function Footer() {
   return (
     <footer className="border-t bg-linear-to-l from-gray-700 to-slate-500">

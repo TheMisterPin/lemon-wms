@@ -1,15 +1,11 @@
 'use client'
-
 import React, { useState } from 'react'
-
 import { Footer } from './footer'
 import { Header } from './header'
 import { Sidebar } from './sidebar'
-
 interface LayoutWrapperProps {
   children: React.ReactNode;
 }
-
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 

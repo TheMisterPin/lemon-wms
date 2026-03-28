@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 interface LogEntry {
   timestamp: string;
   level: 'info' | 'warn' | 'error' | 'debug';
@@ -8,7 +7,6 @@ interface LogEntry {
   url?: string;
   userAgent?: string;
 }
-
 class ClientLogger {
   private async sendLog(entry: LogEntry) {
     try {
@@ -25,7 +23,6 @@ class ClientLogger {
       console.warn('Failed to send log to server:', error)
     }
   }
-
   private createLogEntry(
     level: LogEntry['level'],
     message: string,
@@ -40,26 +37,21 @@ class ClientLogger {
       userAgent: navigator.userAgent
     }
   }
-
   info(message: string, data?: any) {
     console.log(`[CLIENT LOG] ${message}`, data)
     this.sendLog(this.createLogEntry('info', message, data))
   }
-
   warn(message: string, data?: any) {
     console.warn(`[CLIENT LOG] ${message}`, data)
     this.sendLog(this.createLogEntry('warn', message, data))
   }
-
   error(message: string, data?: any) {
     console.error(`[CLIENT LOG] ${message}`, data)
     this.sendLog(this.createLogEntry('error', message, data))
   }
-
   debug(message: string, data?: any) {
     console.debug(`[CLIENT LOG] ${message}`, data)
     this.sendLog(this.createLogEntry('debug', message, data))
   }
 }
-
 export const logger = new ClientLogger()

@@ -1,6 +1,4 @@
-
 import * as z from 'zod'
-
 export const createUserformSchema = z.object({
   name: z
     .string()

@@ -1,11 +1,12 @@
 'use client'
-
 import * as React from 'react'
-
 import { CalendarIcon } from 'lucide-react'
-
 import { Calendar } from '@/components/ui/calendar'
-import { Field, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldDescription,
+  FieldLabel
+} from '@/components/ui/field'
 import {
   InputGroup,
   InputGroupAddon,
@@ -18,32 +19,46 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import { formatDate, isValidDate } from '@/utils/formatters/date-utils'
-
 interface FormDateInputProps {
   label: string
   value?: Date
   onChange?: (date: Date | undefined) => void
   placeholder?: string
-  id?: string
+  id: string
+  description?: string
+  required?: boolean
+  disabled?: boolean
+  error?: string
 }
-
 export function FormDateInput(props: FormDateInputProps) {
-  const { label, value, onChange, placeholder = 'Select date', id } = props
+  const {
+    label,
+    value,
+    onChange,
+    placeholder = 'Select date',
+    id,
+    description,
+    required,
+    disabled,
+    error
+  } = props
   const [open, setOpen] = React.useState(false)
   const [month, setMonth] = React.useState<Date | undefined>(value)
-
   const displayValue = formatDate(value)
 
   return (
-    <Field className="mx-auto w-48">
+    <Field>
       <FieldLabel htmlFor={id}>
         {label}
+        {required ? ' *' : ''}
       </FieldLabel>
       <InputGroup>
         <InputGroupInput
           id={id}
           value={displayValue}
           placeholder={placeholder}
+          disabled={disabled}
+          aria-invalid={!!error}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const date = new Date(e.target.value)
             if (isValidDate(date)) {
@@ -54,7 +69,7 @@ export function FormDateInput(props: FormDateInputProps) {
             }
           }}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === 'ArrowDown') {
+            if (e.key === 'ArrowDown' && !disabled) {
               e.preventDefault()
               setOpen(true)
             }
@@ -63,10 +78,16 @@ export function FormDateInput(props: FormDateInputProps) {
         <InputGroupAddon align="inline-end">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <InputGroupButton id="date-picker" variant="ghost" size="icon-xs" aria-label="Select date">
+              <InputGroupButton
+                id={`${id}-date-picker`}
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Select date"
+                disabled={disabled}
+              >
                 <CalendarIcon />
                 <span className="sr-only">
-                  Select date
+Select date
                 </span>
               </InputGroupButton>
             </PopoverTrigger>
@@ -91,6 +112,16 @@ export function FormDateInput(props: FormDateInputProps) {
           </Popover>
         </InputGroupAddon>
       </InputGroup>
+      {description && !error && (
+        <FieldDescription>
+          {description}
+        </FieldDescription>
+      )}
+      {error && (
+        <FieldDescription className="text-red-500">
+          {error}
+        </FieldDescription>
+      )}
     </Field>
   )
 }

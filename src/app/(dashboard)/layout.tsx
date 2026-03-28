@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen min-w-[768px] bg-slate-50 p-4">

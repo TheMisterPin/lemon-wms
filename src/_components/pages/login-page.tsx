@@ -1,4 +1,3 @@
-
 import { Card } from '@/components/ui/card'
 import {
   Tabs,
@@ -6,13 +5,10 @@ import {
   TabsList,
   TabsTrigger
 } from '@/components/ui/tabs'
-
 import { CreateUserForm } from '../forms/create-user-form'
 import { LoginForm } from '../forms/login-form'
-
 export function LoginPage() {
   return (
-
     <Card className="m-auto p-6 min-h-2/3">
       <Tabs defaultValue="login" className="flex-1" >
         <div className="mb-4 space-y-2 text-center">
@@ -22,7 +18,6 @@ Welcome to BoxMas
           <p className="text-sm text-muted-foreground">
 Please login or sign up to continue.
           </p>
-
           <TabsList className="mt-2 border-2 ">
             <TabsTrigger value="login">
 Login
@@ -40,6 +35,5 @@ Signup
         </TabsContent>
       </Tabs>
     </Card>
-
   )
 }

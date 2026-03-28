@@ -2,7 +2,6 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
 import unusedImports from 'eslint-plugin-unused-imports'
-
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -26,7 +25,6 @@ const eslintConfig = defineConfig([
       'linebreak-style': ['error', 'windows'], // Allow Windows line endings
       'quotes': ['error', 'single'],
       'semi': ['error', 'never'],
-
       // Import organization
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
@@ -67,14 +65,13 @@ const eslintConfig = defineConfig([
             }
           ],
           'pathGroupsExcludedImportTypes': ['react', 'next'],
-          'newlines-between': 'always',
+          'newlines-between': 'ignore',
           'alphabetize': {
             'order': 'asc',
             'caseInsensitive': true
           }
         }
       ],
-
       // Space after functions
       'space-before-function-paren': [
         'error',
@@ -84,20 +81,11 @@ const eslintConfig = defineConfig([
           'asyncArrow': 'always'
         }
       ],
-
-      // Array/Object formatting - one element per line for multiline
+      // Array/Object formatting
       'array-bracket-newline': ['error', 'consistent'],
-      'array-element-newline': ['error', 'consistent'],
-      'object-curly-newline': [
-        'error',
-        {
-          'ObjectExpression': { 'multiline': true, 'consistent': true },
-          'ObjectPattern': { 'multiline': true, 'consistent': true },
-          'ImportDeclaration': { 'multiline': true, 'consistent': true },
-          'ExportDeclaration': { 'multiline': true, 'consistent': true }
-        }
-      ],
-
+      'array-element-newline': 'off',
+      'object-property-newline': 'off',
+      'object-curly-newline': 'off',
       // Additional Airbnb-style rules
       'comma-dangle': ['error', 'never'],
       'no-unused-vars': 'off', // Using unused-imports instead
@@ -113,17 +101,16 @@ const eslintConfig = defineConfig([
       'no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 0 }],
       'no-trailing-spaces': 'error',
       'eol-last': ['error', 'always'],
-
-      // Function declarations
       'padding-line-between-statements': [
         'error',
-        { blankLine: 'always', prev: '*', next: 'function' }
+        { blankLine: 'always', prev: '*', next: 'function' },
+        { blankLine: 'always', prev: '*', next: 'return' }
       ],
-
       // JSX rules
-      'react/jsx-one-expression-per-line': 'error'
+      'react/jsx-one-expression-per-line': 'off',
+      'react/jsx-max-props-per-line': ['error', { 'maximum': 3, 'when': 'multiline' }],
+      '@next/next/jsx-no-literals': 'off'
     }
   }
 ])
-
 export default eslintConfig

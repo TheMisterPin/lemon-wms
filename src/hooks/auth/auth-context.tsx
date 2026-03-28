@@ -1,18 +1,13 @@
-
 'use client'
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-
 import { useErrorModal } from '@/hooks/ui/error-modal-context'
 import api from '@/lib/axios'
 import { logger } from '@/utils/components/logger/client-logger'
-
 interface User {
   id: string;
   email: string;
   name: string;
 }
-
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
@@ -21,36 +16,30 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
+
   return context
 }
-
 interface AuthProviderProps {
   children: ReactNode;
 }
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const { openModal } = useErrorModal()
-
   useEffect(() => {
     // Check for stored token on app load
     const token = localStorage.getItem('authToken')
-
     logger.info('Auth context initializing', {
       tokenExists: !!token,
       tokenPreview: token ? `${token.substring(0, 20)}...` : null,
       pathname: window.location.pathname
     })
-
     if (token) {
       // You could validate the token here with the server
       // For now, we'll assume it's valid and extract user info
@@ -62,7 +51,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           name: payload.email // Using email as name for now
         }
         setUser(userData)
-
         logger.info('User loaded from token', {
           userId: userData.id,
           email: userData.email
@@ -76,23 +64,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     setLoading(false)
   }, [])
-
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       logger.info('Login attempt', { email })
-
       const response = await api.post('/auth/login', { email, password })
       const { user: userData, token } = response.data
-
       logger.info('Login successful - storing token', {
         userId: userData.id,
         email: userData.email,
         tokenPreview: token ? `${token.substring(0, 20)}...` : null
       })
-
       localStorage.setItem('authToken', token)
       setUser(userData)
-
       // Verify token was stored
       const storedToken = localStorage.getItem('authToken')
       logger.info('Token verification after storage', {
@@ -107,10 +90,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         'Failed to login. Please try again.'
       logger.error('Login failed', { email, error: errorMessage })
       openModal(errorMessage)
+
       return false
     }
   }
-
   const logout = async (): Promise<void> => {
     try {
       logger.info('Logout initiated')
@@ -131,7 +114,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logger.info('Logout complete - user cleared')
     }
   }
-
   const logoutAllDevices = async (): Promise<void> => {
     try {
       // Call logout all devices API
@@ -147,7 +129,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null)
     }
   }
-
   const value: AuthContextType = {
     user,
     login,

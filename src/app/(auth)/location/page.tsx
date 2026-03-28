@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
-
 import React, { useEffect, useState } from 'react'
-
 import { PlusCircle } from 'lucide-react'
-
 import { LocationCard } from '@/_components/cards/location-card'
 import { CreateLocationForm } from '@/_components/forms/create-location-form'
 import {
@@ -20,17 +17,14 @@ import { useErrorModal } from '@/hooks'
 import { apiClient } from '@/lib/axios'
 import { Location } from '@/types'
 import { logger } from '@/utils/components/logger/client-logger'
-
 export default function LocationsPage() {
   const [locations, setLocations] = useState<Location[]>([])
   const [fetchingLocations, setFetchingLocations] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const { openModal } = useErrorModal()
-
   useEffect(() => {
     fetchLocations()
   }, [])
-
   const fetchLocations = async () => {
     setFetchingLocations(true)
     try {
@@ -38,12 +32,10 @@ export default function LocationsPage() {
       const token = localStorage.getItem('authToken')
       console.log('Token exists:', !!token)
       console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'null')
-
       logger.info('Fetching locations', {
         tokenExists: !!token,
         pathname: window.location.pathname
       })
-
       const data = await apiClient.get<Location[]>('/location')
       setLocations(data)
       logger.info('Locations fetched successfully', { count: data.length })
@@ -60,12 +52,10 @@ export default function LocationsPage() {
       setFetchingLocations(false)
     }
   }
-
   const handleLocationCreated = () => {
     setDialogOpen(false)
     fetchLocations()
   }
-
   if (fetchingLocations) {
     return (
       <div className="flex flex-1 items-center justify-center">

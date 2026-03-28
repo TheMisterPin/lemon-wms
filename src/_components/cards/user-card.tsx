@@ -1,5 +1,4 @@
 import { InboxIcon } from 'lucide-react'
-
 import {
   Item,
   ItemContent,
@@ -7,10 +6,8 @@ import {
   ItemTitle
 } from '@/components/ui/item'
 import { User } from '@/types'
-
 export function UserCard(user : User) {
   return (
-
     <Item variant="outline">
       <ItemMedia variant="icon">
         <InboxIcon />
@@ -21,6 +18,5 @@ export function UserCard(user : User) {
         </ItemTitle>
       </ItemContent>
     </Item>
-
   )
 }

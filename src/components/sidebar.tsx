@@ -1,12 +1,8 @@
 'use client'
-
 import React from 'react'
-
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
 import { Building2, Home, LogOut } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -16,16 +12,13 @@ import {
   SheetTitle
 } from '@/components/ui/sheet'
 import { useAuth } from '@/hooks'
-
 interface SidebarProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
 export function Sidebar({ open, onOpenChange }: SidebarProps) {
   const { user, logout, isAuthenticated } = useAuth()
   const router = useRouter()
-
   const handleLogout = async () => {
     await logout()
     onOpenChange(false)

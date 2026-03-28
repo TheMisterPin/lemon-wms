@@ -1,21 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios'
-
 import { logger } from '@/utils/components/logger/client-logger'
-
 const api = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json'
   }
 })
-
 // Request interceptor - attach token to all requests
 api.interceptors.request.use(
   (config) => {
     // Get token from localStorage
     const token = localStorage.getItem('authToken')
-
     const requestLog = {
       timestamp: new Date().toISOString(),
       type: 'REQUEST',
@@ -32,10 +28,8 @@ api.interceptors.request.use(
       data: config.data,
       params: config.params
     }
-
     console.log('[REQUEST]', requestLog)
     logger.info('API Request', requestLog)
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
       console.log('[Axios Interceptor] Authorization header set')
@@ -48,10 +42,10 @@ api.interceptors.request.use(
   },
   (error) => {
     logger.error('Axios request interceptor error', { error: error.message })
+
     return Promise.reject(error)
   }
 )
-
 // Response interceptor - handle 401 errors
 api.interceptors.response.use(
   (response) => {
@@ -66,7 +60,6 @@ api.interceptors.response.use(
       headers: response.headers,
       data: response.data
     }
-
     console.log('[RESPONSE]', responseLog)
     logger.info('API Response', responseLog)
 
@@ -85,15 +78,12 @@ api.interceptors.response.use(
       hadAuthHeader: !!error.config?.headers?.Authorization,
       message: error.message
     }
-
     console.error('[ERROR_RESPONSE]', errorLog)
     logger.error('API Error Response', errorLog)
-
     if (error.response?.status === 401) {
       // Only remove token and redirect if we actually sent a token
       // This prevents deleting valid tokens on timing issues
       const hadToken = error.config?.headers?.Authorization
-
       if (hadToken) {
         console.log('[Axios Interceptor] Token was sent but rejected - removing token and redirecting')
         logger.error('Token was rejected by server - removing and redirecting', {
@@ -101,7 +91,6 @@ api.interceptors.response.use(
           tokenWasSent: true
         })
         localStorage.removeItem('authToken')
-
         // Redirect to login if not already there
         if (window.location.pathname !== '/') {
           window.location.href = '/'
@@ -118,9 +107,7 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
 export default api
-
 /**
  * Universal authenticated API call function
  * Automatically includes the Bearer token from localStorage
@@ -148,9 +135,7 @@ export async function authenticatedCall<T = any>(
   }
 ): Promise<T> {
   const { method = 'GET', data, params, headers } = options || {}
-
   const token = localStorage.getItem('authToken')
-
   const config = {
     method,
     url,
@@ -161,27 +146,22 @@ export async function authenticatedCall<T = any>(
       ...(token && { Authorization: `Bearer ${token}` })
     }
   }
-
   const response = await api.request<T>(config)
+
   return response.data
 }
-
 /**
  * Convenience methods for common HTTP operations
  */
 export const apiClient = {
   get: <T = any>(url: string, params?: any) =>
     authenticatedCall<T>(url, { method: 'GET', params }),
-
   post: <T = any>(url: string, data?: any) =>
     authenticatedCall<T>(url, { method: 'POST', data }),
-
   put: <T = any>(url: string, data?: any) =>
     authenticatedCall<T>(url, { method: 'PUT', data }),
-
   patch: <T = any>(url: string, data?: any) =>
     authenticatedCall<T>(url, { method: 'PATCH', data }),
-
   delete: <T = any>(url: string, data?: any) =>
     authenticatedCall<T>(url, { method: 'DELETE', data })
 }
