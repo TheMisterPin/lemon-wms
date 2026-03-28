@@ -1,7 +1,7 @@
 'use client'
 import { FieldValues, useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
-import { GenericFormField } from './inputs/GenericFormField'
+import { GenericFormField } from './inputs/dynamic-form-field'
 import { GenericFormProps } from '../types/components/form/generic-form.types'
 
 function getColumnsClass(columns: 1 | 2 | 3 | 4 = 2): string {
@@ -17,7 +17,8 @@ function getColumnsClass(columns: 1 | 2 | 3 | 4 = 2): string {
     return 'grid-cols-1 md:grid-cols-2'
   }
 }
-export function GenericForm<T extends FieldValues>({
+
+function DynamicForm<T extends FieldValues>({
   fields,
   defaultValues,
   onSubmit,
@@ -55,3 +56,5 @@ export function GenericForm<T extends FieldValues>({
     </form>
   )
 }
+
+export default DynamicForm
