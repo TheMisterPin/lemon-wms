@@ -42,7 +42,7 @@ export default function ScanInput({
       autoCorrect="off"
       autoCapitalize="off"
       spellCheck={false}
-      className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-lg text-zinc-100 placeholder-zinc-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+      className="w-full border border-terminal-border bg-black px-4 py-3 font-[family-name:var(--font-terminal)] text-base font-semibold tracking-[0.05em] text-terminal-accent outline-none transition-colors duration-[0.15s] placeholder:text-terminal-text-dim focus:border-terminal-accent disabled:cursor-not-allowed disabled:opacity-50"
     />
   )
 }

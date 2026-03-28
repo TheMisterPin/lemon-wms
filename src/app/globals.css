@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Share+Tech+Mono&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -5,6 +6,18 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Terminal floor aesthetic tokens */
+  --color-terminal-bg: #0d0f0e;
+  --color-terminal-surface: #141714;
+  --color-terminal-border: #2a2e2b;
+  --color-terminal-accent: #c8f53b;
+  --color-terminal-accent-dim: #8aaa1f;
+  --color-terminal-text: #d4d9d5;
+  --color-terminal-text-dim: #5a6359;
+  --color-terminal-danger: #f53b3b;
+  --font-terminal: 'JetBrains Mono', monospace;
+  --font-terminal-label: 'Share Tech Mono', monospace;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -126,4 +139,58 @@
   .dev{
     border: solid 2px red;
   }
+}
+
+/* ─── Terminal floor aesthetic ─────────────────────────────────────── */
+
+.terminal-scanline {
+  background-color: #0d0f0e;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.012) 2px,
+    rgba(255, 255, 255, 0.012) 4px
+  );
+}
+
+/* Clipped-corner primary button */
+.btn-clip {
+  position: relative;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+.btn-clip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 12px 12px 0;
+  border-color: transparent #2a2e2b transparent transparent;
+  transition: border-color 0.15s;
+}
+.btn-clip:hover::before,
+.btn-clip:focus-visible::before {
+  border-color: transparent #c8f53b transparent transparent;
+}
+.btn-clip-active::before,
+.btn-clip:active::before {
+  border-color: transparent #c8f53b transparent transparent;
+}
+
+@keyframes resultFlash {
+  0%   { background: rgba(200, 245, 59, 0.25); }
+  100% { background: #000; }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes terminalBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }

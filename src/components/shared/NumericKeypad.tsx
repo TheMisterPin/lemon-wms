@@ -36,8 +36,12 @@ export default function NumericKeypad({
   return (
     <div className="flex flex-col gap-3">
       {/* Display */}
-      <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-zinc-100 min-h-[52px]">
-        {displayValue || <span className="text-zinc-600 tracking-normal text-base">Enter PIN</span>}
+      <div className="border border-terminal-accent bg-black px-4 py-3 text-center font-[family-name:var(--font-terminal)] text-2xl font-semibold tracking-[0.5em] text-terminal-accent min-h-[52px]">
+        {displayValue || (
+          <span className="font-[family-name:var(--font-terminal-label)] text-[0.6rem] uppercase tracking-[0.2em] text-terminal-text-dim">
+            ENTER PIN
+          </span>
+        )}
       </div>
 
       {/* Grid */}
@@ -52,12 +56,12 @@ export default function NumericKeypad({
               type="button"
               onClick={() => handleKey(key)}
               className={[
-                'flex h-14 items-center justify-center rounded-lg text-xl font-semibold transition-colors select-none',
+                'btn-clip flex h-14 items-center justify-center font-[family-name:var(--font-terminal)] text-xl font-semibold select-none transition-colors duration-[0.15s]',
                 isConfirm
-                  ? 'bg-amber-500 text-zinc-950 hover:bg-amber-400 active:bg-amber-600'
+                  ? 'border border-terminal-accent bg-terminal-surface text-terminal-accent hover:bg-[#1a1f1a]'
                   : isBackspace
-                  ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600 active:bg-zinc-800'
-                  : 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 active:bg-zinc-900'
+                  ? 'border border-terminal-border bg-terminal-surface text-terminal-danger hover:border-terminal-danger'
+                  : 'border border-terminal-border bg-terminal-surface text-terminal-text hover:border-terminal-accent hover:text-terminal-accent'
               ].join(' ')}
             >
               {isBackspace ? '⌫' : isConfirm ? '✓' : key}

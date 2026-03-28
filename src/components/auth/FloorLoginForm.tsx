@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
 
 import { useAuthStore } from '@/lib/auth/store'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -20,6 +19,14 @@ type LoginResponse = {
 }
 
 const DEVICE_CODE_KEY = 'wms_device_code'
+
+const STEP_LABELS: Record<Step, string> = {
+  device: 'DEVICE CODE',
+  badge: 'SCAN BADGE',
+  pin: 'ENTER PIN',
+}
+
+const STEPS: Step[] = ['device', 'badge', 'pin']
 
 export default function FloorLoginForm() {
   const router = useRouter()
@@ -75,16 +82,13 @@ export default function FloorLoginForm() {
         setError(data.error ?? 'Login failed')
         setPin('')
         if (res.status === 401 && data.error === 'Invalid badge or PIN') {
-          // Go back to badge scan on auth failure
           setStep('badge')
           setBadgeNumber('')
         }
         return
       }
 
-      // Persist device code for next login
       localStorage.setItem(DEVICE_CODE_KEY, deviceCode.trim())
-
       setAuth(data.accessToken, data.user)
       router.push('/warehouse')
     } catch {
@@ -109,38 +113,62 @@ export default function FloorLoginForm() {
     }
   }
 
+  const currentStepIndex = STEPS.indexOf(step)
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 font-[family-name:var(--font-terminal)]">
+
       {/* Step indicator */}
-      <div className="flex items-center gap-2">
-        {(['device', 'badge', 'pin'] as Step[]).map((s, i) => (
-          <div key={s} className="flex items-center gap-2">
-            <div
-              className={[
-                'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
-                step === s
-                  ? 'bg-amber-500 text-zinc-950'
-                  : ['device', 'badge', 'pin'].indexOf(step) > i
-                  ? 'bg-zinc-600 text-zinc-300'
-                  : 'bg-zinc-800 text-zinc-500'
-              ].join(' ')}
-            >
-              {i + 1}
+      <div className="flex items-center gap-0">
+        {STEPS.map((s, i) => {
+          const isActive = step === s
+          const isDone = currentStepIndex > i
+          return (
+            <div key={s} className="flex items-center">
+              <div className="flex flex-col items-center gap-1">
+                <div
+                  className={[
+                    'flex h-6 w-6 items-center justify-center border font-[family-name:var(--font-terminal)] text-xs font-bold transition-colors duration-[0.15s]',
+                    isActive
+                      ? 'border-terminal-accent text-terminal-accent'
+                      : isDone
+                      ? 'border-terminal-accent-dim text-terminal-accent-dim'
+                      : 'border-terminal-border text-terminal-text-dim'
+                  ].join(' ')}
+                >
+                  {isDone ? '✓' : i + 1}
+                </div>
+                <span
+                  className={[
+                    'font-[family-name:var(--font-terminal-label)] text-[0.5rem] uppercase tracking-[0.15em]',
+                    isActive ? 'text-terminal-accent' : 'text-terminal-text-dim'
+                  ].join(' ')}
+                >
+                  {STEP_LABELS[s]}
+                </span>
+              </div>
+              {i < STEPS.length - 1 && (
+                <div
+                  className={[
+                    'mb-4 h-px w-8 transition-colors duration-[0.15s]',
+                    currentStepIndex > i ? 'bg-terminal-accent-dim' : 'bg-terminal-border'
+                  ].join(' ')}
+                />
+              )}
             </div>
-            {i < 2 && <div className="h-px w-6 bg-zinc-700" />}
-          </div>
-        ))}
-        <span className="ml-1 text-sm text-zinc-400">
-          {step === 'device' ? 'Device code' : step === 'badge' ? 'Scan badge' : 'Enter PIN'}
-        </span>
+          )
+        })}
       </div>
 
       {/* Step 1: Device code */}
       {step === 'device' && (
         <form onSubmit={handleDeviceSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="device-code" className="text-sm font-medium text-zinc-300">
-              Device code
+            <label
+              htmlFor="device-code"
+              className="font-[family-name:var(--font-terminal-label)] text-[0.6rem] uppercase tracking-[0.2em] text-terminal-text-dim"
+            >
+              DEVICE CODE
             </label>
             <input
               id="device-code"
@@ -151,15 +179,15 @@ export default function FloorLoginForm() {
               onChange={(e) => setDeviceCode(e.target.value)}
               placeholder="e.g. WH1-ZONE3"
               autoComplete="off"
-              className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-lg text-zinc-100 placeholder-zinc-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+              className="border border-terminal-border bg-black px-4 py-3 font-[family-name:var(--font-terminal)] text-base font-semibold tracking-[0.05em] text-terminal-accent outline-none transition-colors duration-[0.15s] placeholder:text-terminal-text-dim focus:border-terminal-accent"
             />
           </div>
           <button
             type="submit"
             disabled={deviceCode.trim().length < 3}
-            className="rounded-lg bg-amber-500 px-4 py-3 font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-clip border border-terminal-border bg-terminal-surface px-6 py-3 font-[family-name:var(--font-terminal)] text-sm font-semibold uppercase tracking-[0.08em] text-terminal-text transition-colors duration-[0.15s] hover:border-terminal-accent hover:bg-[#1a1f1a] hover:text-terminal-accent disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Continue
+            CONTINUE
           </button>
         </form>
       )}
@@ -167,9 +195,11 @@ export default function FloorLoginForm() {
       {/* Step 2: Badge scan */}
       {step === 'badge' && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-zinc-400">
-            Scan your badge or type your badge number
-          </p>
+          <div>
+            <p className="font-[family-name:var(--font-terminal-label)] text-[0.6rem] uppercase tracking-[0.2em] text-terminal-text-dim">
+              SCAN BADGE OR ENTER BADGE NUMBER
+            </p>
+          </div>
           <ScanInput
             placeholder="Scan badge…"
             onScan={handleBadgeScan}
@@ -178,9 +208,9 @@ export default function FloorLoginForm() {
           <button
             type="button"
             onClick={() => { setStep('device'); setError(null) }}
-            className="text-sm text-zinc-500 hover:text-zinc-300"
+            className="font-[family-name:var(--font-terminal-label)] text-left text-[0.6rem] uppercase tracking-[0.15em] text-terminal-text-dim transition-colors duration-[0.15s] hover:text-terminal-accent-dim"
           >
-            ← Change device code
+            ← CHANGE DEVICE CODE
           </button>
         </div>
       )}
@@ -188,15 +218,23 @@ export default function FloorLoginForm() {
       {/* Step 3: PIN */}
       {step === 'pin' && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-zinc-400">
-            Badge: <span className="font-mono text-zinc-200">{badgeNumber}</span>
-          </p>
+          <div className="flex items-center gap-2 border-l-2 border-terminal-accent-dim pl-3">
+            <span className="font-[family-name:var(--font-terminal-label)] text-[0.6rem] uppercase tracking-[0.15em] text-terminal-text-dim">
+              BADGE
+            </span>
+            <span className="font-[family-name:var(--font-terminal)] text-sm font-semibold tracking-[0.05em] text-terminal-text">
+              {badgeNumber}
+            </span>
+          </div>
 
           {isMobile ? (
             /* Native numeric keyboard on touch devices */
-            <div className="flex flex-col gap-3">
-              <label htmlFor="native-pin" className="text-sm font-medium text-zinc-300">
-                4-digit PIN
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="native-pin"
+                className="font-[family-name:var(--font-terminal-label)] text-[0.6rem] uppercase tracking-[0.2em] text-terminal-text-dim"
+              >
+                4-DIGIT PIN
               </label>
               <input
                 id="native-pin"
@@ -210,7 +248,7 @@ export default function FloorLoginForm() {
                 onChange={handleNativePinChange}
                 disabled={loading}
                 placeholder="••••"
-                className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-2xl tracking-[0.5em] text-zinc-100 placeholder-zinc-600 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
+                className="border border-terminal-border bg-black px-4 py-3 text-center font-[family-name:var(--font-terminal)] text-2xl tracking-[0.5em] text-terminal-accent outline-none transition-colors duration-[0.15s] placeholder:text-terminal-text-dim focus:border-terminal-accent disabled:opacity-50"
               />
             </div>
           ) : (
@@ -229,34 +267,49 @@ export default function FloorLoginForm() {
               type="button"
               onClick={handlePinConfirm}
               disabled={pin.length !== 4 || loading}
-              className="flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-3 font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-clip flex items-center justify-center gap-2 border border-terminal-border bg-terminal-surface px-6 py-3 font-[family-name:var(--font-terminal)] text-sm font-semibold uppercase tracking-[0.08em] text-terminal-text transition-colors duration-[0.15s] hover:border-terminal-accent hover:bg-[#1a1f1a] hover:text-terminal-accent disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {loading && <Loader2 size={16} className="animate-spin" />}
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? (
+                <>
+                  <span className="font-[family-name:var(--font-terminal-label)] text-[0.6rem] uppercase tracking-[0.2em]">
+                    SIGNING IN
+                  </span>
+                  <span className="animate-[terminalBlink_1s_ease-in-out_infinite]">_</span>
+                </>
+              ) : (
+                'SIGN IN'
+              )}
             </button>
           )}
 
           {loading && isMobile && (
-            <div className="flex items-center justify-center gap-2 text-zinc-400">
-              <Loader2 size={16} className="animate-spin" />
-              <span className="text-sm">Signing in…</span>
+            <div className="flex items-center gap-2 text-terminal-text-dim">
+              <span className="font-[family-name:var(--font-terminal-label)] text-[0.6rem] uppercase tracking-[0.2em]">
+                SIGNING IN
+              </span>
+              <span className="animate-[terminalBlink_1s_ease-in-out_infinite] text-terminal-accent">_</span>
             </div>
           )}
 
           <button
             type="button"
             onClick={() => { setStep('badge'); setBadgeNumber(''); setPin(''); setError(null) }}
-            className="text-sm text-zinc-500 hover:text-zinc-300"
+            className="font-[family-name:var(--font-terminal-label)] text-left text-[0.6rem] uppercase tracking-[0.15em] text-terminal-text-dim transition-colors duration-[0.15s] hover:text-terminal-accent-dim"
           >
-            ← Rescan badge
+            ← RESCAN BADGE
           </button>
         </div>
       )}
 
       {error && (
-        <p role="alert" className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-2.5 text-sm text-red-400">
-          {error}
-        </p>
+        <div
+          role="alert"
+          className="border border-terminal-danger bg-terminal-surface px-4 py-2.5"
+        >
+          <p className="font-[family-name:var(--font-terminal)] text-sm font-semibold tracking-[0.05em] text-terminal-danger">
+            {error}
+          </p>
+        </div>
       )}
     </div>
   )
