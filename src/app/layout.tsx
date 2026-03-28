@@ -1,18 +1,10 @@
-import { Maven_Pro } from 'next/font/google'
-import './globals.css'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { AuthProvider } from '@/hooks'
-import { ErrorModalProvider } from '@/hooks'
-import { ErrorModal } from '../components/error-modal'
-import { LayoutWrapper } from '../components/layout-wrapper'
 import type { Metadata } from 'next'
-const mavenPro = Maven_Pro({
-  variable: '--font-maven-pro',
-  subsets: ['latin']
-})
+
+import './globals.css'
+
 export const metadata: Metadata = {
-  title: 'Boxmas',
-  description: 'Manage your boxes with ease'
+  title: 'Lemon WMS',
+  description: 'Warehouse Management System for office and floor operations.',
 }
 export default function RootLayout({
   children
@@ -21,20 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${mavenPro.variable} antialiased flex min-h-screen flex-col`}
-      >
-        <TooltipProvider>
-          <ErrorModalProvider>
-            <AuthProvider>
-              <LayoutWrapper>
-                {children}
-              </LayoutWrapper>
-              <ErrorModal />
-            </AuthProvider>
-          </ErrorModalProvider>
-        </TooltipProvider>
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   )
 }

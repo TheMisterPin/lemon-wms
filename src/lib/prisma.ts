@@ -5,10 +5,8 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 const prisma = globalForPrisma.prisma ?? (() => {
-  const connectionString = process.env.DATABASE_URL
-  if (!connectionString) {
-    throw new Error('DATABASE_URL environment variable is not set')
-  }
+  const connectionString = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/wms_db'
+
   const pool = new Pool({ connectionString })
   const adapter = new PrismaPg(pool)
 
