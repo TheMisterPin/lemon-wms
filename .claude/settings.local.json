@@ -6,7 +6,10 @@
       "Bash(npx prisma migrate dev:*)",
       "Bash(npx prisma generate:*)",
       "Bash(node -e:*)",
-      "Bash(npx shadcn@latest add:*)"
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(python -c \":*)",
+      "Bash(pnpm add:*)"
     ]
   }
 }

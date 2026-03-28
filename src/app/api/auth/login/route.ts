@@ -1,18 +1,18 @@
-import bcrypt from 'bcrypt'
 import { NextRequest, NextResponse } from 'next/server'
+import bcrypt from 'bcrypt'
 import { z } from 'zod'
 
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
 import {
   createDeviceLabel,
   persistRefreshToken,
-  setRefreshTokenCookie,
+  setRefreshTokenCookie
 } from '@/lib/auth/session'
 import prisma from '@/lib/prisma'
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(8)
 })
 
 export async function POST(request: NextRequest) {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     userId: user.id,
     rawToken: refreshToken,
     deviceLabel: createDeviceLabel(request.headers.get('user-agent')),
-    expiresAt,
+    expiresAt
   })
   await setRefreshTokenCookie(refreshToken)
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       id: user.id,
       email: user.email,
       role: user.role,
-      badgeNumber: user.badgeNumber,
-    },
+      badgeNumber: user.badgeNumber
+    }
   })
 }

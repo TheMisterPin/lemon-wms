@@ -4,7 +4,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Lemon WMS',
-  description: 'Warehouse Management System for office and floor operations.',
+  description: 'Warehouse Management System for office and floor operations.'
 }
 export default function RootLayout({
   children

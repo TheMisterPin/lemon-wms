@@ -12,11 +12,12 @@ export const getBearerToken = (request: NextRequest): string | null => {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null
   }
+
   return authHeader.slice(7)
 }
 
 export const verifyAccessTokenFromRequest = (
-  request: NextRequest,
+  request: NextRequest
 ): AccessTokenPayload | null => {
   const token = getBearerToken(request)
   if (!token) {

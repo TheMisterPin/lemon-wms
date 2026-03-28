@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios'
 import { logger } from '@/utils/components/logger/client-logger'

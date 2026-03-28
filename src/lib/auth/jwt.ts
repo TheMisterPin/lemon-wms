@@ -10,6 +10,7 @@ const getSecret = (): string => {
   if (!secret) {
     throw new Error('JWT_SECRET is required')
   }
+
   return secret
 }
 

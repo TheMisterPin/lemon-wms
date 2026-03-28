@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 
 import {
   verifyToken as verifyJwtToken,
-  type AccessTokenPayload,
+  type AccessTokenPayload
 } from '@/lib/auth/jwt'
 
 export interface TokenValidationResult {
@@ -19,7 +19,7 @@ export async function verifyToken(token: string): Promise<TokenValidationResult>
     return {
       valid: true,
       userId: decoded.userId,
-      role: decoded.role,
+      role: decoded.role
     }
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {

@@ -20,6 +20,6 @@ export async function getAuthFromRequest(req: NextRequest): Promise<AuthResult> 
   return {
     valid: true,
     userId: validation.userId,
-    role: validation.role,
+    role: validation.role
   }
 }
