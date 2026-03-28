@@ -3,10 +3,10 @@ import { NextRequest } from 'next/server'
 import { verifyToken } from './verify-token'
 
 export interface AuthResult {
-	valid: boolean
-	userId?: string
-	email?: string
-	error?: string
+  valid: boolean
+  userId?: string
+  role?: string
+  error?: string
 }
 
 export async function getAuthFromRequest(req: NextRequest): Promise<AuthResult> {
@@ -26,6 +26,6 @@ export async function getAuthFromRequest(req: NextRequest): Promise<AuthResult> 
   return {
     valid: true,
     userId: validation.userId,
-    email: validation.email,
+    role: validation.role,
   }
 }
