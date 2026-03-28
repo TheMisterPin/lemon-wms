@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import prisma from '@/lib/prisma'
 
 const REFRESH_COOKIE_NAME = 'refresh_token'
+const ACCESS_COOKIE_NAME = 'access_token'
 
 const hashToken = (token: string): string =>
   crypto.createHash('sha256').update(token).digest('hex')
@@ -27,8 +28,25 @@ export const clearRefreshTokenCookie = async (): Promise<void> => {
 
 export const readRefreshTokenCookie = async (): Promise<string | null> => {
   const cookieStore = await cookies()
-
   return cookieStore.get(REFRESH_COOKIE_NAME)?.value ?? null
+}
+
+// Access token cookie — non-httpOnly so middleware (Edge) can read it
+// Cleared on logout; re-set on login and refresh
+export const setAccessTokenCookie = async (token: string): Promise<void> => {
+  const cookieStore = await cookies()
+  cookieStore.set(ACCESS_COOKIE_NAME, token, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 15 // 15 minutes, matches JWT_ACCESS_EXPIRY
+  })
+}
+
+export const clearAccessTokenCookie = async (): Promise<void> => {
+  const cookieStore = await cookies()
+  cookieStore.delete(ACCESS_COOKIE_NAME)
 }
 
 export const persistRefreshToken = async (params: {
@@ -78,6 +96,5 @@ export const createDeviceLabel = (userAgent: string | null): string => {
   if (!userAgent) {
     return 'unknown-device'
   }
-
   return crypto.createHash('sha256').update(userAgent).digest('hex').slice(0, 12)
 }
