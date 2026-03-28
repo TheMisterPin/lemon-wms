@@ -6,6 +6,7 @@ import {
   persistRefreshToken,
   readRefreshTokenCookie,
   revokeRefreshToken,
+  setAccessTokenCookie,
   setRefreshTokenCookie
 } from '@/lib/auth/session'
 
@@ -36,7 +37,19 @@ export async function POST() {
     deviceId: existing.deviceId ?? undefined,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   })
-  await setRefreshTokenCookie(nextRefresh)
 
-  return NextResponse.json({ accessToken })
+  await Promise.all([
+    setRefreshTokenCookie(nextRefresh),
+    setAccessTokenCookie(accessToken)
+  ])
+
+  return NextResponse.json({
+    accessToken,
+    user: {
+      id: existing.user.id,
+      email: existing.user.email,
+      role: existing.user.role,
+      badgeNumber: existing.user.badgeNumber
+    }
+  })
 }

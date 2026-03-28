@@ -48,46 +48,51 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  if (isPublicPath(pathname) || isPublicApiPath(pathname)) {
+  if (isPublicApiPath(pathname)) {
     return NextResponse.next()
   }
+
   const payload = resolveAuthPayload(request)
+
+  // Unauthenticated: redirect to /login for pages, 401 for API
   if (!payload) {
+    if (isPublicPath(pathname)) {
+      return NextResponse.next()
+    }
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const payload = resolveAuthPayload(request)
-
-    if (!payload) {
-      if (pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      }
-
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-
-    if (pathname.startsWith('/dashboard') && !isOfficeRole(payload.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    if (pathname.startsWith('/warehouse') && !isFloorRole(payload.role)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    if (pathname === '/login' || pathname === '/floor') {
-      const target = isOfficeRole(payload.role) ? '/dashboard' : '/warehouse'
-
-      return NextResponse.redirect(new URL(target, request.url))
-    }
-
-    const headers = new Headers(request.headers)
-    headers.set('x-user-id', payload.userId)
-    headers.set('x-user-role', payload.role)
-
-    return NextResponse.next({ request: { headers } })
+    return NextResponse.redirect(new URL('/login', request.url))
   }
+
+  // Authenticated: redirect away from auth pages
+  if (pathname === '/login' || pathname === '/floor') {
+    const target = isOfficeRole(payload.role) ? '/dashboard' : '/warehouse'
+    return NextResponse.redirect(new URL(target, request.url))
+  }
+
+  // Role-based access control
+  if (pathname.startsWith('/dashboard') && !isOfficeRole(payload.role)) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    return NextResponse.redirect(new URL('/warehouse', request.url))
+  }
+
+  if (pathname.startsWith('/warehouse') && !isFloorRole(payload.role)) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  const headers = new Headers(request.headers)
+  headers.set('x-user-id', payload.userId)
+  headers.set('x-user-role', payload.role)
+
+  return NextResponse.next({ request: { headers } })
 }
+
 export const config = {
   matcher: '/:path*'
 }
