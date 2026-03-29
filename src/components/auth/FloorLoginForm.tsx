@@ -119,18 +119,18 @@ export default function FloorLoginForm() {
               className={[
                 'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
                 step === s
-                  ? 'bg-amber-500 text-zinc-950'
+                  ? 'bg-gradient-to-br from-brand-primary to-brand-primary-end text-white'
                   : ['device', 'badge', 'pin'].indexOf(step) > i
-                  ? 'bg-zinc-600 text-zinc-300'
-                  : 'bg-zinc-800 text-zinc-500'
+                  ? 'bg-brand-input text-brand-muted'
+                  : 'bg-brand-border text-brand-subtle'
               ].join(' ')}
             >
               {i + 1}
             </div>
-            {i < 2 && <div className="h-px w-6 bg-zinc-700" />}
+            {i < 2 && <div className="h-px w-6 bg-brand-input" />}
           </div>
         ))}
-        <span className="ml-1 text-sm text-zinc-400">
+        <span className="ml-1 text-sm text-brand-muted">
           {step === 'device' ? 'Device code' : step === 'badge' ? 'Scan badge' : 'Enter PIN'}
         </span>
       </div>
@@ -139,7 +139,7 @@ export default function FloorLoginForm() {
       {step === 'device' && (
         <form onSubmit={handleDeviceSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="device-code" className="text-sm font-medium text-zinc-300">
+            <label htmlFor="device-code" className="text-sm font-medium text-brand-text">
               Device code
             </label>
             <input
@@ -151,13 +151,13 @@ export default function FloorLoginForm() {
               onChange={(e) => setDeviceCode(e.target.value)}
               placeholder="e.g. WH1-ZONE3"
               autoComplete="off"
-              className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-lg text-zinc-100 placeholder-zinc-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+              className="rounded-lg border border-brand-input bg-brand-surface px-4 py-3 text-lg text-brand-text placeholder-brand-subtle outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
             />
           </div>
           <button
             type="submit"
             disabled={deviceCode.trim().length < 3}
-            className="rounded-lg bg-amber-500 px-4 py-3 font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-gradient-to-r from-brand-primary to-brand-primary-end px-4 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Continue
           </button>
@@ -167,7 +167,7 @@ export default function FloorLoginForm() {
       {/* Step 2: Badge scan */}
       {step === 'badge' && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-brand-muted">
             Scan your badge or type your badge number
           </p>
           <ScanInput
@@ -178,7 +178,7 @@ export default function FloorLoginForm() {
           <button
             type="button"
             onClick={() => { setStep('device'); setError(null) }}
-            className="text-sm text-zinc-500 hover:text-zinc-300"
+            className="text-sm text-brand-subtle hover:text-brand-muted"
           >
             ← Change device code
           </button>
@@ -188,14 +188,14 @@ export default function FloorLoginForm() {
       {/* Step 3: PIN */}
       {step === 'pin' && (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-zinc-400">
-            Badge: <span className="font-mono text-zinc-200">{badgeNumber}</span>
+          <p className="text-sm text-brand-muted">
+            Badge: <span className="font-mono text-brand-text">{badgeNumber}</span>
           </p>
 
           {isMobile ? (
             /* Native numeric keyboard on touch devices */
             <div className="flex flex-col gap-3">
-              <label htmlFor="native-pin" className="text-sm font-medium text-zinc-300">
+              <label htmlFor="native-pin" className="text-sm font-medium text-brand-text">
                 4-digit PIN
               </label>
               <input
@@ -210,7 +210,7 @@ export default function FloorLoginForm() {
                 onChange={handleNativePinChange}
                 disabled={loading}
                 placeholder="••••"
-                className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-2xl tracking-[0.5em] text-zinc-100 placeholder-zinc-600 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
+                className="rounded-lg border border-brand-input bg-brand-surface px-4 py-3 text-center text-2xl tracking-[0.5em] text-brand-text placeholder-brand-subtle outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary disabled:opacity-50"
               />
             </div>
           ) : (
@@ -229,7 +229,7 @@ export default function FloorLoginForm() {
               type="button"
               onClick={handlePinConfirm}
               disabled={pin.length !== 4 || loading}
-              className="flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-3 font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-primary to-brand-primary-end px-4 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               {loading ? 'Signing in…' : 'Sign in'}
@@ -237,7 +237,7 @@ export default function FloorLoginForm() {
           )}
 
           {loading && isMobile && (
-            <div className="flex items-center justify-center gap-2 text-zinc-400">
+            <div className="flex items-center justify-center gap-2 text-brand-muted">
               <Loader2 size={16} className="animate-spin" />
               <span className="text-sm">Signing in…</span>
             </div>
@@ -246,7 +246,7 @@ export default function FloorLoginForm() {
           <button
             type="button"
             onClick={() => { setStep('badge'); setBadgeNumber(''); setPin(''); setError(null) }}
-            className="text-sm text-zinc-500 hover:text-zinc-300"
+            className="text-sm text-brand-subtle hover:text-brand-muted"
           >
             ← Rescan badge
           </button>
