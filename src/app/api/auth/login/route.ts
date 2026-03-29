@@ -6,30 +6,64 @@ import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
 import {
   createDeviceLabel,
   persistRefreshToken,
+  setAccessTokenCookie,
   setRefreshTokenCookie
 } from '@/lib/auth/session'
 import prisma from '@/lib/prisma'
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8)
+  password: z.string().min(1)
 })
 
 export async function POST(request: NextRequest) {
-  const parsed = loginSchema.safeParse(await request.json())
+  const body = await request.json().catch(() => null)
+  const parsed = loginSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
 
-  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } })
+  const { email, password } = parsed.data
 
-  if (!user || !user.passwordHash || !user.isActive) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+  const user = await prisma.user.findUnique({ where: { email } })
+
+  if (!user) {
+    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
   }
 
-  const matches = await bcrypt.compare(parsed.data.password, user.passwordHash)
+  if (!user.isActive) {
+    // Write LOGIN_FAILED UAE for deactivated account
+    await prisma.userActivityEntry.create({
+      data: {
+        userId: user.id,
+        actionType: 'LOGIN_FAILED',
+        entityType: 'USER',
+        entityId: user.id,
+        ipAddress: request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? undefined,
+        notes: 'Account deactivated'
+      }
+    })
+    return NextResponse.json({ error: 'Account deactivated' }, { status: 403 })
+  }
+
+  if (!user.passwordHash || (user.loginType !== 'CREDENTIAL' && user.loginType !== 'BOTH')) {
+    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+  }
+
+  const matches = await bcrypt.compare(password, user.passwordHash)
   if (!matches) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    // Write LOGIN_FAILED UAE for wrong password
+    await prisma.userActivityEntry.create({
+      data: {
+        userId: user.id,
+        actionType: 'LOGIN_FAILED',
+        entityType: 'USER',
+        entityId: user.id,
+        ipAddress: request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? undefined,
+        notes: 'Invalid password'
+      }
+    })
+    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
   }
 
   const accessToken = signAccessToken({ userId: user.id, role: user.role })
@@ -42,7 +76,20 @@ export async function POST(request: NextRequest) {
     deviceLabel: createDeviceLabel(request.headers.get('user-agent')),
     expiresAt
   })
-  await setRefreshTokenCookie(refreshToken)
+
+  await Promise.all([
+    setRefreshTokenCookie(refreshToken),
+    setAccessTokenCookie(accessToken),
+    prisma.userActivityEntry.create({
+      data: {
+        userId: user.id,
+        actionType: 'LOGIN',
+        entityType: 'USER',
+        entityId: user.id,
+        ipAddress: request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? undefined
+      }
+    })
+  ])
 
   return NextResponse.json({
     accessToken,

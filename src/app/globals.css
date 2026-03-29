@@ -4,6 +4,30 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─── Brand design tokens ───────────────────────────────────────────────── */
+@theme {
+  /* Surfaces */
+  --color-brand-bg:      #080e1f;   /* page background — dark navy          */
+  --color-brand-surface: #0f172a;   /* card / input background — slate-900  */
+  --color-brand-border:  #1e293b;   /* card borders — slate-800             */
+  --color-brand-input:   #334155;   /* input borders — slate-700            */
+
+  /* Text */
+  --color-brand-text:    #f1f5f9;   /* primary text — slate-100             */
+  --color-brand-muted:   #94a3b8;   /* muted text — slate-400               */
+  --color-brand-subtle:  #64748b;   /* very muted / footer — slate-500      */
+
+  /* Primary — green / leaf */
+  --color-brand-primary:     #4ade80;   /* green-400  — gradient start, focus   */
+  --color-brand-primary-end: #059669;   /* emerald-600 — gradient end           */
+
+  /* Accent — yellow / lemon */
+  --color-brand-accent:     #fde047;   /* yellow-300 */
+  --color-brand-accent-mid: #facc15;   /* yellow-400 */
+  --color-brand-accent-end: #fbbf24;   /* amber-400  */
+}
+/* ────────────────────────────────────────────────────────────────────────── */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -120,8 +144,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    height: 100%;
+    overflow: hidden;
+  }
   body {
     @apply bg-background text-foreground;
+    height: 100%;
+    overflow: hidden;
   }
   .dev{
     border: solid 2px red;

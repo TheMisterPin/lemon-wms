@@ -2,6 +2,7 @@
   "name": "lemon-wms",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.29.3",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -37,7 +38,8 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
     "tailwind-merge": "^3.4.0",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

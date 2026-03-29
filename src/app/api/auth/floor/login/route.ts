@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
 import {
   persistRefreshToken,
+  setAccessTokenCookie,
   setRefreshTokenCookie
 } from '@/lib/auth/session'
 import prisma from '@/lib/prisma'
@@ -16,13 +17,18 @@ const loginSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
-  const parsed = loginSchema.safeParse(await request.json())
+  const body = await request.json().catch(() => null)
+  const parsed = loginSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
 
+  const { deviceCode, badgeNumber, pin } = parsed.data
+  const ipAddress =
+    request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? undefined
+
   const device = await prisma.device.findUnique({
-    where: { code: parsed.data.deviceCode },
+    where: { code: deviceCode },
     include: { zone: true }
   })
 
@@ -30,14 +36,44 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid device code' }, { status: 401 })
   }
 
-  const user = await prisma.user.findUnique({ where: { badgeNumber: parsed.data.badgeNumber } })
+  const user = await prisma.user.findUnique({ where: { badgeNumber } })
 
-  if (!user || !user.pinHash || !user.isActive) {
+  if (!user) {
     return NextResponse.json({ error: 'Invalid badge or PIN' }, { status: 401 })
   }
 
-  const matches = await bcrypt.compare(parsed.data.pin, user.pinHash)
+  if (!user.isActive) {
+    await prisma.userActivityEntry.create({
+      data: {
+        userId: user.id,
+        actionType: 'LOGIN_FAILED',
+        entityType: 'USER',
+        entityId: user.id,
+        warehouseId: device.warehouseId,
+        ipAddress,
+        notes: 'Account deactivated'
+      }
+    })
+    return NextResponse.json({ error: 'Account deactivated' }, { status: 403 })
+  }
+
+  if (!user.pinHash || (user.loginType !== 'BADGE_PIN' && user.loginType !== 'BOTH')) {
+    return NextResponse.json({ error: 'Invalid badge or PIN' }, { status: 401 })
+  }
+
+  const matches = await bcrypt.compare(pin, user.pinHash)
   if (!matches) {
+    await prisma.userActivityEntry.create({
+      data: {
+        userId: user.id,
+        actionType: 'LOGIN_FAILED',
+        entityType: 'USER',
+        entityId: user.id,
+        warehouseId: device.warehouseId,
+        ipAddress,
+        notes: 'Invalid PIN'
+      }
+    })
     return NextResponse.json({ error: 'Invalid badge or PIN' }, { status: 401 })
   }
 
@@ -57,7 +93,21 @@ export async function POST(request: NextRequest) {
     deviceId: device.id,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   })
-  await setRefreshTokenCookie(refreshToken)
+
+  await Promise.all([
+    setRefreshTokenCookie(refreshToken),
+    setAccessTokenCookie(accessToken),
+    prisma.userActivityEntry.create({
+      data: {
+        userId: user.id,
+        actionType: 'LOGIN',
+        entityType: 'USER',
+        entityId: user.id,
+        warehouseId: device.warehouseId,
+        ipAddress
+      }
+    })
+  ])
 
   return NextResponse.json({
     accessToken,

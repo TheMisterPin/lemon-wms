@@ -1,19 +1,23 @@
 import type { Metadata } from 'next'
 
+import AuthProvider from '@/components/shared/AuthProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Lemon WMS',
   description: 'Warehouse Management System for office and floor operations.'
 }
+
 export default function RootLayout({
   children
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   )
 }
