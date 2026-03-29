@@ -60,7 +60,7 @@ export default function CredentialLoginForm() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium text-zinc-300">
+        <label htmlFor="email" className="text-sm font-medium text-slate-300">
           Email
         </label>
         <input
@@ -72,12 +72,12 @@ export default function CredentialLoginForm() {
           required
           disabled={loading}
           placeholder="you@company.com"
-          className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
+          className="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm font-medium text-zinc-300">
+        <label htmlFor="password" className="text-sm font-medium text-slate-300">
           Password
         </label>
         <div className="relative">
@@ -90,13 +90,13 @@ export default function CredentialLoginForm() {
             required
             disabled={loading}
             placeholder="••••••••"
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 pr-11 text-zinc-100 placeholder-zinc-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
+            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 pr-11 text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 disabled:opacity-50"
           />
           <button
             type="button"
             tabIndex={-1}
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -113,7 +113,7 @@ export default function CredentialLoginForm() {
       <button
         type="submit"
         disabled={loading || !email || !password}
-        className="flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading && <Loader2 size={16} className="animate-spin" />}
         {loading ? 'Signing in…' : 'Sign in'}
