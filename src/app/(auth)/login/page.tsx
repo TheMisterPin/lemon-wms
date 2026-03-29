@@ -11,27 +11,27 @@ export default function LoginPage() {
   const [tab, setTab] = useState<Tab>('office')
 
   return (
-    <main className="flex h-full flex-col items-center justify-center overflow-hidden bg-[#080e1f] p-4">
+    <main className="flex h-full flex-col items-center justify-center overflow-hidden bg-brand-bg p-4">
       <div className="w-full max-w-sm">
         {/* Branding */}
         <div className="mb-8 text-center">
           <div className="mb-2 inline-flex items-center gap-2">
-            <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 bg-clip-text text-3xl font-black tracking-tight text-transparent">
+            <span className="bg-gradient-to-r from-brand-accent via-brand-accent-mid to-brand-accent-end bg-clip-text text-3xl font-black tracking-tight text-transparent">
               LEMON
             </span>
-            <span className="rounded bg-gradient-to-br from-green-400 to-emerald-600 px-2 py-0.5 text-xs font-black uppercase tracking-widest text-white">
+            <span className="rounded bg-gradient-to-br from-brand-primary to-brand-primary-end px-2 py-0.5 text-xs font-black uppercase tracking-widest text-white">
               WMS
             </span>
           </div>
-          <p className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-sm text-transparent">
+          <p className="bg-gradient-to-r from-brand-primary to-brand-primary-end bg-clip-text text-sm text-transparent">
             Warehouse Management System
           </p>
         </div>
 
         {/* Card */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900 shadow-xl">
+        <div className="rounded-xl border border-brand-border bg-brand-surface shadow-xl">
           {/* Tabs */}
-          <div className="flex border-b border-slate-800">
+          <div className="flex border-b border-brand-border">
             {(['office', 'warehouse'] as Tab[]).map((t) => (
               <button
                 key={t}
@@ -40,8 +40,8 @@ export default function LoginPage() {
                 className={[
                   'flex-1 py-3.5 text-sm font-semibold uppercase tracking-wider transition-colors',
                   tab === t
-                    ? 'border-b-2 border-emerald-500 text-emerald-400'
-                    : 'text-slate-500 hover:text-slate-300'
+                    ? 'border-b-2 border-brand-primary text-brand-primary'
+                    : 'text-brand-subtle hover:text-brand-muted'
                 ].join(' ')}
               >
                 {t === 'office' ? 'Office' : 'Warehouse'}
@@ -53,14 +53,14 @@ export default function LoginPage() {
           <div className="p-6">
             {tab === 'office' ? (
               <>
-                <p className="mb-5 text-sm text-slate-400">
+                <p className="mb-5 text-sm text-brand-muted">
                   Sign in with your email and password.
                 </p>
                 <CredentialLoginForm />
               </>
             ) : (
               <>
-                <p className="mb-5 text-sm text-slate-400">
+                <p className="mb-5 text-sm text-brand-muted">
                   Use your device code, badge, and PIN.
                 </p>
                 <FloorLoginForm />
@@ -69,7 +69,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-700">
+        <p className="mt-6 text-center text-xs text-brand-subtle">
           Lemon WMS — internal use only
         </p>
       </div>
