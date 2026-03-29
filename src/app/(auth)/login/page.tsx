@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [tab, setTab] = useState<Tab>('office')
 
   return (
-    <main className="flex h-[100dvh] flex-col items-center justify-center overflow-hidden bg-[#080e1f] p-4">
+    <main className="flex h-full flex-col items-center justify-center overflow-hidden bg-[#080e1f] p-4">
       <div className="w-full max-w-sm">
         {/* Branding */}
         <div className="mb-8 text-center">
