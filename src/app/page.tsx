@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+import SeedUsersButton from '@/components/home/SeedUsersButton'
+
 const accessOptions = [
   {
     href: '/login',
@@ -25,9 +27,7 @@ export default function HomePage() {
             </span>
           </div>
           <p className="text-sm text-zinc-400">Warehouse Management System</p>
-          <p className="mt-2 text-sm text-zinc-500">
-            Choose your portal to continue.
-          </p>
+          <p className="mt-2 text-sm text-zinc-500">Choose your portal to continue.</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -43,6 +43,10 @@ export default function HomePage() {
               <p className="mt-1 text-sm text-zinc-500">{option.description}</p>
             </Link>
           ))}
+
+          <div className="sm:col-span-2">
+            <SeedUsersButton />
+          </div>
         </div>
       </div>
     </main>
