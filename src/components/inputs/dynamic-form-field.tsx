@@ -8,6 +8,7 @@ import {
   FieldValues
 } from 'react-hook-form'
 
+import { cn } from '@/lib/utils'
 import { getValueByPath } from '@/lib/utils/get-value-by-path'
 
 import { CheckboxInput } from './checkbox-input'
@@ -62,7 +63,13 @@ function GenericFormField<T extends FieldValues>({
   const id = String(field.name).replace(/\./g, '-')
 
   return (
-    <div className={getColSpanClass(field.colSpan)}>
+    <div
+      className={cn(
+        'flex flex-col gap-1.5',
+        getColSpanClass(field.colSpan)
+      )}
+      data-field-type={field.type}
+    >
       <Controller
         name={field.name}
         control={control}

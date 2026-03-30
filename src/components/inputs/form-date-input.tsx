@@ -52,17 +52,18 @@ export function FormDateInput(props: FormDateInputProps) {
 
   return (
     <Field data-invalid={!!error || undefined} data-disabled={disabled || undefined}>
-      <FieldLabel htmlFor={id}>
+      <FieldLabel htmlFor={id} className="text-sm font-medium text-brand-form-label">
         {label}
         {required ? ' *' : ''}
       </FieldLabel>
-      <InputGroup>
+      <InputGroup className="min-h-11 rounded-lg border-brand-form-border bg-brand-form-surface focus-within:border-brand-form-focus focus-within:ring-1 focus-within:ring-brand-form-focus">
         <InputGroupInput
           id={id}
           value={displayValue}
           placeholder={placeholder}
           disabled={disabled}
           aria-invalid={!!error}
+          className="px-4 py-2.5 text-brand-form-text placeholder:text-brand-form-placeholder"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const date = new Date(e.target.value)
             if (isValidDate(date)) {
@@ -87,6 +88,7 @@ export function FormDateInput(props: FormDateInputProps) {
                 id={`${id}-date-picker`}
                 variant="ghost"
                 size="icon-xs"
+                className="text-brand-form-description hover:bg-brand-border hover:text-brand-form-text"
                 aria-label="Select date"
                 disabled={disabled}
                 onBlur={onBlur}
@@ -98,7 +100,7 @@ Select date
               </InputGroupButton>
             </PopoverTrigger>
             <PopoverContent
-              className="w-auto overflow-hidden p-0"
+              className="w-auto overflow-hidden border-brand-form-border bg-brand-form-surface p-0 text-brand-form-text"
               align="end"
               alignOffset={-8}
               sideOffset={10}
@@ -120,9 +122,9 @@ Select date
         </InputGroupAddon>
       </InputGroup>
       {description && !error && (
-        <FieldDescription>{description}</FieldDescription>
+        <FieldDescription className="text-sm text-brand-form-description">{description}</FieldDescription>
       )}
-      <FieldError>{error}</FieldError>
+      <FieldError className="rounded-lg border border-brand-form-error-border bg-brand-form-error-surface px-4 py-2.5 text-sm text-brand-form-error-text">{error}</FieldError>
     </Field>
   )
 }

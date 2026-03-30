@@ -19,6 +19,11 @@ export default function WarehouseHomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  function handleRowClick(row: Warehouse) {
+    // eslint-disable-next-line no-console
+    console.log('Clicked warehouse row:', row)
+  }
+
   useEffect(() => {
     let isMounted = true
 
@@ -83,6 +88,7 @@ export default function WarehouseHomePage() {
           <GenericTable
             columns={warehouseTableColumns}
             records={warehouses}
+            onRowClick={handleRowClick}
             emptyMessage="No warehouses found."
           />
         </div>

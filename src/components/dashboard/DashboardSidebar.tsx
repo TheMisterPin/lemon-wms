@@ -9,15 +9,17 @@ import {
   ClipboardList,
   Users,
   BarChart3,
+  MapPin
 } from 'lucide-react'
 
 const NAV_LINKS = [
   { label: 'Dashboard',  href: '/dashboard',            icon: LayoutDashboard },
   { label: 'Warehouses', href: '/dashboard/warehouses', icon: Warehouse },
+  { label: 'Zones',      href: '/dashboard/zones',      icon: MapPin },
   { label: 'Items',      href: '/dashboard/items',      icon: Package },
   { label: 'Orders',     href: '/dashboard/orders',     icon: ClipboardList },
   { label: 'Users',      href: '/dashboard/users',      icon: Users },
-  { label: 'Reports',    href: '/dashboard/reports',    icon: BarChart3 },
+  { label: 'Reports',    href: '/dashboard/reports',    icon: BarChart3 }
 ]
 
 interface DashboardSidebarProps {
@@ -49,7 +51,7 @@ export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
                 'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 active
                   ? 'border border-dash-amber/25 bg-dash-amber-dim text-dash-amber-text'
-                  : 'border border-transparent text-dash-muted hover:bg-dash-card2 hover:text-dash-text',
+                  : 'border border-transparent text-dash-muted hover:bg-dash-card2 hover:text-dash-text'
               ].join(' ')}
             >
               <Icon size={16} className="shrink-0" />

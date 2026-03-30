@@ -35,11 +35,11 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   emptyMessage = 'No records found.'
 }: GenericTableProps<T>) {
   return (
-    <Table>
-      <TableHeader>
+    <Table className="w-10/12 mx-auto bg-dash-card border border-brand-border rounded-lg overflow-hidden">
+      <TableHeader className='bg-brand-surface border border-slate-600 text-center'>
         <TableRow>
           {columns.map((column, index) => (
-            <TableHead key={index} className={column.className}>
+            <TableHead key={index} className={[column.className, 'bg-brand-surface border select-none border-slate-600 text-center'].filter(Boolean).join(' ')}>
               {column.label}
             </TableHead>
           ))}
@@ -47,7 +47,7 @@ export function GenericTable<T extends FieldValues & { id: string }>({
       </TableHeader>
       <TableBody>
         {records.length === 0 ? (
-          <TableRow>
+          <TableRow className='bg-brand-surface border border-slate-600 text-center'>
             <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-8">
               {emptyMessage}
             </TableCell>
@@ -57,6 +57,8 @@ export function GenericTable<T extends FieldValues & { id: string }>({
             <TableRow
               key={row.id}
               className={[
+                ' border border-slate-600 text-center',
+
                 onRowClick ? 'cursor-pointer' : '',
                 selectedId === row.id ? 'bg-muted' : ''
               ].filter(Boolean).join(' ')}
@@ -64,7 +66,7 @@ export function GenericTable<T extends FieldValues & { id: string }>({
               data-state={selectedId === row.id ? 'selected' : undefined}
             >
               {columns.map((column, index) => (
-                <TableCell key={index} className={column.className}>
+                <TableCell key={index} className={[column.className, ' border border-slate-600 text-center select-none'].filter(Boolean).join(' ')}>
                   {getCellValue(row, column)}
                 </TableCell>
               ))}

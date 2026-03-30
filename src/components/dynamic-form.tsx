@@ -5,6 +5,7 @@ import { FieldValues, Resolver, useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { FieldGroup } from '@/components/ui/field'
+import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 
 import { GenericFormField } from './inputs/dynamic-form-field'
@@ -43,8 +44,8 @@ function DynamicForm<T extends FieldValues>({
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={className}>
-      <FieldGroup className={cn('grid gap-4', getColumnsClass(columns))}>
+    <form onSubmit={handleSubmit(onSubmit)} className={cn('flex flex-col gap-5', className)}>
+      <FieldGroup className={cn('grid gap-5', getColumnsClass(columns))}>
         {fields.map((field) => (
           <GenericFormField<T>
             key={String(field.name)}
@@ -54,9 +55,14 @@ function DynamicForm<T extends FieldValues>({
           />
         ))}
       </FieldGroup>
-      <div className="mt-6 flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : submitLabel}
+      <div className="mt-2 flex">
+        <Button type="submit" variant="brand" size="sm" disabled={isSubmitting} className="w-1/3 mx-auto rounded-lg font-semibold">
+          {isSubmitting ? (
+            <>
+              <Spinner data-icon="inline-start" />
+              Saving...
+            </>
+          ) : submitLabel}
         </Button>
       </div>
     </form>

@@ -49,17 +49,22 @@ export function FormSelectInput(props: FormSelectInputProps) {
 
   return (
     <Field data-invalid={!!error || undefined} data-disabled={disabled || undefined}>
-      <FieldLabel htmlFor={id}>
+      <FieldLabel htmlFor={id} className="text-sm font-medium text-brand-form-label">
         {label}
         {required ? ' *' : ''}
       </FieldLabel>
       <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger id={id} className="w-full" aria-invalid={!!error} onBlur={onBlur}>
+        <SelectTrigger
+          id={id}
+          className="h-auto min-h-11 w-full rounded-lg border-brand-form-border bg-brand-form-surface px-4 py-2.5 text-brand-form-text data-[placeholder]:text-brand-form-placeholder focus-visible:border-brand-form-focus focus-visible:ring-1 focus-visible:ring-brand-form-focus"
+          aria-invalid={!!error}
+          onBlur={onBlur}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="border-brand-form-border bg-brand-form-surface text-brand-form-text">
           <SelectGroup>
-            <SelectLabel>
+            <SelectLabel className="text-brand-form-description">
               {label}
             </SelectLabel>
             {options.map((option) => (
@@ -71,9 +76,9 @@ export function FormSelectInput(props: FormSelectInputProps) {
         </SelectContent>
       </Select>
       {description && !error && (
-        <FieldDescription>{description}</FieldDescription>
+        <FieldDescription className="text-sm text-brand-form-description">{description}</FieldDescription>
       )}
-      <FieldError>{error}</FieldError>
+      <FieldError className="rounded-lg border border-brand-form-error-border bg-brand-form-error-surface px-4 py-2.5 text-sm text-brand-form-error-text">{error}</FieldError>
     </Field>
   )
 }

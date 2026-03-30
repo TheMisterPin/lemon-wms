@@ -37,7 +37,7 @@ export function TextInput({
 }: TextInputProps) {
   return (
     <Field data-invalid={!!error || undefined} data-disabled={disabled || undefined}>
-      <FieldLabel htmlFor={id}>
+      <FieldLabel htmlFor={id} className="text-sm font-medium text-brand-form-label">
         {label}
         {required ? ' *' : ''}
       </FieldLabel>
@@ -50,11 +50,12 @@ export function TextInput({
         onChange={(e) => onChange?.(e.target.value)}
         onBlur={onBlur}
         aria-invalid={!!error}
+        className="h-auto min-h-11 rounded-lg border-brand-form-border bg-brand-form-surface px-4 py-2.5 text-brand-form-text placeholder:text-brand-form-placeholder focus-visible:border-brand-form-focus focus-visible:ring-1 focus-visible:ring-brand-form-focus"
       />
       {description && !error && (
-        <FieldDescription>{description}</FieldDescription>
+        <FieldDescription className="text-sm text-brand-form-description">{description}</FieldDescription>
       )}
-      <FieldError>{error}</FieldError>
+      <FieldError className="rounded-lg border border-brand-form-error-border bg-brand-form-error-surface px-4 py-2.5 text-sm text-brand-form-error-text">{error}</FieldError>
     </Field>
   )
 }

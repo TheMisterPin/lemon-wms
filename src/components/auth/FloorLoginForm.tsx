@@ -120,7 +120,7 @@ export default function FloorLoginForm() {
               className={[
                 'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
                 step === s
-                  ? 'bg-gradient-to-br from-brand-primary to-brand-primary-end text-white'
+                  ? 'bg-linear-to-br from-brand-primary to-brand-primary-end text-white'
                   : ['device', 'badge', 'pin'].indexOf(step) > i
                     ? 'bg-brand-input text-brand-muted'
                     : 'bg-brand-border text-brand-subtle'
@@ -158,7 +158,7 @@ export default function FloorLoginForm() {
           <button
             type="submit"
             disabled={deviceCode.trim().length < 3}
-            className="rounded-lg bg-gradient-to-r from-brand-primary to-brand-primary-end px-4 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-linear-to-r from-brand-primary to-brand-primary-end px-4 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Continue
           </button>
@@ -232,7 +232,7 @@ export default function FloorLoginForm() {
               type="button"
               onClick={handlePinConfirm}
               disabled={pin.length !== 4 || loading}
-              className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-primary to-brand-primary-end px-4 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-brand-primary to-brand-primary-end px-4 py-3 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               {loading ? 'Signing in…' : 'Sign in'}
