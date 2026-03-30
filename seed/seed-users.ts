@@ -1,7 +1,6 @@
-import { PrismaClient } from '../src/generated/prisma'
+import 'dotenv/config'
+import prisma from '../src/lib/prisma'
 import { seedUsers } from '../src/lib/seeding/users'
-
-const prisma = new PrismaClient()
 
 async function runSeedUsers() {
   console.warn('Seeding users...\n')

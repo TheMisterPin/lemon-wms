@@ -62,12 +62,14 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // Authenticated: redirect away from auth pages
   if (pathname === '/login' || pathname === '/floor') {
     const target = isOfficeRole(payload.role) ? '/dashboard' : '/warehouse'
+
     return NextResponse.redirect(new URL(target, request.url))
   }
 
@@ -76,6 +78,7 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+
     return NextResponse.redirect(new URL('/warehouse', request.url))
   }
 
@@ -83,6 +86,7 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
