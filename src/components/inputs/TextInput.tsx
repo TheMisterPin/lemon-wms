@@ -1,10 +1,13 @@
 'use client'
+
 import {
   Field,
+  FieldError,
   FieldDescription,
   FieldLabel
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+
 interface TextInputProps {
   label: string
   id: string
@@ -13,11 +16,12 @@ interface TextInputProps {
   description?: string
   required?: boolean
   disabled?: boolean
-  value?: string | number
+  value?: string | number | undefined
   onChange?: (value: string) => void
   onBlur?: () => void
   error?: string
 }
+
 export function TextInput({
   label,
   id,
@@ -32,7 +36,7 @@ export function TextInput({
   error
 }: TextInputProps) {
   return (
-    <Field>
+    <Field data-invalid={!!error || undefined} data-disabled={disabled || undefined}>
       <FieldLabel htmlFor={id}>
         {label}
         {required ? ' *' : ''}
@@ -48,15 +52,9 @@ export function TextInput({
         aria-invalid={!!error}
       />
       {description && !error && (
-        <FieldDescription>
-          {description}
-        </FieldDescription>
+        <FieldDescription>{description}</FieldDescription>
       )}
-      {error && (
-        <FieldDescription className="text-red-500">
-          {error}
-        </FieldDescription>
-      )}
+      <FieldError>{error}</FieldError>
     </Field>
   )
 }

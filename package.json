@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix .",
-    "seed:users": "tsx seed/seed-users.ts"
+    "seed:users": "tsx seed/seed-users.ts",
+    "seed:warehouses": "tsx seed/seed-warehouses.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -6,7 +6,7 @@ const NAV_LINKS = [
   { label: 'Items', href: '/dashboard/items' },
   { label: 'Orders', href: '/dashboard/orders' },
   { label: 'Users', href: '/dashboard/users' },
-  { label: 'Reports', href: '/dashboard/reports' },
+  { label: 'Reports', href: '/dashboard/reports' }
 ]
 
 interface DashboardSidebarProps {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
+import { CirclePlus } from 'lucide-react'
 import { GenericTable } from '@/components/tables/generic-table'
 import { warehouseTableColumns } from '@/lib/components/configs/entities/warehouse/config'
 import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
@@ -70,9 +71,18 @@ export default function WarehouseHomePage() {
   }, [])
 
   return (
-    <main className="rounded border border-zinc-800 bg-zinc-900 p-6">
-      <h1 className="text-2xl font-semibold">Order Pool</h1>
-      <p className="text-sm text-zinc-400">Phase 0 warehouse shell complete.</p>
+    <main className="h-full rounded bg-brand-content-bg p-6">
+      <div className="flex items-center justify-between mb-6 bg-brand-surface p-4 rounded border text-brand-text w-full">
+        <h1 className="text-2xl font-semibold">WAREHOUSES</h1>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 rounded border border-brand-border bg-transparent px-3 py-2 text-sm font-medium text-brand-text transition-colors hover:bg-brand-border"
+          >
+            <CirclePlus className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
 
       {isLoading ? (
         <p className="mt-4 text-sm text-zinc-400">Loading warehouse data...</p>

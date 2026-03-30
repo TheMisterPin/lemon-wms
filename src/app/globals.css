@@ -11,7 +11,7 @@
   --color-brand-surface: #0f172a;   /* card / input background — slate-900  */
   --color-brand-border:  #1e293b;   /* card borders — slate-800             */
   --color-brand-input:   #334155;   /* input borders — slate-700            */
-
+  --color-brand-content-bg : #1e293b;   /* content background — slate-800       */
   /* Text */
   --color-brand-text:    #f1f5f9;   /* primary text — slate-100             */
   --color-brand-muted:   #94a3b8;   /* muted text — slate-400               */

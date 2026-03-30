@@ -1,6 +1,12 @@
 'use client'
-import { FieldValues, useForm } from 'react-hook-form'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FieldValues, Resolver, useForm } from 'react-hook-form'
+
 import { Button } from '@/components/ui/button'
+import { FieldGroup } from '@/components/ui/field'
+import { cn } from '@/lib/utils'
+
 import { GenericFormField } from './inputs/dynamic-form-field'
 import { GenericFormProps } from '../types/components/form/generic-form.types'
 
@@ -22,7 +28,7 @@ function DynamicForm<T extends FieldValues>({
   fields,
   defaultValues,
   onSubmit,
-  resolver,
+  schema,
   submitLabel = 'Save',
   className,
   columns = 2
@@ -33,12 +39,12 @@ function DynamicForm<T extends FieldValues>({
     formState: { errors, isSubmitting }
   } = useForm<T>({
     defaultValues,
-    resolver
+    resolver: zodResolver(schema as never) as unknown as Resolver<T>
   })
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={className}>
-      <div className={`grid gap-4 ${getColumnsClass(columns)}`}>
+      <FieldGroup className={cn('grid gap-4', getColumnsClass(columns))}>
         {fields.map((field) => (
           <GenericFormField<T>
             key={String(field.name)}
@@ -47,7 +53,7 @@ function DynamicForm<T extends FieldValues>({
             errors={errors}
           />
         ))}
-      </div>
+      </FieldGroup>
       <div className="mt-6 flex justify-end">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : submitLabel}
@@ -57,4 +63,5 @@ function DynamicForm<T extends FieldValues>({
   )
 }
 
+export { DynamicForm as GenericForm }
 export default DynamicForm

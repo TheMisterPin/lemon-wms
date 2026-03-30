@@ -4,9 +4,9 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import PageWrapper from '@/components/shared/PageWrapper'
+import DashboardFooter from './DashboardFooter'
 import DashboardHeader from './DashboardHeader'
 import DashboardSidebar from './DashboardSidebar'
-import DashboardFooter from './DashboardFooter'
 
 export default function DashboardShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)

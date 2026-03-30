@@ -1,6 +1,8 @@
 'use client'
+
 import {
   Field,
+  FieldError,
   FieldDescription,
   FieldLabel
 } from '@/components/ui/field'
@@ -23,6 +25,7 @@ interface FormSelectInputProps {
   options: FormSelectInputElement[]
   value?: string
   onChange?: (value: string) => void
+  onBlur?: () => void
   placeholder?: string
   description?: string
   required?: boolean
@@ -36,6 +39,7 @@ export function FormSelectInput(props: FormSelectInputProps) {
     options,
     value,
     onChange,
+    onBlur,
     placeholder = 'Select an option',
     description,
     required,
@@ -44,13 +48,13 @@ export function FormSelectInput(props: FormSelectInputProps) {
   } = props
 
   return (
-    <Field>
+    <Field data-invalid={!!error || undefined} data-disabled={disabled || undefined}>
       <FieldLabel htmlFor={id}>
         {label}
         {required ? ' *' : ''}
       </FieldLabel>
       <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger id={id} className="w-full">
+        <SelectTrigger id={id} className="w-full" aria-invalid={!!error} onBlur={onBlur}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
@@ -67,15 +71,9 @@ export function FormSelectInput(props: FormSelectInputProps) {
         </SelectContent>
       </Select>
       {description && !error && (
-        <FieldDescription>
-          {description}
-        </FieldDescription>
+        <FieldDescription>{description}</FieldDescription>
       )}
-      {error && (
-        <FieldDescription className="text-red-500">
-          {error}
-        </FieldDescription>
-      )}
+      <FieldError>{error}</FieldError>
     </Field>
   )
 }

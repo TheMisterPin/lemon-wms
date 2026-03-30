@@ -145,10 +145,10 @@ enum DeviceType {
 
 model Warehouse {
   id          String          @id @default(uuid())
-  name        String
-  address     String
-  timezone    String
-  currency    String
+  name        String          @unique
+  address     String?
+  timezone    String?
+  currency    String?
   status      WarehouseStatus @default(ACTIVE)
   createdById String?
   createdBy   User?           @relation("WarehouseCreatedBy", fields: [createdById], references: [id])
@@ -272,7 +272,7 @@ model RefreshToken {
 
 model Device {
   id           String     @id @default(uuid())
-  name         String
+  name         String     @unique
   code         String     @unique
   warehouseId  String
   zoneId       String     @unique

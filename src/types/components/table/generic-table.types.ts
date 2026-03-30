@@ -1,34 +1,35 @@
 import { ReactNode } from 'react'
+import { FieldPath, FieldValues } from 'react-hook-form'
 
-export interface BaseColumnConfig<T> {
+export interface BaseColumnConfig {
   label: string
   className?: string
 }
 
-export interface AccessorColumnConfig<T> extends BaseColumnConfig<T> {
-  accessor: keyof T & string
+export interface AccessorColumnConfig<T extends FieldValues> extends BaseColumnConfig {
+  accessor: Extract<keyof T, string>
   accessorPath?: never
   cell?: never
 }
 
-export interface AccessorPathColumnConfig<T> extends BaseColumnConfig<T> {
+export interface AccessorPathColumnConfig<T extends FieldValues> extends BaseColumnConfig {
   accessor?: never
-  accessorPath: string
+  accessorPath: FieldPath<T>
   cell?: never
 }
 
-export interface CellColumnConfig<T> extends BaseColumnConfig<T> {
+export interface CellColumnConfig<T extends FieldValues> extends BaseColumnConfig {
   accessor?: never
   accessorPath?: never
   cell: (row: T) => ReactNode
 }
 
-export type TableColumnConfig<T> =
+export type TableColumnConfig<T extends FieldValues> =
   | AccessorColumnConfig<T>
   | AccessorPathColumnConfig<T>
   | CellColumnConfig<T>
 
-export interface GenericTableProps<T extends { id: string }> {
+export interface GenericTableProps<T extends FieldValues & { id: string }> {
   columns: TableColumnConfig<T>[]
   records: T[]
   onRowClick?: (row: T) => void

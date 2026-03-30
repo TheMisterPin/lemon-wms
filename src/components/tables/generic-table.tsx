@@ -1,5 +1,7 @@
 'use client'
 
+import { FieldValues } from 'react-hook-form'
+
 import {
   Table,
   TableBody,
@@ -11,7 +13,7 @@ import {
 import { formatDisplayValue, getValueByPath } from '@/lib/utils/get-value-by-path'
 import { GenericTableProps, TableColumnConfig } from '@/types/components/table/generic-table.types'
 
-function getCellValue<T>(row: T, column: TableColumnConfig<T>): React.ReactNode {
+function getCellValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>): React.ReactNode {
   if (column.cell) {
     return column.cell(row)
   }
@@ -25,7 +27,7 @@ function getCellValue<T>(row: T, column: TableColumnConfig<T>): React.ReactNode 
   return '—'
 }
 
-export function GenericTable<T extends { id: string }>({
+export function GenericTable<T extends FieldValues & { id: string }>({
   columns,
   records,
   onRowClick,

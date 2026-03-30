@@ -1,13 +1,3 @@
-import type { WarehouseStatus } from './enums'
+import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
 
-export interface IWarehouse {
-  id: string
-  name: string
-  address: string
-  timezone: string
-  currency: string
-  status: WarehouseStatus
-  createdById: string | null
-  deletedAt: Date | null
-  createdAt: Date
-}
+export type IWarehouse = Warehouse

@@ -1,9 +1,11 @@
 'use client'
 import * as React from 'react'
 import { CalendarIcon } from 'lucide-react'
+
 import { Calendar } from '@/components/ui/calendar'
 import {
   Field,
+  FieldError,
   FieldDescription,
   FieldLabel
 } from '@/components/ui/field'
@@ -23,6 +25,7 @@ interface FormDateInputProps {
   label: string
   value?: Date
   onChange?: (date: Date | undefined) => void
+  onBlur?: () => void
   placeholder?: string
   id: string
   description?: string
@@ -35,6 +38,7 @@ export function FormDateInput(props: FormDateInputProps) {
     label,
     value,
     onChange,
+    onBlur,
     placeholder = 'Select date',
     id,
     description,
@@ -47,7 +51,7 @@ export function FormDateInput(props: FormDateInputProps) {
   const displayValue = formatDate(value)
 
   return (
-    <Field>
+    <Field data-invalid={!!error || undefined} data-disabled={disabled || undefined}>
       <FieldLabel htmlFor={id}>
         {label}
         {required ? ' *' : ''}
@@ -68,6 +72,7 @@ export function FormDateInput(props: FormDateInputProps) {
               onChange?.(undefined)
             }
           }}
+          onBlur={onBlur}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'ArrowDown' && !disabled) {
               e.preventDefault()
@@ -84,8 +89,9 @@ export function FormDateInput(props: FormDateInputProps) {
                 size="icon-xs"
                 aria-label="Select date"
                 disabled={disabled}
+                onBlur={onBlur}
               >
-                <CalendarIcon />
+                <CalendarIcon data-icon="inline-end" />
                 <span className="sr-only">
 Select date
                 </span>
@@ -106,6 +112,7 @@ Select date
                   onChange?.(date)
                   setMonth(date)
                   setOpen(false)
+                  onBlur?.()
                 }}
               />
             </PopoverContent>
@@ -113,15 +120,9 @@ Select date
         </InputGroupAddon>
       </InputGroup>
       {description && !error && (
-        <FieldDescription>
-          {description}
-        </FieldDescription>
+        <FieldDescription>{description}</FieldDescription>
       )}
-      {error && (
-        <FieldDescription className="text-red-500">
-          {error}
-        </FieldDescription>
-      )}
+      <FieldError>{error}</FieldError>
     </Field>
   )
 }

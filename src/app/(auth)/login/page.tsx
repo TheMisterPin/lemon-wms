@@ -19,7 +19,7 @@ export default function LoginPage() {
           <div className="mb-2 inline-flex items-center gap-2">
             <LemonHeader />
           </div>
-          <p className="bg-gradient-to-r from-brand-primary to-brand-primary-end bg-clip-text text-sm text-transparent">
+          <p className="bg-linear-to-r from-brand-primary to-brand-primary-end bg-clip-text text-sm text-transparent">
             Warehouse Management System
           </p>
         </div>

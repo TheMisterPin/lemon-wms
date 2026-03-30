@@ -1,40 +1,36 @@
 'use client'
+
 import {
   Control,
   Controller,
   FieldErrors,
-  FieldPath,
   FieldValues
 } from 'react-hook-form'
+
+import { getValueByPath } from '@/lib/utils/get-value-by-path'
+
 import { CheckboxInput } from './checkbox-input'
 import { FormDateInput } from './form-date-input'
 import { FormSelectInput } from './form-select-input'
 import { TextInput } from './TextInput'
 import { FormFieldConfig } from '../../types/components/form/generic-form.types'
+
 interface GenericFormFieldProps<T extends FieldValues> {
   field: FormFieldConfig<T>
   control: Control<T>
   errors: FieldErrors<T>
 }
 
-function getNestedErrorValue(value: unknown, path: string): unknown {
-  return path.split('.').reduce<unknown>((acc, key) => {
-    if (!acc || typeof acc !== 'object') {
-      return undefined
-    }
-
-    return (acc as Record<string, unknown>)[key]
-  }, value)
-}
-
 function getErrorMessage<T extends FieldValues>(
   errors: FieldErrors<T>,
-  name: FieldPath<T>
+  name: FormFieldConfig<T>['name']
 ): string | undefined {
-  const error = getNestedErrorValue(errors, String(name))
+  const error = getValueByPath(errors, name)
+
   if (!error || typeof error !== 'object') {
     return undefined
   }
+
   const maybeMessage = (error as { message?: unknown }).message
 
   return typeof maybeMessage === 'string' ? maybeMessage : undefined
@@ -85,14 +81,7 @@ function GenericFormField<T extends FieldValues>({
                 required={field.required}
                 disabled={field.disabled}
                 value={rhfField.value ?? ''}
-                onChange={(value) => {
-                  if (field.type === 'number') {
-                    rhfField.onChange(value === '' ? undefined : Number(value))
-
-                    return
-                  }
-                  rhfField.onChange(value)
-                }}
+                onChange={rhfField.onChange}
                 onBlur={rhfField.onBlur}
                 error={error}
               />
@@ -105,6 +94,7 @@ function GenericFormField<T extends FieldValues>({
                 options={field.options}
                 value={typeof rhfField.value === 'string' ? rhfField.value : ''}
                 onChange={rhfField.onChange}
+                onBlur={rhfField.onBlur}
                 placeholder={field.placeholder}
                 description={field.description}
                 required={field.required}
@@ -117,9 +107,9 @@ function GenericFormField<T extends FieldValues>({
               <FormDateInput
                 id={id}
                 label={field.label}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                value={(rhfField.value as any) instanceof Date ? rhfField.value : undefined}
+                value={rhfField.value instanceof Date ? rhfField.value : undefined}
                 onChange={rhfField.onChange}
+                onBlur={rhfField.onBlur}
                 placeholder={field.placeholder}
                 description={field.description}
                 required={field.required}
@@ -132,8 +122,9 @@ function GenericFormField<T extends FieldValues>({
               <CheckboxInput
                 id={id}
                 label={field.label}
-                checked={Boolean(rhfField.value)}
-                onCheckedChange={rhfField.onChange}
+                value={Boolean(rhfField.value)}
+                onChange={rhfField.onChange}
+                onBlur={rhfField.onBlur}
                 description={field.description}
                 disabled={field.disabled}
                 error={error}

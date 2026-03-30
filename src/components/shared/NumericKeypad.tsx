@@ -38,7 +38,7 @@ export default function NumericKeypad({
   return (
     <div className="flex flex-col gap-3">
       {/* Display */}
-      <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-zinc-100 min-h-[52px]">
+      <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-zinc-100 min-h-13">
         {displayValue || <span className="text-zinc-600 tracking-normal text-base">Enter PIN</span>}
       </div>
 
