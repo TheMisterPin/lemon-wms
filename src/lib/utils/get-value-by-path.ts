@@ -3,6 +3,7 @@ export function getValueByPath(obj: unknown, path: string): unknown {
     if (acc === null || acc === undefined || typeof acc !== 'object') {
       return undefined
     }
+
     return (acc as Record<string, unknown>)[key]
   }, obj)
 }
@@ -17,5 +18,6 @@ export function formatDisplayValue(value: unknown): string {
   if (typeof value === 'boolean') {
     return value ? 'Yes' : 'No'
   }
+
   return String(value)
 }

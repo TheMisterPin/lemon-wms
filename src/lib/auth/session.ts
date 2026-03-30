@@ -28,6 +28,7 @@ export const clearRefreshTokenCookie = async (): Promise<void> => {
 
 export const readRefreshTokenCookie = async (): Promise<string | null> => {
   const cookieStore = await cookies()
+
   return cookieStore.get(REFRESH_COOKIE_NAME)?.value ?? null
 }
 
@@ -96,5 +97,6 @@ export const createDeviceLabel = (userAgent: string | null): string => {
   if (!userAgent) {
     return 'unknown-device'
   }
+
   return crypto.createHash('sha256').update(userAgent).digest('hex').slice(0, 12)
 }

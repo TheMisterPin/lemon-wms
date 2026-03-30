@@ -18,6 +18,7 @@ function getFieldValue<T>(data: T, field: FactboxFieldConfig<T>): React.ReactNod
   if (field.accessor) {
     return formatDisplayValue(data[field.accessor])
   }
+
   return '—'
 }
 

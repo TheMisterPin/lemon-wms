@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
         notes: 'Account deactivated'
       }
     })
+
     return NextResponse.json({ error: 'Account deactivated' }, { status: 403 })
   }
 
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
         notes: 'Invalid PIN'
       }
     })
+
     return NextResponse.json({ error: 'Invalid badge or PIN' }, { status: 401 })
   }
 

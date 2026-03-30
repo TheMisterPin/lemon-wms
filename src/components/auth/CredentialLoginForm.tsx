@@ -39,6 +39,7 @@ export default function CredentialLoginForm() {
 
       if (!res.ok) {
         setError(data.error ?? 'Login failed')
+
         return
       }
 

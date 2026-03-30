@@ -20,7 +20,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const rehydrate = async () => {
       try {
         const res = await fetch('/api/auth/refresh', { method: 'POST' })
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
 
         if (res.ok) {
           const data: RefreshResponse = await res.json()
@@ -29,7 +31,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           clearAuth()
         }
       } catch {
-        if (!cancelled) clearAuth()
+        if (!cancelled) {
+          clearAuth()
+        }
       }
     }
 

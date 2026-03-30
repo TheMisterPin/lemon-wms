@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
-import { useAuthStore } from '@/lib/auth/store'
-import { useIsMobile } from '@/hooks/use-mobile'
-import ScanInput from '@/components/shared/ScanInput'
 import NumericKeypad from '@/components/shared/NumericKeypad'
+import ScanInput from '@/components/shared/ScanInput'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { useAuthStore } from '@/lib/auth/store'
 import type { AuthUser } from '@/types'
 
 type Step = 'device' | 'badge' | 'pin'
@@ -79,6 +79,7 @@ export default function FloorLoginForm() {
           setStep('badge')
           setBadgeNumber('')
         }
+
         return
       }
 
@@ -121,8 +122,8 @@ export default function FloorLoginForm() {
                 step === s
                   ? 'bg-gradient-to-br from-brand-primary to-brand-primary-end text-white'
                   : ['device', 'badge', 'pin'].indexOf(step) > i
-                  ? 'bg-brand-input text-brand-muted'
-                  : 'bg-brand-border text-brand-subtle'
+                    ? 'bg-brand-input text-brand-muted'
+                    : 'bg-brand-border text-brand-subtle'
               ].join(' ')}
             >
               {i + 1}
@@ -177,7 +178,9 @@ export default function FloorLoginForm() {
           />
           <button
             type="button"
-            onClick={() => { setStep('device'); setError(null) }}
+            onClick={() => {
+              setStep('device'); setError(null)
+            }}
             className="text-sm text-brand-subtle hover:text-brand-muted"
           >
             ← Change device code
@@ -245,7 +248,9 @@ export default function FloorLoginForm() {
 
           <button
             type="button"
-            onClick={() => { setStep('badge'); setBadgeNumber(''); setPin(''); setError(null) }}
+            onClick={() => {
+              setStep('badge'); setBadgeNumber(''); setPin(''); setError(null)
+            }}
             className="text-sm text-brand-subtle hover:text-brand-muted"
           >
             ← Rescan badge

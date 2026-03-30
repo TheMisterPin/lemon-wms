@@ -22,7 +22,7 @@ const eslintConfig = defineConfig([
     rules: {
       // Airbnb-style base rules
       'indent': ['error', 2],
-      'linebreak-style': ['error', 'windows'], // Allow Windows line endings
+      'linebreak-style': 'off', // Allow both CRLF and LF line endings
       'quotes': ['error', 'single'],
       'semi': ['error', 'never'],
       // Import organization

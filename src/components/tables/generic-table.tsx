@@ -21,6 +21,7 @@ function getCellValue<T>(row: T, column: TableColumnConfig<T>): React.ReactNode 
   if (column.accessor) {
     return formatDisplayValue(row[column.accessor])
   }
+
   return '—'
 }
 

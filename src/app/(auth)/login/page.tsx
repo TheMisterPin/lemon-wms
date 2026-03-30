@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import CredentialLoginForm from '@/components/auth/CredentialLoginForm'
 import FloorLoginForm from '@/components/auth/FloorLoginForm'
+import LemonHeader from '@/components/typography/lemon-header'
 
 type Tab = 'office' | 'warehouse'
 
@@ -16,12 +17,7 @@ export default function LoginPage() {
         {/* Branding */}
         <div className="mb-8 text-center">
           <div className="mb-2 inline-flex items-center gap-2">
-            <span className="bg-gradient-to-r from-brand-accent via-brand-accent-mid to-brand-accent-end bg-clip-text text-3xl font-black tracking-tight text-transparent">
-              LEMON
-            </span>
-            <span className="rounded bg-gradient-to-br from-brand-primary to-brand-primary-end px-2 py-0.5 text-xs font-black uppercase tracking-widest text-white">
-              WMS
-            </span>
+            <LemonHeader />
           </div>
           <p className="bg-gradient-to-r from-brand-primary to-brand-primary-end bg-clip-text text-sm text-transparent">
             Warehouse Management System
