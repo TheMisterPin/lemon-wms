@@ -87,6 +87,7 @@ function GenericFormField<T extends FieldValues>({
                 error={error}
               />
             )
+            // Future field types can be added here as needed
           case 'select':
             return (
               <FormSelectInput
