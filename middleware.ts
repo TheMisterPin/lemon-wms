@@ -8,7 +8,7 @@ import {
   verifyAccessTokenFromRequest
 } from '@/lib/auth/middleware'
 
-const PUBLIC_PATHS = ['/', '/login', '/floor']
+const PUBLIC_PATHS = ['/login', '/floor']
 const PUBLIC_API_PATHS = ['/api/auth/login', '/api/auth/floor/login', '/api/auth/refresh']
 
 const getTokenFromCookie = (request: NextRequest): string | null => {
@@ -66,8 +66,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Authenticated: redirect away from auth pages
-  if (pathname === '/login' || pathname === '/floor') {
+  // Authenticated: redirect away from auth pages and root
+  if (pathname === '/' || pathname === '/login' || pathname === '/floor') {
     const target = isOfficeRole(payload.role) ? '/dashboard' : '/warehouse'
 
     return NextResponse.redirect(new URL(target, request.url))
