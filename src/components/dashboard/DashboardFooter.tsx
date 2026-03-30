@@ -18,18 +18,26 @@ export default function DashboardFooter() {
   }
 
   return (
-    <footer className="flex h-12 shrink-0 items-center border-t border-zinc-200 bg-white px-4">
+    <footer className="flex h-12 shrink-0 items-center border-t border-brand-border bg-brand-surface px-4">
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-9 w-9">
-            <UserCircle className="h-5 w-5 text-zinc-500" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 text-brand-muted hover:bg-brand-border hover:text-brand-text"
+          >
+            <UserCircle className="h-5 w-5" />
             <span className="sr-only">User menu</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent side="top" align="start" className="w-40 p-1">
+        <PopoverContent
+          side="top"
+          align="start"
+          className="w-40 border-brand-border bg-brand-surface p-1"
+        >
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+            className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-brand-muted transition-colors hover:bg-brand-border hover:text-brand-text"
           >
             <LogOut className="h-4 w-4" />
             Logout
