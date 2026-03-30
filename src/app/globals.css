@@ -25,6 +25,42 @@
   --color-brand-accent:     #fde047;   /* yellow-300 */
   --color-brand-accent-mid: #facc15;   /* yellow-400 */
   --color-brand-accent-end: #fbbf24;   /* amber-400  */
+
+  /* ── Dashboard dark theme surfaces ──────────────────────────────────── */
+  --color-dash-bg:       #111314;   /* page background                      */
+  --color-dash-card:     #1a1d1f;   /* primary card surface                 */
+  --color-dash-card2:    #222528;   /* secondary / inner card surface       */
+  --color-dash-border:   #2a2d30;   /* card / divider borders               */
+
+  /* Dashboard text */
+  --color-dash-text:     #f1f5f9;   /* primary text                         */
+  --color-dash-muted:    #6b7280;   /* muted / secondary text               */
+
+  /* ── Status colours — full, dim (bg), text ──────────────────────────── */
+  /* Amber / accent */
+  --color-dash-amber:      #f59e0b;
+  --color-dash-amber-dim:  #78490a;
+  --color-dash-amber-text: #fcd34d;
+
+  /* Green / success */
+  --color-dash-green:      #22c55e;
+  --color-dash-green-dim:  #14532d;
+  --color-dash-green-text: #86efac;
+
+  /* Red / danger */
+  --color-dash-red:        #ef4444;
+  --color-dash-red-dim:    #450a0a;
+  --color-dash-red-text:   #fca5a5;
+
+  /* Blue / info */
+  --color-dash-blue:       #3b82f6;
+  --color-dash-blue-dim:   #1e3a5f;
+  --color-dash-blue-text:  #93c5fd;
+
+  /* Gray / neutral */
+  --color-dash-gray:       #6b7280;
+  --color-dash-gray-dim:   #1f2937;
+  --color-dash-gray-text:  #9ca3af;
 }
 /* ────────────────────────────────────────────────────────────────────────── */
 
