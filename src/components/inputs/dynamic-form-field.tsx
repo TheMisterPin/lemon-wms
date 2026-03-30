@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import {
@@ -107,7 +108,7 @@ function GenericFormField<T extends FieldValues>({
               <FormDateInput
                 id={id}
                 label={field.label}
-                value={rhfField.value instanceof Date ? rhfField.value : undefined}
+                value={(rhfField.value as any) instanceof Date ? rhfField.value : undefined}
                 onChange={rhfField.onChange}
                 onBlur={rhfField.onBlur}
                 placeholder={field.placeholder}
