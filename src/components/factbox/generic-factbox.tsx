@@ -20,9 +20,11 @@ function getFieldValue<T extends FieldValues>(data: T, field: FactboxFieldConfig
   if (field.render) {
     return field.render(data)
   }
+
   if (field.accessorPath) {
     return formatDisplayValue(getValueByPath(data, field.accessorPath))
   }
+
   if (field.accessor) {
     return formatDisplayValue(data[field.accessor])
   }
@@ -38,34 +40,43 @@ export function GenericFactbox<T extends FieldValues>({
 }: GenericFactboxProps<T>) {
   if (!data) {
     return (
-      <Card className={className}>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">No data selected.</p>
+      <Card className={[
+        'rounded-xl border border-brand-glass-border bg-brand-glass backdrop-blur-sm shadow-lg shadow-black/10',
+        className
+      ].filter(Boolean).join(' ')}>
+        <CardContent className="py-8">
+          <p className="text-sm text-brand-subtle text-center">No data selected.</p>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className={className}>
+    <Card className={[
+      'rounded-xl border border-brand-glass-border bg-brand-glass backdrop-blur-sm shadow-lg shadow-black/10',
+      className
+    ].filter(Boolean).join(' ')}>
       {title && (
-        <CardHeader className="gap-1">
-          <CardTitle className="text-sm">{title}</CardTitle>
-          <CardDescription>Details</CardDescription>
+        <CardHeader className="gap-1 pb-3">
+          <CardTitle className="text-sm font-semibold text-brand-text">{title}</CardTitle>
+          <CardDescription className="text-brand-subtle text-xs">Details</CardDescription>
         </CardHeader>
       )}
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex flex-col gap-4">
         {sections.map((section, sectionIndex) => (
-          <div key={sectionIndex} className="flex flex-col gap-2">
-            {sectionIndex > 0 && <Separator />}
-            <h4 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          <div key={sectionIndex} className="flex flex-col gap-2.5">
+            {sectionIndex > 0 && <Separator className="bg-brand-glass-border" />}
+            <h4 className="text-[11px] font-semibold tracking-widest text-brand-subtle uppercase">
               {section.title}
             </h4>
-            <dl className="flex flex-col gap-1.5">
+            <dl className="flex flex-col gap-2">
               {section.fields.map((field, fieldIndex) => (
-                <div key={fieldIndex} className="flex items-start justify-between gap-4 text-sm">
-                  <dt className="text-muted-foreground">{field.label}</dt>
-                  <dd className="font-medium text-right">{getFieldValue(data, field)}</dd>
+                <div
+                  key={fieldIndex}
+                  className="flex items-start justify-between gap-4 text-sm rounded-lg px-3 py-1.5 transition-colors duration-200 hover:bg-brand-glass-hover"
+                >
+                  <dt className="text-brand-muted">{field.label}</dt>
+                  <dd className="font-medium text-right text-brand-text">{getFieldValue(data, field)}</dd>
                 </div>
               ))}
             </dl>

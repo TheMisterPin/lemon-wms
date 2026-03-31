@@ -44,7 +44,13 @@ function DynamicForm<T extends FieldValues>({
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={cn('flex flex-col gap-5', className)}>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className={cn(
+        'flex flex-col gap-6 rounded-xl border border-brand-glass-border bg-brand-glass backdrop-blur-sm p-6 shadow-lg shadow-black/10',
+        className
+      )}
+    >
       <FieldGroup className={cn('grid gap-5', getColumnsClass(columns))}>
         {fields.map((field) => (
           <GenericFormField<T>
@@ -56,7 +62,13 @@ function DynamicForm<T extends FieldValues>({
         ))}
       </FieldGroup>
       <div className="mt-2 flex">
-        <Button type="submit" variant="brand" size="sm" disabled={isSubmitting} className="w-1/3 mx-auto rounded-lg font-semibold">
+        <Button
+          type="submit"
+          variant="brand"
+          size="sm"
+          disabled={isSubmitting}
+          className="w-1/3 mx-auto rounded-xl font-semibold bg-linear-to-r from-brand-primary to-brand-primary-end text-brand-button-text shadow-md shadow-brand-primary/20 hover:shadow-lg hover:shadow-brand-primary/30 transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
+        >
           {isSubmitting ? (
             <>
               <Spinner data-icon="inline-start" />

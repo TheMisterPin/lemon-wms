@@ -30,9 +30,9 @@ export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-dash-border bg-dash-card">
-      <nav className="flex flex-col gap-0.5 p-3 pt-5">
-        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-widest text-dash-muted">
+    <div className="flex h-full w-64 flex-col border-r border-brand-glass-border bg-brand-surface/90 backdrop-blur-md">
+      <nav className="flex flex-col gap-1 p-4 pt-6">
+        <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-brand-subtle">
           Navigation
         </p>
         {NAV_LINKS.map((link) => {
@@ -48,13 +48,13 @@ export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
               href={link.href}
               onClick={onClose}
               className={[
-                'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                 active
-                  ? 'border border-dash-amber/25 bg-dash-amber-dim text-dash-amber-text'
-                  : 'border border-transparent text-dash-muted hover:bg-dash-card2 hover:text-dash-text'
+                  ? 'bg-linear-to-r from-brand-primary/15 to-brand-primary-end/10 text-brand-primary border border-brand-primary/20 shadow-sm shadow-brand-primary/5'
+                  : 'border border-transparent text-brand-muted hover:bg-brand-glass-hover hover:text-brand-text'
               ].join(' ')}
             >
-              <Icon size={16} className="shrink-0" />
+              <Icon size={18} className="shrink-0" />
               {link.label}
             </Link>
           )

@@ -19,7 +19,8 @@ export const getBearerToken = (request: NextRequest): string | null => {
 export const verifyAccessTokenFromRequest = (
   request: NextRequest
 ): AccessTokenPayload | null => {
-  const token = getBearerToken(request)
+  const token =
+    getBearerToken(request) ?? request.cookies.get('access_token')?.value ?? null
   if (!token) {
     return null
   }

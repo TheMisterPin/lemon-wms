@@ -1,8 +1,19 @@
 import { ReactNode } from 'react'
 import { FieldPath, FieldValues } from 'react-hook-form'
 
+export type SortDirection = 'asc' | 'desc'
+
 export interface BaseColumnConfig {
   label: string
+  className?: string
+  cellClassName?: string
+  sortable?: boolean
+}
+
+export interface RowAction<T> {
+  icon: ReactNode
+  tooltip: string
+  onClick: (row: T) => void
   className?: string
 }
 
@@ -35,4 +46,5 @@ export interface GenericTableProps<T extends FieldValues & { id: string }> {
   onRowClick?: (row: T) => void
   selectedId?: string
   emptyMessage?: string
+  actions?: RowAction<T>[]
 }
