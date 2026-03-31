@@ -16,14 +16,17 @@ Both sides are in the same Next.js app (monorepo). They share the database and A
 
 | Concern | Decision |
 |---|---|
-| Framework | Next.js (App Router), TypeScript strict mode |
-| Styling | Tailwind CSS |
+| Framework | Next.js 16.2.1 (App Router), TypeScript strict mode |
+| Styling | Tailwind CSS 4 + PostCSS |
 | Components | shadcn/ui (dashboard side), custom minimal (warehouse floor side) |
-| Database | PostgreSQL local (port 5432, db: `wms_db`) via Prisma |
+| Database | PostgreSQL via Prisma 7.3 (PrismaPg adapter) |
 | Auth | Custom JWT — two flows: credential (email+password) and badge+PIN |
-| State | React Query — minimal client state |
+| State | Zustand (auth store) + React Hook Form + minimal client state |
+| Forms | React Hook Form + Zod |
+| HTTP client | Axios (`lib/axios.ts`) |
 | API | Next.js API routes in `src/app/api/` |
 | Real-time | React Query polling — no WebSockets for MVP |
+| Package manager | pnpm 10.29.3 |
 | Deployment | Vercel + managed Postgres (Neon or Supabase) |
 | Testing | None for MVP |
 
@@ -34,65 +37,97 @@ Both sides are in the same Next.js app (monorepo). They share the database and A
 ```
 lemon-wms/
 ├── prisma/
-│   ├── schema.prisma
-│   └── migrations/
+│   ├── schema.prisma                   # 31 models, fully defined
+│   └── migrations/                     # Empty — use `npx prisma db push` in dev
+├── seed/
+│   ├── seed-users.ts                   # Entry point: npm run seed:users
+│   └── seed-warehouses.ts             # Entry point: npm run seed:warehouses
+├── docs/
+│   ├── create-local-postgres-db.md
+│   ├── seeding-users.md
+│   └── LOGGING.md
 ├── src/
 │   ├── app/
+│   │   ├── layout.tsx                  # Root layout with AuthProvider
+│   │   ├── page.tsx                    # Redirects to /login
+│   │   ├── globals.css                 # Tailwind + brand design tokens
 │   │   ├── (auth)/
-│   │   │   ├── login/page.tsx          # Credential login (email + password)
-│   │   │   └── floor/page.tsx          # Badge + PIN login
+│   │   │   ├── login/page.tsx          # Dual-tab login (credential + floor)
+│   │   │   └── floor/page.tsx          # Badge + PIN login (alt route)
 │   │   ├── (dashboard)/                # Office side — Owner, OM, OW
-│   │   │   ├── layout.tsx
-│   │   │   ├── page.tsx                # Dashboard home
-│   │   │   ├── orders/
-│   │   │   ├── items/
-│   │   │   ├── warehouses/
-│   │   │   └── users/
+│   │   │   ├── layout.tsx              # DashboardShell wrapper
+│   │   │   └── dashboard/
+│   │   │       ├── page.tsx            # Home stub
+│   │   │       ├── warehouses/page.tsx
+│   │   │       ├── zones/page.tsx      # (stub)
+│   │   │       ├── items/page.tsx      # (stub)
+│   │   │       └── users/             # (planned)
 │   │   ├── (warehouse)/                # Floor side — WM, WW
-│   │   │   ├── layout.tsx
-│   │   │   ├── page.tsx                # Order pool / home
-│   │   │   ├── orders/
-│   │   │   └── zones/
+│   │   │   ├── layout.tsx              # WarehouseShell wrapper
+│   │   │   └── warehouse/
+│   │   │       ├── page.tsx            # Order pool home
+│   │   │       ├── orders/             # (planned)
+│   │   │       └── zones/              # (planned)
 │   │   └── api/
 │   │       ├── auth/
-│   │       ├── warehouses/
-│   │       ├── zones/
-│   │       ├── bins/
-│   │       ├── items/
-│   │       ├── orders/
-│   │       │   ├── purchase/
-│   │       │   ├── sales/
-│   │       │   ├── transfer/
-│   │       │   ├── return/
-│   │       │   └── adjustment/
-│   │       ├── lots/
-│   │       ├── serials/
-│   │       └── logs/
+│   │       │   ├── login/route.ts      # ✅ Credential flow
+│   │       │   ├── floor/login/route.ts # ✅ Badge/PIN flow
+│   │       │   ├── logout/route.ts     # ✅
+│   │       │   └── refresh/route.ts    # ✅
+│   │       ├── warehouses/route.ts     # ✅ GET + POST
+│   │       ├── zones/route.ts          # ✅ GET
+│   │       ├── logs/route.ts           # stub
+│   │       └── seed/users/route.ts     # ✅ GET (dev only)
 │   ├── components/
-│   │   ├── shared/                     # Used by both sides
-│   │   ├── dashboard/                  # Office side only
-│   │   └── warehouse/                  # Floor side only
+│   │   ├── ui/                         # shadcn/ui components
+│   │   ├── shared/                     # Both sides (ScanInput, NumericKeypad, etc.)
+│   │   ├── dashboard/                  # DashboardShell, Sidebar, Header, MetricCard
+│   │   ├── warehouse/                  # WarehouseShell
+│   │   ├── auth/                       # CredentialLoginForm, FloorLoginForm
+│   │   ├── tables/                     # GenericTable, CheckboxTable
+│   │   ├── factbox/                    # GenericFactbox (detail/read-only view)
+│   │   ├── inputs/                     # FormInputs, DateInput
+│   │   └── typography/                 # LemonHeader
 │   ├── lib/
-│   │   ├── prisma.ts                   # Prisma singleton
+│   │   ├── prisma.ts                   # Prisma singleton (PrismaPg adapter)
+│   │   ├── axios.ts                    # Axios instance
+│   │   ├── utils.ts                    # Utility helpers
 │   │   ├── auth/
-│   │   │   ├── jwt.ts                  # Token sign/verify
-│   │   │   ├── session.ts
-│   │   │   └── middleware.ts
-│   │   ├── services/                   # Business logic — one file per domain
-│   │   │   ├── warehouse.service.ts
-│   │   │   ├── zone.service.ts
-│   │   │   ├── bin.service.ts
-│   │   │   ├── item.service.ts
-│   │   │   ├── order.service.ts
-│   │   │   ├── lot.service.ts
-│   │   │   ├── serial.service.ts
-│   │   │   └── log.service.ts          # Writes UAE + BOE + ILE
-│   │   └── hooks/                      # React Query hooks
+│   │   │   ├── jwt.ts                  # signAccessToken, verifyToken
+│   │   │   ├── session.ts              # Cookie helpers, token hashing, refresh token
+│   │   │   ├── middleware.ts           # isOfficeRole, isFloorRole guards
+│   │   │   └── store.ts                # Zustand auth state store
+│   │   ├── entities/                   # Business logic — one folder per domain
+│   │   │   ├── warehouses/
+│   │   │   │   ├── create-warehouse.ts
+│   │   │   │   └── get-warehouses.ts
+│   │   │   └── zones/
+│   │   │       └── get-zones.ts
+│   │   ├── components/
+│   │   │   └── configs/entities/       # Form/table/factbox configs per entity
+│   │   │       ├── warehouse/          # schema, types, config
+│   │   │       ├── zone/
+│   │   │       ├── user/
+│   │   │       ├── bin/
+│   │   │       ├── device/
+│   │   │       └── forms/
+│   │   ├── seeding/
+│   │   │   ├── users.ts                # 5 seed users (owner, manager, workers)
+│   │   │   └── warehouses.ts          # 1 seed warehouse
+│   │   └── utils/
+│   │       └── get-value-by-path.ts
 │   ├── middleware.ts                    # Auth guard + role-based redirect
-│   └── types/
-│       └── index.ts
+│   ├── types/
+│   │   ├── index.ts                    # Re-exports + AuthUser, JWTPayload
+│   │   ├── models/                     # Role, LoginType, etc.
+│   │   ├── responses/                  # API response shapes
+│   │   └── components/                 # Table, form, factbox prop types
+│   └── generated/
+│       └── prisma/                     # @prisma/client (auto-generated — do not edit)
 └── public/
 ```
+
+> **Note on services pattern**: Business logic lives in `lib/entities/<domain>/` (not `lib/services/`). Each file is a focused function (e.g. `create-warehouse.ts`, `get-warehouses.ts`). API routes call these functions directly. Log chain functions will also live here when implemented.
 
 ---
 
@@ -103,9 +138,11 @@ DATABASE_URL="postgresql://localhost:5432/wms_db"
 JWT_SECRET="generate-with: openssl rand -base64 32"
 JWT_ACCESS_EXPIRY="15m"
 JWT_REFRESH_EXPIRY="7d"
+IMGBB_API_KEY=
+NEXT_PUBLIC_IMGBB_API_KEY=
 ```
 
-No NextAuth — auth is fully custom JWT.
+No NextAuth — auth is fully custom JWT. See `.env.example` for the template.
 
 ---
 
@@ -128,8 +165,8 @@ Permissions are role-based and additive downward. No role can be elevated beyond
 ### Credential flow (office side)
 - Email + password → `POST /api/auth/login`
 - Returns access token (15m) + refresh token (7d)
-- Access token stored in memory only (not localStorage)
-- Refresh token in httpOnly cookie
+- Access token stored in a **non-httpOnly cookie** (readable by middleware for SSR routing)
+- Refresh token stored in a **httpOnly cookie** (not accessible to JS)
 
 ### Badge + PIN flow (floor side)
 - Device code → badge number scan → 4-digit PIN → `POST /api/auth/floor/login`
@@ -399,14 +436,53 @@ Build one phase at a time. Always confirm before moving to the next. Run `npm ru
 ## Development commands
 
 ```bash
-npm run dev                                # Dev server on port 3000
-npx prisma migrate dev --name <name>       # Create and apply migration
-npx prisma db seed                         # Seed with sample data
-npx prisma studio                          # Visual DB browser (port 5555)
+pnpm dev                                   # Dev server on port 3000
+pnpm build                                 # Production build check
+pnpm lint                                  # ESLint
+
+# Prisma
+npx prisma db push                         # Push schema to DB (no migration file — use in dev)
+npx prisma migrate dev --name <name>       # Create and apply named migration
 npx prisma generate                        # Regenerate client after schema changes
-npm run lint                               # ESLint
-npm run build                              # Production build check
+npx prisma studio                          # Visual DB browser (port 5555)
+
+# Seeding
+npm run seed:users                         # Seed 5 default users (owner → warehouse worker)
+npm run seed:warehouses                    # Seed 1 default warehouse
 ```
+
+### Seed credentials
+
+| User | Email | Password | Badge | PIN | Role |
+|---|---|---|---|---|---|
+| Owner | owner@lemon-wms.local | owner1234 | USR-0001 | — | OWNER |
+| Office Manager | office.manager@lemon-wms.local | manager1234 | USR-0002 | — | OFFICE_MANAGER |
+| Office Worker | office.worker@lemon-wms.local | worker1234 | USR-0003 | — | OFFICE_WORKER |
+| Warehouse Manager | — | — | USR-0004 | 1111 | WAREHOUSE_MANAGER |
+| Warehouse Worker | — | — | USR-0005 | 2222 | WAREHOUSE_WORKER |
+
+---
+
+## Styling & design tokens
+
+Tailwind CSS 4 with custom brand tokens defined as CSS variables in `src/app/globals.css`.
+
+| Token | Value | Usage |
+|---|---|---|
+| `--color-brand-bg` | `#080e1f` | Page background (navy) |
+| `--color-brand-surface` | `#0f172a` | Cards, panels (slate-900) |
+| `--color-brand-border` | `#1e293b` | Borders |
+| `--color-brand-text` | `#f1f5f9` | Primary text |
+| `--color-brand-muted` | `#94a3b8` | Muted text |
+| `--color-brand-subtle` | `#64748b` | Placeholder / subtle text |
+| `--color-brand-primary` | `#4ade80` | Green — primary CTA |
+| `--color-brand-primary-end` | `#059669` | Green gradient end |
+| `--color-brand-accent` | `#fde047` | Yellow — accent/highlight |
+| `--color-dash-bg` | dashboard variant | Dashboard background |
+| `--color-dash-card` | dashboard variant | Dashboard card background |
+| `--color-dash-muted` | dashboard variant | Dashboard muted text |
+
+Use these CSS variables via Tailwind utilities. Do not hardcode hex colours inline.
 
 ---
 
@@ -424,4 +500,33 @@ npx shadcn@latest add avatar accordion tooltip switch textarea
 ---
 
 ## Current status
-🟡 Phase 0 — Starting from scratch.
+
+🟢 **Phase 0 — Complete.**
+
+### What is implemented
+- Full Prisma schema (31 models) — pushed to DB via `npx prisma db push`
+- Custom JWT auth — both credential and badge+PIN flows
+- Auth middleware — role-based routing and 403 guards
+- Dashboard shell (`/dashboard`) with sidebar, header, and metric card components
+- Warehouse shell (`/warehouse`) with full-screen layout
+- Login page — dual-tab (credential + floor)
+- Warehouse list page (`/dashboard/warehouses`) — basic GET/POST
+- Zones list API (`GET /api/zones`)
+- Auth API routes — login, floor login, logout, refresh
+- GenericTable, GenericFactbox, DynamicForm component system
+- ScanInput and NumericKeypad shared components
+- Zustand auth store
+- Seed scripts for users and warehouses
+- Entity configs for warehouse, zone, user, bin, device
+
+### What is NOT yet implemented (Phase 1+)
+- Bin CRUD (Phase 1)
+- User CRUD, zone assignments (Phase 2)
+- WARItem, ItemCategory, Lot, SerialNumber APIs (Phase 3)
+- All five order types and execution flows (Phases 4–9)
+- Log chain (UAE → BOE → ILE atomic transactions)
+- Alert rules and in-app notifications (Phase 11)
+- Reports and traceability views (Phase 10)
+
+### Next: Phase 1 — Locations
+Warehouse/Zone/Bin CRUD with dashboard UI and warehouse read views.
