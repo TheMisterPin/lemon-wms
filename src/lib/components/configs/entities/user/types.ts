@@ -1,39 +1,8 @@
-import type { LoginType, Role } from '@/types/models/enums'
+import { z } from 'zod'
 
-export type User = {
-  id: string
-  email: string | null
-  passwordHash: string | null
-  badgeNumber: string
-  pinHash: string | null
-  role: Role
-  loginType: LoginType
-  isActive: boolean
-  deletedAt: Date | null
-  createdAt: Date
-}
+import { loginTypeSchema, roleSchema, userFormSchema, userSchema } from './schema'
 
-export type UserFormValues = {
-  email: string | null
-  passwordHash: string | null
-  badgeNumber: string
-  pinHash: string | null
-  role: Role
-  loginType: LoginType
-  isActive: boolean
-}
-
-// Backward-compatible aliases used by the current config scaffold.
-export type Warehouse = {
-  id: string
-  name: string
-  address: string
-  timezone: string
-  currency: string
-  status: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'
-  createdById: string | null
-  deletedAt: Date | null
-  createdAt: Date
-}
-
-export type WarehouseFormValues = Pick<Warehouse, 'name' | 'address' | 'timezone' | 'currency' | 'status'>
+export type User = z.infer<typeof userSchema>
+export type UserFormValues = z.infer<typeof userFormSchema>
+export type RoleValue = z.infer<typeof roleSchema>
+export type LoginTypeValue = z.infer<typeof loginTypeSchema>

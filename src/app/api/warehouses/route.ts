@@ -1,41 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
 import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse/schema'
+import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
+import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { createWarehouse } from '@/lib/entities/warehouses/create-warehouse'
 import { getWarehouses } from '@/lib/entities/warehouses/get-warehouses'
 import prisma from '@/lib/prisma'
 
-const createWarehouseRequestSchema = warehouseFormSchema.pick({
-  name: true
-})
-
-export async function POST(req : NextRequest) {
+export async function GET(req: NextRequest) {
+  const payload = verifyAccessTokenFromRequest(req)
+  if (!payload) return unauthorized()
 
   try {
-    const rawdata = createWarehouseRequestSchema.parse(await req.json())
-    const data = rawdata.name
-    const result = await createWarehouse(prisma, { name: data })
+    const data = await getWarehouses(prisma)
 
-    return NextResponse.json({ success: true, data: result })
+    return ok(data, 'Warehouses retrieved successfully.')
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid warehouse payload.', details: error.flatten() }, { status: 400 })
-    }
+    console.error('[GET /api/warehouses]', error)
 
-    console.error('Failed to create warehouse from API:', error)
-
-    return NextResponse.json({ error: 'Failed to create warehouse.' }, { status: 500 })
+    return fail('Failed to retrieve warehouses.')
   }
 }
-export async function GET() {
+
+export async function POST(req: NextRequest) {
+  const payload = verifyAccessTokenFromRequest(req)
+  if (!payload) return unauthorized()
+
+  if (!isOfficeRole(payload.role)) {
+    return fail('Only office users can create warehouses.', 'FORBIDDEN', 403)
+  }
+
   try {
-    const result = await getWarehouses(prisma)
+    const body = await req.json()
+    const parsed = warehouseFormSchema.parse(body)
+    const warehouse = await createWarehouse(prisma, {
+      ...parsed,
+      createdById: payload.userId
+    })
 
-    return NextResponse.json({ success: true, data: result })
+    return created(warehouse, 'Warehouse created successfully.')
   } catch (error) {
-    console.error('Failed to get warehouses from API:', error)
+    if (error instanceof z.ZodError) return validationFail(error)
+    console.error('[POST /api/warehouses]', error)
 
-    return NextResponse.json({ error: 'Failed to get warehouses.' }, { status: 500 })
+    return fail('Failed to create warehouse.')
   }
 }
