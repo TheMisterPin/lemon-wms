@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 import { describe, expect, it } from 'vitest'
 
-import { verifyToken } from '@/utils/auth/verify-token'
 import { signAccessToken } from '@/lib/auth/jwt'
+import { verifyToken } from '@/utils/auth/verify-token'
 
 const SECRET = 'test-secret-for-unit-tests-at-least-32-chars'
 

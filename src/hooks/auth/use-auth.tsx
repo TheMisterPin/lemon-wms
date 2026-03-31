@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -24,34 +25,46 @@ const OFFICE_ROLES: Role[] = ['OWNER', 'OFFICE_MANAGER', 'OFFICE_WORKER']
 const FLOOR_ROLES: Role[] = ['WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER']
 
 function parseAccessTokenCookie(): AuthUser | null {
-  if (typeof document === 'undefined') return null
+  if (typeof document === 'undefined') {
+    return null
+  }
 
   const match = document.cookie
     .split('; ')
     .find((row) => row.startsWith('access_token='))
 
-  if (!match) return null
+  if (!match) {
+    return null
+  }
 
   const token = match.split('=')[1]
-  if (!token) return null
+  if (!token) {
+    return null
+  }
 
   try {
     const parts = token.split('.')
-    if (parts.length !== 3) return null
+    if (parts.length !== 3) {
+      return null
+    }
 
     const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
 
-    if (!payload.userId || !payload.role) return null
+    if (!payload.userId || !payload.role) {
+      return null
+    }
 
     // Check expiry
-    if (payload.exp && payload.exp * 1000 < Date.now()) return null
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      return null
+    }
 
     return {
       userId: payload.userId,
       role: payload.role as Role,
       deviceId: payload.deviceId,
       zoneId: payload.zoneId,
-      warehouseId: payload.warehouseId,
+      warehouseId: payload.warehouseId
     }
   } catch {
     return null
@@ -75,6 +88,7 @@ export function useAuth(): AuthState {
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
@@ -83,6 +97,6 @@ export function useAuth(): AuthState {
     isAuthenticated: user !== null,
     isOfficeRole: user !== null && OFFICE_ROLES.includes(user.role),
     isFloorRole: user !== null && FLOOR_ROLES.includes(user.role),
-    isLoading,
+    isLoading
   }
 }

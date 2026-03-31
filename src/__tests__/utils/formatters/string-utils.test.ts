@@ -4,7 +4,7 @@ import {
   capitalizeFirstLetter,
   convertFromCamelCase,
   convertFromKebabCase,
-  convertFromSnakeCase,
+  convertFromSnakeCase
 } from '@/utils/formatters/string-utils'
 
 describe('capitalizeFirstLetter', () => {

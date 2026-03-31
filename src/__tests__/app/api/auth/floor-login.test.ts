@@ -11,14 +11,14 @@ vi.mock('@/lib/prisma', () => ({
     device: { findUnique: vi.fn() },
     user: { findUnique: vi.fn() },
     userActivityEntry: { create: vi.fn().mockResolvedValue({}) },
-    refreshToken: { create: vi.fn().mockResolvedValue({}) },
-  },
+    refreshToken: { create: vi.fn().mockResolvedValue({}) }
+  }
 }))
 
 vi.mock('@/lib/auth/session', () => ({
   persistRefreshToken: vi.fn().mockResolvedValue(undefined),
   setAccessTokenCookie: vi.fn().mockResolvedValue(undefined),
-  setRefreshTokenCookie: vi.fn().mockResolvedValue(undefined),
+  setRefreshTokenCookie: vi.fn().mockResolvedValue(undefined)
 }))
 
 // ---------------------------------------------------------------------------
@@ -36,7 +36,7 @@ function makeRequest(body: unknown): NextRequest {
   return new NextRequest('http://localhost/api/auth/floor/login', {
     method: 'POST',
     body: JSON.stringify(body),
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json' }
   })
 }
 
@@ -47,11 +47,12 @@ const activeDevice = {
   warehouseId: 'wh-1',
   zoneId: 'zone-1',
   isActive: true,
-  zone: { id: 'zone-1', name: 'Zone A' },
+  zone: { id: 'zone-1', name: 'Zone A' }
 }
 
 async function buildWorker(overrides: Record<string, unknown> = {}) {
   const pinHash = await bcrypt.hash('1234', 1)
+
   return {
     id: 'user-2',
     email: null,
@@ -60,7 +61,7 @@ async function buildWorker(overrides: Record<string, unknown> = {}) {
     role: 'WAREHOUSE_WORKER',
     loginType: 'BADGE_PIN',
     isActive: true,
-    ...overrides,
+    ...overrides
   }
 }
 

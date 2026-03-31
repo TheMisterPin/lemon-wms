@@ -47,7 +47,9 @@ async function generateBadgeNumber(prisma: PrismaClient): Promise<string> {
     select: { badgeNumber: true }
   })
 
-  if (!last) return 'USR-0001'
+  if (!last) {
+    return 'USR-0001'
+  }
 
   const match = last.badgeNumber.match(/USR-(\d+)/)
   const next = match ? parseInt(match[1], 10) + 1 : 1

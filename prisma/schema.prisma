@@ -471,16 +471,17 @@ model SalesOrder {
 }
 
 model SalesOrderLine {
-  id              String  @id @default(uuid())
-  salesOrderId    String
-  warItemId       String
-  binId           String?
-  baseQuantity    Decimal
-  handledQuantity Decimal @default(0)
-  isShort         Boolean @default(false)
-  lotId           String?
-  serialNumberId  String?
-  uom             String
+  id               String  @id @default(uuid())
+  salesOrderId     String
+  warItemId        String
+  destinationBinId String?
+  originBinId      String?
+  baseQuantity     Decimal
+  handledQuantity  Decimal @default(0)
+  isShort          Boolean @default(false)
+  lotId            String?
+  serialNumberId   String?
+  uom              String
 
   salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
 }
@@ -492,8 +493,8 @@ model TransferOrder {
   priority         OrderPriority @default(NORMAL)
   warehouseId      String
   notes            String?
-  fromBinId        String?
-  toBinId          String?
+  destinationBinId String?
+  originBinId      String?
   isCrossWarehouse Boolean       @default(false)
   createdById      String
   confirmedById    String?
@@ -502,10 +503,10 @@ model TransferOrder {
   deletedAt        DateTime?
   createdAt        DateTime      @default(now())
 
-  warehouse Warehouse           @relation(fields: [warehouseId], references: [id])
-  fromBin   Bin?                @relation("TransferFromBin", fields: [fromBinId], references: [id])
-  toBin     Bin?                @relation("TransferToBin", fields: [toBinId], references: [id])
-  lines     TransferOrderLine[]
+  warehouse      Warehouse           @relation(fields: [warehouseId], references: [id])
+  originBin      Bin?                @relation("TransferFromBin", fields: [originBinId], references: [id])
+  destinationBin Bin?                @relation("TransferToBin", fields: [destinationBinId], references: [id])
+  lines          TransferOrderLine[]
 }
 
 model TransferOrderLine {

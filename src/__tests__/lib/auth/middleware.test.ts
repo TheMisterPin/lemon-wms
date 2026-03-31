@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server'
 import { describe, expect, it } from 'vitest'
 
+import { signAccessToken } from '@/lib/auth/jwt'
 import {
   getBearerToken,
   isFloorRole,
   isOfficeRole,
   unauthorizedJson,
-  verifyAccessTokenFromRequest,
+  verifyAccessTokenFromRequest
 } from '@/lib/auth/middleware'
-import { signAccessToken } from '@/lib/auth/jwt'
 
 function makeRequest(headers: Record<string, string> = {}): NextRequest {
   return new NextRequest('http://localhost/api/test', { headers })

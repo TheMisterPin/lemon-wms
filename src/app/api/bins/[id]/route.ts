@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
 import { deleteBin } from '@/lib/entities/bins/delete-bin'
 import { getBin } from '@/lib/entities/bins/get-bin'
 import { updateBin } from '@/lib/entities/bins/update-bin'
@@ -13,13 +13,17 @@ type Params = { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   const { id } = await params
 
   try {
     const bin = await getBin(prisma, id)
-    if (!bin) return notFound('Bin')
+    if (!bin) {
+      return notFound('Bin')
+    }
 
     return ok(bin, 'Bin retrieved successfully.')
   } catch (error) {
@@ -31,7 +35,9 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 export async function PUT(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   if (!isOfficeRole(payload.role)) {
     return fail('Only office users can update bins.', 'FORBIDDEN', 403)
@@ -41,7 +47,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   try {
     const existing = await getBin(prisma, id)
-    if (!existing) return notFound('Bin')
+    if (!existing) {
+      return notFound('Bin')
+    }
 
     const body = await req.json()
     const parsed = binFormSchema.partial().parse(body)
@@ -49,7 +57,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     return ok(bin, 'Bin updated successfully.')
   } catch (error) {
-    if (error instanceof z.ZodError) return validationFail(error)
+    if (error instanceof z.ZodError) {
+      return validationFail(error)
+    }
     console.error('[PUT /api/bins/[id]]', error)
 
     return fail('Failed to update bin.')
@@ -58,7 +68,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 export async function DELETE(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   if (!isOfficeRole(payload.role)) {
     return fail('Only office users can delete bins.', 'FORBIDDEN', 403)
@@ -68,7 +80,9 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
   try {
     const existing = await getBin(prisma, id)
-    if (!existing) return notFound('Bin')
+    if (!existing) {
+      return notFound('Bin')
+    }
 
     const bin = await deleteBin(prisma, id)
 

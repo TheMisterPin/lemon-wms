@@ -1,16 +1,18 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
 import { createBin } from '@/lib/entities/bins/create-bin'
 import { getBins } from '@/lib/entities/bins/get-bins'
 import prisma from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   try {
     const { searchParams } = new URL(req.url)
@@ -28,7 +30,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   if (!isOfficeRole(payload.role)) {
     return fail('Only office users can create bins.', 'FORBIDDEN', 403)
@@ -41,7 +45,9 @@ export async function POST(req: NextRequest) {
 
     return created(bin, 'Bin created successfully.')
   } catch (error) {
-    if (error instanceof z.ZodError) return validationFail(error)
+    if (error instanceof z.ZodError) {
+      return validationFail(error)
+    }
     console.error('[POST /api/bins]', error)
 
     return fail('Failed to create bin.')

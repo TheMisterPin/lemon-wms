@@ -17,7 +17,9 @@ export interface ErrorModalProps {
 }
 
 function parseDetails(raw: unknown): ErrorDetail[] {
-  if (!raw) return []
+  if (!raw) {
+    return []
+  }
 
   // Zod flatten() shape: { fieldErrors: { field: string[] }, formErrors: string[] }
   if (typeof raw === 'object' && raw !== null && 'fieldErrors' in raw) {
@@ -39,7 +41,9 @@ function parseDetails(raw: unknown): ErrorDetail[] {
   // Plain record
   if (typeof raw === 'object' && raw !== null && !Array.isArray(raw)) {
     return Object.entries(raw as Record<string, unknown>).flatMap(([field, val]) => {
-      if (Array.isArray(val)) return val.map((m) => ({ field, message: String(m) }))
+      if (Array.isArray(val)) {
+        return val.map((m) => ({ field, message: String(m) }))
+      }
 
       return [{ field, message: String(val) }]
     })
@@ -70,10 +74,14 @@ export function ErrorModal({
 
   // Close on Escape
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      return
+    }
 
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        onClose()
+      }
     }
 
     window.addEventListener('keydown', handler)
@@ -83,10 +91,14 @@ export function ErrorModal({
 
   // Trap focus inside modal
   useEffect(() => {
-    if (open) dialogRef.current?.focus()
+    if (open) {
+      dialogRef.current?.focus()
+    }
   }, [open])
 
-  if (!open) return null
+  if (!open) {
+    return null
+  }
 
   return (
     <div

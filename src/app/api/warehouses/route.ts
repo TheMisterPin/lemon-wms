@@ -1,16 +1,18 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse/schema'
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse/schema'
 import { createWarehouse } from '@/lib/entities/warehouses/create-warehouse'
 import { getWarehouses } from '@/lib/entities/warehouses/get-warehouses'
 import prisma from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   try {
     const data = await getWarehouses(prisma)
@@ -25,7 +27,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   if (!isOfficeRole(payload.role)) {
     return fail('Only office users can create warehouses.', 'FORBIDDEN', 403)
@@ -41,7 +45,9 @@ export async function POST(req: NextRequest) {
 
     return created(warehouse, 'Warehouse created successfully.')
   } catch (error) {
-    if (error instanceof z.ZodError) return validationFail(error)
+    if (error instanceof z.ZodError) {
+      return validationFail(error)
+    }
     console.error('[POST /api/warehouses]', error)
 
     return fail('Failed to create warehouse.')

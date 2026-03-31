@@ -11,10 +11,10 @@ async function updateItem(prisma: PrismaClient, id: string, data: Partial<ItemFo
       ...rest,
       ...(dimensions !== undefined
         ? {
-            dimensions: dimensions != null
-              ? (dimensions as Prisma.InputJsonValue)
-              : Prisma.JsonNull
-          }
+          dimensions: dimensions !== null
+            ? (dimensions as Prisma.InputJsonValue)
+            : Prisma.JsonNull
+        }
         : {})
     }
   })

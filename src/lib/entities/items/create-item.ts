@@ -8,7 +8,7 @@ async function createItem(prisma: PrismaClient, data: ItemFormValues) {
   return prisma.wARItem.create({
     data: {
       ...rest,
-      dimensions: dimensions != null
+      dimensions: dimensions !== null
         ? (dimensions as Prisma.InputJsonValue)
         : Prisma.JsonNull
     }

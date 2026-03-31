@@ -10,15 +10,15 @@ vi.mock('@/lib/prisma', () => ({
   default: {
     user: { findUnique: vi.fn() },
     userActivityEntry: { create: vi.fn().mockResolvedValue({}) },
-    refreshToken: { create: vi.fn().mockResolvedValue({}) },
-  },
+    refreshToken: { create: vi.fn().mockResolvedValue({}) }
+  }
 }))
 
 vi.mock('@/lib/auth/session', () => ({
   createDeviceLabel: vi.fn().mockReturnValue('test-label'),
   persistRefreshToken: vi.fn().mockResolvedValue(undefined),
   setAccessTokenCookie: vi.fn().mockResolvedValue(undefined),
-  setRefreshTokenCookie: vi.fn().mockResolvedValue(undefined),
+  setRefreshTokenCookie: vi.fn().mockResolvedValue(undefined)
 }))
 
 // ---------------------------------------------------------------------------
@@ -36,12 +36,13 @@ function makeRequest(body: unknown): NextRequest {
   return new NextRequest('http://localhost/api/auth/login', {
     method: 'POST',
     body: JSON.stringify(body),
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json' }
   })
 }
 
 async function buildUser(overrides: Record<string, unknown> = {}) {
   const passwordHash = await bcrypt.hash('correct-password', 1)
+
   return {
     id: 'user-1',
     email: 'admin@example.com',
@@ -50,7 +51,7 @@ async function buildUser(overrides: Record<string, unknown> = {}) {
     badgeNumber: 'USR-0001',
     loginType: 'CREDENTIAL',
     isActive: true,
-    ...overrides,
+    ...overrides
   }
 }
 
@@ -70,7 +71,7 @@ describe('POST /api/auth/login', () => {
     const req = new NextRequest('http://localhost/api/auth/login', {
       method: 'POST',
       body: 'not-json',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json' }
     })
     const res = await POST(req)
     expect(res.status).toBe(400)

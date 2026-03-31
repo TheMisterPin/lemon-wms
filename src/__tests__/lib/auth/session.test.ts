@@ -7,9 +7,9 @@ vi.mock('@/lib/prisma', () => ({
       create: vi.fn(),
       findFirst: vi.fn(),
       update: vi.fn(),
-      updateMany: vi.fn(),
-    },
-  },
+      updateMany: vi.fn()
+    }
+  }
 }))
 
 // next/headers is a Next.js runtime module — mock it for the Node test environment
@@ -17,8 +17,8 @@ vi.mock('next/headers', () => ({
   cookies: vi.fn().mockResolvedValue({
     set: vi.fn(),
     delete: vi.fn(),
-    get: vi.fn(),
-  }),
+    get: vi.fn()
+  })
 }))
 
 import { createDeviceLabel } from '@/lib/auth/session'

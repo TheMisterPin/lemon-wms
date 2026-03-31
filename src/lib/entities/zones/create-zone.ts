@@ -8,7 +8,7 @@ async function createZone(prisma: PrismaClient, data: ZoneFormValues) {
   return prisma.zone.create({
     data: {
       ...rest,
-      customPermissions: customPermissions != null
+      customPermissions: customPermissions !== null
         ? (customPermissions as Prisma.InputJsonValue)
         : Prisma.JsonNull
     }

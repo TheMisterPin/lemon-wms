@@ -19,13 +19,13 @@ export function MetricCard({
   value,
   sub,
   valueColor = 'text-dash-amber',
-  className,
+  className
 }: MetricCardProps) {
   return (
     <div
       className={cn(
         'flex min-w-[100px] flex-1 flex-col rounded-lg border border-dash-border bg-dash-card2 px-4 py-3',
-        className,
+        className
       )}
     >
       <span className="mb-1 text-xs text-dash-muted">{label}</span>

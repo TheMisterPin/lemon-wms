@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { signAccessToken, signRefreshToken, verifyToken } from '@/lib/auth/jwt'
 
@@ -25,7 +25,7 @@ describe('signAccessToken', () => {
       role: 'WAREHOUSE_WORKER',
       deviceId: 'd1',
       zoneId: 'z1',
-      warehouseId: 'w1',
+      warehouseId: 'w1'
     })
     const decoded = jwt.verify(token, SECRET) as Record<string, unknown>
     expect(decoded.deviceId).toBe('d1')

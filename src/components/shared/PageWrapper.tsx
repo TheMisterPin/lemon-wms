@@ -13,7 +13,7 @@ export default function PageWrapper({
   footer,
   sidebar,
   sidebarOpen = false,
-  children,
+  children
 }: PageWrapperProps) {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-brand-bg text-brand-text">

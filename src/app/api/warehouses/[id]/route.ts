@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse/schema'
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse/schema'
 import { deleteWarehouse } from '@/lib/entities/warehouses/delete-warehouse'
 import { getWarehouse } from '@/lib/entities/warehouses/get-warehouse'
 import { updateWarehouse } from '@/lib/entities/warehouses/update-warehouse'
@@ -13,13 +13,17 @@ type Params = { params: Promise<{ id: string }> }
 
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   const { id } = await params
 
   try {
     const warehouse = await getWarehouse(prisma, id)
-    if (!warehouse) return notFound('Warehouse')
+    if (!warehouse) {
+      return notFound('Warehouse')
+    }
 
     return ok(warehouse, 'Warehouse retrieved successfully.')
   } catch (error) {
@@ -31,7 +35,9 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 export async function PUT(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   if (!isOfficeRole(payload.role)) {
     return fail('Only office users can update warehouses.', 'FORBIDDEN', 403)
@@ -41,7 +47,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   try {
     const existing = await getWarehouse(prisma, id)
-    if (!existing) return notFound('Warehouse')
+    if (!existing) {
+      return notFound('Warehouse')
+    }
 
     const body = await req.json()
     const parsed = warehouseFormSchema.partial().parse(body)
@@ -49,7 +57,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     return ok(warehouse, 'Warehouse updated successfully.')
   } catch (error) {
-    if (error instanceof z.ZodError) return validationFail(error)
+    if (error instanceof z.ZodError) {
+      return validationFail(error)
+    }
     console.error('[PUT /api/warehouses/[id]]', error)
 
     return fail('Failed to update warehouse.')
@@ -58,7 +68,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 export async function DELETE(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   if (payload.role !== 'OWNER') {
     return fail('Only owners can delete warehouses.', 'FORBIDDEN', 403)
@@ -68,7 +80,9 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
   try {
     const existing = await getWarehouse(prisma, id)
-    if (!existing) return notFound('Warehouse')
+    if (!existing) {
+      return notFound('Warehouse')
+    }
 
     const warehouse = await deleteWarehouse(prisma, id)
 

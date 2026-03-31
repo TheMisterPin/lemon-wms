@@ -15,10 +15,10 @@ async function updateZone(
       ...rest,
       ...(customPermissions !== undefined
         ? {
-            customPermissions: customPermissions != null
-              ? (customPermissions as Prisma.InputJsonValue)
-              : Prisma.JsonNull
-          }
+          customPermissions: customPermissions !== null
+            ? (customPermissions as Prisma.InputJsonValue)
+            : Prisma.JsonNull
+        }
         : {})
     }
   })

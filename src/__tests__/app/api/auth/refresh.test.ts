@@ -10,7 +10,7 @@ vi.mock('@/lib/auth/session', () => ({
   revokeRefreshToken: vi.fn().mockResolvedValue(undefined),
   persistRefreshToken: vi.fn().mockResolvedValue(undefined),
   setAccessTokenCookie: vi.fn().mockResolvedValue(undefined),
-  setRefreshTokenCookie: vi.fn().mockResolvedValue(undefined),
+  setRefreshTokenCookie: vi.fn().mockResolvedValue(undefined)
 }))
 
 // ---------------------------------------------------------------------------
@@ -21,7 +21,7 @@ import { POST } from '@/app/api/auth/refresh/route'
 import {
   findValidRefreshToken,
   readRefreshTokenCookie,
-  revokeRefreshToken,
+  revokeRefreshToken
 } from '@/lib/auth/session'
 
 // ---------------------------------------------------------------------------
@@ -37,14 +37,14 @@ const activeUser = {
   email: 'owner@example.com',
   role: 'OWNER',
   badgeNumber: 'USR-0001',
-  isActive: true,
+  isActive: true
 }
 
 const validTokenRecord = {
   id: 'rt-1',
   deviceLabel: 'test-device',
   deviceId: 'dev-1',
-  user: activeUser,
+  user: activeUser
 }
 
 // ---------------------------------------------------------------------------
@@ -79,7 +79,7 @@ describe('POST /api/auth/refresh', () => {
     mockReadCookie().mockResolvedValue('raw-token-xyz')
     mockFindToken().mockResolvedValue({
       ...validTokenRecord,
-      user: { ...activeUser, isActive: false },
+      user: { ...activeUser, isActive: false }
     })
 
     const res = await POST()

@@ -1,16 +1,18 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { itemFormSchema } from '@/lib/components/configs/entities/item/schema'
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { itemFormSchema } from '@/lib/components/configs/entities/item/schema'
 import { createItem } from '@/lib/entities/items/create-item'
 import { getItems } from '@/lib/entities/items/get-items'
 import prisma from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   try {
     const { searchParams } = new URL(req.url)
@@ -29,7 +31,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
-  if (!payload) return unauthorized()
+  if (!payload) {
+    return unauthorized()
+  }
 
   if (!isOfficeRole(payload.role)) {
     return fail('Only office users can create items.', 'FORBIDDEN', 403)
@@ -42,7 +46,9 @@ export async function POST(req: NextRequest) {
 
     return created(item, 'Item created successfully.')
   } catch (error) {
-    if (error instanceof z.ZodError) return validationFail(error)
+    if (error instanceof z.ZodError) {
+      return validationFail(error)
+    }
     console.error('[POST /api/items]', error)
 
     return fail('Failed to create item.')
