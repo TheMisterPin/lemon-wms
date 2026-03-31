@@ -1,14 +1,10 @@
 import type { PrismaClient } from '@/generated/prisma'
-import { WarehouseFormValues } from '@/lib/components/configs/entities/warehouse/types'
+import type { WarehouseFormValues } from '@/lib/components/configs/entities/warehouse/types'
 
-type CreateWarehouseValues = Pick<WarehouseFormValues, 'name'>
+type CreateWarehouseInput = WarehouseFormValues & { createdById?: string }
 
-async function createWarehouse(prisma: PrismaClient, data: CreateWarehouseValues) {
-  const warehouse = await prisma.warehouse.create({
-    data
-  })
-
-  return warehouse
+async function createWarehouse(prisma: PrismaClient, data: CreateWarehouseInput) {
+  return prisma.warehouse.create({ data })
 }
 
 export { createWarehouse }

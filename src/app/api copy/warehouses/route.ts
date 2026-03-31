@@ -6,16 +6,12 @@ import { createWarehouse } from '@/lib/entities/warehouses/create-warehouse'
 import { getWarehouses } from '@/lib/entities/warehouses/get-warehouses'
 import prisma from '@/lib/prisma'
 
-const createWarehouseRequestSchema = warehouseFormSchema.pick({
-  name: true
-})
-
 export async function POST(req : NextRequest) {
 
   try {
-    const rawdata = createWarehouseRequestSchema.parse(await req.json())
-    const data = rawdata.name
-    const result = await createWarehouse(prisma, { name: data })
+    const body = await req.json()
+    const parsed = warehouseFormSchema.parse(body)
+    const result = await createWarehouse(prisma, parsed)
 
     return NextResponse.json({ success: true, data: result })
   } catch (error) {

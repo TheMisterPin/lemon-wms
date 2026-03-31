@@ -1,17 +1,46 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+import { z } from 'zod'
 
+import { zoneFormSchema } from '@/lib/components/configs/entities/zone/schema'
+import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
+import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { createZone } from '@/lib/entities/zones/create-zone'
 import { getZones } from '@/lib/entities/zones/get-zones'
 import prisma from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const payload = verifyAccessTokenFromRequest(req)
+  if (!payload) return unauthorized()
+
   try {
     const zones = await getZones(prisma)
-    const warehouseList = await prisma.warehouse.findMany({ select: { name: true } })
 
-    return NextResponse.json({ success: true, data: { zones: zones, warehouseList: warehouseList } })
+    return ok(zones, 'Zones retrieved successfully.')
   } catch (error) {
-    console.error('Failed to get zones from API:', error)
+    console.error('[GET /api/zones]', error)
 
-    return NextResponse.json({ error: 'Failed to get zones.' }, { status: 500 })
+    return fail('Failed to retrieve zones.')
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const payload = verifyAccessTokenFromRequest(req)
+  if (!payload) return unauthorized()
+
+  if (!isOfficeRole(payload.role)) {
+    return fail('Only office users can create zones.', 'FORBIDDEN', 403)
+  }
+
+  try {
+    const body = await req.json()
+    const parsed = zoneFormSchema.parse(body)
+    const zone = await createZone(prisma, parsed)
+
+    return created(zone, 'Zone created successfully.')
+  } catch (error) {
+    if (error instanceof z.ZodError) return validationFail(error)
+    console.error('[POST /api/zones]', error)
+
+    return fail('Failed to create zone.')
   }
 }

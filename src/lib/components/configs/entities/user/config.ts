@@ -1,137 +1,108 @@
-import { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
-import { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
-import { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
+import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
+import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 
-import { Warehouse, WarehouseFormValues } from './types'
+import type { User, UserFormValues } from './types'
 
-export const warehouseStatusOptions: SelectOption[] = [
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'INACTIVE', label: 'Inactive' },
-  { value: 'ARCHIVED', label: 'Archived' }
+export const roleOptions: SelectOption[] = [
+  { value: 'OWNER', label: 'Owner' },
+  { value: 'OFFICE_MANAGER', label: 'Office Manager' },
+  { value: 'OFFICE_WORKER', label: 'Office Worker' },
+  { value: 'WAREHOUSE_MANAGER', label: 'Warehouse Manager' },
+  { value: 'WAREHOUSE_WORKER', label: 'Warehouse Worker' }
 ]
 
-export const warehouseFormConfig: GenericFormConfig<WarehouseFormValues> = {
+export const loginTypeOptions: SelectOption[] = [
+  { value: 'CREDENTIAL', label: 'Email + Password' },
+  { value: 'BADGE_PIN', label: 'Badge + PIN' },
+  { value: 'BOTH', label: 'Both' }
+]
+
+export const userFormConfig: GenericFormConfig<UserFormValues> = {
   columns: 2,
-  submitLabel: 'Save warehouse',
+  submitLabel: 'Save user',
   defaultValues: {
-    name: '',
-    address: '',
-    timezone: '',
-    currency: 'USD',
-    status: 'ACTIVE'
+    email: null,
+    password: null,
+    pin: null,
+    role: 'OFFICE_WORKER',
+    loginType: 'CREDENTIAL',
+    isActive: true
   },
   fields: [
     {
-      name: 'name',
-      label: 'Warehouse name',
-      type: 'text',
-      placeholder: 'Main distribution center',
-      required: true
+      name: 'email',
+      label: 'Email address',
+      type: 'email',
+      placeholder: 'user@company.com'
     },
     {
-      name: 'status',
-      label: 'Status',
+      name: 'role',
+      label: 'Role',
       type: 'select',
-      options: warehouseStatusOptions,
+      options: roleOptions,
       required: true
     },
     {
-      name: 'timezone',
-      label: 'Timezone',
-      type: 'text',
-      placeholder: 'Europe/London',
-      description: 'Use a valid IANA timezone identifier.',
+      name: 'loginType',
+      label: 'Login type',
+      type: 'select',
+      options: loginTypeOptions,
       required: true
     },
     {
-      name: 'currency',
-      label: 'Currency',
-      type: 'text',
-      placeholder: 'USD',
-      description: 'Three-letter ISO 4217 currency code.',
-      required: true
+      name: 'isActive',
+      label: 'Active',
+      type: 'checkbox'
     },
     {
-      name: 'address',
-      label: 'Address',
+      name: 'password',
+      label: 'Password',
+      type: 'password',
+      placeholder: '••••••••',
+      description: 'Required for credential login. Minimum 8 characters.'
+    },
+    {
+      name: 'pin',
+      label: 'PIN',
       type: 'text',
-      placeholder: '12 Orchard Lane, London',
-      required: true,
-      colSpan: 2
+      placeholder: '••••',
+      description: 'Required for badge + PIN login. Exactly 4 digits.'
     }
   ]
 }
 
-export const warehouseTableColumns: TableColumnConfig<Warehouse>[] = [
-  {
-    label: 'Name',
-    accessor: 'name'
-  },
-  {
-    label: 'Timezone',
-    accessor: 'timezone'
-  },
-  {
-    label: 'Currency',
-    accessor: 'currency'
-  },
-  {
-    label: 'Status',
-    accessor: 'status'
-  },
-  {
-    label: 'Created',
-    accessor: 'createdAt'
-  }
+export const userTableColumns: TableColumnConfig<User>[] = [
+  { label: 'Badge', accessor: 'badgeNumber' },
+  { label: 'Email', accessor: 'email' },
+  { label: 'Role', accessor: 'role' },
+  { label: 'Login type', accessor: 'loginType' },
+  { label: 'Active', accessor: 'isActive' },
+  { label: 'Created', accessor: 'createdAt' }
 ]
 
-export const warehouseFactboxSections: FactboxSectionConfig<Warehouse>[] = [
+export const userFactboxSections: FactboxSectionConfig<User>[] = [
   {
-    title: 'Overview',
+    title: 'Identity',
     fields: [
-      {
-        label: 'Name',
-        accessor: 'name'
-      },
-      {
-        label: 'Status',
-        accessor: 'status'
-      },
-      {
-        label: 'Created',
-        accessor: 'createdAt'
-      }
+      { label: 'Badge number', accessor: 'badgeNumber' },
+      { label: 'Email', accessor: 'email' },
+      { label: 'Role', accessor: 'role' },
+      { label: 'Login type', accessor: 'loginType' },
+      { label: 'Active', accessor: 'isActive' }
     ]
   },
   {
-    title: 'Operations',
+    title: 'Audit',
     fields: [
-      {
-        label: 'Timezone',
-        accessor: 'timezone'
-      },
-      {
-        label: 'Currency',
-        accessor: 'currency'
-      },
-      {
-        label: 'Address',
-        accessor: 'address'
-      },
-      {
-        label: 'Deleted at',
-        accessor: 'deletedAt'
-      },
-      {
-        label: 'Created by',
-        accessor: 'createdById'
-      }
+      { label: 'Created at', accessor: 'createdAt' },
+      { label: 'Deleted at', accessor: 'deletedAt' }
     ]
   }
 ]
 
-export const warehouseCrudConfig = {
-  form: warehouseFormConfig,
-  table: warehouseTableColumns,
-  factbox: warehouseFactboxSections
+export const userCrudConfig = {
+  form: userFormConfig,
+  table: userTableColumns,
+  factbox: userFactboxSections
 } as const

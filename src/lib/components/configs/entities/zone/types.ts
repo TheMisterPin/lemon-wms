@@ -1,26 +1,7 @@
-import type { ZoneType } from '@/types/models/enums'
+import { z } from 'zod'
 
-export type Zone = {
-  id: string
-  warehouseId: string
-  name: string
-  type: ZoneType
-  customPermissions: Record<string, unknown> | null
-  isActive: boolean
-  defaultReceivingBinId: string | null
-  defaultQuarantineBinId: string | null
-  defaultOutgoingBinId: string | null
-  deletedAt: Date | null
-  createdAt: Date
-}
+import { zoneFormSchema, zoneSchema, zoneTypeSchema } from './schema'
 
-export type ZoneFormValues = {
-  warehouseId: string
-  name: string
-  type: ZoneType
-  customPermissions: Record<string, unknown> | null
-  isActive: boolean
-  defaultReceivingBinId: string | null
-  defaultQuarantineBinId: string | null
-  defaultOutgoingBinId: string | null
-}
+export type Zone = z.infer<typeof zoneSchema>
+export type ZoneFormValues = z.infer<typeof zoneFormSchema>
+export type ZoneTypeValue = z.infer<typeof zoneTypeSchema>
