@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 import { useAuthStore } from '@/lib/auth/store'
 import type { AuthUser } from '@/types'
@@ -13,6 +13,7 @@ type RefreshResponse = {
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const setAuth = useAuthStore((s) => s.setAuth)
   const clearAuth = useAuthStore((s) => s.clearAuth)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -34,6 +35,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled) {
           clearAuth()
         }
+      } finally {
+        if (!cancelled) {
+          setReady(true)
+        }
       }
     }
 
@@ -43,6 +48,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       cancelled = true
     }
   }, [setAuth, clearAuth])
+
+  if (!ready) {
+    return null
+  }
 
   return <>{children}</>
 }
