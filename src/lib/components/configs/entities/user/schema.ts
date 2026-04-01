@@ -14,6 +14,8 @@ export const roleSchema = z.enum(roleValues)
 export const loginTypeSchema = z.enum(loginTypeValues)
 
 export const userFormSchema = z.object({
+  firstName: z.string().min(1, 'First name is required.'),
+  lastName: z.string().min(1, 'Last name is required.'),
   email: z.string().email('Must be a valid email.').nullable().optional(),
   password: z
     .string()

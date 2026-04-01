@@ -1,12 +1,14 @@
 import bcrypt from 'bcrypt'
 
-import type { PrismaClient } from '@/generated/prisma'
+import type { LoginType, PrismaClient, Role } from '@/generated/prisma'
 import { generateUserSerial } from '@/utils/serials'
 
 type CreateUserInput = {
   email?: string | null
   password?: string | null
   pin?: string | null
+  firstName: string
+  lastName: string
   role: 'OWNER' | 'OFFICE_MANAGER' | 'OFFICE_WORKER' | 'WAREHOUSE_MANAGER' | 'WAREHOUSE_WORKER'
   loginType: 'CREDENTIAL' | 'BADGE_PIN' | 'BOTH'
   isActive?: boolean
@@ -23,12 +25,14 @@ async function createUser(prisma: PrismaClient, data: CreateUserInput) {
 
     data: {
       id: newID,
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email ?? null,
       passwordHash,
       pinHash,
       badgeNumber,
-      role: data.role,
-      loginType: data.loginType,
+      role: data.role as Role,
+      loginType: data.loginType as LoginType,
       isActive: data.isActive ?? true
     }
   })

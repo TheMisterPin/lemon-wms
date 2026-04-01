@@ -7,7 +7,7 @@ async function runSeedWarehouses() {
 
   const result = await seedWarehouses(prisma)
 
-  console.warn(`Seeded ${result.warehousesSeeded} warehouses.`)
+  console.warn(`Seeded ${result.count} warehouses.`)
   console.warn('Done.')
 }
 
