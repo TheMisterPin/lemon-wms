@@ -1,20 +1,28 @@
+'use client'
+
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import PageWrapper from '@/components/shared/PageWrapper'
-import LemonHeader from '@/components/typography/lemon-header'
-
-function WarehouseTopBar() {
-  return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-brand-border bg-brand-surface px-4">
-      <LemonHeader />
-      <span className="text-sm font-medium text-brand-subtle">Warehouse Floor</span>
-    </header>
-  )
-}
+import WarehouseHeader from './WarehouseHeader'
+import WarehouseFooter from './WarehouseFooter'
+import WarehouseSidebar from './WarehouseSidebar'
 
 export default function WarehouseShell({ children }: { children: ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
-    <PageWrapper header={<WarehouseTopBar />}>
+    <PageWrapper
+      header={
+        <WarehouseHeader
+          sidebarOpen={sidebarOpen}
+          onMenuToggle={() => setSidebarOpen((v) => !v)}
+        />
+      }
+      sidebar={<WarehouseSidebar onClose={() => setSidebarOpen(false)} />}
+      sidebarOpen={sidebarOpen}
+      footer={<WarehouseFooter />}
+    >
       {children}
     </PageWrapper>
   )
