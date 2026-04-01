@@ -3,9 +3,9 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { zoneFormSchema } from '@/lib/components/configs/entities/zone/schema'
-import { createZone } from '@/lib/entities/zones/create-zone'
-import { getZones } from '@/lib/entities/zones/get-zones'
+import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
+import { createBin } from '@/lib/entities/bins/create-bin'
+import { getBins } from '@/lib/entities/bins/get-bins'
 import prisma from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
@@ -16,14 +16,15 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url)
+    const zoneId = searchParams.get('zoneId') ?? undefined
     const warehouseId = searchParams.get('warehouseId') ?? undefined
-    const zones = await getZones(prisma, { warehouseId })
+    const bins = await getBins(prisma, { zoneId, warehouseId })
 
-    return ok(zones, 'Zones retrieved successfully.')
+    return ok(bins, 'Bins retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/zones]', error)
+    console.error('[GET /api/bins]', error)
 
-    return fail('Failed to retrieve zones.')
+    return fail('Failed to retrieve bins.')
   }
 }
 
@@ -34,21 +35,21 @@ export async function POST(req: NextRequest) {
   }
 
   if (!isOfficeRole(payload.role)) {
-    return fail('Only office users can create zones.', 'FORBIDDEN', 403)
+    return fail('Only office users can create bins.', 'FORBIDDEN', 403)
   }
 
   try {
     const body = await req.json()
-    const parsed = zoneFormSchema.parse(body)
-    const zone = await createZone(prisma, parsed)
+    const parsed = binFormSchema.parse(body)
+    const bin = await createBin(prisma, parsed)
 
-    return created(zone, 'Zone created successfully.')
+    return created(bin, 'Bin created successfully.')
   } catch (error) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
-    console.error('[POST /api/zones]', error)
+    console.error('[POST /api/bins]', error)
 
-    return fail('Failed to create zone.')
+    return fail('Failed to create bin.')
   }
 }

@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 
 import type { PrismaClient } from '@/generated/prisma'
+import { generateUserSerial } from '@/utils/serials'
 
 type CreateUserInput = {
   email?: string | null
@@ -17,9 +18,11 @@ async function createUser(prisma: PrismaClient, data: CreateUserInput) {
     data.pin ? bcrypt.hash(data.pin, 10) : Promise.resolve(null),
     generateBadgeNumber(prisma)
   ])
+  const newID = await generateUserSerial(prisma)
+  const user =  prisma.user.create({
 
-  return prisma.user.create({
     data: {
+      id: newID,
       email: data.email ?? null,
       passwordHash,
       pinHash,

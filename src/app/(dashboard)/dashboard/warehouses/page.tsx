@@ -1,11 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Boxes, MapPinned } from 'lucide-react'
 
 import CreateWarehouseForm from '@/app/(dashboard)/dashboard/warehouses/components/create-warehouse-form'
 import PageWithGrid from '@/components/pages/page-with-grid'
+import { Button } from '@/components/ui/button'
+import { warehouseTableColumns } from '@/lib/components/configs/entities/warehouse/config'
 import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
-import { warehouseTableColumns } from '@/lib/components/configs/forms/warehouse-form-config'
+import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 
 type WarehouseApiResponse = {
   success: boolean
@@ -16,6 +20,7 @@ type WarehouseApiResponse = {
 }
 
 export default function WarehouseDashboardPage() {
+  const router = useRouter()
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -24,6 +29,48 @@ export default function WarehouseDashboardPage() {
     // eslint-disable-next-line no-console
     console.log('Clicked warehouse row:', row)
   }
+
+  const columns = useMemo<TableColumnConfig<Warehouse>[]>(() => ([
+    ...warehouseTableColumns,
+    {
+      label: 'Zones',
+      sortable: false,
+      cell: (row) => (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="bg-dash-card"
+          onClick={(event) => {
+            event.stopPropagation()
+            router.push(`/dashboard/zones?warehouseId=${encodeURIComponent(row.id)}`)
+          }}
+        >
+          <MapPinned data-icon="inline-start" />
+          View zones
+        </Button>
+      )
+    },
+    {
+      label: 'Bins',
+      sortable: false,
+      cell: (row) => (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="bg-dash-card"
+          onClick={(event) => {
+            event.stopPropagation()
+            router.push(`/dashboard/bins?warehouseId=${encodeURIComponent(row.id)}`)
+          }}
+        >
+          <Boxes data-icon="inline-start" />
+          View bins
+        </Button>
+      )
+    }
+  ]), [router])
 
   useEffect(() => {
     let isMounted = true
@@ -82,7 +129,7 @@ export default function WarehouseDashboardPage() {
       headerActions={<CreateWarehouseForm />}
       isLoading={isLoading}
       error={error}
-      tableData={{ columns: warehouseTableColumns, records: warehouses }}
+      tableData={{ columns, records: warehouses }}
       onRowClick={handleRowClick}
     />
   )

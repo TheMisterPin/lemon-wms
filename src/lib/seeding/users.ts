@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 
 import { LoginType, Role } from '@/generated/prisma'
 import type { PrismaClient } from '@/generated/prisma'
+import { generateUserSerial } from '@/utils/serials'
 
 const SALT_ROUNDS = 10
 
@@ -54,11 +55,12 @@ export async function seedUsers(prisma: PrismaClient) {
   for (const user of users) {
     const passwordHash = user.password ? await bcrypt.hash(user.password, SALT_ROUNDS) : null
     const pinHash = user.pin ? await bcrypt.hash(user.pin, SALT_ROUNDS) : null
-
+    const newID = await generateUserSerial(prisma)
     await prisma.user.upsert({
       where: { badgeNumber: user.badgeNumber },
       update: {},
       create: {
+        id: newID,
         email: user.email ?? null,
         passwordHash,
         badgeNumber: user.badgeNumber,

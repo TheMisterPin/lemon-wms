@@ -4,6 +4,25 @@ import type { TableColumnConfig } from '@/types/components/table/generic-table.t
 
 import type { Bin, BinFormValues } from './types'
 
+export type BinTableRow = {
+  id: string
+  zoneId: string
+  zoneName: string
+  warehouseId: string
+  warehouseName: string
+  name: string
+  code: string
+  type: string
+  isBlocked: boolean
+  createdAt: string
+  deletedAt: string | null
+}
+
+export type BinFactboxRecord = Bin & {
+  zoneName: string
+  warehouseName: string
+}
+
 export const binTypeOptions: SelectOption[] = [
   { value: 'RECEIVING', label: 'Receiving' },
   { value: 'STORAGE', label: 'Storage' },
@@ -15,94 +34,104 @@ export const binTypeOptions: SelectOption[] = [
   { value: 'CUSTOM', label: 'Custom' }
 ]
 
-export const binFormConfig: GenericFormConfig<BinFormValues> = {
-  columns: 2,
-  submitLabel: 'Save bin',
-  defaultValues: {
-    zoneId: '',
-    warehouseId: '',
-    name: '',
-    code: '',
-    type: 'STORAGE',
-    isBlocked: false,
-    blockReason: null,
-    maxWeightKg: null,
-    maxVolumeM3: null
-  },
-  fields: [
-    {
-      name: 'name',
-      label: 'Bin name',
-      type: 'text',
-      placeholder: 'A-01-01',
-      required: true
+export function createBinFormConfig(
+  zoneOptions: SelectOption[],
+  warehouseOptions: SelectOption[]
+): GenericFormConfig<BinFormValues> {
+  return {
+    columns: 2,
+    submitLabel: 'Save bin',
+    defaultValues: {
+      zoneId: '',
+      warehouseId: '',
+      name: '',
+      code: '',
+      type: 'STORAGE',
+      isBlocked: false,
+      blockReason: null,
+      maxWeightKg: null,
+      maxVolumeM3: null
     },
-    {
-      name: 'code',
-      label: 'Bin code',
-      type: 'text',
-      placeholder: 'WH1-A-01-01',
-      description: 'Unique identifier scanned on the floor.',
-      required: true
-    },
-    {
-      name: 'type',
-      label: 'Bin type',
-      type: 'select',
-      options: binTypeOptions,
-      required: true
-    },
-    {
-      name: 'isBlocked',
-      label: 'Blocked',
-      type: 'checkbox'
-    },
-    {
-      name: 'zoneId',
-      label: 'Zone',
-      type: 'text',
-      placeholder: 'Zone ID',
-      required: true
-    },
-    {
-      name: 'warehouseId',
-      label: 'Warehouse',
-      type: 'text',
-      placeholder: 'Warehouse ID',
-      required: true
-    },
-    {
-      name: 'maxWeightKg',
-      label: 'Max weight (kg)',
-      type: 'number',
-      placeholder: '500'
-    },
-    {
-      name: 'maxVolumeM3',
-      label: 'Max volume (m³)',
-      type: 'number',
-      placeholder: '2.5'
-    },
-    {
-      name: 'blockReason',
-      label: 'Block reason',
-      type: 'text',
-      placeholder: 'Reason for blocking',
-      colSpan: 2
-    }
-  ]
+    fields: [
+      {
+        name: 'name',
+        label: 'Bin name',
+        type: 'text',
+        placeholder: 'A-01-01',
+        required: true
+      },
+      {
+        name: 'code',
+        label: 'Bin code',
+        type: 'text',
+        placeholder: 'WH1-A-01-01',
+        description: 'Unique identifier scanned on the floor.',
+        required: true
+      },
+      {
+        name: 'type',
+        label: 'Bin type',
+        type: 'select',
+        options: binTypeOptions,
+        required: true
+      },
+      {
+        name: 'isBlocked',
+        label: 'Blocked',
+        type: 'checkbox'
+      },
+      {
+        name: 'zoneId',
+        label: 'Zone',
+        type: 'select',
+        options: zoneOptions,
+        placeholder: 'Select a zone',
+        required: true
+      },
+      {
+        name: 'warehouseId',
+        label: 'Warehouse',
+        type: 'select',
+        options: warehouseOptions,
+        placeholder: 'Select a warehouse',
+        required: true
+      },
+      {
+        name: 'maxWeightKg',
+        label: 'Max weight (kg)',
+        type: 'number',
+        placeholder: '500'
+      },
+      {
+        name: 'maxVolumeM3',
+        label: 'Max volume (m³)',
+        type: 'number',
+        placeholder: '2.5'
+      },
+      {
+        name: 'blockReason',
+        label: 'Block reason',
+        type: 'text',
+        placeholder: 'Reason for blocking',
+        colSpan: 2
+      }
+    ]
+  }
 }
 
-export const binTableColumns: TableColumnConfig<Bin>[] = [
+export const binFormConfig = createBinFormConfig([], [])
+
+export const binTableColumns: TableColumnConfig<BinTableRow>[] = [
   { label: 'Code', accessor: 'code' },
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
   { label: 'Blocked', accessor: 'isBlocked' },
-  { label: 'Zone', accessor: 'zoneId' },
+  { label: 'Zone', accessor: 'zoneName' },
+  { label: 'Warehouse', accessor: 'warehouseName' },
   { label: 'Created', accessor: 'createdAt' }
 ]
 
-export const binFactboxSections: FactboxSectionConfig<Bin>[] = [
+export const binFactboxSections: FactboxSectionConfig<BinFactboxRecord>[] = [
   {
     title: 'Overview',
     fields: [
@@ -118,8 +147,8 @@ export const binFactboxSections: FactboxSectionConfig<Bin>[] = [
     fields: [
       { label: 'Max weight (kg)', accessor: 'maxWeightKg' },
       { label: 'Max volume (m³)', accessor: 'maxVolumeM3' },
-      { label: 'Zone', accessor: 'zoneId' },
-      { label: 'Warehouse', accessor: 'warehouseId' },
+      { label: 'Zone', accessor: 'zoneName' },
+      { label: 'Warehouse', accessor: 'warehouseName' },
       { label: 'Created', accessor: 'createdAt' },
       { label: 'Deleted at', accessor: 'deletedAt' }
     ]
