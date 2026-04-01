@@ -41,7 +41,7 @@ export const setAccessTokenCookie = async (token: string): Promise<void> => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 15 // 15 minutes, matches JWT_ACCESS_EXPIRY
+    maxAge: 60 * 60 * 24 * 7 // 7 days — cookie persists; JWT itself expires in 15m
   })
 }
 

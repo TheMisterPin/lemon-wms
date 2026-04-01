@@ -12,6 +12,25 @@ const api = axios.create({
   }
 })
 
+// Track in-flight refresh to avoid concurrent refresh calls
+let refreshPromise: Promise<string | null> | null = null
+
+async function attemptTokenRefresh(): Promise<string | null> {
+  try {
+    const res = await axios.post('/api/auth/refresh')
+    const { accessToken, user } = res.data
+
+    if (accessToken && user) {
+      useAuthStore.getState().setAuth(accessToken, user)
+      return accessToken
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
+
 // Request interceptor — attach Bearer token from Zustand auth store
 api.interceptors.request.use(
   (config) => {
@@ -26,19 +45,38 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response interceptor — handle 401 by clearing auth state
+// Response interceptor — attempt refresh on 401, then retry original request
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const hadToken = !!error.config?.headers?.Authorization
+  async (error) => {
+    const originalRequest = error.config
 
-      if (hadToken) {
-        useAuthStore.getState().clearAuth()
+    // Only attempt refresh once per request, and only if we had a token
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retried &&
+      originalRequest?.headers?.Authorization
+    ) {
+      originalRequest._retried = true
 
-        if (typeof window !== 'undefined' && window.location.pathname !== '/') {
-          window.location.href = '/login'
-        }
+      // Deduplicate concurrent refresh attempts
+      if (!refreshPromise) {
+        refreshPromise = attemptTokenRefresh().finally(() => {
+          refreshPromise = null
+        })
+      }
+
+      const newToken = await refreshPromise
+
+      if (newToken) {
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        return api(originalRequest)
+      }
+
+      // Refresh failed — clear auth and redirect
+      useAuthStore.getState().clearAuth()
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.href = '/login'
       }
     }
 

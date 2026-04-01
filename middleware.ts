@@ -15,21 +15,46 @@ const getTokenFromCookie = (request: NextRequest): string | null => {
   return request.cookies.get('access_token')?.value ?? null
 }
 
-const resolveAuthPayload = (request: NextRequest): AccessTokenPayload | null => {
+/**
+ * Decode a JWT without verifying expiry — used to extract the payload
+ * from an expired-but-present access token so the middleware can let
+ * the request through for client-side refresh.
+ */
+const decodeTokenUnsafe = (token: string): AccessTokenPayload | null => {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const payload = JSON.parse(atob(parts[1]))
+    if (payload.userId && payload.role) return payload as AccessTokenPayload
+    return null
+  } catch {
+    return null
+  }
+}
+
+type AuthResult = {
+  payload: AccessTokenPayload | null
+  expired: boolean
+}
+
+const resolveAuthPayload = (request: NextRequest): AuthResult => {
   const headerPayload = verifyAccessTokenFromRequest(request)
   if (headerPayload) {
-    return headerPayload
+    return { payload: headerPayload, expired: false }
   }
 
   const cookieToken = getTokenFromCookie(request)
   if (!cookieToken) {
-    return null
+    return { payload: null, expired: false }
   }
 
   try {
-    return verifyToken<AccessTokenPayload>(cookieToken)
+    return { payload: verifyToken<AccessTokenPayload>(cookieToken), expired: false }
   } catch {
-    return null
+    // Token exists but is expired — decode it so we can still route correctly
+    // and let the client-side refresh handle getting a new token
+    const decoded = decodeTokenUnsafe(cookieToken)
+    return { payload: decoded, expired: !!decoded }
   }
 }
 
@@ -52,7 +77,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const payload = resolveAuthPayload(request)
+  const { payload, expired } = resolveAuthPayload(request)
 
   // Unauthenticated: redirect to /login for pages, 401 for API
   if (!payload) {
@@ -64,6 +89,17 @@ export function middleware(request: NextRequest) {
     }
 
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Token expired but present — let page requests through so client-side
+  // AuthProvider can refresh the token. Block API requests with 401.
+  if (expired) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Token expired' }, { status: 401 })
+    }
+
+    // Let the page load — AuthProvider will call /api/auth/refresh
+    return NextResponse.next()
   }
 
   // Authenticated: redirect away from auth pages and root
