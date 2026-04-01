@@ -1,27 +1,35 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useEffect, useState } from 'react'
 
+import CreateZoneForm from '@/app/(dashboard)/dashboard/zones/components/create-zone-form'
 import PageWithGrid from '@/components/pages/page-with-grid'
 import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
-import { warehouseTableColumns } from '@/lib/components/configs/forms/warehouse-form-config'
+import { zoneTableColumns, type ZoneTableRow } from '@/lib/components/configs/entities/zone/config'
+import type { SelectOption } from '@/types/components/form/generic-form.types'
 
-type ZonesApiResponse = {
+type ZoneApiRecord = {
+  id: string
+  warehouseId: string
+  name: string
+  type: string
+  isActive: boolean
+  createdAt: string
+  deletedAt: string | null
+}
+
+type ApiPayload<T> = {
   success: boolean
-  data: Array<Omit<Warehouse, 'createdAt' | 'deletedAt'> & {
-    createdAt: string
-    deletedAt: string | null
-  }>
+  data: T
 }
 
 export default function ZonesHomePage() {
-  const [zones, setZones] = useState<any[]>([])
-  const [warehouseList, setWarehouseList] = useState<string[]>([])
+  const [zones, setZones] = useState<ZoneTableRow[]>([])
+  const [warehouseList, setWarehouseList] = useState<SelectOption[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  function handleRowClick(row: any) {
+  function handleRowClick(row: ZoneTableRow) {
     // eslint-disable-next-line no-console
     console.log('Clicked zone row:', row)
   }
@@ -29,35 +37,58 @@ export default function ZonesHomePage() {
   useEffect(() => {
     let isMounted = true
 
-    async function loadZones() {
+    async function loadData() {
       try {
-        const response = await fetch('/api/zones', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
+        const [zonesResp, warehousesResp] = await Promise.all([
+          fetch('/api/zones', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          }),
+          fetch('/api/warehouses', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          })
+        ])
 
-        if (!response.ok) {
+        if (!zonesResp.ok) {
           throw new Error('Failed to load zones.')
         }
 
-        const payload = await response.json()
+        if (!warehousesResp.ok) {
+          throw new Error('Failed to load warehouses.')
+        }
+
+        const zonesPayload = (await zonesResp.json()) as ApiPayload<ZoneApiRecord[]>
+        const warehousesPayload = (await warehousesResp.json()) as ApiPayload<Warehouse[]>
+
         if (!isMounted) {
           return
         }
+
+        const warehouseOptions = Array.isArray(warehousesPayload.data)
+          ? warehousesPayload.data.map((warehouse) => ({ label: warehouse.name, value: warehouse.id }))
+          : []
+
+        const warehouseNameMap = new Map(warehouseOptions.map((warehouse) => [warehouse.value, warehouse.label]))
 
         setZones(
-          payload.data.zones
+          Array.isArray(zonesPayload.data)
+            ? zonesPayload.data.map((zone) => ({
+              ...zone,
+              warehouseName: warehouseNameMap.get(zone.warehouseId) ?? zone.warehouseId
+            }))
+            : []
         )
-        setWarehouseList(payload.data.warehouseList.map((warehouse : any) => warehouse.name))
+
+        setWarehouseList(warehouseOptions)
         setError(null)
-      } catch {
+      } catch (err) {
         if (!isMounted) {
           return
         }
 
-        setError('Unable to load zones.')
+        console.error(err)
+        setError('Unable to load zones and warehouses.')
       } finally {
         if (isMounted) {
           setIsLoading(false)
@@ -65,7 +96,7 @@ export default function ZonesHomePage() {
       }
     }
 
-    void loadZones()
+    void loadData()
 
     return () => {
       isMounted = false
@@ -73,14 +104,16 @@ export default function ZonesHomePage() {
   }, [])
 
   return (
+    <>
 
-    <PageWithGrid
-      title='Zones'
-      headerActions={null}
-      isLoading={isLoading}
-      error={error}
-      tableData={{ columns: warehouseTableColumns, records: zones }}
-      onRowClick={handleRowClick}
-    />
+      <PageWithGrid
+        title='Zones'
+        headerActions={<CreateZoneForm warehouseList={warehouseList} />}
+        isLoading={isLoading}
+        error={error}
+        tableData={{ columns: zoneTableColumns, records: zones }}
+        onRowClick={handleRowClick}
+      />
+    </>
   )
 }

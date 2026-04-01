@@ -7,6 +7,7 @@ import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse
 import { createWarehouse } from '@/lib/entities/warehouses/create-warehouse'
 import { getWarehouses } from '@/lib/entities/warehouses/get-warehouses'
 import prisma from '@/lib/prisma'
+import { generateWarehouseSerial } from '@/utils/serials/warehouse-serial'
 
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
@@ -38,9 +39,11 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const parsed = warehouseFormSchema.parse(body)
+    const id = await generateWarehouseSerial()
     const warehouse = await createWarehouse(prisma, {
       ...parsed,
-      createdById: payload.userId
+      createdById: payload.userId,
+      id: id
     })
 
     return created(warehouse, 'Warehouse created successfully.')

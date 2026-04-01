@@ -35,9 +35,9 @@ export function CheckboxInput({
       orientation="horizontal"
       data-invalid={!!error || undefined}
       data-disabled={disabled || undefined}
-      className="rounded-lg border border-brand-form-border bg-brand-form-surface px-4 py-3.5"
+      className="min-h-11 rounded-lg border border-brand-form-border bg-brand-form-surface px-4 py-2.5"
     >
-      <div className="flex items-start gap-3">
+      <div className="flex min-h-6 items-center gap-3">
         <Checkbox
           id={id}
           checked={value}
@@ -45,7 +45,7 @@ export function CheckboxInput({
           onBlur={onBlur}
           disabled={disabled}
           aria-invalid={!!error}
-          className="mt-0.5 border-brand-form-border bg-brand-form-surface data-[state=checked]:border-brand-form-focus data-[state=checked]:bg-brand-form-focus data-[state=checked]:text-brand-button-text"
+          className="border-brand-form-border bg-brand-form-surface data-[state=checked]:border-brand-form-focus data-[state=checked]:bg-brand-form-focus data-[state=checked]:text-brand-button-text"
         />
         <FieldContent>
           <FieldLabel htmlFor={id} className="text-sm font-medium text-brand-form-label">

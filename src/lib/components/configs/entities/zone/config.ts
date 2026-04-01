@@ -4,6 +4,21 @@ import type { TableColumnConfig } from '@/types/components/table/generic-table.t
 
 import type { Zone, ZoneFormValues } from './types'
 
+export type ZoneTableRow = {
+  id: string
+  warehouseId: string
+  warehouseName: string
+  name: string
+  type: string
+  isActive: boolean
+  createdAt: string
+  deletedAt: string | null
+}
+
+export type ZoneFactboxRecord = Zone & {
+  warehouseName: string
+}
+
 export const zoneTypeOptions: SelectOption[] = [
   { value: 'RECEIVING', label: 'Receiving' },
   { value: 'STORAGE', label: 'Storage' },
@@ -14,58 +29,65 @@ export const zoneTypeOptions: SelectOption[] = [
   { value: 'CUSTOM', label: 'Custom' }
 ]
 
-export const zoneFormConfig: GenericFormConfig<ZoneFormValues> = {
-  columns: 2,
-  submitLabel: 'Save zone',
-  defaultValues: {
-    warehouseId: '',
-    name: '',
-    type: 'STORAGE',
-    isActive: true,
-    customPermissions: null,
-    defaultReceivingBinId: null,
-    defaultQuarantineBinId: null,
-    defaultOutgoingBinId: null
-  },
-  fields: [
-    {
-      name: 'name',
-      label: 'Zone name',
-      type: 'text',
-      placeholder: 'Main storage zone',
-      required: true
+export function createZoneFormConfig(
+  warehouseOptions: SelectOption[]
+): GenericFormConfig<ZoneFormValues> {
+  return {
+    columns: 2,
+    submitLabel: 'Save zone',
+    defaultValues: {
+      warehouseId: '',
+      name: '',
+      type: 'STORAGE',
+      isActive: true,
+      customPermissions: null,
+      defaultReceivingBinId: null,
+      defaultQuarantineBinId: null,
+      defaultOutgoingBinId: null
     },
-    {
-      name: 'type',
-      label: 'Zone type',
-      type: 'select',
-      options: zoneTypeOptions,
-      required: true
-    },
-    {
-      name: 'warehouseId',
-      label: 'Warehouse',
-      type: 'text',
-      placeholder: 'Warehouse ID',
-      required: true
-    },
-    {
-      name: 'isActive',
-      label: 'Active',
-      type: 'checkbox'
-    }
-  ]
+    fields: [
+      {
+        name: 'name',
+        label: 'Zone name',
+        type: 'text',
+        placeholder: 'Main storage zone',
+        required: true
+      },
+      {
+        name: 'type',
+        label: 'Zone type',
+        type: 'select',
+        options: zoneTypeOptions,
+        required: true
+      },
+      {
+        name: 'warehouseId',
+        label: 'Warehouse',
+        type: 'select',
+        options: warehouseOptions,
+        placeholder: 'Select a warehouse',
+        required: true
+      },
+      {
+        name: 'isActive',
+        label: 'Active',
+        type: 'checkbox'
+      }
+    ]
+  }
 }
 
-export const zoneTableColumns: TableColumnConfig<Zone>[] = [
+export const zoneFormConfig = createZoneFormConfig([])
+
+export const zoneTableColumns: TableColumnConfig<ZoneTableRow>[] = [
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
   { label: 'Active', accessor: 'isActive' },
-  { label: 'Warehouse', accessor: 'warehouseId' },
+  { label: 'Warehouse', accessor: 'warehouseName' },
   { label: 'Created', accessor: 'createdAt' }
 ]
 
-export const zoneFactboxSections: FactboxSectionConfig<Zone>[] = [
+export const zoneFactboxSections: FactboxSectionConfig<ZoneFactboxRecord>[] = [
   {
     title: 'Overview',
     fields: [

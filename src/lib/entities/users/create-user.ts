@@ -27,16 +27,6 @@ async function createUser(prisma: PrismaClient, data: CreateUserInput) {
       role: data.role,
       loginType: data.loginType,
       isActive: data.isActive ?? true
-    },
-    select: {
-      id: true,
-      email: true,
-      badgeNumber: true,
-      role: true,
-      loginType: true,
-      isActive: true,
-      deletedAt: true,
-      createdAt: true
     }
   })
 }

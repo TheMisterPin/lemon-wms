@@ -144,7 +144,7 @@ enum DeviceType {
 }
 
 model Warehouse {
-  id          String          @id @default(uuid())
+  id          String          @id
   name        String          @unique
   address     String?
   timezone    String?
@@ -172,7 +172,7 @@ model Warehouse {
 }
 
 model Zone {
-  id                     String    @id @default(uuid())
+  id                     String    @id
   warehouseId            String
   warehouse              Warehouse @relation(fields: [warehouseId], references: [id])
   name                   String
@@ -193,7 +193,7 @@ model Zone {
 }
 
 model Bin {
-  id          String    @id @default(uuid())
+  id          String    @id
   zoneId      String
   warehouseId String
   zone        Zone      @relation(fields: [zoneId], references: [id])
@@ -238,7 +238,7 @@ model BinItem {
 }
 
 model User {
-  id           String    @id @default(uuid())
+  id           String    @id
   email        String?   @unique
   passwordHash String?
   badgeNumber  String    @unique
