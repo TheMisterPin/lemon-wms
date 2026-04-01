@@ -6,8 +6,7 @@ async function runSeedUsers() {
   console.warn('Seeding users...\n')
 
   const result = await seedUsers(prisma)
-
-  console.warn(`Seeded ${result.usersSeeded} users.`)
+  console.warn(`Seeded ${result.count} users.`)
   console.warn('Done.')
 }
 

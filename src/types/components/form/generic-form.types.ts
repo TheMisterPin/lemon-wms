@@ -39,7 +39,7 @@ export interface SelectFieldConfig<T extends FieldValues> extends BaseFieldConfi
 }
 
 export interface DateFieldConfig<T extends FieldValues> extends BaseFieldConfig<T> {
-  type: 'date'
+  type: 'date' | 'time' | 'dateTime'
 }
 
 export interface CheckboxFieldConfig<T extends FieldValues> extends BaseFieldConfig<T> {

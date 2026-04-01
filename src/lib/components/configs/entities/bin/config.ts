@@ -26,7 +26,7 @@ export type BinFactboxRecord = Bin & {
 export const binTypeOptions: SelectOption[] = [
   { value: 'RECEIVING', label: 'Receiving' },
   { value: 'STORAGE', label: 'Storage' },
-  { value: 'PICK_FACE', label: 'Pick Face' },
+  { value: 'PICKING', label: 'Picking' },
   { value: 'PACKING', label: 'Packing' },
   { value: 'SHIPPING', label: 'Shipping' },
   { value: 'QUARANTINE', label: 'Quarantine' },
@@ -35,22 +35,15 @@ export const binTypeOptions: SelectOption[] = [
 ]
 
 export function createBinFormConfig(
-  zoneOptions: SelectOption[],
-  warehouseOptions: SelectOption[]
+  zoneOptions: SelectOption[]
 ): GenericFormConfig<BinFormValues> {
   return {
     columns: 2,
     submitLabel: 'Save bin',
     defaultValues: {
       zoneId: '',
-      warehouseId: '',
       name: '',
-      code: '',
-      type: 'STORAGE',
-      isBlocked: false,
-      blockReason: null,
-      maxWeightKg: null,
-      maxVolumeM3: null
+      type: 'STORAGE'
     },
     fields: [
       {
@@ -61,24 +54,11 @@ export function createBinFormConfig(
         required: true
       },
       {
-        name: 'code',
-        label: 'Bin code',
-        type: 'text',
-        placeholder: 'WH1-A-01-01',
-        description: 'Unique identifier scanned on the floor.',
-        required: true
-      },
-      {
         name: 'type',
         label: 'Bin type',
         type: 'select',
         options: binTypeOptions,
         required: true
-      },
-      {
-        name: 'isBlocked',
-        label: 'Blocked',
-        type: 'checkbox'
       },
       {
         name: 'zoneId',
@@ -87,39 +67,12 @@ export function createBinFormConfig(
         options: zoneOptions,
         placeholder: 'Select a zone',
         required: true
-      },
-      {
-        name: 'warehouseId',
-        label: 'Warehouse',
-        type: 'select',
-        options: warehouseOptions,
-        placeholder: 'Select a warehouse',
-        required: true
-      },
-      {
-        name: 'maxWeightKg',
-        label: 'Max weight (kg)',
-        type: 'number',
-        placeholder: '500'
-      },
-      {
-        name: 'maxVolumeM3',
-        label: 'Max volume (m³)',
-        type: 'number',
-        placeholder: '2.5'
-      },
-      {
-        name: 'blockReason',
-        label: 'Block reason',
-        type: 'text',
-        placeholder: 'Reason for blocking',
-        colSpan: 2
       }
     ]
   }
 }
 
-export const binFormConfig = createBinFormConfig([], [])
+export const binFormConfig = createBinFormConfig([])
 
 export const binTableColumns: TableColumnConfig<BinTableRow>[] = [
   { label: 'Code', accessor: 'code' },

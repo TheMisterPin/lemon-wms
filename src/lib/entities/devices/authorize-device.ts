@@ -24,7 +24,7 @@ async function authorizeDevice(prisma: PrismaClient, params : AuthorizeDevicePar
 async function deauthorizeDevice(prisma: PrismaClient, code: string) {
   await prisma.device.update({
     where: { code },
-    data: { authorized: false, warehouseId: '', zoneId: '' }
+    data: { authorized: false, warehouseId: null, zoneId: null }
   })
 }
 

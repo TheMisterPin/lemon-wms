@@ -1,7 +1,17 @@
+import { Suspense } from 'react'
 import type { ReactNode } from 'react'
 
 import DashboardShell from '@/components/dashboard/DashboardShell'
+import { DashboardWarehouseProvider } from '@/hooks/dashboard/use-dashboard-warehouse'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  return <DashboardShell>{children}</DashboardShell>
+  return (
+    <DashboardShell>
+      <Suspense>
+        <DashboardWarehouseProvider>
+          {children}
+        </DashboardWarehouseProvider>
+      </Suspense>
+    </DashboardShell>
+  )
 }

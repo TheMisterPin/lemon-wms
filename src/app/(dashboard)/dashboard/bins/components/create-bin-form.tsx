@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
+import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
 import { createBinFormConfig } from '@/lib/components/configs/entities/bin/config'
 import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
 import type { BinFormValues } from '@/lib/components/configs/entities/bin/types'
@@ -21,35 +22,21 @@ import type { SelectOption } from '@/types/components/form/generic-form.types'
 
 type CreateBinFormProps = {
   zonesList: SelectOption[]
-  warehouseList: SelectOption[]
 }
 
-export default function CreateBinForm({ zonesList, warehouseList }: CreateBinFormProps) {
+export default function CreateBinForm({ zonesList }: CreateBinFormProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  const { createBin } = useDashboardWarehouse()
 
-  const formConfig = createBinFormConfig(zonesList, warehouseList)
+  const formConfig = createBinFormConfig(zonesList)
 
   async function handleCreateBin(values: BinFormValues) {
     setCreateError(null)
 
     try {
-      const response = await fetch('/api/bins', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(values)
-      })
-
-      const payload = await response.json() as { error?: string }
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? 'Failed to create bin.')
-      }
-
+      await createBin(values)
       setIsOpen(false)
-      window.location.reload()
     } catch (submissionError) {
       setCreateError(
         submissionError instanceof Error

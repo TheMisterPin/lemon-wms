@@ -3,10 +3,18 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
-import { createBin } from '@/lib/entities/bins/create-bin'
-import { getBins } from '@/lib/entities/bins/get-bins'
+import { createDevice } from '@/lib/entities/devices/create-device'
+import { getFilteredDevices } from '@/lib/entities/devices/get-devices'
 import prisma from '@/lib/prisma'
+
+const createDeviceSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  code: z.string().min(1, 'Code is required'),
+  warehouseId: z.string().nullable().optional(),
+  zoneId: z.string().nullable().optional(),
+  authorized: z.boolean().default(false),
+  isActive: z.boolean().default(true)
+})
 
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
@@ -16,15 +24,26 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url)
-    const zoneId = searchParams.get('zoneId') ?? undefined
+
+    const authorizedParam = searchParams.get('authorized')
     const warehouseId = searchParams.get('warehouseId') ?? undefined
-    const bins = await getBins(prisma, { zoneId, warehouseId })
+    const zoneId = searchParams.get('zoneId') ?? undefined
+    const isActiveParam = searchParams.get('isActive')
 
-    return ok(bins, 'Bins retrieved successfully.')
+    const filters = {
+      ...(authorizedParam !== null ? { authorized: authorizedParam === 'true' } : {}),
+      ...(warehouseId ? { warehouseId } : {}),
+      ...(zoneId ? { zoneId } : {}),
+      ...(isActiveParam !== null ? { isActive: isActiveParam === 'true' } : {})
+    }
+
+    const devices = await getFilteredDevices(prisma, Object.keys(filters).length ? filters : undefined)
+
+    return ok(devices, 'Devices retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/bins]', error)
+    console.error('[GET /api/devices]', error)
 
-    return fail('Failed to retrieve bins.')
+    return ok([], 'No devices found.')
   }
 }
 
@@ -35,21 +54,28 @@ export async function POST(req: NextRequest) {
   }
 
   if (!isOfficeRole(payload.role)) {
-    return fail('Only office users can create bins.', 'FORBIDDEN', 403)
+    return fail('Only office users can register devices.', 'FORBIDDEN', 403)
   }
 
   try {
     const body = await req.json()
-    const parsed = binFormSchema.parse(body)
-    const bin = await createBin(prisma, parsed)
+    const parsed = createDeviceSchema.parse(body)
+    const device = await createDevice(prisma, {
+      name: parsed.name,
+      code: parsed.code,
+      warehouseId: parsed.warehouseId ?? null,
+      zoneId: parsed.zoneId ?? null,
+      authorized: parsed.authorized,
+      isActive: parsed.isActive
+    })
 
-    return created(bin, 'Bin created successfully.')
+    return created(device, 'Device registered successfully.')
   } catch (error) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
-    console.error('[POST /api/bins]', error)
+    console.error('[POST /api/devices]', error)
 
-    return fail('Failed to create bin.')
+    return fail('Failed to register device.')
   }
 }

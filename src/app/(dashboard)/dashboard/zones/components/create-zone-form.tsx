@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 
@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
+import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
 import { createZoneFormConfig } from '@/lib/components/configs/entities/zone/config'
 import { zoneFormSchema } from '@/lib/components/configs/entities/zone/schema'
 import type { ZoneFormValues } from '@/lib/components/configs/entities/zone/types'
@@ -26,6 +27,7 @@ type CreateZoneFormProps = {
 export default function CreateZoneForm({ warehouseList }: CreateZoneFormProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  const { createZone } = useDashboardWarehouse()
 
   const formConfig = createZoneFormConfig(warehouseList)
 
@@ -33,22 +35,8 @@ export default function CreateZoneForm({ warehouseList }: CreateZoneFormProps) {
     setCreateError(null)
 
     try {
-      const response = await fetch('/api/zones', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(values)
-      })
-
-      const payload = await response.json() as { error?: string }
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? 'Failed to create zone.')
-      }
-
+      await createZone(values)
       setIsOpen(false)
-      window.location.reload()
     } catch (submissionError) {
       setCreateError(
         submissionError instanceof Error

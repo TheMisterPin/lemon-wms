@@ -132,7 +132,7 @@ export default function FloorLoginForm() {
           </div>
         ))}
         <span className="ml-1 text-sm text-brand-muted">
-          {step === 'device' ? 'Device code' : step === 'badge' ? 'Scan badge' : 'Enter PIN'}
+          {step === 'device' ? 'Device name' : step === 'badge' ? 'Scan badge' : 'Enter PIN'}
         </span>
       </div>
 
@@ -141,7 +141,7 @@ export default function FloorLoginForm() {
         <form onSubmit={handleDeviceSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="device-code" className="text-sm font-medium text-brand-text">
-              Device code
+              Device name
             </label>
             <input
               id="device-code"
@@ -150,7 +150,7 @@ export default function FloorLoginForm() {
               autoFocus
               value={deviceCode}
               onChange={(e) => setDeviceCode(e.target.value)}
-              placeholder="e.g. WH1-ZONE3"
+              placeholder="e.g. ZONE-3-TERMINAL"
               autoComplete="off"
               className="rounded-lg border border-brand-input bg-brand-surface px-4 py-3 text-lg text-brand-text placeholder-brand-subtle outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
             />
@@ -183,7 +183,7 @@ export default function FloorLoginForm() {
             }}
             className="text-sm text-brand-subtle hover:text-brand-muted"
           >
-            ← Change device code
+            ← Change device name
           </button>
         </div>
       )}

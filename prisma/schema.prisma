@@ -45,7 +45,7 @@ enum ZoneType {
 enum BinType {
   RECEIVING
   STORAGE
-  PICK_FACE
+  PICKING
   PACKING
   SHIPPING
   QUARANTINE
@@ -219,6 +219,65 @@ model Bin {
   boxes         Box[]
 }
 
+model User {
+  id                String    @id
+  email             String?   @unique
+  passwordHash      String?
+  badgeNumber       String    @unique
+  pinHash           String?
+  firstName         String
+  lastName          String
+  fullName          String    @default("${firstName} ${lastName}")
+  role              Role
+  loginType         LoginType
+  isActive          Boolean   @default(true)
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  lastLoginDeviceId String?
+
+  lastLoginDevice      Device?               @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
+  usedByDevices        Device[]              @relation("DeviceLastUser") // ← back-relation for Device.lastUser
+  refreshTokens        RefreshToken[]
+  warehouseAssignments WarehouseAssignment[]
+  createdWarehouses    Warehouse[]           @relation("WarehouseCreatedBy")
+  userActivityEntries  UserActivityEntry[]
+  binOperationEntries  BinOperationEntry[]
+  notifications        Notification[]
+}
+
+model Device {
+  id           String     @id @default(uuid())
+  name         String     @unique
+  code         String     @unique
+  warehouseId  String?
+  zoneId       String?    @unique
+  authorized   Boolean    @default(false)
+  isActive     Boolean    @default(true)
+  type         DeviceType @default(FLOOR)
+  registeredAt DateTime   @default(now())
+  lastSeenAt   DateTime?
+  loginMode    LoginMode  @default(PIN)
+  lastUserId   String?
+
+  lastUser        User?      @relation("DeviceLastUser", fields: [lastUserId], references: [id])
+  loggedInByUsers User[]     @relation("UserLastDevice")
+  warehouse       Warehouse? @relation(fields: [warehouseId], references: [id])
+  zone            Zone?      @relation(fields: [zoneId], references: [id])
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  userId      String
+  tokenHash   String    @unique
+  deviceLabel String
+  deviceId    String?
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model BinItem {
   id                String        @id @default(uuid())
   binId             String
@@ -241,64 +300,6 @@ model BinItem {
   @@unique([binId, warItemId, lotId])
   @@unique([binId, warItemId, serialNumberId])
 }
-
-
-model User {
-  id                String    @id
-  email             String?   @unique
-  passwordHash      String?
-  badgeNumber       String    @unique
-  pinHash           String?
-  role              Role
-  loginType         LoginType
-  isActive          Boolean   @default(true)
-  deletedAt         DateTime?
-  createdAt         DateTime  @default(now())
-  lastLoginDeviceId String?
-
-  lastLoginDevice      Device?               @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
-  usedByDevices        Device[]              @relation("DeviceLastUser")   // ← back-relation for Device.lastUser
-  refreshTokens        RefreshToken[]
-  warehouseAssignments WarehouseAssignment[]
-  createdWarehouses    Warehouse[]           @relation("WarehouseCreatedBy")
-  userActivityEntries  UserActivityEntry[]
-  binOperationEntries  BinOperationEntry[]
-  notifications        Notification[]
-}
-
-model Device {
-  id           String     @id @default(uuid())
-  name         String     @unique
-  code         String     @unique
-  warehouseId  String
-  zoneId       String     @unique
-  authorized   Boolean    @default(false)
-  isActive     Boolean    @default(true)
-  type         DeviceType @default(FLOOR)
-  registeredAt DateTime   @default(now())
-  lastSeenAt   DateTime?
-  loginMode    LoginMode  @default(PIN)
-  lastUserId   String?
-
-  lastUser        User?      @relation("DeviceLastUser", fields: [lastUserId], references: [id])
-  loggedInByUsers User[]     @relation("UserLastDevice")  // ← back-relation for User.lastLoginDevice
-  warehouse       Warehouse  @relation(fields: [warehouseId], references: [id])
-  zone            Zone       @relation(fields: [zoneId], references: [id])
-}
-model RefreshToken {
-  id          String    @id @default(uuid())
-  userId      String
-  tokenHash   String    @unique
-  deviceLabel String
-  deviceId    String?
-  expiresAt   DateTime
-  revokedAt   DateTime?
-  createdAt   DateTime  @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-
 
 model WarehouseAssignment {
   id          String   @id @default(uuid())

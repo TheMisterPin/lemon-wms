@@ -1,9 +1,7 @@
 import { PrismaClient } from '@/generated/prisma'
 
 async function generateUserSerial(prisma: PrismaClient) {
-  const count = await prisma.user.count({
-    where: { id: { startsWith: 'USR-' } }
-  })
+  const count = await prisma.user.count()
 
   const newID = `USR-${String(count + 1).padStart(4, '0')}`
 

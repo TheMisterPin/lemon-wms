@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
+import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
 import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse/schema'
 import type { WarehouseFormValues } from '@/lib/components/configs/entities/warehouse/types'
 import { warehouseFormConfig } from '@/lib/components/configs/forms/warehouse-form-config'
@@ -55,27 +56,14 @@ const createWarehouseFormSchema = warehouseFormSchema.pick({
 export default function CreateWarehouseForm() {
   const [isOpen, setIsOpen] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  const { createWarehouse } = useDashboardWarehouse()
 
   async function handleCreateWarehouse(values: CreateWarehouseFormValues) {
     setCreateError(null)
 
     try {
-      const response = await fetch('/api/warehouses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(values)
-      })
-
-      const payload = await response.json() as { error?: string }
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? 'Failed to create warehouse.')
-      }
-
+      await createWarehouse(values)
       setIsOpen(false)
-      window.location.reload()
     } catch (submissionError) {
       setCreateError(
         submissionError instanceof Error

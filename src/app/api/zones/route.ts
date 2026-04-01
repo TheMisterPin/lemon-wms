@@ -6,6 +6,7 @@ import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middlewar
 import { zoneFormSchema } from '@/lib/components/configs/entities/zone/schema'
 import { createZone } from '@/lib/entities/zones/create-zone'
 import { getZones } from '@/lib/entities/zones/get-zones'
+import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
@@ -47,6 +48,11 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
+
+    if (error instanceof DomainError) {
+      return fail(error.message, error.code, error.status)
+    }
+
     console.error('[POST /api/zones]', error)
 
     return fail('Failed to create zone.')

@@ -6,20 +6,22 @@ import {
   LayoutDashboard,
   Warehouse,
   Package,
-  ClipboardList,
+  // ClipboardList,
   Users,
-  BarChart3,
-  MapPin
+  // BarChart3,
+  MapPin,
+  ShelvingUnit
 } from 'lucide-react'
 
 const NAV_LINKS = [
   { label: 'Dashboard',  href: '/dashboard',            icon: LayoutDashboard },
   { label: 'Warehouses', href: '/dashboard/warehouses', icon: Warehouse },
   { label: 'Zones',      href: '/dashboard/zones',      icon: MapPin },
+  { label: 'Bins',       href: '/dashboard/bins',       icon: ShelvingUnit },
   { label: 'Items',      href: '/dashboard/items',      icon: Package },
-  { label: 'Orders',     href: '/dashboard/orders',     icon: ClipboardList },
-  { label: 'Users',      href: '/dashboard/users',      icon: Users },
-  { label: 'Reports',    href: '/dashboard/reports',    icon: BarChart3 }
+  // { label: 'Orders',     href: '/dashboard/orders',     icon: ClipboardList },
+  { label: 'Users',      href: '/dashboard/users',      icon: Users }
+  // { label: 'Reports',    href: '/dashboard/reports',    icon: BarChart3 }
 ]
 
 interface DashboardSidebarProps {

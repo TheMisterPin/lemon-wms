@@ -3,6 +3,7 @@
 import React from 'react'
 
 import { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { RowAction } from '@/types/components/table/generic-table.types'
 
 import { GenericTable } from '../tables/generic-table'
 
@@ -16,10 +17,11 @@ interface PageWithGridProps {
         records: any[]
     }
     onRowClick?: (row: any) => void
+    tableActions?: RowAction<any>[]
 }
 
 export default function PageWithGrid(props: PageWithGridProps) {
-  const { title, headerActions, isLoading, error, tableData, onRowClick } = props
+  const { title, headerActions, isLoading, error, tableData, onRowClick, tableActions } = props
 
   return (
     <main className="h-full rounded-xl bg-brand-content-bg p-6">
@@ -52,6 +54,7 @@ export default function PageWithGrid(props: PageWithGridProps) {
           columns={tableData.columns}
           records={tableData.records}
           onRowClick={onRowClick}
+          actions={tableActions}
           emptyMessage={`No ${title.toLowerCase()} found.`}
         />
       )}

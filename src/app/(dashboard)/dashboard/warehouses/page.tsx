@@ -1,29 +1,21 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Boxes, MapPinned } from 'lucide-react'
 
 import CreateWarehouseForm from '@/app/(dashboard)/dashboard/warehouses/components/create-warehouse-form'
 import PageWithGrid from '@/components/pages/page-with-grid'
+import { ErrorModal } from '@/components/shared/ErrorModal'
 import { Button } from '@/components/ui/button'
+import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
 import { warehouseTableColumns } from '@/lib/components/configs/entities/warehouse/config'
 import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 
-type WarehouseApiResponse = {
-  success: boolean
-  data: Array<Omit<Warehouse, 'createdAt' | 'deletedAt'> & {
-    createdAt: string
-    deletedAt: string | null
-  }>
-}
-
 export default function WarehouseDashboardPage() {
   const router = useRouter()
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { warehouses, isLoading, error, mutationError, clearMutationError } = useDashboardWarehouse()
 
   function handleRowClick(row: Warehouse) {
     // eslint-disable-next-line no-console
@@ -72,65 +64,23 @@ export default function WarehouseDashboardPage() {
     }
   ]), [router])
 
-  useEffect(() => {
-    let isMounted = true
-
-    async function loadWarehouses() {
-      try {
-        const response = await fetch('/api/warehouses', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to load warehouses.')
-        }
-
-        const payload = await response.json() as WarehouseApiResponse
-
-        if (!isMounted) {
-          return
-        }
-
-        setWarehouses(
-          payload.data.map((warehouse) => ({
-            ...warehouse,
-            createdAt: new Date(warehouse.createdAt),
-            deletedAt: warehouse.deletedAt ? new Date(warehouse.deletedAt) : null
-          }))
-        )
-        setError(null)
-      } catch {
-        if (!isMounted) {
-          return
-        }
-
-        setError('Unable to load warehouses.')
-      } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    void loadWarehouses()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
   return (
-
-    <PageWithGrid
-      title='Warehouses'
-      headerActions={<CreateWarehouseForm />}
-      isLoading={isLoading}
-      error={error}
-      tableData={{ columns, records: warehouses }}
-      onRowClick={handleRowClick}
-    />
+    <>
+      <PageWithGrid
+        title='Warehouses'
+        headerActions={<CreateWarehouseForm />}
+        isLoading={isLoading}
+        error={error}
+        tableData={{ columns, records: warehouses }}
+        onRowClick={handleRowClick}
+      />
+      <ErrorModal
+        open={mutationError !== null}
+        message={mutationError?.message ?? ''}
+        code={mutationError?.code}
+        details={mutationError?.details}
+        onClose={clearMutationError}
+      />
+    </>
   )
 }

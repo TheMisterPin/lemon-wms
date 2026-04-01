@@ -6,6 +6,7 @@ import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middlewar
 import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
 import { createBin } from '@/lib/entities/bins/create-bin'
 import { getBins } from '@/lib/entities/bins/get-bins'
+import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
@@ -48,6 +49,11 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
+
+    if (error instanceof DomainError) {
+      return fail(error.message, error.code, error.status)
+    }
+
     console.error('[POST /api/bins]', error)
 
     return fail('Failed to create bin.')
