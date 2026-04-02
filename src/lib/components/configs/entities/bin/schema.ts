@@ -14,7 +14,7 @@ export const binTypeValues = [
 export const binTypeSchema = z.enum(binTypeValues)
 
 export const binFormSchema = z.object({
-  zoneId: z.string().uuid('Zone ID must be a valid UUID.'),
+  zoneId: z.string(),
   name: z.string().trim().min(1, 'Name is required.').max(120, 'Name must be at most 120 characters.'),
   type: binTypeSchema
 })

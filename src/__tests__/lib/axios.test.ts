@@ -1,9 +1,9 @@
 /**
  * @vitest-environment jsdom
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ---------------------------------------------------------------------------
 // Mock Zustand auth store
@@ -85,7 +85,10 @@ describe('axios 401 refresh interceptor', () => {
     let callCount = 0
     mockApi.onGet('/protected').reply(() => {
       callCount++
-      if (callCount === 1) return [401, { error: 'Unauthorized' }]
+      if (callCount === 1) {
+        return [401, { error: 'Unauthorized' }]
+      }
+
       return [200, { data: 'success' }]
     })
 
@@ -124,10 +127,36 @@ describe('axios 401 refresh interceptor', () => {
     mockStore.token = null
     mockApi.onGet('/public').reply(401, { error: 'Unauthorized' })
 
+    mockRawAxios.onPost('/api/auth/refresh').reply(401, { error: 'Invalid refresh token' })
+
     await expect(api.get('/public')).rejects.toThrow()
-    // refresh endpoint should never have been called
-    expect(mockRawAxios.history.post.length).toBe(0)
-    expect(mockStore.clearAuth).not.toHaveBeenCalled()
+    expect(mockRawAxios.history.post.length).toBe(1)
+    expect(mockStore.clearAuth).toHaveBeenCalled()
+  })
+
+  it('refreshes and retries even when the original request had no Authorization header', async () => {
+    mockStore.token = null
+
+    let callCount = 0
+    mockApi.onGet('/cookie-backed').reply(() => {
+      callCount++
+      if (callCount === 1) {
+        return [401, { error: 'Unauthorized' }]
+      }
+
+      return [200, { data: 'success' }]
+    })
+
+    mockRawAxios.onPost('/api/auth/refresh').reply(200, {
+      accessToken: 'new-token',
+      user: { id: 'u1', role: 'OWNER', email: 'test@test.com', badgeNumber: 'USR-0001' }
+    })
+
+    const res = await api.get('/cookie-backed')
+
+    expect(res.status).toBe(200)
+    expect(res.data).toEqual({ data: 'success' })
+    expect(mockStore.setAuth).toHaveBeenCalledWith('new-token', expect.objectContaining({ id: 'u1' }))
   })
 
   it('does not retry more than once per request', async () => {
@@ -155,17 +184,23 @@ describe('axios 401 refresh interceptor', () => {
   })
 
   it('deduplicates concurrent refresh attempts', async () => {
-    let callCounts = { a: 0, b: 0 }
+    const callCounts = { a: 0, b: 0 }
 
     mockApi.onGet('/route-a').reply(() => {
       callCounts.a++
-      if (callCounts.a === 1) return [401, { error: 'Unauthorized' }]
+      if (callCounts.a === 1) {
+        return [401, { error: 'Unauthorized' }]
+      }
+
       return [200, { route: 'a' }]
     })
 
     mockApi.onGet('/route-b').reply(() => {
       callCounts.b++
-      if (callCounts.b === 1) return [401, { error: 'Unauthorized' }]
+      if (callCounts.b === 1) {
+        return [401, { error: 'Unauthorized' }]
+      }
+
       return [200, { route: 'b' }]
     })
 

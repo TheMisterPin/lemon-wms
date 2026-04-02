@@ -16,11 +16,7 @@ export const getBearerToken = (request: NextRequest): string | null => {
   return authHeader.slice(7)
 }
 
-export const verifyAccessTokenFromRequest = (
-  request: NextRequest
-): AccessTokenPayload | null => {
-  const token =
-    getBearerToken(request) ?? request.cookies.get('access_token')?.value ?? null
+const verifyAccessToken = (token: string | null): AccessTokenPayload | null => {
   if (!token) {
     return null
   }
@@ -30,6 +26,17 @@ export const verifyAccessTokenFromRequest = (
   } catch {
     return null
   }
+}
+
+export const verifyAccessTokenFromRequest = (
+  request: NextRequest
+): AccessTokenPayload | null => {
+  const bearerPayload = verifyAccessToken(getBearerToken(request))
+  if (bearerPayload) {
+    return bearerPayload
+  }
+
+  return verifyAccessToken(request.cookies.get('access_token')?.value ?? null)
 }
 
 export const isOfficeRole = (role: Role): boolean => OFFICE_ROLES.includes(role)

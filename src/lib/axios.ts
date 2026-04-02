@@ -1,9 +1,13 @@
 'use client'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from 'axios'
+import axios, { type InternalAxiosRequestConfig } from 'axios'
 
 import { useAuthStore } from '@/lib/auth/store'
+
+type RetriableAxiosRequestConfig = InternalAxiosRequestConfig & {
+  _retried?: boolean
+}
 
 const api = axios.create({
   baseURL: '/api',
@@ -15,6 +19,25 @@ const api = axios.create({
 // Track in-flight refresh to avoid concurrent refresh calls
 let refreshPromise: Promise<string | null> | null = null
 
+function shouldAttemptRefresh(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) {
+    return false
+  }
+
+  const originalRequest = error.config as RetriableAxiosRequestConfig | undefined
+  const requestUrl = originalRequest?.url ?? ''
+
+  if (!originalRequest || originalRequest._retried) {
+    return false
+  }
+
+  if (error.response?.status !== 401) {
+    return false
+  }
+
+  return !requestUrl.includes('/auth/refresh')
+}
+
 async function attemptTokenRefresh(): Promise<string | null> {
   try {
     const res = await axios.post('/api/auth/refresh')
@@ -22,6 +45,7 @@ async function attemptTokenRefresh(): Promise<string | null> {
 
     if (accessToken && user) {
       useAuthStore.getState().setAuth(accessToken, user)
+
       return accessToken
     }
 
@@ -49,35 +73,34 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config
+    if (!shouldAttemptRefresh(error)) {
+      return Promise.reject(error)
+    }
 
-    // Only attempt refresh once per request, and only if we had a token
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retried &&
-      originalRequest?.headers?.Authorization
-    ) {
-      originalRequest._retried = true
+    const originalRequest = error.config as RetriableAxiosRequestConfig
 
-      // Deduplicate concurrent refresh attempts
-      if (!refreshPromise) {
-        refreshPromise = attemptTokenRefresh().finally(() => {
-          refreshPromise = null
-        })
-      }
+    originalRequest._retried = true
 
-      const newToken = await refreshPromise
+    // Deduplicate concurrent refresh attempts
+    if (!refreshPromise) {
+      refreshPromise = attemptTokenRefresh().finally(() => {
+        refreshPromise = null
+      })
+    }
 
-      if (newToken) {
-        originalRequest.headers.Authorization = `Bearer ${newToken}`
-        return api(originalRequest)
-      }
+    const newToken = await refreshPromise
 
-      // Refresh failed — clear auth and redirect
-      useAuthStore.getState().clearAuth()
-      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-        window.location.href = '/login'
-      }
+    if (newToken) {
+      originalRequest.headers = originalRequest.headers ?? {}
+      originalRequest.headers.Authorization = `Bearer ${newToken}`
+
+      return api(originalRequest)
+    }
+
+    // Refresh failed — clear auth and redirect
+    useAuthStore.getState().clearAuth()
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      window.location.href = '/login'
     }
 
     return Promise.reject(error)

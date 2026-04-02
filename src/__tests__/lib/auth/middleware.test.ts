@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import jwt from 'jsonwebtoken'
 import { describe, expect, it } from 'vitest'
 
 import { signAccessToken } from '@/lib/auth/jwt'
@@ -58,17 +59,37 @@ describe('verifyAccessTokenFromRequest', () => {
     expect(verifyAccessTokenFromRequest(req)).toBeNull()
   })
 
+  it('falls back to the access_token cookie when the Bearer token is invalid', () => {
+    const req = makeRequest({ authorization: 'Bearer tampered.token.value' })
+    req.cookies.set('access_token', signAccessToken({ userId: 'u2', role: 'OWNER' }))
+
+    const payload = verifyAccessTokenFromRequest(req)
+    expect(payload).not.toBeNull()
+    expect(payload?.userId).toBe('u2')
+  })
+
+  it('falls back to the access_token cookie when the Bearer token is expired', () => {
+    const expired = jwt.sign(
+      { userId: 'u1', role: 'OWNER' },
+      process.env.JWT_SECRET!,
+      { expiresIn: -1 }
+    )
+    const req = makeRequest({ authorization: `Bearer ${expired}` })
+    req.cookies.set('access_token', signAccessToken({ userId: 'u3', role: 'OWNER' }))
+
+    const payload = verifyAccessTokenFromRequest(req)
+    expect(payload).not.toBeNull()
+    expect(payload?.userId).toBe('u3')
+  })
+
   it('returns null for an expired token', () => {
-    // sign with a very-short expiry trick: use raw jwt
-    import('jsonwebtoken').then(({ default: jwtLib }) => {
-      const expired = jwtLib.sign(
-        { userId: 'u1', role: 'OWNER' },
-        process.env.JWT_SECRET!,
-        { expiresIn: -1 }
-      )
-      const req = makeRequest({ authorization: `Bearer ${expired}` })
-      expect(verifyAccessTokenFromRequest(req)).toBeNull()
-    })
+    const expired = jwt.sign(
+      { userId: 'u1', role: 'OWNER' },
+      process.env.JWT_SECRET!,
+      { expiresIn: -1 }
+    )
+    const req = makeRequest({ authorization: `Bearer ${expired}` })
+    expect(verifyAccessTokenFromRequest(req)).toBeNull()
   })
 })
 

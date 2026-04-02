@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { GenericTable } from '@/components/tables/generic-table'
+import { apiClient } from '@/lib/axios'
 import { warehouseTableColumns } from '@/lib/components/configs/entities/warehouse/config'
 import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
 
@@ -29,18 +30,7 @@ export default function WarehouseHomePage() {
 
     async function loadWarehouses() {
       try {
-        const response = await fetch('/api/warehouses', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to load warehouses.')
-        }
-
-        const payload = await response.json() as WarehouseApiResponse
+        const payload = await apiClient.get<WarehouseApiResponse>('/warehouses')
 
         if (!isMounted) {
           return
