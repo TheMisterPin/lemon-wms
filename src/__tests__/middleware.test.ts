@@ -96,19 +96,31 @@ describe('middleware — no token', () => {
 // ---------------------------------------------------------------------------
 
 describe('middleware — expired access token in cookie', () => {
-  it('lets page requests through so client-side refresh can run', () => {
+  it('lets page requests through when refresh token exists so client-side refresh can run', () => {
     const token = expiredToken('OWNER')
-    const res = middleware(makeRequest('/dashboard', { cookie: { name: 'access_token', value: token } }))
+    const req = makeRequest('/dashboard', { cookie: { name: 'access_token', value: token } })
+    req.cookies.set('refresh_token', 'refresh-token-present')
+    const res = middleware(req)
 
     // Must NOT redirect to /login — that was the prod bug
     expect(res.status).toBe(200)
   })
 
-  it('lets page requests through for floor roles too', () => {
+  it('lets page requests through for floor roles too when refresh token exists', () => {
     const token = expiredToken('WAREHOUSE_MANAGER')
-    const res = middleware(makeRequest('/warehouse', { cookie: { name: 'access_token', value: token } }))
+    const req = makeRequest('/warehouse', { cookie: { name: 'access_token', value: token } })
+    req.cookies.set('refresh_token', 'refresh-token-present')
+    const res = middleware(req)
 
     expect(res.status).toBe(200)
+  })
+
+  it('redirects page requests to /login when expired token has no refresh token', () => {
+    const token = expiredToken('OWNER')
+    const res = middleware(makeRequest('/dashboard', { cookie: { name: 'access_token', value: token } }))
+
+    expect(res.status).toBe(307)
+    expect(new URL(res.headers.get('location')!).pathname).toBe('/login')
   })
 
   it('returns 401 for API requests with expired token', () => {
@@ -118,9 +130,11 @@ describe('middleware — expired access token in cookie', () => {
     expect(res.status).toBe(401)
   })
 
-  it('returns "Token expired" error message for expired API requests', async () => {
+  it('returns "Token expired" error message for expired API requests when refresh token exists', async () => {
     const token = expiredToken('OWNER')
-    const res = middleware(makeRequest('/api/warehouses', { cookie: { name: 'access_token', value: token } }))
+    const req = makeRequest('/api/warehouses', { cookie: { name: 'access_token', value: token } })
+    req.cookies.set('refresh_token', 'refresh-token-present')
+    const res = middleware(req)
 
     const body = await res.json()
     expect(body.error).toBe('Token expired')
