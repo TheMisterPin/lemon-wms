@@ -15,6 +15,10 @@ const getTokenFromCookie = (request: NextRequest): string | null => {
   return request.cookies.get('access_token')?.value ?? null
 }
 
+const hasRefreshTokenCookie = (request: NextRequest): boolean => {
+  return Boolean(request.cookies.get('refresh_token')?.value)
+}
+
 /**
  * Decode a JWT without verifying expiry — used to extract the payload
  * from an expired-but-present access token so the middleware can let
@@ -78,6 +82,7 @@ export function middleware(request: NextRequest) {
   }
 
   const { payload, expired } = resolveAuthPayload(request)
+  const hasRefreshToken = hasRefreshTokenCookie(request)
 
   // Unauthenticated: redirect to /login for pages, 401 for API
   if (!payload) {
@@ -94,6 +99,16 @@ export function middleware(request: NextRequest) {
   // Token expired but present — let page requests through so client-side
   // AuthProvider can refresh the token. Block API requests with 401.
   if (expired) {
+    // If we don't have a refresh token, this is effectively logged-out state.
+    // Redirect immediately instead of allowing a protected page shell.
+    if (!hasRefreshToken) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Token expired' }, { status: 401 })
     }
