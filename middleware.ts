@@ -86,7 +86,6 @@ export function middleware(request: NextRequest) {
   }
   const hasRefreshToken = hasRefreshTokenCookie(request)
   const { payload, expired } = resolveAuthPayload(request)
-  const hasRefreshToken = hasRefreshTokenCookie(request)
 
   // Unauthenticated: redirect to /login for pages, 401 for API
   if (!payload) {
