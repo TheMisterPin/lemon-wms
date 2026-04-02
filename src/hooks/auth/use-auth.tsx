@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 
 import type { Role } from '@/generated/prisma'
+import { readStoredAccessToken } from '@/lib/auth/store'
 
 export type AuthUser = {
   userId: string
@@ -24,7 +25,7 @@ type AuthState = {
 const OFFICE_ROLES: Role[] = ['OWNER', 'OFFICE_MANAGER', 'OFFICE_WORKER']
 const FLOOR_ROLES: Role[] = ['WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER']
 
-function parseAccessTokenCookie(): AuthUser | null {
+const readAccessTokenCookie = (): string | null => {
   if (typeof document === 'undefined') {
     return null
   }
@@ -37,7 +38,11 @@ function parseAccessTokenCookie(): AuthUser | null {
     return null
   }
 
-  const token = match.split('=')[1]
+  return match.split('=')[1] ?? null
+}
+
+function parseAccessToken(): AuthUser | null {
+  const token = readStoredAccessToken() ?? readAccessTokenCookie()
   if (!token) {
     return null
   }
@@ -76,14 +81,14 @@ export function useAuth(): AuthState {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const parsed = parseAccessTokenCookie()
+    const parsed = parseAccessToken()
     setUser(parsed)
     setIsLoading(false)
 
     // Re-check when the tab regains focus (token may have refreshed or expired)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        setUser(parseAccessTokenCookie())
+        setUser(parseAccessToken())
       }
     }
 

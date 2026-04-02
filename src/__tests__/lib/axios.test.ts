@@ -22,6 +22,7 @@ const mockStore = {
 }
 
 vi.mock('@/lib/auth/store', () => ({
+  readStoredAccessToken: () => mockStore.token,
   useAuthStore: {
     getState: () => mockStore
   }
@@ -123,7 +124,7 @@ describe('axios 401 refresh interceptor', () => {
     Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
   })
 
-  it('does not attempt refresh when there was no Authorization header', async () => {
+  it('attempts refresh even when there was no Authorization header', async () => {
     mockStore.token = null
     mockApi.onGet('/public').reply(401, { error: 'Unauthorized' })
 

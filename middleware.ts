@@ -9,7 +9,6 @@ import {
 } from '@/lib/auth/middleware'
 
 const PUBLIC_PATHS = ['/login', '/floor']
-const PUBLIC_API_PATHS = ['/api/auth/login', '/api/auth/floor/login', '/api/auth/refresh']
 
 const getTokenFromCookie = (request: NextRequest): string | null => {
   return request.cookies.get('access_token')?.value ?? null
@@ -67,8 +66,6 @@ const resolveAuthPayload = (request: NextRequest): AuthResult => {
 }
 
 const isPublicPath = (pathname: string): boolean => PUBLIC_PATHS.includes(pathname)
-const isPublicApiPath = (pathname: string): boolean =>
-  PUBLIC_API_PATHS.some((apiPath) => pathname.startsWith(apiPath))
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -81,39 +78,30 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  if (isPublicApiPath(pathname)) {
+  // API routes authenticate inside their own Node handlers. Skipping auth here
+  // avoids duplicate verification in Edge middleware on Vercel previews.
+  if (pathname.startsWith('/api/')) {
     return NextResponse.next()
   }
   const hasRefreshToken = hasRefreshTokenCookie(request)
   const { payload, expired } = resolveAuthPayload(request)
 
-  // Unauthenticated: redirect to /login for pages, 401 for API
+  // Unauthenticated: redirect to /login for pages
   if (!payload) {
     if (isPublicPath(pathname)) {
       return NextResponse.next()
-    }
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // Token expired but present — let page requests through so client-side
-  // AuthProvider can refresh the token. Block API requests with 401.
+  // AuthProvider can refresh the token.
   if (expired) {
     // If we don't have a refresh token, this is effectively logged-out state.
     // Redirect immediately instead of allowing a protected page shell.
     if (!hasRefreshToken) {
-      if (pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      }
-
       return NextResponse.redirect(new URL('/login', request.url))
-    }
-
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Token expired' }, { status: 401 })
     }
 
     // Let the page load — AuthProvider will call /api/auth/refresh
@@ -129,18 +117,10 @@ export function middleware(request: NextRequest) {
 
   // Role-based access control
   if (pathname.startsWith('/dashboard') && !isOfficeRole(payload.role)) {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     return NextResponse.redirect(new URL('/warehouse', request.url))
   }
 
   if (pathname.startsWith('/warehouse') && !isFloorRole(payload.role)) {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

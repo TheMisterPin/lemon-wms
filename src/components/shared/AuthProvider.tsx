@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 
-import { useAuthStore } from '@/lib/auth/store'
+import { readStoredAccessToken, useAuthStore } from '@/lib/auth/store'
 import type { AuthUser, JWTPayload } from '@/types'
 
 type RefreshResponse = {
@@ -44,13 +44,12 @@ const decodeAccessToken = (token: string): JWTPayload | null => {
   }
 }
 
-const hasUsableAccessToken = (): string | null => {
-  const accessToken = readCookie('access_token')
-  if (!accessToken) {
+const getUsableAccessToken = (token: string | null): string | null => {
+  if (!token) {
     return null
   }
 
-  const payload = decodeAccessToken(accessToken)
+  const payload = decodeAccessToken(token)
   if (!payload) {
     return null
   }
@@ -59,7 +58,7 @@ const hasUsableAccessToken = (): string | null => {
     return null
   }
 
-  return accessToken
+  return token
 }
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
@@ -71,7 +70,10 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false
 
-    const accessToken = hasUsableAccessToken()
+    const accessToken =
+      getUsableAccessToken(readStoredAccessToken()) ??
+      getUsableAccessToken(readCookie('access_token'))
+
     if (accessToken) {
       setToken(accessToken)
       setReady(true)
