@@ -14,7 +14,9 @@ const PUBLIC_API_PATHS = ['/api/auth/login', '/api/auth/floor/login', '/api/auth
 const getTokenFromCookie = (request: NextRequest): string | null => {
   return request.cookies.get('access_token')?.value ?? null
 }
-
+const hasRefreshTokenCookie = (request: NextRequest): boolean => {
+  return Boolean(request.cookies.get('refresh_token')?.value)
+}
 /**
  * Decode a JWT without verifying expiry — used to extract the payload
  * from an expired-but-present access token so the middleware can let
@@ -23,9 +25,14 @@ const getTokenFromCookie = (request: NextRequest): string | null => {
 const decodeTokenUnsafe = (token: string): AccessTokenPayload | null => {
   try {
     const parts = token.split('.')
-    if (parts.length !== 3) return null
+    if (parts.length !== 3) {
+      return null
+    }
     const payload = JSON.parse(atob(parts[1]))
-    if (payload.userId && payload.role) return payload as AccessTokenPayload
+    if (payload.userId && payload.role) {
+      return payload as AccessTokenPayload
+    }
+
     return null
   } catch {
     return null
@@ -54,6 +61,7 @@ const resolveAuthPayload = (request: NextRequest): AuthResult => {
     // Token exists but is expired — decode it so we can still route correctly
     // and let the client-side refresh handle getting a new token
     const decoded = decodeTokenUnsafe(cookieToken)
+
     return { payload: decoded, expired: !!decoded }
   }
 }
@@ -76,7 +84,7 @@ export function middleware(request: NextRequest) {
   if (isPublicApiPath(pathname)) {
     return NextResponse.next()
   }
-
+  const hasRefreshToken = hasRefreshTokenCookie(request)
   const { payload, expired } = resolveAuthPayload(request)
 
   // Unauthenticated: redirect to /login for pages, 401 for API
@@ -94,6 +102,16 @@ export function middleware(request: NextRequest) {
   // Token expired but present — let page requests through so client-side
   // AuthProvider can refresh the token. Block API requests with 401.
   if (expired) {
+    // If we don't have a refresh token, this is effectively logged-out state.
+    // Redirect immediately instead of allowing a protected page shell.
+    if (!hasRefreshToken) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Token expired' }, { status: 401 })
     }
