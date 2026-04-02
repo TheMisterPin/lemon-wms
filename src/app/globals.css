@@ -322,7 +322,15 @@
   --dash-gray-dim:   rgba(100, 116, 139, 0.12);
   --dash-gray-text:  #94a3b8;
 }
-
+.glass{
+/* From https://css.glass */
+background: rgba(245, 245, 246, 0.075);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(5.3px);
+-webkit-backdrop-filter: blur(5.3px);
+border: 1px solid rgba(245, 245, 246, 0.56);
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;

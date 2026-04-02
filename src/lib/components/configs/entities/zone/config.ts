@@ -82,9 +82,9 @@ export const zoneFormConfig = createZoneFormConfig([])
 export const zoneTableColumns: TableColumnConfig<ZoneTableRow>[] = [
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
-  { label: 'Active', accessor: 'isActive' },
+  { label: 'Active', accessor: 'isActive', type: 'boolean' },
   { label: 'Warehouse', accessor: 'warehouseName' },
-  { label: 'Created', accessor: 'createdAt' }
+  { label: 'Created', accessor: 'createdAt', type: 'date' }
 ]
 
 export const zoneFactboxSections: FactboxSectionConfig<ZoneFactboxRecord>[] = [

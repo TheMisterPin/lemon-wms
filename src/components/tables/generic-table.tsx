@@ -5,6 +5,8 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { FieldValues } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Progress } from '@/components/ui/progress'
 import {
   Table,
   TableBody,
@@ -19,8 +21,19 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { formatDisplayValue, getValueByPath } from '@/lib/utils/get-value-by-path'
-import { GenericTableProps, SortDirection, TableColumnConfig } from '@/types/components/table/generic-table.types'
+import {
+  EMPTY_DISPLAY_VALUE,
+  formatDisplayValue,
+  getValueByPath
+} from '@/lib/utils/get-value-by-path'
+import {
+  GenericTableProps,
+  ProgressColumnConfig,
+  SortDirection,
+  TableColumnConfig,
+  TableColumnType
+} from '@/types/components/table/generic-table.types'
+import { formatDateValue, parseDateValue } from '@/utils/formatters/date-utils'
 
 function getRawValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>): unknown {
   if (column.accessorPath) {
@@ -34,20 +47,146 @@ function getRawValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>
   return undefined
 }
 
+function getNumericValue(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const numericValue = Number(value)
+
+    if (Number.isFinite(numericValue)) {
+      return numericValue
+    }
+  }
+
+  return undefined
+}
+
+function getProgressValues<T extends FieldValues>(
+  row: T,
+  column: ProgressColumnConfig<T>
+): { current: number, max: number, percentage: number } | undefined {
+  const current = getNumericValue(getValueByPath(row, column.progressBarRef.current))
+  const max = getNumericValue(getValueByPath(row, column.progressBarRef.max))
+
+  if (current === undefined || max === undefined || current < 0 || max < 0) {
+    return undefined
+  }
+
+  if (max === 0) {
+    if (current !== 0) {
+      return undefined
+    }
+
+    return {
+      current,
+      max,
+      percentage: 0
+    }
+  }
+
+  return {
+    current,
+    max,
+    percentage: Math.min(Math.max((current / max) * 100, 0), 100)
+  }
+}
+
+function isTemporalColumnType(
+  columnType: TableColumnType | undefined
+): columnType is 'date' | 'datetime' | 'time' {
+  return columnType === 'date' || columnType === 'datetime' || columnType === 'time'
+}
+
+function getComparableValue(value: unknown, columnType: TableColumnType | undefined): unknown {
+  if (columnType === 'boolean') {
+    return typeof value === 'boolean' ? value : undefined
+  }
+
+  if (!isTemporalColumnType(columnType)) {
+    return value
+  }
+
+  if (!(value instanceof Date) && typeof value !== 'string' && typeof value !== 'number') {
+    return undefined
+  }
+
+  return parseDateValue(value)?.getTime()
+}
+
+function getColumnComparableValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>): unknown {
+  if (column.type === 'progress') {
+    return getProgressValues(row, column)?.percentage
+  }
+
+  return getComparableValue(getRawValue(row, column), column.type)
+}
+
+function formatTypedValue<T extends FieldValues>(
+  row: T,
+  value: unknown,
+  column: TableColumnConfig<T>
+): React.ReactNode {
+  if (column.type === 'progress') {
+    const progressValues = getProgressValues(row, column)
+
+    if (!progressValues) {
+      return EMPTY_DISPLAY_VALUE
+    }
+
+    const roundedPercentage = Math.round(progressValues.percentage)
+
+    return (
+      <div className="mx-auto flex w-full max-w-36 items-center gap-2">
+        <Progress
+          value={progressValues.percentage}
+          className="flex-1"
+          aria-label={`${column.label}: ${progressValues.current} of ${progressValues.max} (${roundedPercentage}%)`}
+        />
+        <span className="min-w-10 text-right text-xs text-brand-muted tabular-nums">
+          {roundedPercentage}%
+        </span>
+      </div>
+    )
+  }
+
+  if (column.type === 'boolean') {
+    if (typeof value !== 'boolean') {
+      return EMPTY_DISPLAY_VALUE
+    }
+
+    return (
+      <div className="flex justify-center">
+        <Checkbox
+          checked={value}
+          disabled
+          aria-label={`${column.label}: ${value ? 'checked' : 'unchecked'}`}
+          className="pointer-events-none"
+        />
+      </div>
+    )
+  }
+
+  if (isTemporalColumnType(column.type)) {
+    if (!(value instanceof Date) && typeof value !== 'string' && typeof value !== 'number') {
+      return EMPTY_DISPLAY_VALUE
+    }
+
+    return formatDateValue(value, column.type) || EMPTY_DISPLAY_VALUE
+  }
+
+  return formatDisplayValue(value)
+}
+
 function getCellValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>): React.ReactNode {
   if (column.cell) {
     return column.cell(row)
   }
 
-  if (column.accessorPath) {
-    return formatDisplayValue(getValueByPath(row, column.accessorPath))
-  }
+  const value = getRawValue(row, column)
 
-  if (column.accessor) {
-    return formatDisplayValue(row[column.accessor])
-  }
-
-  return '—'
+  return formatTypedValue(row, value, column)
 }
 
 function compareValues(a: unknown, b: unknown, direction: SortDirection): number {
@@ -93,7 +232,7 @@ function isSortable<T extends FieldValues>(column: TableColumnConfig<T>): boolea
     return false
   }
 
-  return !!(column.accessor || column.accessorPath)
+  return column.type === 'progress' || !!(column.accessor || column.accessorPath)
 }
 
 export function GenericTable<T extends FieldValues & { id: string }>({
@@ -131,7 +270,11 @@ export function GenericTable<T extends FieldValues & { id: string }>({
     const column = columns[sortColumnIndex]
 
     return [...records].sort((a, b) =>
-      compareValues(getRawValue(a, column), getRawValue(b, column), sortDirection)
+      compareValues(
+        getColumnComparableValue(a, column),
+        getColumnComparableValue(b, column),
+        sortDirection
+      )
     )
   }, [records, columns, sortColumnIndex, sortDirection])
 

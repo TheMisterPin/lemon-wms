@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken'
 import { NextRequest } from 'next/server'
+import jwt from 'jsonwebtoken'
 import { describe, expect, it } from 'vitest'
 
 import { signAccessToken } from '@/lib/auth/jwt'

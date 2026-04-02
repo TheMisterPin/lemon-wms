@@ -81,7 +81,8 @@ export const warehouseTableColumns: TableColumnConfig<Warehouse>[] = [
   },
   {
     label: 'Created',
-    accessor: 'createdAt'
+    accessor: 'createdAt',
+    type: 'date'
   }
 ]
 

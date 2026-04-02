@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatDate, isValidDate } from '@/utils/formatters/date-utils'
+import {
+  formatDate,
+  formatDateTime,
+  formatDateValue,
+  formatTime,
+  isValidDate,
+  parseDateValue
+} from '@/utils/formatters/date-utils'
 
 describe('formatDate', () => {
   it('formats a valid date in long US format', () => {
@@ -44,5 +51,47 @@ describe('isValidDate', () => {
   it('returns true for dates in the distant past and future', () => {
     expect(isValidDate(new Date('1970-01-01'))).toBe(true)
     expect(isValidDate(new Date('2099-12-31'))).toBe(true)
+  })
+})
+
+describe('parseDateValue', () => {
+  it('parses ISO timestamp strings into valid Date objects', () => {
+    const result = parseDateValue('2025-03-15T09:45:00Z')
+
+    expect(result).toBeInstanceOf(Date)
+    expect(result?.toISOString()).toBe('2025-03-15T09:45:00.000Z')
+  })
+
+  it('returns undefined for invalid values', () => {
+    expect(parseDateValue('not-a-date')).toBeUndefined()
+    expect(parseDateValue(null)).toBeUndefined()
+  })
+})
+
+describe('formatDateValue', () => {
+  it('formats datetime values with both date and time', () => {
+    const result = formatDateTime('2025-03-15T09:45:00Z')
+
+    expect(result).toContain('2025')
+    expect(result).toMatch(/march/i)
+    expect(result).toMatch(/09:45|9:45/)
+  })
+
+  it('formats time-only values', () => {
+    const result = formatTime('2025-03-15T21:05:00Z')
+
+    expect(result).toMatch(/09:05|9:05/)
+    expect(result).toMatch(/PM/i)
+  })
+
+  it('formats dates through the shared formatter', () => {
+    const result = formatDateValue('2025-12-31T00:00:00Z', 'date')
+
+    expect(result).toContain('2025')
+    expect(result).toMatch(/december/i)
+  })
+
+  it('returns an empty string for invalid temporal values', () => {
+    expect(formatDateValue('bad-input', 'datetime')).toBe('')
   })
 })

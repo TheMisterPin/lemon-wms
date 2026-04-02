@@ -208,6 +208,7 @@ model Bin {
   type        BinType
   isBlocked   Boolean   @default(false)
   blockReason String?
+  maxCapacity Decimal?
   maxWeightKg Decimal?
   maxVolumeM3 Decimal?
   deletedAt   DateTime?
