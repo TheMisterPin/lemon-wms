@@ -223,7 +223,7 @@ model BinItem {
   quantityAvailable Decimal       @default(0)
   quantityReserved  Decimal       @default(0)
   quantityBlocked   Decimal       @default(0)
-  uom               String
+  uomCode           String
   status            BinItemStatus @default(AVAILABLE)
   expiryDate        DateTime?
   createdAt         DateTime      @default(now())
@@ -232,6 +232,7 @@ model BinItem {
   warItem      WARItem       @relation(fields: [warItemId], references: [id])
   lot          Lot?          @relation(fields: [lotId], references: [id])
   serialNumber SerialNumber? @relation(fields: [serialNumberId], references: [id])
+  uom          UnitOfMeasure @relation(fields: [uomCode], references: [id])
 
   @@unique([binId, warItemId, lotId])
   @@unique([binId, warItemId, serialNumberId])
@@ -299,6 +300,21 @@ model WarehouseAssignment {
   @@unique([userId, warehouseId, zoneId])
 }
 
+model UnitOfMeasure {
+  id           String @id
+  description  String
+  decimalRound Int    @default(0)
+
+  warItems            WARItem[]
+  binItems            BinItem[]
+  boxLines            BoxLine[]
+  purchaseOrderLines  PurchaseOrderLine[]
+  salesOrderLines     SalesOrderLine[]
+  transferOrderLines  TransferOrderLine[]
+  returnOrderLines    ReturnOrderLine[]
+  adjustmentOrderLines AdjustmentOrderLine[]
+}
+
 model WARItem {
   id           String           @id @default(uuid())
   sku          String           @unique
@@ -307,7 +323,7 @@ model WARItem {
   barcode      String?
   categoryId   String
   trackingMode ItemTrackingMode
-  uom          String
+  uomCode      String
   weightKg     Decimal?
   dimensions   Json?
   minQuantity  Decimal          @default(0)
@@ -316,6 +332,7 @@ model WARItem {
   deletedAt    DateTime?
   createdAt    DateTime         @default(now())
 
+  uom                 UnitOfMeasure        @relation(fields: [uomCode], references: [id])
   category            ItemCategory         @relation(fields: [categoryId], references: [id])
   binItems            BinItem[]
   lots                Lot[]
@@ -405,12 +422,13 @@ model BoxLine {
   quantity       Decimal
   lotId          String?
   serialNumberId String?
-  uom            String
+  uomCode        String
 
   box          Box           @relation(fields: [boxId], references: [id], onDelete: Cascade)
   warItem      WARItem       @relation(fields: [warItemId], references: [id])
   lot          Lot?          @relation(fields: [lotId], references: [id])
   serialNumber SerialNumber? @relation(fields: [serialNumberId], references: [id])
+  uom          UnitOfMeasure @relation(fields: [uomCode], references: [id])
 }
 
 model PurchaseOrder {
@@ -444,9 +462,10 @@ model PurchaseOrderLine {
   isShort         Boolean @default(false)
   lotId           String?
   serialNumberId  String?
-  uom             String
+  uomCode         String
 
   purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  uom           UnitOfMeasure @relation(fields: [uomCode], references: [id])
 }
 
 model SalesOrder {
@@ -480,9 +499,10 @@ model SalesOrderLine {
   isShort         Boolean @default(false)
   lotId           String?
   serialNumberId  String?
-  uom             String
+  uomCode         String
 
-  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  salesOrder SalesOrder    @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  uom        UnitOfMeasure @relation(fields: [uomCode], references: [id])
 }
 
 model TransferOrder {
@@ -518,9 +538,10 @@ model TransferOrderLine {
   isShort         Boolean @default(false)
   lotId           String?
   serialNumberId  String?
-  uom             String
+  uomCode         String
 
   transferOrder TransferOrder @relation(fields: [transferOrderId], references: [id], onDelete: Cascade)
+  uom           UnitOfMeasure @relation(fields: [uomCode], references: [id])
 }
 
 model ReturnOrder {
@@ -553,9 +574,10 @@ model ReturnOrderLine {
   isShort         Boolean @default(false)
   lotId           String?
   serialNumberId  String?
-  uom             String
+  uomCode         String
 
-  returnOrder ReturnOrder @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
+  returnOrder ReturnOrder   @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
+  uom         UnitOfMeasure @relation(fields: [uomCode], references: [id])
 }
 
 model AdjustmentOrder {
@@ -587,9 +609,10 @@ model AdjustmentOrderLine {
   isShort           Boolean @default(false)
   lotId             String?
   serialNumberId    String?
-  uom               String
+  uomCode           String
 
   adjustmentOrder AdjustmentOrder @relation(fields: [adjustmentOrderId], references: [id], onDelete: Cascade)
+  uom             UnitOfMeasure   @relation(fields: [uomCode], references: [id])
 }
 
 model UserActivityEntry {
