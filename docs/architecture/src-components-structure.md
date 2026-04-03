@@ -1,0 +1,81 @@
+# `src/components` Structure
+
+Generated from current repository files.
+
+```text
+components/
+  auth/
+    CredentialLoginForm.tsx
+    FloorLoginForm.tsx
+  dashboard/
+    DashboardFooter.tsx
+    DashboardHeader.tsx
+    DashboardInfoCards.tsx
+    DashboardRecordListSection.tsx
+    DashboardShell.tsx
+    DashboardSidebar.tsx
+    MetricCard.tsx
+    StatusBadge.tsx
+  factbox/
+    generic-factbox.tsx
+  inputs/
+    checkbox-input.tsx
+    dynamic-form-field.tsx
+    form-date-input.tsx
+    form-select-input.tsx
+    select-input.tsx
+    text-input.tsx
+    TextInput.tsx
+  pages/
+    page-with-grid.tsx
+  shared/
+    AuthProvider.tsx
+    ErrorModal.tsx
+    Loader.tsx
+    NumericKeypad.tsx
+    PageWrapper.tsx
+    ScanInput.tsx
+  tables/
+    checkbox-table.tsx
+    generic-table.tsx
+  typography/
+    lemon-header.tsx
+  ui/
+    avatar.tsx
+    breadcrumb.tsx
+    button.tsx
+    calendar.tsx
+    card.tsx
+    checkbox.tsx
+    dialog.tsx
+    dropdown-menu.tsx
+    field.tsx
+    form.tsx
+    input-group.tsx
+    input.tsx
+    item.tsx
+    label.tsx
+    popover.tsx
+    progress.tsx
+    select.tsx
+    separator.tsx
+    sheet.tsx
+    sidebar.tsx
+    skeleton.tsx
+    spinner.tsx
+    table.tsx
+    tabs.tsx
+    textarea.tsx
+    toast.tsx
+    tooltip.tsx
+    use-toast.ts
+  warehouse/
+    WarehouseFooter.tsx
+    WarehouseHeader.tsx
+    WarehouseShell.tsx
+    WarehouseSidebar.tsx
+  dynamic-form.tsx
+  universal-button.tsx
+  universal-loader.tsx
+  universal-modal.tsx
+```

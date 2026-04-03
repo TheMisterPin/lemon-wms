@@ -1,0 +1,51 @@
+# `src/types` Structure
+
+Generated from current repository files.
+
+```text
+types/
+  components/
+    factbox/
+      generic-factbox.types.ts
+    form/
+      generic-form.types.ts
+    table/
+      generic-table.types.ts
+  models/
+    adjustment-order-line.ts
+    adjustment-order.ts
+    alert-rule.ts
+    bin-item.ts
+    bin-operation-entry.ts
+    bin.ts
+    box-line.ts
+    box.ts
+    device.ts
+    enums.ts
+    index.ts
+    item-category.ts
+    item-ledger-entry.ts
+    lot.ts
+    notification.ts
+    purchase-order-line.ts
+    purchase-order.ts
+    refresh-token.ts
+    return-order-line.ts
+    return-order.ts
+    sales-order-line.ts
+    sales-order.ts
+    serial-number-config.ts
+    serial-number.ts
+    transfer-order-line.ts
+    transfer-order.ts
+    user-activity-entry.ts
+    user.ts
+    war-item.ts
+    warehouse-assignment.ts
+    warehouse.ts
+    zone.ts
+  responses/
+    basic-response.ts
+    index.ts
+  index.ts
+```
