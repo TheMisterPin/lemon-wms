@@ -1,3 +1,5 @@
+import type { IUnitOfMeasure } from './unit-of-measure'
+
 export interface IBoxLine {
   id: string
   boxId: string
@@ -5,5 +7,6 @@ export interface IBoxLine {
   quantity: number
   lotId: string | null
   serialNumberId: string | null
-  uom: string
+  uomCode: string
+  uom?: IUnitOfMeasure
 }

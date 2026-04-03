@@ -1,3 +1,5 @@
+import type { IUnitOfMeasure } from './unit-of-measure'
+
 export interface IReturnOrderLine {
   id: string
   returnOrderId: string
@@ -8,5 +10,6 @@ export interface IReturnOrderLine {
   isShort: boolean
   lotId: string | null
   serialNumberId: string | null
-  uom: string
+  uomCode: string
+  uom?: IUnitOfMeasure
 }

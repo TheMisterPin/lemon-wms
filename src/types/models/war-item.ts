@@ -1,4 +1,5 @@
 import type { ItemTrackingMode } from './enums'
+import type { IUnitOfMeasure } from './unit-of-measure'
 
 export interface IWARItem {
   id: string
@@ -8,7 +9,8 @@ export interface IWARItem {
   barcode: string | null
   categoryId: string
   trackingMode: ItemTrackingMode
-  uom: string
+  uomCode: string
+  uom?: IUnitOfMeasure
   weightKg: number | null
   dimensions: Record<string, unknown> | null
   minQuantity: number

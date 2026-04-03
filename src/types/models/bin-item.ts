@@ -1,4 +1,5 @@
 import type { BinItemStatus } from './enums'
+import type { IUnitOfMeasure } from './unit-of-measure'
 
 export interface IBinItem {
   id: string
@@ -9,7 +10,8 @@ export interface IBinItem {
   quantityAvailable: number
   quantityReserved: number
   quantityBlocked: number
-  uom: string
+  uomCode: string
+  uom?: IUnitOfMeasure
   status: BinItemStatus
   expiryDate: Date | null
   createdAt: Date

@@ -1,3 +1,5 @@
+import type { IUnitOfMeasure } from './unit-of-measure'
+
 export interface ITransferOrderLine {
   id: string
   transferOrderId: string
@@ -8,5 +10,6 @@ export interface ITransferOrderLine {
   isShort: boolean
   lotId: string | null
   serialNumberId: string | null
-  uom: string
+  uomCode: string
+  uom?: IUnitOfMeasure
 }

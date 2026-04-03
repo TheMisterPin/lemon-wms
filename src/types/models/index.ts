@@ -1,4 +1,5 @@
 export * from './enums'
+export * from './unit-of-measure'
 export * from './warehouse'
 export * from './zone'
 export * from './bin'
