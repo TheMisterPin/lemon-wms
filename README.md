@@ -101,16 +101,23 @@ pnpm seed:warehouses # Seed sample warehouses
 
 ## Repository Structure
 
+Current structure (today):
+
 ```text
 src/
   app/                # App router pages + API route handlers
   components/         # UI and domain-facing components
-  lib/                # Business logic, entities, shared helpers
   utils/              # Utility modules and feature helpers
+  types/              # Shared typing/model declarations
   __tests__/          # Unit/integration tests
 prisma/               # Prisma schema and migration assets
 seed/                 # Seed scripts for bootstrapping data
+docs/                # Architecture and developer documentation
 ```
+
+Planned structure proposal:
+
+- See `docs/folder-structure-proposal.md` for a feature-first folder layout and phased migration plan.
 
 ---
 
