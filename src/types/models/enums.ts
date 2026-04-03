@@ -6,7 +6,7 @@ export type WarehouseStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'
 
 export type ZoneType = 'RECEIVING' | 'STORAGE' | 'PICKING' | 'PACKING' | 'SHIPPING' | 'QUARANTINE' | 'CUSTOM'
 
-export type BinType = 'RECEIVING' | 'STORAGE' | 'PICK_FACE' | 'PACKING' | 'SHIPPING' | 'QUARANTINE' | 'STAGING' | 'CUSTOM'
+export type BinType = 'RECEIVING' | 'STORAGE' | 'PICKING' | 'PACKING' | 'SHIPPING' | 'QUARANTINE' | 'STAGING' | 'CUSTOM'
 
 export type BinItemStatus = 'AVAILABLE' | 'RESERVED' | 'BLOCKED' | 'IN_TRANSIT'
 

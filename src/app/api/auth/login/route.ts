@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         notes: 'Account deactivated'
       }
     })
+
     return NextResponse.json({ error: 'Account deactivated' }, { status: 403 })
   }
 
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
         notes: 'Invalid password'
       }
     })
+
     return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
   }
 

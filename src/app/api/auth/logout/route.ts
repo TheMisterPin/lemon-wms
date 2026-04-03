@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import {
   clearAccessTokenCookie,
   clearRefreshTokenCookie,
@@ -7,7 +8,6 @@ import {
   readRefreshTokenCookie,
   revokeRefreshToken
 } from '@/lib/auth/session'
-import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import prisma from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {

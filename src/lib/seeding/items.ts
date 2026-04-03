@@ -237,7 +237,7 @@ export async function seedItemsAndUOMs(prisma: PrismaClient, target = 1000) {
     const [wMin, wMax] = cat.weightRange
 
     try {
-      await prisma.wARItem.upsert({
+      await prisma.item.upsert({
         where:  { sku: itemSku },
         update: {},
         create: {

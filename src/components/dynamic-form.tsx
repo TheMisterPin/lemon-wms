@@ -1,6 +1,13 @@
 'use client'
-import { FieldValues, useForm } from 'react-hook-form'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FieldValues, Resolver, useForm } from 'react-hook-form'
+
 import { Button } from '@/components/ui/button'
+import { FieldGroup } from '@/components/ui/field'
+import { Spinner } from '@/components/ui/spinner'
+import { cn } from '@/lib/utils'
+
 import { GenericFormField } from './inputs/dynamic-form-field'
 import { GenericFormProps } from '../types/components/form/generic-form.types'
 
@@ -22,7 +29,7 @@ function DynamicForm<T extends FieldValues>({
   fields,
   defaultValues,
   onSubmit,
-  resolver,
+  schema,
   submitLabel = 'Save',
   className,
   columns = 2
@@ -33,12 +40,18 @@ function DynamicForm<T extends FieldValues>({
     formState: { errors, isSubmitting }
   } = useForm<T>({
     defaultValues,
-    resolver
+    resolver: zodResolver(schema as never) as unknown as Resolver<T>
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={className}>
-      <div className={`grid gap-4 ${getColumnsClass(columns)}`}>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className={cn(
+        'flex flex-col gap-6 rounded-xl border border-brand-glass-border bg-brand-glass backdrop-blur-sm p-6 shadow-lg shadow-black/10',
+        className
+      )}
+    >
+      <FieldGroup className={cn('grid gap-5', getColumnsClass(columns))}>
         {fields.map((field) => (
           <GenericFormField<T>
             key={String(field.name)}
@@ -47,14 +60,26 @@ function DynamicForm<T extends FieldValues>({
             errors={errors}
           />
         ))}
-      </div>
-      <div className="mt-6 flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : submitLabel}
+      </FieldGroup>
+      <div className="mt-2 flex">
+        <Button
+          type="submit"
+          variant="brand"
+          size="sm"
+          disabled={isSubmitting}
+          className="w-1/3 mx-auto rounded-xl font-semibold bg-linear-to-r from-brand-primary to-brand-primary-end text-brand-button-text shadow-md shadow-brand-primary/20 hover:shadow-lg hover:shadow-brand-primary/30 transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
+        >
+          {isSubmitting ? (
+            <>
+              <Spinner data-icon="inline-start" />
+              Saving...
+            </>
+          ) : submitLabel}
         </Button>
       </div>
     </form>
   )
 }
 
+export { DynamicForm as GenericForm }
 export default DynamicForm

@@ -55,7 +55,7 @@ const ZONE_LAYOUT: ZoneDef[] = [
     slug: 'PKF',
     name: 'Pick Face & Forward Picking',
     type: ZoneType.PICKING,
-    binType: BinType.PICK_FACE,
+    binType: BinType.PICKING,
     binNamePrefix: 'PKF',
   },
   {

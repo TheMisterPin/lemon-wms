@@ -28,6 +28,7 @@ export const clearRefreshTokenCookie = async (): Promise<void> => {
 
 export const readRefreshTokenCookie = async (): Promise<string | null> => {
   const cookieStore = await cookies()
+
   return cookieStore.get(REFRESH_COOKIE_NAME)?.value ?? null
 }
 
@@ -40,7 +41,7 @@ export const setAccessTokenCookie = async (token: string): Promise<void> => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 15 // 15 minutes, matches JWT_ACCESS_EXPIRY
+    maxAge: 60 * 60 * 24 * 7 // 7 days — cookie persists; JWT itself expires in 15m
   })
 }
 
@@ -96,5 +97,6 @@ export const createDeviceLabel = (userAgent: string | null): string => {
   if (!userAgent) {
     return 'unknown-device'
   }
+
   return crypto.createHash('sha256').update(userAgent).digest('hex').slice(0, 12)
 }

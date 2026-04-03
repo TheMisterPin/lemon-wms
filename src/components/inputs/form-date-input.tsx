@@ -1,9 +1,11 @@
 'use client'
 import * as React from 'react'
 import { CalendarIcon } from 'lucide-react'
+
 import { Calendar } from '@/components/ui/calendar'
 import {
   Field,
+  FieldError,
   FieldDescription,
   FieldLabel
 } from '@/components/ui/field'
@@ -23,6 +25,7 @@ interface FormDateInputProps {
   label: string
   value?: Date
   onChange?: (date: Date | undefined) => void
+  onBlur?: () => void
   placeholder?: string
   id: string
   description?: string
@@ -35,6 +38,7 @@ export function FormDateInput(props: FormDateInputProps) {
     label,
     value,
     onChange,
+    onBlur,
     placeholder = 'Select date',
     id,
     description,
@@ -47,18 +51,19 @@ export function FormDateInput(props: FormDateInputProps) {
   const displayValue = formatDate(value)
 
   return (
-    <Field>
-      <FieldLabel htmlFor={id}>
+    <Field data-invalid={!!error || undefined} data-disabled={disabled || undefined}>
+      <FieldLabel htmlFor={id} className="text-sm font-medium text-brand-form-label">
         {label}
         {required ? ' *' : ''}
       </FieldLabel>
-      <InputGroup>
+      <InputGroup className="min-h-11 rounded-lg border-brand-form-border bg-brand-form-surface focus-within:border-brand-form-focus focus-within:ring-1 focus-within:ring-brand-form-focus">
         <InputGroupInput
           id={id}
           value={displayValue}
           placeholder={placeholder}
           disabled={disabled}
           aria-invalid={!!error}
+          className="px-4 py-2.5 text-brand-form-text placeholder:text-brand-form-placeholder"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const date = new Date(e.target.value)
             if (isValidDate(date)) {
@@ -68,6 +73,7 @@ export function FormDateInput(props: FormDateInputProps) {
               onChange?.(undefined)
             }
           }}
+          onBlur={onBlur}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'ArrowDown' && !disabled) {
               e.preventDefault()
@@ -82,17 +88,19 @@ export function FormDateInput(props: FormDateInputProps) {
                 id={`${id}-date-picker`}
                 variant="ghost"
                 size="icon-xs"
+                className="text-brand-form-description hover:bg-brand-border hover:text-brand-form-text"
                 aria-label="Select date"
                 disabled={disabled}
+                onBlur={onBlur}
               >
-                <CalendarIcon />
+                <CalendarIcon data-icon="inline-end" />
                 <span className="sr-only">
 Select date
                 </span>
               </InputGroupButton>
             </PopoverTrigger>
             <PopoverContent
-              className="w-auto overflow-hidden p-0"
+              className="w-auto overflow-hidden border-brand-form-border bg-brand-form-surface p-0 text-brand-form-text"
               align="end"
               alignOffset={-8}
               sideOffset={10}
@@ -106,6 +114,7 @@ Select date
                   onChange?.(date)
                   setMonth(date)
                   setOpen(false)
+                  onBlur?.()
                 }}
               />
             </PopoverContent>
@@ -113,15 +122,9 @@ Select date
         </InputGroupAddon>
       </InputGroup>
       {description && !error && (
-        <FieldDescription>
-          {description}
-        </FieldDescription>
+        <FieldDescription className="text-sm text-brand-form-description">{description}</FieldDescription>
       )}
-      {error && (
-        <FieldDescription className="text-red-500">
-          {error}
-        </FieldDescription>
-      )}
+      <FieldError className="rounded-lg border border-brand-form-error-border bg-brand-form-error-surface px-4 py-2.5 text-sm text-brand-form-error-text">{error}</FieldError>
     </Field>
   )
 }

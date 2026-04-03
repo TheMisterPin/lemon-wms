@@ -39,6 +39,7 @@ export default function CredentialLoginForm() {
 
       if (!res.ok) {
         setError(data.error ?? 'Login failed')
+
         return
       }
 
@@ -113,7 +114,7 @@ export default function CredentialLoginForm() {
       <button
         type="submit"
         disabled={loading || !email || !password}
-        className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-primary to-brand-primary-end px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-brand-primary to-brand-primary-end px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading && <Loader2 size={16} className="animate-spin" />}
         {loading ? 'Signing in…' : 'Sign in'}

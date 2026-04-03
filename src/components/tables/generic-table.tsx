@@ -1,0 +1,395 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
+import { FieldValues } from 'react-hook-form'
+
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Progress } from '@/components/ui/progress'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
+import {
+  EMPTY_DISPLAY_VALUE,
+  formatDisplayValue,
+  getValueByPath
+} from '@/lib/utils/get-value-by-path'
+import {
+  GenericTableProps,
+  ProgressColumnConfig,
+  SortDirection,
+  TableColumnConfig,
+  TableColumnType
+} from '@/types/components/table/generic-table.types'
+import { formatDateValue, parseDateValue } from '@/utils/formatters/date-utils'
+
+function getRawValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>): unknown {
+  if (column.accessorPath) {
+    return getValueByPath(row, column.accessorPath)
+  }
+
+  if (column.accessor) {
+    return row[column.accessor]
+  }
+
+  return undefined
+}
+
+function getNumericValue(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const numericValue = Number(value)
+
+    if (Number.isFinite(numericValue)) {
+      return numericValue
+    }
+  }
+
+  return undefined
+}
+
+function getProgressValues<T extends FieldValues>(
+  row: T,
+  column: ProgressColumnConfig<T>
+): { current: number, max: number, percentage: number } | undefined {
+  const current = getNumericValue(getValueByPath(row, column.progressBarRef.current))
+  const max = getNumericValue(getValueByPath(row, column.progressBarRef.max))
+
+  if (current === undefined || max === undefined || current < 0 || max < 0) {
+    return undefined
+  }
+
+  if (max === 0) {
+    if (current !== 0) {
+      return undefined
+    }
+
+    return {
+      current,
+      max,
+      percentage: 0
+    }
+  }
+
+  return {
+    current,
+    max,
+    percentage: Math.min(Math.max((current / max) * 100, 0), 100)
+  }
+}
+
+function isTemporalColumnType(
+  columnType: TableColumnType | undefined
+): columnType is 'date' | 'datetime' | 'time' {
+  return columnType === 'date' || columnType === 'datetime' || columnType === 'time'
+}
+
+function getComparableValue(value: unknown, columnType: TableColumnType | undefined): unknown {
+  if (columnType === 'boolean') {
+    return typeof value === 'boolean' ? value : undefined
+  }
+
+  if (!isTemporalColumnType(columnType)) {
+    return value
+  }
+
+  if (!(value instanceof Date) && typeof value !== 'string' && typeof value !== 'number') {
+    return undefined
+  }
+
+  return parseDateValue(value)?.getTime()
+}
+
+function getColumnComparableValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>): unknown {
+  if (column.type === 'progress') {
+    return getProgressValues(row, column)?.percentage
+  }
+
+  return getComparableValue(getRawValue(row, column), column.type)
+}
+
+function formatTypedValue<T extends FieldValues>(
+  row: T,
+  value: unknown,
+  column: TableColumnConfig<T>
+): React.ReactNode {
+  if (column.type === 'progress') {
+    const progressValues = getProgressValues(row, column)
+
+    if (!progressValues) {
+      return EMPTY_DISPLAY_VALUE
+    }
+
+    const roundedPercentage = Math.round(progressValues.percentage)
+
+    return (
+      <div className="mx-auto flex w-full max-w-36 items-center gap-2">
+        <Progress
+          value={progressValues.percentage}
+          className="flex-1"
+          aria-label={`${column.label}: ${progressValues.current} of ${progressValues.max} (${roundedPercentage}%)`}
+        />
+        <span className="min-w-10 text-right text-xs text-brand-muted tabular-nums">
+          {roundedPercentage}%
+        </span>
+      </div>
+    )
+  }
+
+  if (column.type === 'boolean') {
+    if (typeof value !== 'boolean') {
+      return EMPTY_DISPLAY_VALUE
+    }
+
+    return (
+      <div className="flex justify-center">
+        <Checkbox
+          checked={value}
+          disabled
+          aria-label={`${column.label}: ${value ? 'checked' : 'unchecked'}`}
+          className="pointer-events-none"
+        />
+      </div>
+    )
+  }
+
+  if (isTemporalColumnType(column.type)) {
+    if (!(value instanceof Date) && typeof value !== 'string' && typeof value !== 'number') {
+      return EMPTY_DISPLAY_VALUE
+    }
+
+    return formatDateValue(value, column.type) || EMPTY_DISPLAY_VALUE
+  }
+
+  return formatDisplayValue(value)
+}
+
+function getCellValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>): React.ReactNode {
+  if (column.cell) {
+    return column.cell(row)
+  }
+
+  const value = getRawValue(row, column)
+
+  return formatTypedValue(row, value, column)
+}
+
+function compareValues(a: unknown, b: unknown, direction: SortDirection): number {
+  if (a === null && b === null) {
+    return 0
+  }
+
+  if (a === undefined && b === undefined) {
+    return 0
+  }
+
+  if (a === null || a === undefined) {
+    return 1
+  }
+
+  if (b === null || b === undefined) {
+    return -1
+  }
+
+  const modifier = direction === 'asc' ? 1 : -1
+
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a.localeCompare(b) * modifier
+  }
+
+  if (typeof a === 'number' && typeof b === 'number') {
+    return (a - b) * modifier
+  }
+
+  if (a instanceof Date && b instanceof Date) {
+    return (a.getTime() - b.getTime()) * modifier
+  }
+
+  if (typeof a === 'boolean' && typeof b === 'boolean') {
+    return (Number(a) - Number(b)) * modifier
+  }
+
+  return String(a).localeCompare(String(b)) * modifier
+}
+
+function isSortable<T extends FieldValues>(column: TableColumnConfig<T>): boolean {
+  if (column.sortable === false) {
+    return false
+  }
+
+  return column.type === 'progress' || !!(column.accessor || column.accessorPath)
+}
+
+export function GenericTable<T extends FieldValues & { id: string }>({
+  columns,
+  records,
+  onRowClick,
+  selectedId,
+  emptyMessage = 'No records found.',
+  actions
+}: GenericTableProps<T>) {
+  const totalColumns = columns.length + (actions?.length ? 1 : 0)
+
+  const [sortColumnIndex, setSortColumnIndex] = useState<number | null>(null)
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
+  function handleSort(index: number) {
+    if (sortColumnIndex === index) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc')
+      } else {
+        setSortColumnIndex(null)
+        setSortDirection('asc')
+      }
+    } else {
+      setSortColumnIndex(index)
+      setSortDirection('asc')
+    }
+  }
+
+  const sortedRecords = useMemo(() => {
+    if (sortColumnIndex === null) {
+      return records
+    }
+
+    const column = columns[sortColumnIndex]
+
+    return [...records].sort((a, b) =>
+      compareValues(
+        getColumnComparableValue(a, column),
+        getColumnComparableValue(b, column),
+        sortDirection
+      )
+    )
+  }, [records, columns, sortColumnIndex, sortDirection])
+
+  function getSortIcon(index: number) {
+    if (sortColumnIndex !== index) {
+      return <ArrowUpDown className="size-3.5 opacity-30" />
+    }
+
+    if (sortDirection === 'asc') {
+      return <ArrowUp className="size-3.5 text-brand-primary" />
+    }
+
+    return <ArrowDown className="size-3.5 text-brand-primary" />
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="w-10/12 mx-auto rounded-xl border border-brand-glass-border bg-brand-glass backdrop-blur-sm overflow-hidden shadow-lg shadow-black/20">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-brand-glass-border hover:bg-transparent">
+              {columns.map((column, index) => {
+                const sortable = isSortable(column)
+                const isActive = sortColumnIndex === index
+
+                return (
+                  <TableHead
+                    key={index}
+                    className={[
+                      column.className,
+                      'bg-brand-surface/80 text-brand-muted text-xs font-semibold uppercase tracking-wider text-center select-none transition-colors duration-200',
+                      sortable ? 'cursor-pointer hover:text-brand-text hover:bg-brand-glass-hover' : '',
+                      isActive ? 'bg-brand-primary/8 text-brand-primary' : ''
+                    ].filter(Boolean).join(' ')}
+                    onClick={sortable ? () => handleSort(index) : undefined}
+                  >
+                    <div className="flex items-center justify-center gap-1.5">
+                      {column.label}
+                      {sortable && getSortIcon(index)}
+                    </div>
+                  </TableHead>
+                )
+              })}
+              {actions?.length && (
+                <TableHead className='bg-brand-surface/80 text-brand-muted text-xs font-semibold uppercase tracking-wider text-center select-none'>
+                  Actions
+                </TableHead>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedRecords.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={totalColumns} className="text-center text-brand-subtle py-12">
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            ) : (
+              sortedRecords.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className={[
+                    'border-b border-brand-glass-border transition-colors duration-200',
+                    onRowClick ? 'cursor-pointer hover:bg-brand-glass-hover' : 'hover:bg-brand-glass-hover/50',
+                    selectedId === row.id ? 'bg-brand-primary/8' : ''
+                  ].filter(Boolean).join(' ')}
+                  onClick={() => onRowClick?.(row)}
+                  data-state={selectedId === row.id ? 'selected' : undefined}
+                >
+                  {columns.map((column, index) => (
+                    <TableCell
+                      key={index}
+                      className={[
+                        column.cellClassName,
+                        'text-center text-brand-text/90 text-sm select-none'
+                      ].filter(Boolean).join(' ')}
+                    >
+                      {getCellValue(row, column)}
+                    </TableCell>
+                  ))}
+                  {actions?.length && (
+                    <TableCell className='text-center'>
+                      <div className='flex items-center justify-center gap-1'>
+                        {actions.map((action, index) => (
+                          <Tooltip key={index}>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={[
+                                  'size-8 rounded-lg text-brand-muted hover:text-brand-text hover:bg-brand-glass-hover transition-colors duration-200',
+                                  action.className
+                                ].filter(Boolean).join(' ')}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  action.onClick(row)
+                                }}
+                              >
+                                {action.icon}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {action.tooltip}
+                            </TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </TooltipProvider>
+  )
+}

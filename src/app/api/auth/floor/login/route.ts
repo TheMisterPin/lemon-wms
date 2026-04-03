@@ -8,10 +8,11 @@ import {
   setAccessTokenCookie,
   setRefreshTokenCookie
 } from '@/lib/auth/session'
+import { upsertDevice } from '@/lib/entities/devices/create-device'
 import prisma from '@/lib/prisma'
 
 const loginSchema = z.object({
-  deviceCode: z.string().min(3),
+  deviceCode: z.string().min(1),
   badgeNumber: z.string().min(3),
   pin: z.string().regex(/^\d{4}$/)
 })
@@ -27,13 +28,22 @@ export async function POST(request: NextRequest) {
   const ipAddress =
     request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? undefined
 
-  const device = await prisma.device.findUnique({
-    where: { code: deviceCode },
-    include: { zone: true }
-  })
+  // Upsert device — creates it if unknown, otherwise finds existing
+  const device = await upsertDevice(prisma, deviceCode)
 
-  if (!device || !device.isActive) {
-    return NextResponse.json({ error: 'Invalid device code' }, { status: 401 })
+  if (!device) {
+    return NextResponse.json({ error: 'Unable to register device.' }, { status: 500 })
+  }
+
+  if (!device.authorized) {
+    return NextResponse.json(
+      { error: 'Device not authorized. Authorize it from the Dashboard.' },
+      { status: 401 }
+    )
+  }
+
+  if (!device.isActive) {
+    return NextResponse.json({ error: 'Device is inactive.' }, { status: 401 })
   }
 
   const user = await prisma.user.findUnique({ where: { badgeNumber } })
@@ -49,11 +59,12 @@ export async function POST(request: NextRequest) {
         actionType: 'LOGIN_FAILED',
         entityType: 'USER',
         entityId: user.id,
-        warehouseId: device.warehouseId,
+        warehouseId: device.warehouseId ?? undefined,
         ipAddress,
         notes: 'Account deactivated'
       }
     })
+
     return NextResponse.json({ error: 'Account deactivated' }, { status: 403 })
   }
 
@@ -69,11 +80,12 @@ export async function POST(request: NextRequest) {
         actionType: 'LOGIN_FAILED',
         entityType: 'USER',
         entityId: user.id,
-        warehouseId: device.warehouseId,
+        warehouseId: device.warehouseId ?? undefined,
         ipAddress,
         notes: 'Invalid PIN'
       }
     })
+
     return NextResponse.json({ error: 'Invalid badge or PIN' }, { status: 401 })
   }
 
@@ -81,8 +93,8 @@ export async function POST(request: NextRequest) {
     userId: user.id,
     role: user.role,
     deviceId: device.id,
-    warehouseId: device.warehouseId,
-    zoneId: device.zoneId
+    warehouseId: device.warehouseId ?? undefined,
+    zoneId: device.zoneId ?? undefined
   })
 
   const refreshToken = signRefreshToken({ userId: user.id })
@@ -103,7 +115,7 @@ export async function POST(request: NextRequest) {
         actionType: 'LOGIN',
         entityType: 'USER',
         entityId: user.id,
-        warehouseId: device.warehouseId,
+        warehouseId: device.warehouseId ?? undefined,
         ipAddress
       }
     })

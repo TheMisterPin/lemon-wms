@@ -20,10 +20,12 @@ export default function NumericKeypad({
   const handleKey = (key: string) => {
     if (key === 'backspace') {
       onChange(value.slice(0, -1))
+
       return
     }
     if (key === 'confirm') {
       onConfirm()
+
       return
     }
     if (value.length < maxLength) {
@@ -36,7 +38,7 @@ export default function NumericKeypad({
   return (
     <div className="flex flex-col gap-3">
       {/* Display */}
-      <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-zinc-100 min-h-[52px]">
+      <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-zinc-100 min-h-13">
         {displayValue || <span className="text-zinc-600 tracking-normal text-base">Enter PIN</span>}
       </div>
 
@@ -56,8 +58,8 @@ export default function NumericKeypad({
                 isConfirm
                   ? 'bg-amber-500 text-zinc-950 hover:bg-amber-400 active:bg-amber-600'
                   : isBackspace
-                  ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600 active:bg-zinc-800'
-                  : 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 active:bg-zinc-900'
+                    ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600 active:bg-zinc-800'
+                    : 'bg-zinc-800 text-zinc-100 hover:bg-zinc-700 active:bg-zinc-900'
               ].join(' ')}
             >
               {isBackspace ? '⌫' : isConfirm ? '✓' : key}

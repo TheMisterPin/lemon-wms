@@ -9,7 +9,11 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(python3 -c \":*)",
       "Bash(python -c \":*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"industrial warehouse management dark dashboard modern gradient\" --design-system -p \"Lemon WMS\")",
+      "Bash(pnpm build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm vitest:*)"
     ]
   }
 }

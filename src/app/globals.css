@@ -4,31 +4,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ─── Brand design tokens ───────────────────────────────────────────────── */
-@theme {
-  /* Surfaces */
-  --color-brand-bg:      #080e1f;   /* page background — dark navy          */
-  --color-brand-surface: #0f172a;   /* card / input background — slate-900  */
-  --color-brand-border:  #1e293b;   /* card borders — slate-800             */
-  --color-brand-input:   #334155;   /* input borders — slate-700            */
-
-  /* Text */
-  --color-brand-text:    #f1f5f9;   /* primary text — slate-100             */
-  --color-brand-muted:   #94a3b8;   /* muted text — slate-400               */
-  --color-brand-subtle:  #64748b;   /* very muted / footer — slate-500      */
-
-  /* Primary — green / leaf */
-  --color-brand-primary:     #4ade80;   /* green-400  — gradient start, focus   */
-  --color-brand-primary-end: #059669;   /* emerald-600 — gradient end           */
-
-  /* Accent — yellow / lemon */
-  --color-brand-accent:     #fde047;   /* yellow-300 */
-  --color-brand-accent-mid: #facc15;   /* yellow-400 */
-  --color-brand-accent-end: #fbbf24;   /* amber-400  */
-}
+/* ─── Brand design tokens — Modern Industrial ─────────────────────────── */
+/* Brand tokens are defined as CSS variables in :root / .dark so they
+   respond to theme changes, then registered in @theme inline below.     */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 @theme inline {
+  /* ── shadcn ────────────────────────────────────────────────────────── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -69,10 +51,70 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* ── Brand tokens (theme-aware via CSS vars) ───────────────────────── */
+  --color-brand-bg:          var(--brand-bg);
+  --color-brand-surface:     var(--brand-surface);
+  --color-brand-border:      var(--brand-border);
+  --color-brand-input:       var(--brand-input);
+  --color-brand-content-bg:  var(--brand-content-bg);
+
+  --color-brand-glass:        var(--brand-glass);
+  --color-brand-glass-border: var(--brand-glass-border);
+  --color-brand-glass-hover:  var(--brand-glass-hover);
+
+  --color-brand-form-surface:      var(--brand-form-surface);
+  --color-brand-form-border:       var(--brand-form-border);
+  --color-brand-form-focus:        var(--brand-form-focus);
+  --color-brand-form-text:         var(--brand-form-text);
+  --color-brand-form-label:        var(--brand-form-label);
+  --color-brand-form-description:  var(--brand-form-description);
+  --color-brand-form-placeholder:  var(--brand-form-placeholder);
+  --color-brand-form-error-surface: var(--brand-form-error-surface);
+  --color-brand-form-error-border:  var(--brand-form-error-border);
+  --color-brand-form-error-text:    var(--brand-form-error-text);
+
+  --color-brand-text:    var(--brand-text);
+  --color-brand-muted:   var(--brand-muted);
+  --color-brand-subtle:  var(--brand-subtle);
+
+  --color-brand-primary:      var(--brand-primary);
+  --color-brand-primary-end:  var(--brand-primary-end);
+  --color-brand-button-text:  var(--brand-button-text);
+  --color-brand-button-disabled: var(--brand-button-disabled);
+
+  --color-brand-accent:      var(--brand-accent);
+  --color-brand-accent-mid:  var(--brand-accent-mid);
+  --color-brand-accent-end:  var(--brand-accent-end);
+
+  --color-dash-bg:       var(--dash-bg);
+  --color-dash-card:     var(--dash-card);
+  --color-dash-card2:    var(--dash-card2);
+  --color-dash-border:   var(--dash-border);
+  --color-dash-text:     var(--dash-text);
+  --color-dash-muted:    var(--dash-muted);
+
+  --color-dash-amber:      var(--dash-amber);
+  --color-dash-amber-dim:  var(--dash-amber-dim);
+  --color-dash-amber-text: var(--dash-amber-text);
+  --color-dash-green:      var(--dash-green);
+  --color-dash-green-dim:  var(--dash-green-dim);
+  --color-dash-green-text: var(--dash-green-text);
+  --color-dash-red:        var(--dash-red);
+  --color-dash-red-dim:    var(--dash-red-dim);
+  --color-dash-red-text:   var(--dash-red-text);
+  --color-dash-blue:       var(--dash-blue);
+  --color-dash-blue-dim:   var(--dash-blue-dim);
+  --color-dash-blue-text:  var(--dash-blue-text);
+  --color-dash-gray:       var(--dash-gray);
+  --color-dash-gray-dim:   var(--dash-gray-dim);
+  --color-dash-gray-text:  var(--dash-gray-text);
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
+
+  /* ── shadcn base (light) ──────────────────────────────────────────── */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -104,9 +146,80 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* ── Brand tokens (light) ─────────────────────────────────────────── */
+  /* Surfaces */
+  --brand-bg:          #f8fafc;   /* slate-50  */
+  --brand-surface:     #ffffff;   /* white     */
+  --brand-border:      #e2e8f0;   /* slate-200 */
+  --brand-input:       #e2e8f0;   /* slate-200 */
+  --brand-content-bg:  #f1f5f9;   /* slate-100 */
+
+  /* Glass */
+  --brand-glass:        rgba(255, 255, 255, 0.7);
+  --brand-glass-border: rgba(148, 163, 184, 0.2);
+  --brand-glass-hover:  rgba(241, 245, 249, 0.8);
+
+  /* Form */
+  --brand-form-surface:      #ffffff;
+  --brand-form-border:       #e2e8f0;
+  --brand-form-focus:        #16a34a;
+  --brand-form-text:         #0f172a;
+  --brand-form-label:        #1e293b;
+  --brand-form-description:  #64748b;
+  --brand-form-placeholder:  #94a3b8;
+  --brand-form-error-surface: #fef2f2;
+  --brand-form-error-border:  #fecaca;
+  --brand-form-error-text:    #dc2626;
+
+  /* Text */
+  --brand-text:    #0f172a;   /* slate-900 */
+  --brand-muted:   #64748b;   /* slate-500 */
+  --brand-subtle:  #94a3b8;   /* slate-400 */
+
+  /* Primary — green / leaf */
+  --brand-primary:      #16a34a;   /* green-600 — darker for light bg contrast */
+  --brand-primary-end:  #059669;
+  --brand-button-text:  #ffffff;
+  --brand-button-disabled: #94a3b8;
+
+  /* Accent — yellow / lemon */
+  --brand-accent:      #eab308;   /* yellow-500 */
+  --brand-accent-mid:  #ca8a04;   /* yellow-600 */
+  --brand-accent-end:  #b45309;   /* amber-700  */
+
+  /* Dashboard surfaces */
+  --dash-bg:       #f8fafc;
+  --dash-card:     #ffffff;
+  --dash-card2:    #f1f5f9;
+  --dash-border:   #e2e8f0;
+  --dash-text:     #0f172a;
+  --dash-muted:    #64748b;
+
+  /* Status */
+  --dash-amber:      #d97706;
+  --dash-amber-dim:  rgba(245, 158, 11, 0.1);
+  --dash-amber-text: #92400e;
+
+  --dash-green:      #16a34a;
+  --dash-green-dim:  rgba(34, 197, 94, 0.1);
+  --dash-green-text: #14532d;
+
+  --dash-red:        #dc2626;
+  --dash-red-dim:    rgba(239, 68, 68, 0.1);
+  --dash-red-text:   #7f1d1d;
+
+  --dash-blue:       #2563eb;
+  --dash-blue-dim:   rgba(59, 130, 246, 0.1);
+  --dash-blue-text:  #1e3a8a;
+
+  --dash-gray:       #64748b;
+  --dash-gray-dim:   rgba(100, 116, 139, 0.08);
+  --dash-gray-text:  #334155;
 }
 
 .dark {
+  /* ── shadcn base (dark) ───────────────────────────────────────────── */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -138,8 +251,86 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-}
 
+  /* ── Brand tokens (dark) ──────────────────────────────────────────── */
+  /* Surfaces */
+  --brand-bg:          #020617;
+  --brand-surface:     #0a101e;
+  --brand-border:      #1e293b;
+  --brand-input:       #1e293b;
+  --brand-content-bg:  #0f172a;
+
+  /* Glass */
+  --brand-glass:        rgba(15, 23, 42, 0.6);
+  --brand-glass-border: rgba(148, 163, 184, 0.08);
+  --brand-glass-hover:  rgba(30, 41, 59, 0.5);
+
+  /* Form */
+  --brand-form-surface:      #0f172a;
+  --brand-form-border:       #1e293b;
+  --brand-form-focus:        #4ade80;
+  --brand-form-text:         #f1f5f9;
+  --brand-form-label:        #e2e8f0;
+  --brand-form-description:  #64748b;
+  --brand-form-placeholder:  #475569;
+  --brand-form-error-surface: #450a0a;
+  --brand-form-error-border:  #7f1d1d;
+  --brand-form-error-text:    #fca5a5;
+
+  /* Text */
+  --brand-text:    #f1f5f9;
+  --brand-muted:   #94a3b8;
+  --brand-subtle:  #475569;
+
+  /* Primary — green / leaf */
+  --brand-primary:      #4ade80;
+  --brand-primary-end:  #059669;
+  --brand-button-text:  #020617;
+  --brand-button-disabled: #64748b;
+
+  /* Accent — yellow / lemon */
+  --brand-accent:      #fde047;
+  --brand-accent-mid:  #facc15;
+  --brand-accent-end:  #f59e0b;
+
+  /* Dashboard surfaces */
+  --dash-bg:       #020617;
+  --dash-card:     #0a101e;
+  --dash-card2:    #0f172a;
+  --dash-border:   #1e293b;
+  --dash-text:     #f1f5f9;
+  --dash-muted:    #64748b;
+
+  /* Status */
+  --dash-amber:      #f59e0b;
+  --dash-amber-dim:  rgba(245, 158, 11, 0.12);
+  --dash-amber-text: #fcd34d;
+
+  --dash-green:      #22c55e;
+  --dash-green-dim:  rgba(34, 197, 94, 0.12);
+  --dash-green-text: #86efac;
+
+  --dash-red:        #ef4444;
+  --dash-red-dim:    rgba(239, 68, 68, 0.12);
+  --dash-red-text:   #fca5a5;
+
+  --dash-blue:       #3b82f6;
+  --dash-blue-dim:   rgba(59, 130, 246, 0.12);
+  --dash-blue-text:  #93c5fd;
+
+  --dash-gray:       #64748b;
+  --dash-gray-dim:   rgba(100, 116, 139, 0.12);
+  --dash-gray-text:  #94a3b8;
+}
+.glass{
+/* From https://css.glass */
+background: rgba(245, 245, 246, 0.075);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(5.3px);
+-webkit-backdrop-filter: blur(5.3px);
+border: 1px solid rgba(245, 245, 246, 0.56);
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -153,7 +344,7 @@
     height: 100%;
     overflow: hidden;
   }
-  .dev{
+  .dev {
     border: solid 2px red;
   }
 }

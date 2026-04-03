@@ -1,8 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export interface BasicResponse {
-    success: boolean;
-    message?: string;
-    data : any;
-    error? : any;
-    code?: number;
+export interface ApiResponse<T = unknown> {
+  success: boolean
+  message: string
+  data: T | null
+  error?: {
+    code: string
+    details?: unknown
+  }
 }
+
+// Legacy alias — kept for backwards compatibility
+export type BasicResponse = ApiResponse
