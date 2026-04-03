@@ -60,6 +60,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
+
+    if (error instanceof Error) {
+      return fail(error.message, 'VALIDATION_ERROR', 400)
+    }
+
     console.error('[PUT /api/items/[id]]', error)
 
     return fail('Failed to update item.')

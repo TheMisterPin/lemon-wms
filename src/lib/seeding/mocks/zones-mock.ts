@@ -1,51 +1,22 @@
-import { ZoneType, Prisma } from '@/generated/prisma'
+import { Prisma, ZoneType } from '@/generated/prisma'
 
-export const zones: Prisma.ZoneCreateManyInput[] = [
-  // WH-0001
-  {
-    id: 'ZN-0001-0001',
-    warehouseId: 'WH-0001',
-    name: 'Receiving',
-    type: ZoneType.RECEIVING,
-    isActive: true
-  },
-  {
-    id: 'ZN-0001-0002',
-    warehouseId: 'WH-0001',
-    name: 'Storage',
-    type: ZoneType.STORAGE,
-    isActive: true
-  },
-  {
-    id: 'ZN-0001-0003',
-    warehouseId: 'WH-0001',
-    name: 'Picking',
-    type: ZoneType.PICKING,
-    isActive: true
-  },
-  {
-    id: 'ZN-0001-0004',
-    warehouseId: 'WH-0001',
-    name: 'Quarantine',
-    type: ZoneType.QUARANTINE,
-    isActive: true
-  },
-
-  // WH-0002
-  {
-    id: 'ZN-0002-0001',
-    warehouseId: 'WH-0002',
-    name: 'Main Zone',
-    type: ZoneType.STORAGE,
-    isActive: true
-  },
-
-  // WH-0003
-  {
-    id: 'ZN-0003-0001',
-    warehouseId: 'WH-0003',
-    name: 'Overflow Zone',
-    type: ZoneType.STORAGE,
-    isActive: true
-  }
+const zoneDefinitions: Array<{ name: string, type: ZoneType }> = [
+  { name: 'Receiving', type: ZoneType.RECEIVING },
+  { name: 'Storage', type: ZoneType.STORAGE },
+  { name: 'Picking', type: ZoneType.PICKING },
+  { name: 'Packing', type: ZoneType.PACKING },
+  { name: 'Shipping', type: ZoneType.SHIPPING }
 ]
+
+export const zones: Prisma.ZoneCreateManyInput[] = Array.from({ length: 10 }, (_, warehouseIndex) => {
+  const warehouseCode = String(warehouseIndex + 1).padStart(4, '0')
+  const warehouseId = `WH-${warehouseCode}`
+
+  return zoneDefinitions.map((zone, zoneIndex) => ({
+    id: `ZN-${warehouseCode}-${String(zoneIndex + 1).padStart(4, '0')}`,
+    warehouseId,
+    name: `${zone.name} Zone`,
+    type: zone.type,
+    isActive: true
+  }))
+}).flat()
