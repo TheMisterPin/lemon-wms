@@ -45,7 +45,7 @@ type ZoneApiRecord = {
 
 // ── Mutation error ───────────────────────────────────────────────────
 
-export interface MutationError {
+ interface MutationError {
   message: string
   code?: string
   details?: unknown

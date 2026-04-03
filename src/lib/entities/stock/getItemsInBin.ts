@@ -17,7 +17,6 @@ async function getItemsInBin(
 
   const itemsInBin = await prisma.binStockItem.findMany({
     where: {
-      deletedAt: null,
       binId,
       ...(onlyAvailable && { quantityAvailable: { gt: 0 } })
     },

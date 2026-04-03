@@ -24,7 +24,6 @@ const uomOptions = ['PZ', 'KGS', 'MT'] as const
 export const items: Prisma.ItemCreateManyInput[] = Array.from({ length: 1000 }, (_, index) => {
   const itemNo = index + 1
   const id = `ITM-${String(itemNo).padStart(6, '0')}`
-  const categoryId = itemCategories[index % itemCategories.length].id
   const uom = faker.helpers.arrayElement(uomOptions)
   const trackingMode = faker.helpers.arrayElement([
     ItemTrackingMode.NONE,
@@ -44,7 +43,6 @@ export const items: Prisma.ItemCreateManyInput[] = Array.from({ length: 1000 }, 
     name,
     description: faker.commerce.productDescription(),
     barcode: faker.string.numeric(13),
-    categoryId,
     trackingMode,
     uom,
     weightKg: uom === 'KGS' ? faker.number.float({ min: 1, max: 50, fractionDigits: 3 }) : faker.number.float({ min: 0.05, max: 15, fractionDigits: 3 }),

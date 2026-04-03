@@ -12,6 +12,6 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    user: payload, // optional, useful for debugging / frontend
+    user: payload // optional, useful for debugging / frontend
   })
 }

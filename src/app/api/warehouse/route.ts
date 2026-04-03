@@ -10,12 +10,7 @@ async function getOrdersForWarehouseHomePage(warehouseId: string) {
     where: { warehouseId },
     select: {
       id: true,
-      type: true,
-      status: true,
-      assignedTo: {
-        select: {
-          fullName: true        }
-      }
+      status: true
     },
     orderBy: { createdAt: 'desc' }
   })
@@ -23,12 +18,7 @@ async function getOrdersForWarehouseHomePage(warehouseId: string) {
     where: { warehouseId },
     select: {
       id: true,
-      type: true,
-      status: true,
-      assignedTo: {
-        select: {
-          fullName: true        }
-      }
+      status: true
     },
     orderBy: { createdAt: 'desc' }
   })
@@ -36,16 +26,14 @@ async function getOrdersForWarehouseHomePage(warehouseId: string) {
     where: { warehouseId },
     select: {
       id: true,
-      type: true,
-      status: true,
-      assignedTo: {
-        select: {
-          fullName: true        }
-      }
+      status: true
     },
     orderBy: { createdAt: 'desc' }
   })
-  const rawOrders = [...purchaseOrders, ...transferOrders, ...salesOrders]
+  const mappedPurchaseOrders = purchaseOrders.map(order => ({ ...order, type: 'PURCHASE' }))
+  const mappedTransferOrders = transferOrders.map(order => ({ ...order, type: 'TRANSFER' }))
+  const mappedSalesOrders = salesOrders.map(order => ({ ...order, type: 'SALES' }))
+  const rawOrders = [...mappedPurchaseOrders, ...mappedTransferOrders, ...mappedSalesOrders]
   const afterAllOrders = rawOrders.map(order => ({ ...order, progress: Math.floor(Math.random() * 101) }))
 
   return afterAllOrders
