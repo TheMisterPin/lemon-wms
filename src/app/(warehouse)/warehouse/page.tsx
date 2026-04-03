@@ -2,87 +2,152 @@
 
 import { useEffect, useState } from 'react'
 
+import { MapPin, Warehouse } from 'lucide-react'
+import { DashboardInfoCards, type DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
+import {
+  DashboardRecordListItem,
+  DashboardRecordListSection
+} from '@/components/dashboard/DashboardRecordListSection'
 import { GenericTable } from '@/components/tables/generic-table'
+import { Card } from '@/components/ui/card'
+import { OrderStatus, OrderType, Role } from '@/generated/prisma'
 import { apiClient } from '@/lib/axios'
-import { warehouseTableColumns } from '@/lib/components/configs/entities/warehouse/config'
-import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
+import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ApiResponse } from '@/types/responses/basic-response'
+import { BinItem } from './../../../types/warehouse/bins/binlist.type'
 
-type WarehouseApiResponse = {
-  success: boolean
-  data: Array<Omit<Warehouse, 'createdAt' | 'deletedAt'> & {
-    createdAt: string
-    deletedAt: string | null
-  }>
+interface Order {
+  id : string
+  type : OrderType
+  status : OrderStatus
+  assignedTo : string | 'Unassigned'
+  progress : number
+}
+interface WarehouseInfo {
+  warehouseId : string
+  warehouseName : string
+  zoneId : string
+  zoneName : string
+  deviceId : string
+  deviceName : string
+}
+interface UserInfo {
+  userId : string
+  name : string
+  role : Role
 }
 
-export default function WarehouseHomePage() {
-  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+interface WarehouseHomePageData {
+  warehouseInfo: WarehouseInfo
+  user: UserInfo
+  orders: Order[]
+  bins : BinItem[]
 
-  function handleRowClick(row: Warehouse) {
-    // eslint-disable-next-line no-console
-    console.log('Clicked warehouse row:', row)
+}
+
+type DashboardBinRecord = WarehouseHomePageData['bins'][number]
+
+const PAGE_SIZE = 3
+
+const binColumns: TableColumnConfig<DashboardBinRecord>[] = [
+  { label: 'Name', accessor: 'name' },
+  { label: 'Type', accessor: 'type' },
+  { label: 'Status', accessor: 'active', type: 'boolean' },
+  {
+    label: 'Progress',
+    type: 'progress',
+    progressBarRef: {
+      max: 'maxCapacity',
+      current: 'currentCapacity'
+    }
   }
+]
 
+function createInfoCards(data: WarehouseHomePageData['warehouseInfo']): DashboardInfoCardItem[] {
+  return [
+    { label: 'Warehouse', value: data.warehouseName ?? '', icon: Warehouse },
+    { label: 'Zones', value: data.zoneName ?? '', icon: MapPin }
+  ]
+}
+
+export default function DashboardHomePage() {
+  const [dashboardData, setDashboardData] = useState<WarehouseHomePageData>({
+    warehouseInfo: {
+      zoneId: '',
+      warehouseId: '',
+      deviceId: '',
+      warehouseName: '',
+      zoneName: '',
+      deviceName: ''
+    },
+    user: {
+      userId: '',
+      name: '',
+      role: Role.WAREHOUSE_WORKER
+    },
+    orders: [],
+    bins: []
+  })
+
+  const [orderPage, setOrderPage] = useState(0)
+  const orders = dashboardData.orders
+  const bins = dashboardData.bins
+  const orderTotalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE))
+  const user = dashboardData.user
+  const formattedOrders : DashboardRecordListItem[] = orders.map((order) => ({
+    id: order.id,
+    title: `Order ${order.id}`,
+    subtitle: `${order.type} - ${order.status}`,
+    details: `Assigned to: ${order.assignedTo}`,
+    status: order.status,
+    progress: order.progress
+  }))
   useEffect(() => {
-    let isMounted = true
-
-    async function loadWarehouses() {
+    async function fetchData() {
       try {
-        const payload = await apiClient.get<WarehouseApiResponse>('/warehouses')
+        const response = await apiClient.get<ApiResponse<WarehouseHomePageData>>('/warehouse')
 
-        if (!isMounted) {
-          return
+        if (response.success && response.data) {
+          setDashboardData(response.data)
         }
-
-        setWarehouses(
-          payload.data.map((warehouse) => ({
-            ...warehouse,
-            createdAt: new Date(warehouse.createdAt),
-            deletedAt: warehouse.deletedAt ? new Date(warehouse.deletedAt) : null
-          }))
-        )
-        setError(null)
-      } catch {
-        if (!isMounted) {
-          return
-        }
-
-        setError('Unable to load warehouses.')
-      } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error)
       }
     }
 
-    void loadWarehouses()
-
-    return () => {
-      isMounted = false
-    }
+    void fetchData()
   }, [])
 
-  return (
-    <main className="rounded border border-zinc-800 bg-zinc-900 p-6">
-      <h1 className="text-2xl font-semibold">Order Pool</h1>
-      <p className="text-sm text-zinc-400">Phase 0 warehouse shell complete.</p>
+  const pagedOrders = formattedOrders.slice(orderPage * PAGE_SIZE, (orderPage + 1) * PAGE_SIZE)
+  const infoCards = createInfoCards(dashboardData.warehouseInfo)
 
-      {isLoading ? (
-        <p className="mt-4 text-sm text-zinc-400">Loading warehouse data...</p>
-      ) : error ? (
-        <p className="mt-4 text-sm text-red-400">{error}</p>
-      ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
+  return (
+    <main className="select-none flex flex-col h-full bg-linear-50 from-slate-800 to-slate-900 p-6 gap-4 overflow-hidden">
+      <Card className=" glass flex-1 overflow-y-auto py-12 px-16">
+        <h1 className="text-2xl font-semibold">Warehouse </h1>
+
+        <DashboardInfoCards cards={infoCards} />
+
+        <DashboardRecordListSection
+          title="Orders"
+          icon={Warehouse}
+          records={pagedOrders}
+          page={orderPage}
+          totalPages={orderTotalPages}
+          onPrev={() => setOrderPage((page) => Math.max(0, page - 1))}
+          onNext={() => setOrderPage((page) => Math.min(orderTotalPages - 1, page + 1))}
+          paginationPosition="footer"
+        />
+
+        <div className="gap-4 rounded-lg bg-brand-glass/75 border border-slate-500 pb-12">
+          {/* Bins table */}
+          <h2 className="text-xl font-semibold mt-8 px-4 ">Bins</h2>
           <GenericTable
-            columns={warehouseTableColumns}
-            records={warehouses}
-            onRowClick={handleRowClick}
-            emptyMessage="No warehouses found."
+            columns={binColumns}
+            records={bins}
           />
         </div>
-      )}
+      </Card>
     </main>
   )
 }

@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 
 export interface DashboardInfoCardItem {
   label: string
-  value: number
+  value: number | string
   icon: LucideIcon
 }
 

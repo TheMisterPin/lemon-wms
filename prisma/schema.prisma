@@ -305,21 +305,22 @@ model Zone {
 }
 
 model Bin {
-  id          String    @id
-  zoneId      String
-  warehouseId String
-  zone        Zone      @relation(fields: [zoneId], references: [id])
-  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
-  name        String
-  code        String    @unique
-  type        BinType
-  isBlocked   Boolean   @default(false)
-  blockReason String?
-  maxCapacity Decimal?
-  maxWeightKg Decimal?
-  maxVolumeM3 Decimal?
-  deletedAt   DateTime?
-  createdAt   DateTime  @default(now())
+  id              String    @id
+  zoneId          String
+  warehouseId     String
+  zone            Zone      @relation(fields: [zoneId], references: [id])
+  warehouse       Warehouse @relation(fields: [warehouseId], references: [id])
+  name            String
+  code            String    @unique
+  type            BinType
+  isBlocked       Boolean   @default(false)
+  blockReason     String?
+  maxCapacity     Decimal?  @db.Decimal(18, 4)
+  currentCapacity Decimal?  @db.Decimal(18, 4)
+  maxWeightKg     Decimal?  @db.Decimal(18, 4)
+  maxVolumeM3     Decimal?  @db.Decimal(18, 4)
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
 
   binStockItems BinStockItem[]
   fromTransfers TransferOrder[] @relation("TransferFromBin")
@@ -339,6 +340,7 @@ model User {
   role              Role
   loginType         LoginType
   isActive          Boolean   @default(true)
+  isLoggedIn        Boolean   @default(false)
   deletedAt         DateTime?
   createdAt         DateTime  @default(now())
   lastLoginDeviceId String?
@@ -347,10 +349,12 @@ model User {
   usedByDevices        Device[]              @relation("DeviceLastUser")
   refreshTokens        RefreshToken[]
   warehouseAssignments WarehouseAssignment[]
+  orderAssignments     OrderAssignment[]
   createdWarehouses    Warehouse[]           @relation("WarehouseCreatedBy")
   userActivityEntries  UserActivityEntry[]
   binOperationEntries  BinOperationEntry[]
   notifications        Notification[]
+  purchaseOrders       PurchaseOrder[]       @relation("PurchaseOrderAssignedTo")
 }
 
 model Device {
@@ -391,11 +395,14 @@ model BinStockItem {
   warehouseId        String
   binId              String
   itemId             String
+  description        String
+  boxId              String?
   lotId              String?
   serialNumberId     String?
   quantityAvailable  Decimal       @default(0) @db.Decimal(18, 4)
   quantityReserved   Decimal       @default(0) @db.Decimal(18, 4)
   quantityBlocked    Decimal       @default(0) @db.Decimal(18, 4)
+  reservedByOrderId  String?
   uom                String
   status             BinItemStatus @default(AVAILABLE)
   expiryDate         DateTime?
@@ -428,6 +435,21 @@ model WarehouseAssignment {
   zone      Zone?     @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 
   @@unique([userId, warehouseId, zoneId])
+}
+
+model OrderAssignment {
+  id        String    @id @default(uuid())
+  orderId   String
+  orderType OrderType
+  userId    String
+  createdAt DateTime  @default(now())
+
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userActivities UserActivityEntry[] @relation("OrderAssignmentActivities")
+
+  @@unique([orderType, orderId, userId])
+  @@index([userId])
+  @@index([orderType, orderId])
 }
 
 model Item {
@@ -548,6 +570,7 @@ model PurchaseOrder {
   reference         String        @unique
   status            OrderStatus   @default(DRAFT)
   priority          OrderPriority @default(NORMAL)
+  assignedToId      String?
   warehouseId       String
   notes             String?
   supplier          String
@@ -566,6 +589,7 @@ model PurchaseOrder {
   businessParty       BusinessParty?      @relation("SupplierPurchaseOrders", fields: [businessPartyId], references: [id])
   userActivityEntry   UserActivityEntry?  @relation("UserActivityPurchaseOrders", fields: [userActivityEntryId], references: [id])
   userActivityEntryId String?
+  assignedTo          User?               @relation("PurchaseOrderAssignedTo", fields: [assignedToId], references: [id])
 }
 
 model PurchaseOrderLine {
@@ -742,21 +766,23 @@ model AdjustmentOrderLine {
 }
 
 model UserActivityEntry {
-  id          String     @id @default(uuid())
-  userId      String
-  actionType  String
-  entityType  String
-  entityId    String
-  metadata    Json?
-  warehouseId String?
-  orderId     String?
-  orderType   OrderType?
-  ipAddress   String?
-  notes       String?
-  createdAt   DateTime   @default(now())
+  id                String     @id @default(uuid())
+  userId            String
+  actionType        String
+  entityType        String
+  entityId          String
+  metadata          Json?
+  warehouseId       String?
+  orderId           String?
+  orderType         OrderType?
+  orderAssignmentId String?
+  ipAddress         String?
+  notes             String?
+  createdAt         DateTime   @default(now())
 
   user                 User                  @relation(fields: [userId], references: [id])
   warehouse            Warehouse?            @relation(fields: [warehouseId], references: [id])
+  orderAssignment      OrderAssignment?      @relation("OrderAssignmentActivities", fields: [orderAssignmentId], references: [id], onDelete: SetNull)
   boes                 BinOperationEntry[]
   salesOrderLines      SalesOrderLine[]      @relation("UserActivitySalesOrderLines")
   purchaseOrderLines   PurchaseOrderLine[]   @relation("UserActivityPurchaseOrderLines")
@@ -766,6 +792,7 @@ model UserActivityEntry {
   salesOrder           SalesOrder[]          @relation("UserActivitySalesOrders")
 
   @@index([userId, actionType, entityId, entityType])
+  @@index([orderAssignmentId])
 }
 
 model BinOperationEntry {

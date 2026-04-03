@@ -1,10 +1,14 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { OrderStatus } from '@/generated/prisma'
 import type { LucideIcon } from 'lucide-react'
 
 export interface DashboardRecordListItem {
   id: string
   title: string
   subtitle: string
+  progress?: number
+  status? : OrderStatus
+  details?: string
 }
 
 type PaginationPosition = 'header' | 'footer'
@@ -19,6 +23,10 @@ interface DashboardRecordListSectionProps {
   onNext: () => void
   paginationPosition?: PaginationPosition
   emptyMessage?: string
+}
+
+function normalizeProgress(progress: number) {
+  return Math.min(Math.max(progress, 0), 100)
 }
 
 function PaginationControls({
@@ -96,15 +104,43 @@ export function DashboardRecordListSection({
             {emptyMessage}
           </div>
         ) : (
-          records.map((record) => (
-            <div key={record.id} className="flex items-center gap-4 rounded-lg bg-brand-glass p-4">
-              <Icon size={20} className="text-brand-primary" />
-              <div>
-                <p className="text-sm font-medium">{record.title}</p>
-                <p className="text-sm text-brand-muted">{record.subtitle}</p>
+          records.map((record) => {
+            const progress =
+              record.progress !== undefined
+                ? normalizeProgress(record.progress)
+                : undefined
+
+            return (
+              <div key={record.id} className="flex items-center gap-4 rounded-lg bg-brand-glass p-4">
+                <Icon size={20} className="shrink-0 text-brand-primary" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium">{record.title}</p>
+                  <p className="text-sm text-brand-muted">{record.subtitle}</p>
+                  {progress !== undefined && (
+                    <div className="mt-3">
+                      <div className="mb-1 flex items-center justify-between gap-3 text-xs text-brand-muted">
+                        <span>Progress</span>
+                        <span>{progress}%</span>
+                      </div>
+                      <div
+                        aria-label={`${record.title} progress`}
+                        aria-valuemax={100}
+                        aria-valuemin={0}
+                        aria-valuenow={progress}
+                        className="h-2 w-full overflow-hidden rounded-full bg-brand-glass/50"
+                        role="progressbar"
+                      >
+                        <div
+                          className="h-full rounded-full bg-brand-primary transition-[width] duration-300"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
 

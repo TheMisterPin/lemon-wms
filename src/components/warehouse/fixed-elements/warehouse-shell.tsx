@@ -4,9 +4,9 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import PageWrapper from '@/components/shared/PageWrapper'
-import WarehouseHeader from './WarehouseHeader'
-import WarehouseFooter from './WarehouseFooter'
-import WarehouseSidebar from './WarehouseSidebar'
+import WarehouseFooter from './warehouse-footer'
+import WarehouseHeader from './warehouse-header'
+import WarehouseSidebar from './warehouse-sidebar'
 
 export default function WarehouseShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)

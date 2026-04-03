@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 
-import LemonHeader from '../typography/lemon-header'
+import LemonHeader from '../../typography/lemon-header'
 
 interface WarehouseHeaderProps {
   onMenuToggle: () => void
