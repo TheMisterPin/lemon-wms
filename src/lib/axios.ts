@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { type InternalAxiosRequestConfig } from 'axios'
 
-import { useAuthStore } from '@/lib/auth/store'
+import { readStoredAccessToken, useAuthStore } from '@/lib/auth/store'
 
 type RetriableAxiosRequestConfig = InternalAxiosRequestConfig & {
   _retried?: boolean
@@ -58,7 +58,7 @@ async function attemptTokenRefresh(): Promise<string | null> {
 // Request interceptor — attach Bearer token from Zustand auth store
 api.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().token
+    const token = useAuthStore.getState().token ?? readStoredAccessToken()
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -122,7 +122,7 @@ export async function authenticatedCall<T = any>(
   }
 ): Promise<T> {
   const { method = 'GET', data, params, headers } = options ?? {}
-  const token = useAuthStore.getState().token
+  const token = useAuthStore.getState().token ?? readStoredAccessToken()
 
   const response = await api.request<T>({
     method,

@@ -104,8 +104,8 @@ export const itemTableColumns: TableColumnConfig<WARItem>[] = [
   { label: 'Tracking', accessor: 'trackingMode' },
   { label: 'UOM', accessor: 'uom' },
   { label: 'Min qty', accessor: 'minQuantity' },
-  { label: 'Active', accessor: 'isActive' },
-  { label: 'Created', accessor: 'createdAt' }
+  { label: 'Active', accessor: 'isActive', type: 'boolean' },
+  { label: 'Created', accessor: 'createdAt', type: 'date' }
 ]
 
 export const itemFactboxSections: FactboxSectionConfig<WARItem>[] = [

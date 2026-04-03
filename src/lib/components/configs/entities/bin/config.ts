@@ -78,10 +78,10 @@ export const binTableColumns: TableColumnConfig<BinTableRow>[] = [
   { label: 'Code', accessor: 'code' },
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
-  { label: 'Blocked', accessor: 'isBlocked' },
+  { label: 'Blocked', accessor: 'isBlocked', type: 'boolean' },
   { label: 'Zone', accessor: 'zoneName' },
   { label: 'Warehouse', accessor: 'warehouseName' },
-  { label: 'Created', accessor: 'createdAt' }
+  { label: 'Created', accessor: 'createdAt', type: 'date' }
 ]
 
 export const binFactboxSections: FactboxSectionConfig<BinFactboxRecord>[] = [

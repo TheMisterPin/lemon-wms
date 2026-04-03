@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@/generated/prisma'
 
 async function getItems(prisma: PrismaClient, filters?: { categoryId?: string; isActive?: boolean }) {
-  return prisma.wARItem.findMany({
+  return prisma.item.findMany({
     where: {
       deletedAt: null,
       ...(filters?.categoryId ? { categoryId: filters.categoryId } : {}),

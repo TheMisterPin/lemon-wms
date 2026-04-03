@@ -6,6 +6,8 @@ import { seedZones } from './zones'
 
 export async function seedDB(prisma : PrismaClient) {
   console.warn('Clearing existing data...\n')
+  await prisma.userActivityEntry.deleteMany()
+  console.warn('Cleared activities.')
   await prisma.bin.deleteMany()
   console.warn('Cleared bins.')
   await prisma.zone.deleteMany()

@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken'
 import { NextRequest } from 'next/server'
+import jwt from 'jsonwebtoken'
 import { describe, expect, it } from 'vitest'
 
 import { signAccessToken } from '@/lib/auth/jwt'
@@ -51,12 +51,12 @@ describe('middleware — static assets', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Public API paths — always pass through
+// API paths — always pass through to route handlers
 // ---------------------------------------------------------------------------
 
-describe('middleware — public API paths', () => {
-  it.each(['/api/auth/login', '/api/auth/floor/login', '/api/auth/refresh'])(
-    'passes through %s without auth',
+describe('middleware — api paths', () => {
+  it.each(['/api/auth/login', '/api/auth/floor/login', '/api/auth/refresh', '/api/warehouses'])(
+    'passes through %s without auth checks in middleware',
     (path) => {
       const res = middleware(makeRequest(path))
       expect(res.status).toBe(200)
@@ -65,7 +65,7 @@ describe('middleware — public API paths', () => {
 })
 
 // ---------------------------------------------------------------------------
-// No token at all — redirect pages, 401 APIs
+// No token at all — redirect pages
 // ---------------------------------------------------------------------------
 
 describe('middleware — no token', () => {
@@ -75,9 +75,9 @@ describe('middleware — no token', () => {
     expect(new URL(res.headers.get('location')!).pathname).toBe('/login')
   })
 
-  it('returns 401 for protected API routes', () => {
+  it('passes protected API routes through to route handlers', () => {
     const res = middleware(makeRequest('/api/warehouses'))
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(200)
   })
 
   it('allows /login without a token', () => {
@@ -92,7 +92,7 @@ describe('middleware — no token', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Expired token — THE BUG FIX: page requests pass through, API gets 401
+// Expired token — page requests pass through when refresh is possible
 // ---------------------------------------------------------------------------
 
 describe('middleware — expired access token in cookie', () => {
@@ -123,21 +123,20 @@ describe('middleware — expired access token in cookie', () => {
     expect(new URL(res.headers.get('location')!).pathname).toBe('/login')
   })
 
-  it('returns 401 for API requests with expired token', () => {
+  it('passes expired API requests through to route handlers', () => {
     const token = expiredToken('OWNER')
     const res = middleware(makeRequest('/api/warehouses', { cookie: { name: 'access_token', value: token } }))
 
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(200)
   })
 
-  it('returns "Token expired" error message for expired API requests when refresh token exists', async () => {
+  it('passes expired API requests through even when refresh token exists', async () => {
     const token = expiredToken('OWNER')
     const req = makeRequest('/api/warehouses', { cookie: { name: 'access_token', value: token } })
     req.cookies.set('refresh_token', 'refresh-token-present')
     const res = middleware(req)
 
-    const body = await res.json()
-    expect(body.error).toBe('Token expired')
+    expect(res.status).toBe(200)
   })
 
   it('treats a completely garbage cookie as unauthenticated (not expired)', () => {

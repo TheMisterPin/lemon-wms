@@ -77,8 +77,8 @@ export const userTableColumns: TableColumnConfig<User>[] = [
   { label: 'Email', accessor: 'email' },
   { label: 'Role', accessor: 'role' },
   { label: 'Login type', accessor: 'loginType' },
-  { label: 'Active', accessor: 'isActive' },
-  { label: 'Created', accessor: 'createdAt' }
+  { label: 'Active', accessor: 'isActive', type: 'boolean' },
+  { label: 'Created', accessor: 'createdAt', type: 'date' }
 ]
 
 export const userFactboxSections: FactboxSectionConfig<User>[] = [
