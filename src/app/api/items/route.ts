@@ -49,6 +49,11 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
+
+    if (error instanceof Error) {
+      return fail(error.message, 'VALIDATION_ERROR', 400)
+    }
+
     console.error('[POST /api/items]', error)
 
     return fail('Failed to create item.')

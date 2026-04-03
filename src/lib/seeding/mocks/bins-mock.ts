@@ -1,110 +1,55 @@
 import { BinType, Prisma } from '@/generated/prisma'
 
-export const bins: Prisma.BinCreateManyInput[] = [
-  // =========================
-  // WH-0001 - RECEIVING
-  // =========================
-  {
-    id: 'BIN-0001-0001-0001',
-    code: 'BIN-0001-0001-0001',
-    warehouseId: 'WH-0001',
-    zoneId: 'ZN-0001-0001',
-    name: 'Receiving Dock 1',
-    type: BinType.RECEIVING
-  },
-  {
-    id: 'BIN-0001-0001-0002',
-    code: 'BIN-0001-0001-0002',
-
-    warehouseId: 'WH-0001',
-    zoneId: 'ZN-0001-0001',
-    name: 'Receiving Dock 2',
-    type: BinType.RECEIVING
-  },
-
-  // =========================
-  // STORAGE (racks)
-  // =========================
-  {
-    id: 'BIN-0001-0002-0001',
-    code: 'BIN-0001-0002-0001',
-    warehouseId: 'WH-0001',
-    zoneId: 'ZN-0001-0002',
-    name: 'Rack A1',
-    type: BinType.STORAGE
-  },
-  {
-    id: 'BIN-0001-0002-0002',
-    code: 'BIN-0001-0002-0002',
-    warehouseId: 'WH-0001',
-    zoneId: 'ZN-0001-0002',
-    name: 'Rack A2',
-    type: BinType.STORAGE
-  },
-  {
-    id: 'BIN-0001-0002-0003',
-    code: 'BIN-0001-0002-0003',
-    warehouseId: 'WH-0001',
-    zoneId: 'ZN-0001-0002',
-    name: 'Rack B1',
-    type: BinType.STORAGE
-  },
-
-  // =========================
-  // PICKING
-  // =========================
-  {
-    id: 'BIN-0001-0003-0001',
-    code: 'BIN-0001-0003-0001',
-    warehouseId: 'WH-0001',
-    zoneId: 'ZN-0001-0003',
-    name: 'Pick Face 1',
-    type: BinType.PICKING
-  },
-  {
-    id: 'BIN-0001-0003-0002',
-    code: 'BIN-0001-0003-0002',
-    warehouseId: 'WH-0001',
-    zoneId: 'ZN-0001-0003',
-    name: 'Pick Face 2',
-    type: BinType.PICKING
-  },
-
-  // =========================
-  // QUARANTINE
-  // =========================
-  {
-    id: 'BIN-0001-0004-0001',
-    code: 'BIN-0001-0004-0001',
-    warehouseId: 'WH-0001',
-    zoneId: 'ZN-0001-0004',
-    name: 'Quarantine 1',
-    type: BinType.QUARANTINE,
-    isBlocked: true,
-    blockReason: 'Quality hold'
-  },
-
-  // =========================
-  // WH-0002
-  // =========================
-  {
-    id: 'BIN-0002-0001-0001',
-    code: 'BIN-0002-0001-0001',
-    warehouseId: 'WH-0002',
-    zoneId: 'ZN-0002-0001',
-    name: 'Main Rack 1',
-    type: BinType.STORAGE
-  },
-
-  // =========================
-  // WH-0003
-  // =========================
-  {
-    id: 'BIN-0003-0001-0001',
-    code: 'BIN-0003-0001-0001',
-    warehouseId: 'WH-0003',
-    zoneId: 'ZN-0003-0001',
-    name: 'Overflow Rack 1',
-    type: BinType.STORAGE
-  }
+const zoneTypeByPosition: BinType[] = [
+  BinType.RECEIVING,
+  BinType.STORAGE,
+  BinType.PICKING,
+  BinType.PACKING,
+  BinType.SHIPPING
 ]
+
+const buildBinName = (type: BinType, index: number): string => {
+  if (type === BinType.RECEIVING) {
+    return `Dock ${index}`
+  }
+
+  if (type === BinType.STORAGE) {
+    return `Rack-${String(index).padStart(2, '0')}`
+  }
+
+  if (type === BinType.PICKING) {
+    return `Pick Face ${index}`
+  }
+
+  if (type === BinType.PACKING) {
+    return `Pack Station ${index}`
+  }
+
+  return `Outbound Lane ${index}`
+}
+
+export const bins: Prisma.BinCreateManyInput[] = Array.from({ length: 10 }, (_, warehouseIndex) => {
+  const warehouseCode = String(warehouseIndex + 1).padStart(4, '0')
+  const warehouseId = `WH-${warehouseCode}`
+
+  return Array.from({ length: 5 }, (_, zoneIndex) => {
+    const zoneCode = String(zoneIndex + 1).padStart(4, '0')
+    const zoneId = `ZN-${warehouseCode}-${zoneCode}`
+    const binType = zoneTypeByPosition[zoneIndex]
+
+    return Array.from({ length: 30 }, (_, binIndex) => {
+      const binCode = String(binIndex + 1).padStart(4, '0')
+      const id = `BIN-${warehouseCode}-${zoneCode}-${binCode}`
+
+      return {
+        id,
+        code: id,
+        warehouseId,
+        zoneId,
+        name: buildBinName(binType, binIndex + 1),
+        type: binType,
+        isBlocked: false
+      }
+    })
+  }).flat()
+}).flat()

@@ -193,6 +193,24 @@ enum AddressType {
   HQ
 }
 
+model UnitOfMeasure {
+  id           String   @id
+  description  String
+  decimalRound Int
+  createdAt    DateTime @default(now())
+
+  items                Item[]
+  binStockItems        BinStockItem[]
+  boxLines             BoxLine[]
+  purchaseOrderLines   PurchaseOrderLine[]
+  salesOrderLines      SalesOrderLine[]
+  transferOrderLines   TransferOrderLine[]
+  returnOrderLines     ReturnOrderLine[]
+  adjustmentOrderLines AdjustmentOrderLine[]
+  binOperationEntries  BinOperationEntry[]
+  itemLedgerEntries    ItemLedgerEntry[]
+}
+
 model BusinessParty {
   id        String            @id
   code      String            @unique
@@ -391,19 +409,21 @@ model RefreshToken {
 }
 
 model BinStockItem {
-  id                 String        @id @default(uuid())
-  warehouseId        String
-  binId              String
-  itemId             String
-  description        String
-  boxId              String?
-  lotId              String?
-  serialNumberId     String?
-  quantityAvailable  Decimal       @default(0) @db.Decimal(18, 4)
-  quantityReserved   Decimal       @default(0) @db.Decimal(18, 4)
-  quantityBlocked    Decimal       @default(0) @db.Decimal(18, 4)
-  reservedByOrderId  String?
-  uom                String
+  id                String  @id @default(uuid())
+  warehouseId       String
+  binId             String
+  itemId            String
+  description       String
+  boxId             String?
+  lotId             String?
+  serialNumberId    String?
+  quantityAvailable Decimal @default(0) @db.Decimal(18, 4)
+  quantityReserved  Decimal @default(0) @db.Decimal(18, 4)
+  quantityBlocked   Decimal @default(0) @db.Decimal(18, 4)
+  reservedByOrderId String?
+  uom               String
+
+  unitOfMeasure      UnitOfMeasure @relation(fields: [uom], references: [id])
   status             BinItemStatus @default(AVAILABLE)
   expiryDate         DateTime?
   createdByBoeId     String?
@@ -461,13 +481,15 @@ model Item {
   categoryId   String
   trackingMode ItemTrackingMode
   uom          String
-  weightKg     Decimal?
-  dimensions   Json?
-  minQuantity  Decimal          @default(0)
-  isActive     Boolean          @default(true)
-  supplierId   String?
-  deletedAt    DateTime?
-  createdAt    DateTime         @default(now())
+
+  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+  weightKg      Decimal?
+  dimensions    Json?
+  minQuantity   Decimal       @default(0)
+  isActive      Boolean       @default(true)
+  supplierId    String?
+  deletedAt     DateTime?
+  createdAt     DateTime      @default(now())
 
   category            ItemCategory         @relation(fields: [categoryId], references: [id])
   binStockItems       BinStockItem[]
@@ -559,10 +581,11 @@ model BoxLine {
   serialNumberId String?
   uom            String
 
-  box          Box           @relation(fields: [boxId], references: [id], onDelete: Cascade)
-  item         BinStockItem  @relation(fields: [itemId], references: [id])
-  lot          Lot?          @relation(fields: [lotId], references: [id])
-  serialNumber SerialNumber? @relation(fields: [serialNumberId], references: [id])
+  box           Box           @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+  item          BinStockItem  @relation(fields: [itemId], references: [id])
+  lot           Lot?          @relation(fields: [lotId], references: [id])
+  serialNumber  SerialNumber? @relation(fields: [serialNumberId], references: [id])
 }
 
 model PurchaseOrder {
@@ -605,6 +628,7 @@ model PurchaseOrderLine {
   uom             String
 
   purchaseOrder       PurchaseOrder      @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure       UnitOfMeasure      @relation(fields: [uom], references: [id])
   userActivityEntry   UserActivityEntry? @relation("UserActivityPurchaseOrderLines", fields: [userActivityEntryId], references: [id])
   userActivityEntryId String?
 }
@@ -648,6 +672,7 @@ model SalesOrderLine {
   uom              String
 
   salesOrder          SalesOrder         @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure       UnitOfMeasure      @relation(fields: [uom], references: [id])
   userActivityEntry   UserActivityEntry? @relation("UserActivitySalesOrderLines", fields: [userActivityEntryId], references: [id])
   userActivityEntryId String?
 }
@@ -688,6 +713,7 @@ model TransferOrderLine {
   uom             String
 
   transferOrder TransferOrder @relation(fields: [transferOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
 }
 
 model ReturnOrder {
@@ -722,7 +748,8 @@ model ReturnOrderLine {
   serialNumberId  String?
   uom             String
 
-  returnOrder ReturnOrder @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
+  returnOrder   ReturnOrder   @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
 }
 
 model AdjustmentOrder {
@@ -759,6 +786,7 @@ model AdjustmentOrderLine {
   uom               String
 
   adjustmentOrder     AdjustmentOrder    @relation(fields: [adjustmentOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure       UnitOfMeasure      @relation(fields: [uom], references: [id])
   userActivityEntry   UserActivityEntry? @relation("UserActivityAdjustmentOrderLines", fields: [userActivityEntryId], references: [id])
   userActivityEntryId String?
 
@@ -796,15 +824,17 @@ model UserActivityEntry {
 }
 
 model BinOperationEntry {
-  id                 String           @id @default(uuid())
-  type               BinOperationType
-  warehouseId        String
-  userId             String
-  fromBinId          String?
-  toBinId            String?
-  warItemId          String
-  quantity           Decimal          @db.Decimal(18, 4)
-  uom                String
+  id          String           @id @default(uuid())
+  type        BinOperationType
+  warehouseId String
+  userId      String
+  fromBinId   String?
+  toBinId     String?
+  warItemId   String
+  quantity    Decimal          @db.Decimal(18, 4)
+  uom         String
+
+  unitOfMeasure      UnitOfMeasure @relation(fields: [uom], references: [id])
   lotId              String?
   serialNumberId     String?
   boxId              String?
@@ -812,10 +842,10 @@ model BinOperationEntry {
   orderType          OrderType?
   reasonCode         String?
   notes              String?
-  affectsFiscalStock Boolean          @default(false)
+  affectsFiscalStock Boolean       @default(false)
   reversedByEntryId  String?
   reversesEntryId    String?
-  createdAt          DateTime         @default(now())
+  createdAt          DateTime      @default(now())
 
   user                User               @relation(fields: [userId], references: [id])
   warehouse           Warehouse          @relation(fields: [warehouseId], references: [id])
@@ -831,13 +861,15 @@ model BinOperationEntry {
 }
 
 model ItemLedgerEntry {
-  id                  Int                      @id @default(autoincrement())
-  warehouseId         String
-  warItemId           String
-  eventType           FiscalInventoryEventType
-  quantityDelta       Decimal                  @db.Decimal(18, 4)
-  uom                 String
-  lotId               String?
+  id            Int                      @id @default(autoincrement())
+  warehouseId   String
+  warItemId     String
+  eventType     FiscalInventoryEventType
+  quantityDelta Decimal                  @db.Decimal(18, 4)
+  uom           String
+  lotId         String?
+
+  unitOfMeasure       UnitOfMeasure @relation(fields: [uom], references: [id])
   serialNumberId      String?
   orderId             String?
   orderType           OrderType?
@@ -846,7 +878,7 @@ model ItemLedgerEntry {
   externalDocumentRef String?
   boeId               String?
   performedByUserId   String?
-  createdAt           DateTime                 @default(now())
+  createdAt           DateTime      @default(now())
 
   warehouse Warehouse          @relation(fields: [warehouseId], references: [id])
   boe       BinOperationEntry? @relation(fields: [boeId], references: [id])

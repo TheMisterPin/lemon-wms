@@ -11,6 +11,12 @@ export const trackingModeOptions: SelectOption[] = [
   { value: 'FIFO', label: 'FIFO' }
 ]
 
+export const uomOptions: SelectOption[] = [
+  { value: 'PZ', label: 'PZ - Pieces' },
+  { value: 'MT', label: 'MT - Meters' },
+  { value: 'KGS', label: 'KGS - Kilograms' }
+]
+
 export const itemFormConfig: GenericFormConfig<ItemFormValues> = {
   columns: 2,
   submitLabel: 'Save item',
@@ -21,7 +27,7 @@ export const itemFormConfig: GenericFormConfig<ItemFormValues> = {
     barcode: null,
     categoryId: '',
     trackingMode: 'NONE',
-    uom: 'EA',
+    uom: 'PZ',
     weightKg: null,
     dimensions: null,
     minQuantity: 0,
@@ -33,7 +39,7 @@ export const itemFormConfig: GenericFormConfig<ItemFormValues> = {
       name: 'sku',
       label: 'SKU',
       type: 'text',
-      placeholder: 'ITEM-00001',
+      placeholder: 'SKU-000001',
       required: true
     },
     {
@@ -53,17 +59,23 @@ export const itemFormConfig: GenericFormConfig<ItemFormValues> = {
     {
       name: 'uom',
       label: 'Unit of measure',
-      type: 'text',
-      placeholder: 'EA',
-      description: 'e.g. EA, KG, L, BOX',
+      type: 'select',
+      options: uomOptions,
+      description: 'Uses the seeded UnitOfMeasure catalog.',
       required: true
     },
     {
       name: 'categoryId',
       label: 'Category',
       type: 'text',
-      placeholder: 'Category ID',
+      placeholder: 'CAT-0001',
       required: true
+    },
+    {
+      name: 'supplierId',
+      label: 'Supplier ID',
+      type: 'text',
+      placeholder: 'SUP-0001'
     },
     {
       name: 'minQuantity',
@@ -127,6 +139,7 @@ export const itemFactboxSections: FactboxSectionConfig<WARItem>[] = [
       { label: 'Weight (kg)', accessor: 'weightKg' },
       { label: 'Active', accessor: 'isActive' },
       { label: 'Category', accessor: 'categoryId' },
+      { label: 'Supplier', accessor: 'supplierId' },
       { label: 'Created', accessor: 'createdAt' },
       { label: 'Deleted at', accessor: 'deletedAt' }
     ]
