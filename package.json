@@ -10,7 +10,9 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix .",
     "seed:users": "tsx seed/seed-users.ts",
-    "seed:items": "tsx seed/seed-items.ts"
+    "seed:items": "tsx seed/seed-items.ts",
+    "seed:locations": "tsx seed/seed-locations.ts",
+    "seed:all": "tsx seed/seed-all.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
