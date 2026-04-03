@@ -5,7 +5,7 @@ import type { ItemFormValues } from '@/lib/components/configs/entities/item/type
 async function updateItem(prisma: PrismaClient, id: string, data: Partial<ItemFormValues>) {
   const { dimensions, ...rest } = data
 
-  return prisma.wARItem.update({
+  return prisma.item.update({
     where: { id },
     data: {
       ...rest,

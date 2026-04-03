@@ -1,5 +1,5 @@
-import type { LucideIcon } from 'lucide-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 export interface DashboardRecordListItem {
   id: string

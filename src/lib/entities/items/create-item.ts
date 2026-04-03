@@ -5,7 +5,7 @@ import type { ItemFormValues } from '@/lib/components/configs/entities/item/type
 async function createItem(prisma: PrismaClient, data: ItemFormValues) {
   const { dimensions, ...rest } = data
 
-  return prisma.wARItem.create({
+  return prisma.item.create({
     data: {
       ...rest,
       dimensions: dimensions !== null

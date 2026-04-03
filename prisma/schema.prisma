@@ -7,6 +7,43 @@ datasource db {
   provider = "postgresql"
 }
 
+enum FiscalInventoryEventType {
+  RECEIPT
+  SHIPMENT
+  RETURN_IN
+  RETURN_OUT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+enum BinOperationType {
+  RECEIVE
+  PUTAWAY
+  MOVE
+  PICK
+  SHIP
+  BOX
+  UNBOX
+  ADJUST
+  BLOCK
+  UNBLOCK
+  COUNT
+  TRANSFER_LOAD
+  TRANSFER_UNLOAD
+  RETURN_RECEIVE
+  RETURN_PUTAWAY
+  REVERSE_OPERATION
+}
+
+enum BinItemStatus {
+  AVAILABLE
+  RESERVED
+  BLOCKED
+  IN_TRANSIT
+}
+
 enum Role {
   OWNER
   OFFICE_MANAGER
@@ -51,13 +88,6 @@ enum BinType {
   QUARANTINE
   STAGING
   CUSTOM
-}
-
-enum BinItemStatus {
-  AVAILABLE
-  RESERVED
-  BLOCKED
-  IN_TRANSIT
 }
 
 enum ItemTrackingMode {
@@ -148,6 +178,82 @@ enum DeviceType {
   FLOOR
 }
 
+enum BusinessPartyType {
+  CUSTOMER
+  SUPPLIER
+  CARRIER
+}
+
+enum AddressType {
+  PRIMARY
+  BILLING
+  SHIPPING
+  RETURNS
+  WAREHOUSE
+  HQ
+}
+
+model BusinessParty {
+  id        String            @id
+  code      String            @unique
+  type      BusinessPartyType
+  name      String
+  legalName String?
+  email     String?
+  phone     String?
+  website   String?
+  vatNumber String?
+  taxId     String?
+  isActive  Boolean           @default(true)
+  notes     String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  contacts       ContactPerson[]
+  addresses      Address[]
+  purchaseOrders PurchaseOrder[] @relation("SupplierPurchaseOrders")
+  salesOrders    SalesOrder[]    @relation("CustomerSalesOrders")
+}
+
+model ContactPerson {
+  id              String   @id
+  businessPartyId String
+  firstName       String
+  lastName        String
+  fullName        String
+  roleTitle       String?
+  email           String?
+  phone           String?
+  mobile          String?
+  isPrimary       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  businessParty BusinessParty @relation(fields: [businessPartyId], references: [id], onDelete: Cascade)
+
+  @@index([businessPartyId])
+}
+
+model Address {
+  id              String      @id
+  businessPartyId String
+  type            AddressType
+  label           String?
+  streetLine1     String
+  streetLine2     String?
+  city            String
+  state           String?
+  postalCode      String
+  country         String
+  isPrimary       Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  businessParty BusinessParty @relation(fields: [businessPartyId], references: [id], onDelete: Cascade)
+
+  @@index([businessPartyId])
+}
+
 model Warehouse {
   id          String          @id
   name        String          @unique
@@ -160,20 +266,21 @@ model Warehouse {
   deletedAt   DateTime?
   createdAt   DateTime        @default(now())
 
-  zones          Zone[]
-  bins           Bin[]
-  devices        Device[]
-  assignments    WarehouseAssignment[]
-  purchaseOrders PurchaseOrder[]
-  salesOrders    SalesOrder[]
-  transferOrders TransferOrder[]
-  returnOrders   ReturnOrder[]
-  adjustOrders   AdjustmentOrder[]
-  itemLedger     ItemLedgerEntry[]
-  alertRules     AlertRule[]
-  uaeEntries     UserActivityEntry[]
-  serialConfigs  SerialNumberConfig[]
-  boxes          Box[]
+  zones               Zone[]
+  bins                Bin[]
+  devices             Device[]
+  assignments         WarehouseAssignment[]
+  purchaseOrders      PurchaseOrder[]
+  salesOrders         SalesOrder[]
+  transferOrders      TransferOrder[]
+  returnOrders        ReturnOrder[]
+  adjustOrders        AdjustmentOrder[]
+  itemLedger          ItemLedgerEntry[]
+  alertRules          AlertRule[]
+  uaeEntries          UserActivityEntry[]
+  serialConfigs       SerialNumberConfig[]
+  boxes               Box[]
+  binOperationEntries BinOperationEntry[]
 }
 
 model Zone {
@@ -214,7 +321,7 @@ model Bin {
   deletedAt   DateTime?
   createdAt   DateTime  @default(now())
 
-  binItems      BinItem[]
+  binStockItems BinStockItem[]
   fromTransfers TransferOrder[] @relation("TransferFromBin")
   toTransfers   TransferOrder[] @relation("TransferToBin")
   boxes         Box[]
@@ -237,7 +344,7 @@ model User {
   lastLoginDeviceId String?
 
   lastLoginDevice      Device?               @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
-  usedByDevices        Device[]              @relation("DeviceLastUser") // ← back-relation for Device.lastUser
+  usedByDevices        Device[]              @relation("DeviceLastUser")
   refreshTokens        RefreshToken[]
   warehouseAssignments WarehouseAssignment[]
   createdWarehouses    Warehouse[]           @relation("WarehouseCreatedBy")
@@ -279,27 +386,34 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model BinItem {
-  id                String        @id @default(uuid())
-  binId             String
-  warItemId         String
-  lotId             String?
-  serialNumberId    String?
-  quantityAvailable Decimal       @default(0)
-  quantityReserved  Decimal       @default(0)
-  quantityBlocked   Decimal       @default(0)
-  uom               String
-  status            BinItemStatus @default(AVAILABLE)
-  expiryDate        DateTime?
-  createdAt         DateTime      @default(now())
+model BinStockItem {
+  id                 String        @id @default(uuid())
+  warehouseId        String
+  binId              String
+  itemId             String
+  lotId              String?
+  serialNumberId     String?
+  quantityAvailable  Decimal       @default(0) @db.Decimal(18, 4)
+  quantityReserved   Decimal       @default(0) @db.Decimal(18, 4)
+  quantityBlocked    Decimal       @default(0) @db.Decimal(18, 4)
+  uom                String
+  status             BinItemStatus @default(AVAILABLE)
+  expiryDate         DateTime?
+  createdByBoeId     String?
+  lastOperationBoeId String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   bin          Bin           @relation(fields: [binId], references: [id])
-  warItem      WARItem       @relation(fields: [warItemId], references: [id])
+  item         Item          @relation(fields: [itemId], references: [id])
   lot          Lot?          @relation(fields: [lotId], references: [id])
   serialNumber SerialNumber? @relation(fields: [serialNumberId], references: [id])
+  boxLines     BoxLine[]
 
-  @@unique([binId, warItemId, lotId])
-  @@unique([binId, warItemId, serialNumberId])
+  @@unique([binId, itemId, lotId, serialNumberId])
+  @@index([warehouseId, itemId])
+  @@index([binId, itemId])
+  @@index([status])
 }
 
 model WarehouseAssignment {
@@ -316,7 +430,7 @@ model WarehouseAssignment {
   @@unique([userId, warehouseId, zoneId])
 }
 
-model WARItem {
+model Item {
   id           String           @id @default(uuid())
   sku          String           @unique
   name         String
@@ -334,10 +448,9 @@ model WARItem {
   createdAt    DateTime         @default(now())
 
   category            ItemCategory         @relation(fields: [categoryId], references: [id])
-  binItems            BinItem[]
+  binStockItems       BinStockItem[]
   lots                Lot[]
   serialNumbers       SerialNumber[]
-  boxLines            BoxLine[]
   serialNumberConfigs SerialNumberConfig[]
 }
 
@@ -347,22 +460,22 @@ model ItemCategory {
   handlingFlags Json?
   createdAt     DateTime @default(now())
 
-  items WARItem[]
+  items Item[]
 }
 
 model Lot {
   id              String    @id @default(uuid())
   lotNumber       String    @unique
-  warItemId       String
   purchaseOrderId String?
   receivedDate    DateTime
   expiryDate      DateTime?
   status          LotStatus @default(ACTIVE)
   createdAt       DateTime  @default(now())
 
-  warItem  WARItem   @relation(fields: [warItemId], references: [id])
-  binItems BinItem[]
-  boxLines BoxLine[]
+  binStockItems BinStockItem[]
+  boxLines      BoxLine[]
+  item          Item?          @relation(fields: [itemId], references: [id])
+  itemId        String?
 }
 
 model SerialNumber {
@@ -374,13 +487,13 @@ model SerialNumber {
   partialCurrent Int?
   partialTotal   Int?
   status         SerialStatus     @default(IN_STOCK)
-  warItemId      String?
+  itemId         String?
   createdAt      DateTime         @default(now())
 
-  config   SerialNumberConfig @relation(fields: [configId], references: [id])
-  warItem  WARItem?           @relation(fields: [warItemId], references: [id])
-  binItems BinItem[]
-  boxLines BoxLine[]
+  config        SerialNumberConfig @relation(fields: [configId], references: [id])
+  item          Item?              @relation(fields: [itemId], references: [id])
+  binStockItems BinStockItem[]
+  boxLines      BoxLine[]
 }
 
 model SerialNumberConfig {
@@ -391,11 +504,11 @@ model SerialNumberConfig {
   lastValue   Int              @default(0)
   incrementBy Int              @default(1)
   mode        SerialMode       @default(INCREMENTAL)
-  warItemId   String?
+  itemId      String?
   warehouseId String?
   createdAt   DateTime         @default(now())
 
-  warItem   WARItem?       @relation(fields: [warItemId], references: [id])
+  item      Item?          @relation(fields: [itemId], references: [id])
   warehouse Warehouse?     @relation(fields: [warehouseId], references: [id])
   serials   SerialNumber[]
 }
@@ -418,14 +531,14 @@ model Box {
 model BoxLine {
   id             String  @id @default(uuid())
   boxId          String
-  warItemId      String
+  itemId         String
   quantity       Decimal
   lotId          String?
   serialNumberId String?
   uom            String
 
   box          Box           @relation(fields: [boxId], references: [id], onDelete: Cascade)
-  warItem      WARItem       @relation(fields: [warItemId], references: [id])
+  item         BinStockItem  @relation(fields: [itemId], references: [id])
   lot          Lot?          @relation(fields: [lotId], references: [id])
   serialNumber SerialNumber? @relation(fields: [serialNumberId], references: [id])
 }
@@ -445,10 +558,14 @@ model PurchaseOrder {
   confirmedAt       DateTime?
   assignedWMId      String?
   deletedAt         DateTime?
+  businessPartyId   String?
   createdAt         DateTime      @default(now())
 
-  warehouse Warehouse           @relation(fields: [warehouseId], references: [id])
-  lines     PurchaseOrderLine[]
+  warehouse           Warehouse           @relation(fields: [warehouseId], references: [id])
+  lines               PurchaseOrderLine[]
+  businessParty       BusinessParty?      @relation("SupplierPurchaseOrders", fields: [businessPartyId], references: [id])
+  userActivityEntry   UserActivityEntry?  @relation("UserActivityPurchaseOrders", fields: [userActivityEntryId], references: [id])
+  userActivityEntryId String?
 }
 
 model PurchaseOrderLine {
@@ -463,7 +580,9 @@ model PurchaseOrderLine {
   serialNumberId  String?
   uom             String
 
-  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  purchaseOrder       PurchaseOrder      @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  userActivityEntry   UserActivityEntry? @relation("UserActivityPurchaseOrderLines", fields: [userActivityEntryId], references: [id])
+  userActivityEntryId String?
 }
 
 model SalesOrder {
@@ -483,8 +602,12 @@ model SalesOrder {
   deletedAt       DateTime?
   createdAt       DateTime      @default(now())
 
-  warehouse Warehouse        @relation(fields: [warehouseId], references: [id])
-  lines     SalesOrderLine[]
+  warehouse           Warehouse          @relation(fields: [warehouseId], references: [id])
+  lines               SalesOrderLine[]
+  businessPartyId     String?
+  businessParty       BusinessParty?     @relation("CustomerSalesOrders", fields: [businessPartyId], references: [id])
+  userActivityEntry   UserActivityEntry? @relation("UserActivitySalesOrders", fields: [userActivityEntryId], references: [id])
+  userActivityEntryId String?
 }
 
 model SalesOrderLine {
@@ -500,7 +623,9 @@ model SalesOrderLine {
   serialNumberId   String?
   uom              String
 
-  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  salesOrder          SalesOrder         @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  userActivityEntry   UserActivityEntry? @relation("UserActivitySalesOrderLines", fields: [userActivityEntryId], references: [id])
+  userActivityEntryId String?
 }
 
 model TransferOrder {
@@ -591,12 +716,14 @@ model AdjustmentOrder {
   deletedAt     DateTime?
   createdAt     DateTime      @default(now())
 
-  warehouse Warehouse             @relation(fields: [warehouseId], references: [id])
-  lines     AdjustmentOrderLine[]
+  warehouse           Warehouse             @relation(fields: [warehouseId], references: [id])
+  lines               AdjustmentOrderLine[]
+  userActivityEntry   UserActivityEntry?    @relation("UserActivityAdjustmentOrders", fields: [userActivityEntryId], references: [id])
+  userActivityEntryId String?
 }
 
 model AdjustmentOrderLine {
-  id                String  @id @default(uuid())
+  sequence          Int     @default(autoincrement())
   adjustmentOrderId String
   warItemId         String
   binId             String?
@@ -607,7 +734,11 @@ model AdjustmentOrderLine {
   serialNumberId    String?
   uom               String
 
-  adjustmentOrder AdjustmentOrder @relation(fields: [adjustmentOrderId], references: [id], onDelete: Cascade)
+  adjustmentOrder     AdjustmentOrder    @relation(fields: [adjustmentOrderId], references: [id], onDelete: Cascade)
+  userActivityEntry   UserActivityEntry? @relation("UserActivityAdjustmentOrderLines", fields: [userActivityEntryId], references: [id])
+  userActivityEntryId String?
+
+  @@id([adjustmentOrderId, sequence])
 }
 
 model UserActivityEntry {
@@ -624,45 +755,80 @@ model UserActivityEntry {
   notes       String?
   createdAt   DateTime   @default(now())
 
-  user      User                @relation(fields: [userId], references: [id])
-  warehouse Warehouse?          @relation(fields: [warehouseId], references: [id])
-  boes      BinOperationEntry[]
+  user                 User                  @relation(fields: [userId], references: [id])
+  warehouse            Warehouse?            @relation(fields: [warehouseId], references: [id])
+  boes                 BinOperationEntry[]
+  salesOrderLines      SalesOrderLine[]      @relation("UserActivitySalesOrderLines")
+  purchaseOrderLines   PurchaseOrderLine[]   @relation("UserActivityPurchaseOrderLines")
+  adjustmentOrderLines AdjustmentOrderLine[] @relation("UserActivityAdjustmentOrderLines")
+  adjustmentOrder      AdjustmentOrder[]     @relation("UserActivityAdjustmentOrders")
+  purchaseOrder        PurchaseOrder[]       @relation("UserActivityPurchaseOrders")
+  salesOrder           SalesOrder[]          @relation("UserActivitySalesOrders")
+
+  @@index([userId, actionType, entityId, entityType])
 }
 
 model BinOperationEntry {
-  id             String     @id @default(uuid())
-  userId         String
-  fromBinId      String?
-  toBinId        String?
-  warItemId      String
-  quantity       Decimal
-  lotId          String?
-  serialNumberId String?
-  orderId        String?
-  orderType      OrderType?
-  uaeId          String
-  createdAt      DateTime   @default(now())
+  id                 String           @id @default(uuid())
+  type               BinOperationType
+  warehouseId        String
+  userId             String
+  fromBinId          String?
+  toBinId            String?
+  warItemId          String
+  quantity           Decimal          @db.Decimal(18, 4)
+  uom                String
+  lotId              String?
+  serialNumberId     String?
+  boxId              String?
+  orderId            String?
+  orderType          OrderType?
+  reasonCode         String?
+  notes              String?
+  affectsFiscalStock Boolean          @default(false)
+  reversedByEntryId  String?
+  reversesEntryId    String?
+  createdAt          DateTime         @default(now())
 
-  user        User              @relation(fields: [userId], references: [id])
-  uae         UserActivityEntry @relation(fields: [uaeId], references: [id])
-  itemLedgers ItemLedgerEntry[]
+  user                User               @relation(fields: [userId], references: [id])
+  warehouse           Warehouse          @relation(fields: [warehouseId], references: [id])
+  itemLedgers         ItemLedgerEntry[]
+  userActivityEntry   UserActivityEntry? @relation(fields: [userActivityEntryId], references: [id])
+  userActivityEntryId String?
+
+  @@index([warehouseId, warItemId, createdAt])
+  @@index([fromBinId, createdAt])
+  @@index([toBinId, createdAt])
+  @@index([type, createdAt])
+  @@index([orderType, orderId])
 }
 
 model ItemLedgerEntry {
-  id             String          @id @default(uuid())
-  warehouseId    String
-  warItemId      String
-  entryType      LedgerEntryType
-  quantityChange Decimal
-  lotId          String?
-  serialNumberId String?
-  orderId        String?
-  orderType      OrderType?
-  boeId          String
-  createdAt      DateTime        @default(now())
+  id                  Int                      @id @default(autoincrement())
+  warehouseId         String
+  warItemId           String
+  eventType           FiscalInventoryEventType
+  quantityDelta       Decimal                  @db.Decimal(18, 4)
+  uom                 String
+  lotId               String?
+  serialNumberId      String?
+  orderId             String?
+  orderType           OrderType?
+  reference           String?
+  reasonCode          String?
+  externalDocumentRef String?
+  boeId               String?
+  performedByUserId   String?
+  createdAt           DateTime                 @default(now())
 
-  warehouse Warehouse         @relation(fields: [warehouseId], references: [id])
-  boe       BinOperationEntry @relation(fields: [boeId], references: [id])
+  warehouse Warehouse          @relation(fields: [warehouseId], references: [id])
+  boe       BinOperationEntry? @relation(fields: [boeId], references: [id])
+
+  @@index([warehouseId, warItemId, createdAt])
+  @@index([warehouseId, eventType, createdAt])
+  @@index([orderType, orderId])
+  @@index([lotId])
+  @@index([serialNumberId])
 }
 
 model AlertRule {
