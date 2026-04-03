@@ -1,6 +1,8 @@
 import { ReactNode } from 'react'
 import { FieldPath, FieldValues } from 'react-hook-form'
 
+import type { PaginationPosition } from '@/components/shared/PaginationSelector'
+
 export type SortDirection = 'asc' | 'desc'
 export type TableColumnType = 'text' | 'date' | 'datetime' | 'time' | 'boolean' | 'progress'
 
@@ -25,6 +27,14 @@ export interface RowAction<T> {
   tooltip: string
   onClick: (row: T) => void
   className?: string
+}
+
+export interface TablePaginationConfig {
+  page: number
+  totalPages: number
+  onPrev: () => void
+  onNext: () => void
+  position?: PaginationPosition
 }
 
 export interface AccessorColumnConfig<T extends FieldValues> extends BaseColumnConfig, TypedValueColumnConfig {
@@ -70,4 +80,5 @@ export interface GenericTableProps<T extends FieldValues & { id: string }> {
   selectedId?: string
   emptyMessage?: string
   actions?: RowAction<T>[]
+  pagination?: TablePaginationConfig
 }

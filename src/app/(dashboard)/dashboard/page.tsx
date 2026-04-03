@@ -105,6 +105,7 @@ export default function DashboardHomePage() {
 
   const [warehousePage, setWarehousePage] = useState(0)
   const [zonePage, setZonePage] = useState(0)
+  const [binPage, setBinPage] = useState(0)
 
   useEffect(() => {
     async function fetchData() {
@@ -128,9 +129,11 @@ export default function DashboardHomePage() {
 
   const warehouseTotalPages = Math.max(1, Math.ceil(warehouses.length / PAGE_SIZE))
   const zoneTotalPages = Math.max(1, Math.ceil(zones.length / PAGE_SIZE))
+  const binTotalPages = Math.max(1, Math.ceil(bins.length / PAGE_SIZE))
 
   const pagedWarehouses = warehouses.slice(warehousePage * PAGE_SIZE, (warehousePage + 1) * PAGE_SIZE)
   const pagedZones = zones.slice(zonePage * PAGE_SIZE, (zonePage + 1) * PAGE_SIZE)
+  const pagedBins = bins.slice(binPage * PAGE_SIZE, (binPage + 1) * PAGE_SIZE)
   const infoCards = createInfoCards(dashboardData.info)
   const warehouseRecords = createWarehouseRecords(pagedWarehouses)
   const zoneRecords = createZoneRecords(pagedZones)
@@ -151,7 +154,7 @@ export default function DashboardHomePage() {
             totalPages={warehouseTotalPages}
             onPrev={() => setWarehousePage((page) => Math.max(0, page - 1))}
             onNext={() => setWarehousePage((page) => Math.min(warehouseTotalPages - 1, page + 1))}
-            paginationPosition="footer"
+            paginationPosition="header"
           />
           <DashboardRecordListSection
             title="Zones"
@@ -161,6 +164,7 @@ export default function DashboardHomePage() {
             totalPages={zoneTotalPages}
             onPrev={() => setZonePage((page) => Math.max(0, page - 1))}
             onNext={() => setZonePage((page) => Math.min(zoneTotalPages - 1, page + 1))}
+            paginationPosition="header"
           />
         </div>
 
@@ -169,7 +173,14 @@ export default function DashboardHomePage() {
           <h2 className="text-xl font-semibold mt-8 px-4 ">Bins</h2>
           <GenericTable
             columns={binColumns}
-            records={bins!}
+            records={pagedBins}
+            pagination={{
+              page: binPage,
+              totalPages: binTotalPages,
+              onPrev: () => setBinPage((page) => Math.max(0, page - 1)),
+              onNext: () => setBinPage((page) => Math.min(binTotalPages - 1, page + 1)),
+              position: 'header'
+            }}
           />
         </div>
       </Card>

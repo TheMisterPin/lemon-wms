@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import { GenericTable } from '@/components/tables/generic-table'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
@@ -71,5 +71,45 @@ describe('GenericTable', () => {
     expect(progressBars).toHaveLength(2)
     expect(screen.getByText('25%')).toBeTruthy()
     expect(screen.getByText('80%')).toBeTruthy()
+  })
+
+  it('renders shared pagination controls when pagination config is provided', () => {
+    const onPrev = vi.fn()
+    const onNext = vi.fn()
+    const columns: TableColumnConfig<TestRow>[] = [
+      { label: 'Name', accessor: 'name' }
+    ]
+
+    render(
+      <GenericTable
+        columns={columns}
+        records={[
+          {
+            id: 'warehouse-1',
+            name: 'North Hub',
+            createdAt: '2025-03-15T00:00:00Z',
+            lastSeenAt: '2025-03-15T09:45:00Z',
+            isActive: true,
+            currentCapacity: 25,
+            maxCapacity: 100
+          }
+        ]}
+        pagination={{
+          page: 1,
+          totalPages: 3,
+          onPrev,
+          onNext,
+          position: 'footer'
+        }}
+      />
+    )
+
+    expect(screen.getByText('2 / 3')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: /previous page/i }))
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }))
+
+    expect(onPrev).toHaveBeenCalledTimes(1)
+    expect(onNext).toHaveBeenCalledTimes(1)
   })
 })

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { FieldValues } from 'react-hook-form'
 
+import { PaginationSelector } from '@/components/shared/PaginationSelector'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Progress } from '@/components/ui/progress'
@@ -241,9 +242,13 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   onRowClick,
   selectedId,
   emptyMessage = 'No records found.',
-  actions
+  actions,
+  pagination
 }: GenericTableProps<T>) {
   const totalColumns = columns.length + (actions?.length ? 1 : 0)
+  const paginationPosition = pagination?.position ?? 'footer'
+  const showHeaderPagination = paginationPosition === 'header'
+  const showFooterPagination = paginationPosition === 'footer'
 
   const [sortColumnIndex, setSortColumnIndex] = useState<number | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
@@ -292,7 +297,18 @@ export function GenericTable<T extends FieldValues & { id: string }>({
 
   return (
     <TooltipProvider>
-      <div className="w-10/12 mx-auto rounded-xl border border-brand-glass-border bg-brand-glass backdrop-blur-sm overflow-hidden shadow-lg shadow-black/20">
+      <div className="mx-auto w-10/12 overflow-hidden rounded-xl border border-brand-glass-border bg-brand-glass shadow-lg shadow-black/20 backdrop-blur-sm">
+        {pagination && showHeaderPagination && (
+          <div className="border-b border-brand-glass-border px-4 py-3">
+            <PaginationSelector
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              onPrev={pagination.onPrev}
+              onNext={pagination.onNext}
+            />
+          </div>
+        )}
+
         <Table>
           <TableHeader>
             <TableRow className="border-b border-brand-glass-border hover:bg-transparent">
@@ -389,6 +405,17 @@ export function GenericTable<T extends FieldValues & { id: string }>({
             )}
           </TableBody>
         </Table>
+
+        {pagination && showFooterPagination && (
+          <div className="border-t border-brand-glass-border px-4 py-3">
+            <PaginationSelector
+              page={pagination.page}
+              totalPages={pagination.totalPages}
+              onPrev={pagination.onPrev}
+              onNext={pagination.onNext}
+            />
+          </div>
+        )}
       </div>
     </TooltipProvider>
   )

@@ -90,9 +90,11 @@ export default function DashboardHomePage() {
   })
 
   const [orderPage, setOrderPage] = useState(0)
+  const [binPage, setBinPage] = useState(0)
   const orders = dashboardData.orders
   const bins = dashboardData.bins
   const orderTotalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE))
+  const binTotalPages = Math.max(1, Math.ceil(bins.length / PAGE_SIZE))
   const user = dashboardData.user
   const formattedOrders : DashboardRecordListItem[] = orders.map((order) => ({
     id: order.id,
@@ -119,6 +121,7 @@ export default function DashboardHomePage() {
   }, [])
 
   const pagedOrders = formattedOrders.slice(orderPage * PAGE_SIZE, (orderPage + 1) * PAGE_SIZE)
+  const pagedBins = bins.slice(binPage * PAGE_SIZE, (binPage + 1) * PAGE_SIZE)
   const infoCards = createInfoCards(dashboardData.warehouseInfo)
 
   return (
@@ -144,7 +147,14 @@ export default function DashboardHomePage() {
           <h2 className="text-xl font-semibold mt-8 px-4 ">Bins</h2>
           <GenericTable
             columns={binColumns}
-            records={bins}
+            records={pagedBins}
+            pagination={{
+              page: binPage,
+              totalPages: binTotalPages,
+              onPrev: () => setBinPage((page) => Math.max(0, page - 1)),
+              onNext: () => setBinPage((page) => Math.min(binTotalPages - 1, page + 1)),
+              position: 'header'
+            }}
           />
         </div>
       </Card>

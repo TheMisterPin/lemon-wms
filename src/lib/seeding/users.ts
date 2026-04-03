@@ -1,12 +1,29 @@
 import bcrypt from 'bcrypt'
 
-import type { PrismaClient } from '@/generated/prisma'
+import { LoginType, Role, type PrismaClient } from '@/generated/prisma'
 
-import { users } from './mocks/users-mock'
+import { generateFakeUsers } from './mocks/generators/users'
 
 const SALT_ROUNDS = 10
 
 export async function seedUsers(prisma: PrismaClient) {
+  const users = generateFakeUsers()
+  await prisma.user.create({
+    data: {
+      id: 'USR-0000',
+      email: 'owner@lemon-wms.local',
+      passwordHash: await bcrypt.hash('owner1234', SALT_ROUNDS),
+      pinHash: await bcrypt.hash('1234', SALT_ROUNDS),
+      badgeNumber: '0000',
+      firstName: 'Owner',
+      lastName: 'User',
+      fullName: 'Owner User',
+      role: Role.OWNER,
+      loginType: LoginType.BOTH,
+      isActive: true
+    }
+  })
+  console.warn('Seeded owner user')
   const data = await Promise.all(
     users.map(async (user) => ({
       id: user.id,

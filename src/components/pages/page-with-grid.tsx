@@ -2,7 +2,10 @@
 
 import React from 'react'
 
-import { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import {
+  TableColumnConfig,
+  type TablePaginationConfig
+} from '@/types/components/table/generic-table.types'
 import type { RowAction } from '@/types/components/table/generic-table.types'
 
 import { GenericTable } from '../tables/generic-table'
@@ -18,10 +21,11 @@ interface PageWithGridProps {
     }
     onRowClick?: (row: any) => void
     tableActions?: RowAction<any>[]
+    tablePagination?: TablePaginationConfig
 }
 
 export default function PageWithGrid(props: PageWithGridProps) {
-  const { title, headerActions, isLoading, error, tableData, onRowClick, tableActions } = props
+  const { title, headerActions, isLoading, error, tableData, onRowClick, tableActions, tablePagination } = props
 
   return (
     <main className="h-full rounded-xl bg-brand-content-bg p-6">
@@ -55,6 +59,7 @@ export default function PageWithGrid(props: PageWithGridProps) {
           records={tableData.records}
           onRowClick={onRowClick}
           actions={tableActions}
+          pagination={tablePagination}
           emptyMessage={`No ${title.toLowerCase()} found.`}
         />
       )}

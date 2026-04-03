@@ -1,4 +1,7 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  PaginationPosition,
+  PaginationSelector
+} from '@/components/shared/PaginationSelector'
 import { OrderStatus } from '@/generated/prisma'
 import type { LucideIcon } from 'lucide-react'
 
@@ -11,8 +14,6 @@ export interface DashboardRecordListItem {
   details?: string
 }
 
-type PaginationPosition = 'header' | 'footer'
-
 interface DashboardRecordListSectionProps {
   title: string
   icon: LucideIcon
@@ -21,52 +22,12 @@ interface DashboardRecordListSectionProps {
   totalPages: number
   onPrev: () => void
   onNext: () => void
-  paginationPosition?: PaginationPosition
+  paginationPosition: PaginationPosition
   emptyMessage?: string
 }
 
 function normalizeProgress(progress: number) {
   return Math.min(Math.max(progress, 0), 100)
-}
-
-function PaginationControls({
-  page,
-  totalPages,
-  onPrev,
-  onNext
-}: {
-  page: number
-  totalPages: number
-  onPrev: () => void
-  onNext: () => void
-}) {
-  if (totalPages <= 1) {
-    return null
-  }
-
-  return (
-    <div className="flex items-center justify-end gap-2">
-      <button
-        type="button"
-        onClick={onPrev}
-        disabled={page === 0}
-        className="cursor-pointer rounded-md bg-brand-glass p-1.5 text-brand-muted transition-colors hover:text-brand-text disabled:cursor-not-allowed disabled:opacity-30"
-      >
-        <ChevronLeft size={16} />
-      </button>
-      <span className="text-xs text-brand-muted">
-        {page + 1} / {totalPages}
-      </span>
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={page >= totalPages - 1}
-        className="cursor-pointer rounded-md bg-brand-glass p-1.5 text-brand-muted transition-colors hover:text-brand-text disabled:cursor-not-allowed disabled:opacity-30"
-      >
-        <ChevronRight size={16} />
-      </button>
-    </div>
-  )
 }
 
 export function DashboardRecordListSection({
@@ -89,7 +50,7 @@ export function DashboardRecordListSection({
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold">{title}</h2>
         {showHeaderPagination && (
-          <PaginationControls
+          <PaginationSelector
             page={page}
             totalPages={totalPages}
             onPrev={onPrev}
@@ -145,7 +106,7 @@ export function DashboardRecordListSection({
       </div>
 
       {showFooterPagination && (
-        <PaginationControls
+        <PaginationSelector
           page={page}
           totalPages={totalPages}
           onPrev={onPrev}
