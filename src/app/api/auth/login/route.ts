@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
       id: user.id,
       email: user.email,
       role: user.role,
+      fullName: user.fullName,
       badgeNumber: user.badgeNumber
     }
   })
