@@ -1,5 +1,6 @@
 import { type PrismaClient } from '@/generated/prisma'
 
+import { seedBinStockItems } from './bin-stock-items'
 import { seedBins } from './bins'
 import { seedBusinessParties } from './business-parties'
 import { seedItems } from './items'
@@ -52,6 +53,10 @@ export async function seedDB(prisma: PrismaClient) {
   const bins = await seedBins(prisma)
   console.warn(`Seeded ${bins.count} bins.\n`)
 
+  console.warn('Seeding bin stock items...')
+  const binStockItems = await seedBinStockItems(prisma)
+  console.warn(`Seeded ${binStockItems.count} bin stock items.\n`)
+
   console.warn('Seeding users...')
   const users = await seedUsers(prisma)
   console.warn(`Seeded ${users.count} users.\n`)
@@ -69,6 +74,7 @@ export async function seedDB(prisma: PrismaClient) {
     warehousesSeeded: warehouses.count,
     zonesSeeded: zones.count,
     binsSeeded: bins.count,
+    binStockItemsSeeded: binStockItems.count,
     usersSeeded: users.count,
     businessPartiesSeeded: businessParties.partiesCount,
     itemCategoriesSeeded: seededItems.categoriesCount,
