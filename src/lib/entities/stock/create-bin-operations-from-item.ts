@@ -11,7 +11,7 @@ import {
 
 type BaseArgs = {
   prisma: PrismaClient
-  item: Pick<Item, 'id' | 'uom'>
+  item: Pick<Item, 'id' | 'uom' | 'name' >
   userId: string
   warehouseId: string
   quantity: number
@@ -83,6 +83,7 @@ async function createBinOperationsFromItem(args: CreateBinOperationsFromItemArgs
       const stockItem = await tx.binStockItem.create({
         data: {
           warehouseId,
+          description: item.name,
           binId: adjustment.binId,
           itemId: adjustment.warItemId,
           lotId: adjustment.lotId,
@@ -213,6 +214,7 @@ async function createBinOperationsFromItem(args: CreateBinOperationsFromItemArgs
       : await tx.binStockItem.create({
         data: {
           warehouseId,
+          description: item.name,
           binId: movement.toBinId,
           itemId: movement.warItemId,
           lotId: movement.lotId,
