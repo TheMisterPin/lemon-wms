@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 import { MapPin, Warehouse } from 'lucide-react'
 import { DashboardInfoCards, type DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
@@ -71,6 +72,8 @@ function createInfoCards(data: WarehouseHomePageData['warehouseInfo']): Dashboar
 }
 
 export default function DashboardHomePage() {
+  const router = useRouter()
+
   const [dashboardData, setDashboardData] = useState<WarehouseHomePageData>({
     warehouseInfo: {
       zoneId: '',
@@ -95,7 +98,6 @@ export default function DashboardHomePage() {
   const bins = dashboardData.bins
   const orderTotalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE))
   const binTotalPages = Math.max(1, Math.ceil(bins.length / PAGE_SIZE))
-  const user = dashboardData.user
   const formattedOrders : DashboardRecordListItem[] = orders.map((order) => ({
     id: order.id,
     title: `Order ${order.id}`,
@@ -148,6 +150,7 @@ export default function DashboardHomePage() {
           <GenericTable
             columns={binColumns}
             records={pagedBins}
+            onRowClick={(bin) => router.push(`/warehouse/bins/${encodeURIComponent(bin.id)}`)}
             pagination={{
               page: binPage,
               totalPages: binTotalPages,

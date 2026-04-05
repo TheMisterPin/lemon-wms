@@ -8,7 +8,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/lib/prisma', () => ({
   default: {
-    device: { findUnique: vi.fn() },
     user: { findUnique: vi.fn() },
     userActivityEntry: { create: vi.fn().mockResolvedValue({}) },
     refreshToken: { create: vi.fn().mockResolvedValue({}) }
@@ -21,11 +20,16 @@ vi.mock('@/lib/auth/session', () => ({
   setRefreshTokenCookie: vi.fn().mockResolvedValue(undefined)
 }))
 
+vi.mock('@/lib/entities/devices/create-device', () => ({
+  upsertDevice: vi.fn()
+}))
+
 // ---------------------------------------------------------------------------
 // Imports after mocks
 // ---------------------------------------------------------------------------
 
 import { POST } from '@/app/api/auth/floor/login/route'
+import { upsertDevice } from '@/lib/entities/devices/create-device'
 import prisma from '@/lib/prisma'
 
 // ---------------------------------------------------------------------------
@@ -65,7 +69,7 @@ async function buildWorker(overrides: Record<string, unknown> = {}) {
   }
 }
 
-const mockDevice = () => prisma.device.findUnique as ReturnType<typeof vi.fn>
+const mockUpsertDevice = () => upsertDevice as ReturnType<typeof vi.fn>
 const mockUser = () => prisma.user.findUnique as ReturnType<typeof vi.fn>
 
 // ---------------------------------------------------------------------------
@@ -92,26 +96,35 @@ describe('POST /api/auth/floor/login', () => {
     expect(res.status).toBe(400)
   })
 
-  it('returns 401 for an unknown device code', async () => {
-    mockDevice().mockResolvedValue(null)
+  it('returns 500 when the device cannot be registered', async () => {
+    mockUpsertDevice().mockResolvedValue(null)
     const req = makeRequest({ deviceCode: 'UNKNOWN', badgeNumber: 'USR-0001', pin: '1234' })
     const res = await POST(req)
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(500)
     const body = await res.json()
-    expect(body.error).toBe('Invalid device code')
+    expect(body.error).toBe('Unable to register device.')
   })
 
-  it('returns 401 for an inactive device', async () => {
-    mockDevice().mockResolvedValue({ ...activeDevice, isActive: false })
+  it('returns 401 for a non-authorized device', async () => {
+    mockUpsertDevice().mockResolvedValue({ ...activeDevice, authorized: false })
     const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: 'USR-0001', pin: '1234' })
     const res = await POST(req)
     expect(res.status).toBe(401)
     const body = await res.json()
-    expect(body.error).toBe('Invalid device code')
+    expect(body.error).toBe('Device not authorized. Authorize it from the Dashboard.')
+  })
+
+  it('returns 401 for an inactive device', async () => {
+    mockUpsertDevice().mockResolvedValue({ ...activeDevice, isActive: false, authorized: true })
+    const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: 'USR-0001', pin: '1234' })
+    const res = await POST(req)
+    expect(res.status).toBe(401)
+    const body = await res.json()
+    expect(body.error).toBe('Device is inactive.')
   })
 
   it('returns 401 for an unknown badge number', async () => {
-    mockDevice().mockResolvedValue(activeDevice)
+    mockUpsertDevice().mockResolvedValue({ ...activeDevice, authorized: true })
     mockUser().mockResolvedValue(null)
 
     const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: 'USR-9999', pin: '1234' })
@@ -123,7 +136,7 @@ describe('POST /api/auth/floor/login', () => {
 
   it('returns 403 for a deactivated user', async () => {
     const user = await buildWorker({ isActive: false })
-    mockDevice().mockResolvedValue(activeDevice)
+    mockUpsertDevice().mockResolvedValue({ ...activeDevice, authorized: true })
     mockUser().mockResolvedValue(user)
 
     const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: user.badgeNumber, pin: '1234' })
@@ -135,7 +148,7 @@ describe('POST /api/auth/floor/login', () => {
 
   it('returns 401 for a user without pinHash (CREDENTIAL-only loginType)', async () => {
     const user = await buildWorker({ pinHash: null, loginType: 'CREDENTIAL' })
-    mockDevice().mockResolvedValue(activeDevice)
+    mockUpsertDevice().mockResolvedValue({ ...activeDevice, authorized: true })
     mockUser().mockResolvedValue(user)
 
     const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: user.badgeNumber, pin: '1234' })
@@ -145,7 +158,7 @@ describe('POST /api/auth/floor/login', () => {
 
   it('returns 401 for a wrong PIN', async () => {
     const user = await buildWorker()
-    mockDevice().mockResolvedValue(activeDevice)
+    mockUpsertDevice().mockResolvedValue({ ...activeDevice, authorized: true })
     mockUser().mockResolvedValue(user)
 
     const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: user.badgeNumber, pin: '0000' })
@@ -157,7 +170,7 @@ describe('POST /api/auth/floor/login', () => {
 
   it('returns 200 with tokens, user and device on success', async () => {
     const user = await buildWorker()
-    mockDevice().mockResolvedValue(activeDevice)
+    mockUpsertDevice().mockResolvedValue({ ...activeDevice, authorized: true })
     mockUser().mockResolvedValue(user)
 
     const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: user.badgeNumber, pin: '1234' })
@@ -175,7 +188,7 @@ describe('POST /api/auth/floor/login', () => {
 
   it('access token payload contains deviceId, warehouseId and zoneId', async () => {
     const user = await buildWorker()
-    mockDevice().mockResolvedValue(activeDevice)
+    mockUpsertDevice().mockResolvedValue({ ...activeDevice, authorized: true })
     mockUser().mockResolvedValue(user)
 
     const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: user.badgeNumber, pin: '1234' })
