@@ -1,4 +1,5 @@
 import AuthProvider from '@/components/shared/AuthProvider'
+import NotificationDialog from '@/components/shared/NotificationDialog'
 import type { Metadata } from 'next'
 
 import './globals.css'
@@ -24,6 +25,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <AuthProvider>{children}</AuthProvider>
+        <NotificationDialog />
       </body>
     </html>
   )
