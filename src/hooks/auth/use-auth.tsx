@@ -1,21 +1,24 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 
 import type { Role } from '@/generated/prisma'
-import { readStoredAccessToken } from '@/lib/auth/store'
+import { useAuthStore } from '@/lib/auth/store'
+import type { AuthDevice, AuthLocation, AuthUser } from '@/types'
 
-export type AuthUser = {
-  userId: string
-  role: Role
-  deviceId?: string
-  zoneId?: string
-  warehouseId?: string
-}
-
-type AuthState = {
+export type AuthState = {
   user: AuthUser | null
+  location: AuthLocation | null
+  device: AuthDevice | null
+  dashboard: {
+    user: AuthUser
+  } | null
+  warehouse: {
+    user: AuthUser
+    location: AuthLocation | null
+    device: AuthDevice | null
+  } | null
   isAuthenticated: boolean
   isOfficeRole: boolean
   isFloorRole: boolean
@@ -25,83 +28,49 @@ type AuthState = {
 const OFFICE_ROLES: Role[] = ['OWNER', 'OFFICE_MANAGER', 'OFFICE_WORKER']
 const FLOOR_ROLES: Role[] = ['WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER']
 
-const readAccessTokenCookie = (): string | null => {
-  if (typeof document === 'undefined') {
-    return null
-  }
+export function useAuth(): AuthState {
+  const { token, user, location, device } = useAuthStore(
+    useShallow((state) => ({
+      token: state.token,
+      user: state.user,
+      location: state.location,
+      device: state.device
+    }))
+  )
 
-  const match = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('access_token='))
+  const isOfficeRole = user !== null && OFFICE_ROLES.includes(user.role)
+  const isFloorRole = user !== null && FLOOR_ROLES.includes(user.role)
+  const isLoading = token !== null && user === null
 
-  if (!match) {
-    return null
-  }
-
-  return match.split('=')[1] ?? null
-}
-
-function parseAccessToken(): AuthUser | null {
-  const token = readStoredAccessToken() ?? readAccessTokenCookie()
-  if (!token) {
-    return null
-  }
-
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) {
+  const dashboard = useMemo(() => {
+    if (!user || !isOfficeRole) {
       return null
     }
 
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    return { user }
+  }, [user, isOfficeRole])
 
-    if (!payload.userId || !payload.role) {
-      return null
-    }
-
-    // Check expiry
-    if (payload.exp && payload.exp * 1000 < Date.now()) {
+  const warehouse = useMemo(() => {
+    if (!user || !isFloorRole) {
       return null
     }
 
     return {
-      userId: payload.userId,
-      role: payload.role as Role,
-      deviceId: payload.deviceId,
-      zoneId: payload.zoneId,
-      warehouseId: payload.warehouseId
+      user,
+      location,
+      device
     }
-  } catch {
-    return null
-  }
-}
-
-export function useAuth(): AuthState {
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const parsed = parseAccessToken()
-    setUser(parsed)
-    setIsLoading(false)
-
-    // Re-check when the tab regains focus (token may have refreshed or expired)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        setUser(parseAccessToken())
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [])
+  }, [user, location, device, isFloorRole])
 
   return {
     user,
+    location,
+    device,
+    dashboard,
+    warehouse,
     isAuthenticated: user !== null,
-    isOfficeRole: user !== null && OFFICE_ROLES.includes(user.role),
-    isFloorRole: user !== null && FLOOR_ROLES.includes(user.role),
+    isOfficeRole,
+    isFloorRole,
     isLoading
   }
 }

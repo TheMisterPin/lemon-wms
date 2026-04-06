@@ -44,7 +44,23 @@ async function attemptTokenRefresh(): Promise<string | null> {
     const { accessToken, user } = res.data
 
     if (accessToken && user) {
-      useAuthStore.getState().setAuth(accessToken, user)
+      const { setAuth, location, device } = useAuthStore.getState()
+
+      // TODO: The conditional here means office users (location/device both null)
+      // call setAuth(token, user) with no third argument. In store.setAuth, that
+      // defaults context to undefined, which resets location and device to null.
+      // That is harmless for office users but creates a hidden dependency: if the
+      // branch logic ever changes, floor context could be silently zeroed.
+      // Always pass context explicitly to make intent clear:
+      //   setAuth(accessToken, user, { location: location ?? undefined, device: device ?? undefined })
+      if (location || device) {
+        setAuth(accessToken, user, {
+          location: location ?? undefined,
+          device: device ?? undefined
+        })
+      } else {
+        setAuth(accessToken, user)
+      }
 
       return accessToken
     }
@@ -131,6 +147,11 @@ export async function authenticatedCall<T = any>(
     params,
     headers: {
       ...headers,
+      // TODO: The request interceptor on `api` already attaches the Authorization
+      // header from the store. This manual header is redundant and will shadow
+      // any token update that happens between the time `authenticatedCall` reads
+      // the token and when the interceptor fires. Remove the manual header and
+      // rely on the interceptor exclusively.
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
   })

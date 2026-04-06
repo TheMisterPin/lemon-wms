@@ -128,10 +128,16 @@ export async function POST(request: NextRequest) {
       role: user.role,
       badgeNumber: user.badgeNumber
     },
+    location: {
+      warehouseId: device.warehouseId ?? undefined,
+      zoneId: device.zoneId ?? undefined
+    },
     device: {
       id: device.id,
-      warehouseId: device.warehouseId,
-      zoneId: device.zoneId
+      name: device.name,
+      code: device.code,
+      warehouseId: device.warehouseId ?? undefined,
+      zoneId: device.zoneId ?? undefined
     }
   })
 }

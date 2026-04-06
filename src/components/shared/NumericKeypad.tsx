@@ -1,9 +1,24 @@
 'use client'
 
+// TODO: `onChangeUser` is a login-specific concern that couples this generic
+// keypad to auth semantics. Refactor to generic secondary-action props:
+//   onSecondaryAction?: () => void
+//   secondaryActionLabel?: string
+// The floor login form can then pass onSecondaryAction={handleChangeUser} and
+// secondaryActionLabel="Change user" without leaking domain knowledge here.
+
+// TODO: The '⌫' and '✓' emoji have no aria-label, making them inaccessible to
+// screen readers. Add aria-label="Delete" and aria-label="Confirm" to those buttons.
+
+// TODO: Add a `disabled?: boolean` prop so callers can lock the keypad during
+// async operations (e.g. while submitLogin is in flight). Currently the keypad
+// stays fully interactive while the loading spinner is shown above.
+
 type NumericKeypadProps = {
   value: string
   onChange: (value: string) => void
   onConfirm: () => void
+  onChangeUser?: () => void
   maxLength?: number
   masked?: boolean
 }
@@ -14,6 +29,7 @@ export default function NumericKeypad({
   value,
   onChange,
   onConfirm,
+  onChangeUser,
   maxLength = 4,
   masked = false
 }: NumericKeypadProps) {
@@ -67,6 +83,16 @@ export default function NumericKeypad({
           )
         })}
       </div>
+
+      {onChangeUser ? (
+        <button
+          type="button"
+          onClick={onChangeUser}
+          className="h-12 rounded-lg border border-zinc-700 bg-zinc-900 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-800 active:bg-zinc-950"
+        >
+          Change user
+        </button>
+      ) : null}
     </div>
   )
 }
