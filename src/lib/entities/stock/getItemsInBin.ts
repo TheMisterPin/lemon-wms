@@ -12,7 +12,10 @@ async function getItemsInBin(
     lotId: true,
     boxId: true,
     serialNumberId: true,
-    quantityAvailable: true
+    uom: true,
+    quantityAvailable: true,
+    quantityReserved: true,
+    quantityBlocked: true
   } as const
 
   const itemsInBin = await prisma.binStockItem.findMany({

@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@/generated/prisma'
 
 async function getBins(prisma: PrismaClient, filters?: { zoneId?: string; warehouseId?: string }) {
-  return prisma.bin.findMany({
+  const bins = await prisma.bin.findMany({
     where: {
       deletedAt: null,
       ...(filters?.zoneId ? { zoneId: filters.zoneId } : {}),
@@ -9,6 +9,8 @@ async function getBins(prisma: PrismaClient, filters?: { zoneId?: string; wareho
     },
     orderBy: { createdAt: 'desc' }
   })
+
+  return bins
 }
 
 export { getBins }

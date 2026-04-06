@@ -42,7 +42,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       await authorizeDevice(prisma, {
         code: parsed.data.code,
         warehouseId: parsed.data.warehouseId,
-        zoneId: parsed.data.zoneId
+        zoneId: parsed.data.zoneId,
+        userId: payload.userId
       })
 
       return ok(null, 'Device authorized successfully.')

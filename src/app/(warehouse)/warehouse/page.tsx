@@ -54,7 +54,16 @@ const PAGE_SIZE = 3
 const binColumns: TableColumnConfig<DashboardBinRecord>[] = [
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
-  { label: 'Status', accessor: 'active', type: 'boolean' },
+  {
+    label: 'Status',
+    accessor: 'isBlocked',
+    type: 'indicator',
+    indicatorColorMap: {
+      true: '#f87171',
+      false: '#4ade80'
+    },
+    defaultIndicatorColor: '#94a3b8'
+  },
   {
     label: 'Progress',
     type: 'progress',
@@ -80,7 +89,7 @@ function createInfoCards(data: WarehouseHomePageData['warehouseInfo']): Dashboar
 // device). Once `useAuth().warehouse` is fully populated, the /api/warehouse
 // response can drop `user` and `warehouseInfo` fields, and the `UserInfo`/
 // `WarehouseInfo` interfaces below can be removed from this file.
-export default function DashboardHomePage() {
+export default function WarehouseHomePage() {
   const router = useRouter()
   const { warehouse } = useAuth()
 

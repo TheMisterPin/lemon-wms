@@ -9,6 +9,9 @@ import type { TableColumnConfig } from '@/types/components/table/generic-table.t
 type TestRow = {
   id: string
   name: string
+  status: string
+  hiddenValue?: string | null
+  uom: string
   createdAt: string
   lastSeenAt: string
   isActive: boolean
@@ -20,6 +23,15 @@ describe('GenericTable', () => {
   it('formats temporal columns and renders boolean columns as checkboxes', () => {
     const columns: TableColumnConfig<TestRow>[] = [
       { label: 'Name', accessor: 'name' },
+      {
+        label: 'Status',
+        accessor: 'status',
+        type: 'indicator',
+        indicatorColorMap: {
+          active: '#4ade80',
+          inactive: '#f87171'
+        }
+      },
       { label: 'Created', accessor: 'createdAt', type: 'date' },
       { label: 'Last seen', accessor: 'lastSeenAt', type: 'time' },
       { label: 'Active', accessor: 'isActive', type: 'boolean' },
@@ -29,6 +41,14 @@ describe('GenericTable', () => {
         progressBarRef: {
           current: 'currentCapacity',
           max: 'maxCapacity'
+        }
+      },
+      {
+        label: 'Capacity',
+        type: 'joinValues',
+        joinValuesRef: {
+          first: 'currentCapacity',
+          second: 'uom'
         }
       }
     ]
@@ -40,6 +60,8 @@ describe('GenericTable', () => {
           {
             id: 'warehouse-1',
             name: 'North Hub',
+            status: 'active',
+            uom: 'EA',
             createdAt: '2025-03-15T00:00:00Z',
             lastSeenAt: '2025-03-15T09:45:00Z',
             isActive: true,
@@ -49,6 +71,8 @@ describe('GenericTable', () => {
           {
             id: 'warehouse-2',
             name: 'South Hub',
+            status: 'inactive',
+            uom: 'EA',
             createdAt: '2025-03-16T00:00:00Z',
             lastSeenAt: '2025-03-15T18:05:00Z',
             isActive: false,
@@ -61,6 +85,10 @@ describe('GenericTable', () => {
 
     expect(screen.getByText(/march 15/i)).toBeTruthy()
     expect(screen.getByText(/09:45|9:45/)).toBeTruthy()
+    expect(screen.getByLabelText('Status: active')).toBeTruthy()
+    expect(screen.getByLabelText('Status: inactive')).toBeTruthy()
+    expect(screen.getByText('25 EA')).toBeTruthy()
+    expect(screen.getByText('80 EA')).toBeTruthy()
 
     const checkboxes = screen.getAllByRole('checkbox')
     const progressBars = screen.getAllByRole('progressbar')
@@ -87,6 +115,8 @@ describe('GenericTable', () => {
           {
             id: 'warehouse-1',
             name: 'North Hub',
+            status: 'active',
+            uom: 'EA',
             createdAt: '2025-03-15T00:00:00Z',
             lastSeenAt: '2025-03-15T09:45:00Z',
             isActive: true,
@@ -111,5 +141,82 @@ describe('GenericTable', () => {
 
     expect(onPrev).toHaveBeenCalledTimes(1)
     expect(onNext).toHaveBeenCalledTimes(1)
+  })
+
+  it('hides columns when all values are null or empty strings', () => {
+    const columns: TableColumnConfig<TestRow>[] = [
+      { label: 'Name', accessor: 'name' },
+      { label: 'Hidden Column', accessor: 'hiddenValue' }
+    ]
+
+    render(
+      <GenericTable
+        columns={columns}
+        records={[
+          {
+            id: 'warehouse-1',
+            name: 'North Hub',
+            status: 'active',
+            hiddenValue: null,
+            uom: 'EA',
+            createdAt: '2025-03-15T00:00:00Z',
+            lastSeenAt: '2025-03-15T09:45:00Z',
+            isActive: true,
+            currentCapacity: 25,
+            maxCapacity: 100
+          },
+          {
+            id: 'warehouse-2',
+            name: 'South Hub',
+            status: 'inactive',
+            hiddenValue: '',
+            uom: 'EA',
+            createdAt: '2025-03-16T00:00:00Z',
+            lastSeenAt: '2025-03-15T18:05:00Z',
+            isActive: false,
+            currentCapacity: 80,
+            maxCapacity: 100
+          }
+        ]}
+      />
+    )
+
+    expect(screen.getByText('Name')).toBeTruthy()
+    expect(screen.queryByText('Hidden Column')).toBeNull()
+  })
+
+  it('renders joinValues as empty when first value is zero', () => {
+    const columns: TableColumnConfig<TestRow>[] = [
+      { label: 'Name', accessor: 'name' },
+      {
+        label: 'Capacity',
+        type: 'joinValues',
+        joinValuesRef: {
+          first: 'currentCapacity',
+          second: 'uom'
+        }
+      }
+    ]
+
+    render(
+      <GenericTable
+        columns={columns}
+        records={[
+          {
+            id: 'warehouse-1',
+            name: 'North Hub',
+            status: 'active',
+            uom: 'EA',
+            createdAt: '2025-03-15T00:00:00Z',
+            lastSeenAt: '2025-03-15T09:45:00Z',
+            isActive: true,
+            currentCapacity: 0,
+            maxCapacity: 100
+          }
+        ]}
+      />
+    )
+
+    expect(screen.queryByText('0 EA')).toBeNull()
   })
 })

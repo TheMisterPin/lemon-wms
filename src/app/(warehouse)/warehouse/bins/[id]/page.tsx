@@ -8,6 +8,7 @@ import { ArrowLeft, Package } from 'lucide-react'
 import { GenericTable } from '@/components/tables/generic-table'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import AddItemToBinModal from '@/components/warehouse/modals/add-item-to-bin-modal'
 import { apiClient } from '@/lib/axios'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
@@ -19,9 +20,10 @@ type BinStockRecord = {
   lotId: string | null
   serialNumberId: string | null
   boxId: string | null
-  quantityAvailable: number
-  quantityReserved: number
-  quantityBlocked: number
+  uom: string
+  quantityAvailable: number | string
+  quantityReserved: number | string
+  quantityBlocked: number | string
 }
 
 type BinDetails = {
@@ -31,8 +33,8 @@ type BinDetails = {
   type: string
   zoneId: string
   warehouseId: string
-  currentCapacity: number
-  maxCapacity: number
+  currentCapacity: number | string
+  maxCapacity: number | string
   isBlocked: boolean
   blockReason: string | null
 }
@@ -47,9 +49,30 @@ const itemColumns: TableColumnConfig<BinStockRecord>[] = [
   { label: 'Description', accessor: 'description' },
   { label: 'Lot', accessor: 'lotId' },
   { label: 'Serial', accessor: 'serialNumberId' },
-  { label: 'Available', accessor: 'quantityAvailable' },
-  { label: 'Reserved', accessor: 'quantityReserved' },
-  { label: 'Blocked', accessor: 'quantityBlocked' }
+  {
+    label: 'Available',
+    type: 'joinValues',
+    joinValuesRef: {
+      first: 'quantityAvailable',
+      second: 'uom'
+    }
+  },
+  {
+    label: 'Reserved',
+    type: 'joinValues',
+    joinValuesRef: {
+      first: 'quantityReserved',
+      second: 'uom'
+    }
+  },
+  {
+    label: 'Blocked',
+    type: 'joinValues',
+    joinValuesRef: {
+      first: 'quantityBlocked',
+      second: 'uom'
+    }
+  }
 ]
 
 export default function WarehouseBinDetailsPage() {
@@ -58,6 +81,7 @@ export default function WarehouseBinDetailsPage() {
 
   const [data, setData] = useState<BinDetailsResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     async function fetchBinDetails() {
@@ -78,14 +102,21 @@ export default function WarehouseBinDetailsPage() {
     if (binId) {
       void fetchBinDetails()
     }
-  }, [binId])
+  }, [binId, refreshKey])
 
   const occupancy = useMemo(() => {
-    if (!data?.bin || data.bin.maxCapacity <= 0) {
+    if (!data?.bin) {
       return '0%'
     }
 
-    return `${Math.round((data.bin.currentCapacity / data.bin.maxCapacity) * 100)}%`
+    const currentCapacity = Number(data.bin.currentCapacity) || 0
+    const maxCapacity = Number(data.bin.maxCapacity) || 0
+
+    if (maxCapacity <= 0) {
+      return '0%'
+    }
+
+    return `${Math.round((currentCapacity / maxCapacity) * 100)}%`
   }, [data])
 
   return (
@@ -100,12 +131,18 @@ export default function WarehouseBinDetailsPage() {
               </p>
             )}
           </div>
-          <Button asChild variant="secondary">
-            <Link href="/warehouse">
-              <ArrowLeft className="size-4 mr-2" />
-              Back to warehouse
-            </Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <AddItemToBinModal
+              binId={binId}
+              onSuccess={() => setRefreshKey((currentValue) => currentValue + 1)}
+            />
+            <Button asChild variant="secondary">
+              <Link href="/warehouse">
+                <ArrowLeft className="size-4 mr-2" />
+                Back to warehouse
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {data?.bin && (

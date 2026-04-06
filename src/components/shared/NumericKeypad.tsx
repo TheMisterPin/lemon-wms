@@ -21,6 +21,8 @@ type NumericKeypadProps = {
   onChangeUser?: () => void
   maxLength?: number
   masked?: boolean
+  disabled?: boolean
+  emptyLabel?: string
 }
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'backspace', '0', 'confirm'] as const
@@ -31,9 +33,15 @@ export default function NumericKeypad({
   onConfirm,
   onChangeUser,
   maxLength = 4,
-  masked = false
+  masked = false,
+  disabled = false,
+  emptyLabel = 'Enter PIN'
 }: NumericKeypadProps) {
   const handleKey = (key: string) => {
+    if (disabled) {
+      return
+    }
+
     if (key === 'backspace') {
       onChange(value.slice(0, -1))
 
@@ -55,7 +63,7 @@ export default function NumericKeypad({
     <div className="flex flex-col gap-3">
       {/* Display */}
       <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-zinc-100 min-h-13">
-        {displayValue || <span className="text-zinc-600 tracking-normal text-base">Enter PIN</span>}
+        {displayValue || <span className="text-zinc-600 tracking-normal text-base">{emptyLabel}</span>}
       </div>
 
       {/* Grid */}
@@ -68,6 +76,8 @@ export default function NumericKeypad({
             <button
               key={key}
               type="button"
+              disabled={disabled}
+              aria-label={isBackspace ? 'Delete' : isConfirm ? 'Confirm' : key}
               onClick={() => handleKey(key)}
               className={[
                 'flex h-14 items-center justify-center rounded-lg text-xl font-semibold transition-colors select-none',
@@ -87,6 +97,7 @@ export default function NumericKeypad({
       {onChangeUser ? (
         <button
           type="button"
+          disabled={disabled}
           onClick={onChangeUser}
           className="h-12 rounded-lg border border-zinc-700 bg-zinc-900 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-800 active:bg-zinc-950"
         >

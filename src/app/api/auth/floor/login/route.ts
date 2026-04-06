@@ -113,6 +113,10 @@ export async function POST(request: NextRequest) {
   await Promise.all([
     setRefreshTokenCookie(refreshToken),
     setAccessTokenCookie(accessToken),
+    prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginDeviceId: device.id }
+    }),
     prisma.userActivityEntry.create({
       data: {
         userId: user.id,

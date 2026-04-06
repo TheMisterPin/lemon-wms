@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { FieldValues } from 'react-hook-form'
 
@@ -29,6 +29,7 @@ import {
 } from '@/lib/utils/get-value-by-path'
 import {
   GenericTableProps,
+  IndicatorColorMap,
   ProgressColumnConfig,
   SortDirection,
   TableColumnConfig,
@@ -121,7 +122,96 @@ function getColumnComparableValue<T extends FieldValues>(row: T, column: TableCo
     return getProgressValues(row, column)?.percentage
   }
 
+  if (column.type === 'joinValues') {
+    const first = getValueByPath(row, column.joinValuesRef.first)
+    const second = getValueByPath(row, column.joinValuesRef.second)
+
+    if (isJoinPrimaryValueEmpty(first)) {
+      return undefined
+    }
+
+    const separator = column.separator ?? ' '
+
+    return `${formatDisplayValue(first)}${separator}${formatDisplayValue(second)}`
+  }
+
   return getComparableValue(getRawValue(row, column), column.type)
+}
+
+function isNullOrEmptyTextValue(value: unknown): boolean {
+  if (value === null || value === undefined) {
+    return true
+  }
+
+  if (typeof value === 'string') {
+    return value.trim() === ''
+  }
+
+  return false
+}
+
+function isJoinPrimaryValueEmpty(value: unknown): boolean {
+  if (isNullOrEmptyTextValue(value)) {
+    return true
+  }
+
+  if (typeof value === 'number') {
+    return value === 0
+  }
+
+  if (typeof value === 'string') {
+    const numericValue = Number(value)
+
+    if (Number.isFinite(numericValue)) {
+      return numericValue === 0
+    }
+  }
+
+  return false
+}
+
+function shouldHideColumn<T extends FieldValues>(column: TableColumnConfig<T>, records: T[]): boolean {
+  if (records.length === 0) {
+    return false
+  }
+
+  if (column.type === 'progress') {
+    return records.every((record) => getProgressValues(record, column) === undefined)
+  }
+
+  if (column.type === 'joinValues') {
+    return records.every((record) => {
+      const first = getValueByPath(record, column.joinValuesRef.first)
+
+      return isJoinPrimaryValueEmpty(first)
+    })
+  }
+
+  if (column.cell) {
+    return false
+  }
+
+  return records.every((record) => isNullOrEmptyTextValue(getRawValue(record, column)))
+}
+
+function getIndicatorColor(value: unknown, colorMap: IndicatorColorMap, fallbackColor = '#94a3b8'): string {
+  const indicatorKey = String(value ?? '').trim().toLowerCase()
+
+  if (!indicatorKey) {
+    return fallbackColor
+  }
+
+  const directMatch = colorMap[indicatorKey]
+
+  if (directMatch) {
+    return directMatch
+  }
+
+  const normalizedMatch = Object.entries(colorMap).find(
+    ([key]) => key.trim().toLowerCase() === indicatorKey
+  )
+
+  return normalizedMatch?.[1] ?? fallbackColor
 }
 
 function formatTypedValue<T extends FieldValues>(
@@ -175,6 +265,37 @@ function formatTypedValue<T extends FieldValues>(
     }
 
     return formatDateValue(value, column.type) || EMPTY_DISPLAY_VALUE
+  }
+
+  if (column.type === 'indicator') {
+    const color = getIndicatorColor(value, column.indicatorColorMap, column.defaultIndicatorColor)
+    const displayValue = formatDisplayValue(value)
+
+    return (
+      <div className="flex justify-center">
+        <span
+          className="size-3.5 rounded-full animate-pulse"
+          style={{
+            backgroundColor: color,
+            boxShadow: `0 0 8px ${color}66, 0 0 14px ${color}33`
+          }}
+          aria-label={`${column.label}: ${displayValue}`}
+        />
+      </div>
+    )
+  }
+
+  if (column.type === 'joinValues') {
+    const first = getValueByPath(row, column.joinValuesRef.first)
+    const second = getValueByPath(row, column.joinValuesRef.second)
+
+    if (isJoinPrimaryValueEmpty(first)) {
+      return EMPTY_DISPLAY_VALUE
+    }
+
+    const separator = column.separator ?? ' '
+
+    return `${formatDisplayValue(first)}${separator}${formatDisplayValue(second)}`
   }
 
   return formatDisplayValue(value)
@@ -233,7 +354,7 @@ function isSortable<T extends FieldValues>(column: TableColumnConfig<T>): boolea
     return false
   }
 
-  return column.type === 'progress' || !!(column.accessor || column.accessorPath)
+  return column.type === 'progress' || column.type === 'joinValues' || !!(column.accessor || column.accessorPath)
 }
 
 export function GenericTable<T extends FieldValues & { id: string }>({
@@ -245,13 +366,29 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   actions,
   pagination
 }: GenericTableProps<T>) {
-  const totalColumns = columns.length + (actions?.length ? 1 : 0)
+  const visibleColumns = useMemo(
+    () => columns.filter((column) => !shouldHideColumn(column, records)),
+    [columns, records]
+  )
+
+  const totalColumns = Math.max(1, visibleColumns.length + (actions?.length ? 1 : 0))
   const paginationPosition = pagination?.position ?? 'footer'
   const showHeaderPagination = paginationPosition === 'header'
   const showFooterPagination = paginationPosition === 'footer'
 
   const [sortColumnIndex, setSortColumnIndex] = useState<number | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
+  useEffect(() => {
+    if (sortColumnIndex === null) {
+      return
+    }
+
+    if (sortColumnIndex >= visibleColumns.length) {
+      setSortColumnIndex(null)
+      setSortDirection('asc')
+    }
+  }, [sortColumnIndex, visibleColumns.length])
 
   function handleSort(index: number) {
     if (sortColumnIndex === index) {
@@ -272,7 +409,11 @@ export function GenericTable<T extends FieldValues & { id: string }>({
       return records
     }
 
-    const column = columns[sortColumnIndex]
+    const column = visibleColumns[sortColumnIndex]
+
+    if (!column) {
+      return records
+    }
 
     return [...records].sort((a, b) =>
       compareValues(
@@ -281,7 +422,7 @@ export function GenericTable<T extends FieldValues & { id: string }>({
         sortDirection
       )
     )
-  }, [records, columns, sortColumnIndex, sortDirection])
+  }, [records, visibleColumns, sortColumnIndex, sortDirection])
 
   function getSortIcon(index: number) {
     if (sortColumnIndex !== index) {
@@ -312,7 +453,7 @@ export function GenericTable<T extends FieldValues & { id: string }>({
         <Table>
           <TableHeader>
             <TableRow className="border-b border-brand-glass-border hover:bg-transparent">
-              {columns.map((column, index) => {
+              {visibleColumns.map((column, index) => {
                 const sortable = isSortable(column)
                 const isActive = sortColumnIndex === index
 
@@ -360,7 +501,7 @@ export function GenericTable<T extends FieldValues & { id: string }>({
                   onClick={() => onRowClick?.(row)}
                   data-state={selectedId === row.id ? 'selected' : undefined}
                 >
-                  {columns.map((column, index) => (
+                  {visibleColumns.map((column, index) => (
                     <TableCell
                       key={index}
                       className={[

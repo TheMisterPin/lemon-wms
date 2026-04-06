@@ -4,6 +4,7 @@ interface AuthorizeDeviceParams {
   code: string
   warehouseId: string
   zoneId: string
+  userId: string
 }
 
 async function isAuthorizedDevice(prisma: PrismaClient, code: string) {
@@ -15,38 +16,44 @@ async function isAuthorizedDevice(prisma: PrismaClient, code: string) {
 }
 
 async function authorizeDevice(prisma: PrismaClient, params : AuthorizeDeviceParams) {
+  const { warehouseId, zoneId, code, userId } = params
+
+  if (!warehouseId || !zoneId || !code || !userId) {
+    throw new Error('Missing required parameters to authorize device.')
+  }
+
   await prisma.device.update({
-    where: { code: params.code },
-    data: { authorized: true, warehouseId: params.warehouseId, zoneId: params.zoneId }
+    where: { code },
+    data: { authorized: true, warehouseId, zoneId, lastUserId: userId }
   })
 }
 
 async function deauthorizeDevice(prisma: PrismaClient, code: string) {
   await prisma.device.update({
     where: { code },
-    data: { authorized: false, warehouseId: null, zoneId: null }
+    data: { authorized: false, warehouseId: null, zoneId: null, lastUserId: null }
   })
 }
 
 async function  loginUserInDevice(prisma: PrismaClient, code: string, userId: string) {
   await prisma.device.update({
     where: { code },
-    data: { lastUser: { connect: { id: userId } } }
+    data: { lastUserId: userId }
   })
   await prisma.user.update({
     where: { id: userId },
-    data: { lastLoginDevice: { connect: { code } } }
+    data: { lastLoginDeviceId: code }
   })
 }
 
 async function  logoutUserFromDevice(prisma: PrismaClient, code: string, userId: string) {
   await prisma.device.update({
     where: { code },
-    data: { lastUser: { disconnect: true } }
+    data: { lastUserId: null }
   })
   await prisma.user.update({
     where: { id: userId },
-    data: { lastLoginDevice: { disconnect: true } }
+    data: { lastLoginDeviceId: null }
   })
 }
 

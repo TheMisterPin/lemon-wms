@@ -4,7 +4,7 @@ import { FieldPath, FieldValues } from 'react-hook-form'
 import type { PaginationPosition } from '@/components/shared/PaginationSelector'
 
 export type SortDirection = 'asc' | 'desc'
-export type TableColumnType = 'text' | 'date' | 'datetime' | 'time' | 'boolean' | 'progress'
+export type TableColumnType = 'text' | 'date' | 'datetime' | 'time' | 'boolean' | 'progress' | 'indicator' | 'joinValues'
 
 export interface BaseColumnConfig {
   label: string
@@ -14,12 +14,21 @@ export interface BaseColumnConfig {
 }
 
 export interface TypedValueColumnConfig {
-  type?: Exclude<TableColumnType, 'progress'>
+  type?: Exclude<TableColumnType, 'progress' | 'indicator' | 'joinValues'>
 }
 
 export interface ProgressBarRef<T extends FieldValues> {
   current: FieldPath<T>
   max: FieldPath<T>
+}
+
+export interface JoinValuesRef<T extends FieldValues> {
+  first: FieldPath<T>
+  second: FieldPath<T>
+}
+
+export interface IndicatorColorMap {
+  [value: string]: string
 }
 
 export interface RowAction<T> {
@@ -67,11 +76,41 @@ export interface ProgressColumnConfig<T extends FieldValues> extends BaseColumnC
   progressBarRef: ProgressBarRef<T>
 }
 
+export interface AccessorIndicatorColumnConfig<T extends FieldValues> extends BaseColumnConfig {
+  accessor: Extract<keyof T, string>
+  accessorPath?: never
+  cell?: never
+  type: 'indicator'
+  indicatorColorMap: IndicatorColorMap
+  defaultIndicatorColor?: string
+}
+
+export interface AccessorPathIndicatorColumnConfig<T extends FieldValues> extends BaseColumnConfig {
+  accessor?: never
+  accessorPath: FieldPath<T>
+  cell?: never
+  type: 'indicator'
+  indicatorColorMap: IndicatorColorMap
+  defaultIndicatorColor?: string
+}
+
+export interface JoinValuesColumnConfig<T extends FieldValues> extends BaseColumnConfig {
+  accessor?: never
+  accessorPath?: never
+  cell?: never
+  type: 'joinValues'
+  joinValuesRef: JoinValuesRef<T>
+  separator?: string
+}
+
 export type TableColumnConfig<T extends FieldValues> =
   | AccessorColumnConfig<T>
   | AccessorPathColumnConfig<T>
   | CellColumnConfig<T>
   | ProgressColumnConfig<T>
+  | AccessorIndicatorColumnConfig<T>
+  | AccessorPathIndicatorColumnConfig<T>
+  | JoinValuesColumnConfig<T>
 
 export interface GenericTableProps<T extends FieldValues & { id: string }> {
   columns: TableColumnConfig<T>[]

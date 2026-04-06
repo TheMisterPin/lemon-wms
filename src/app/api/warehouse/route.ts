@@ -2,8 +2,24 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { getBinList } from '@/lib/entities/bins'
+import { getBinList, getBins } from '@/lib/entities/bins'
 import prisma from '@/lib/prisma'
+
+function toNumberOrZero(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value)
+
+    if (Number.isFinite(parsed)) {
+      return parsed
+    }
+  }
+
+  return 0
+}
 
 async function getOrdersForWarehouseHomePage(warehouseId: string) {
   const purchaseOrders = await prisma.purchaseOrder.findMany({
@@ -30,9 +46,9 @@ async function getOrdersForWarehouseHomePage(warehouseId: string) {
     },
     orderBy: { createdAt: 'desc' }
   })
-  const mappedPurchaseOrders = purchaseOrders.map(order => ({ ...order, type: 'PURCHASE' }))
-  const mappedTransferOrders = transferOrders.map(order => ({ ...order, type: 'TRANSFER' }))
-  const mappedSalesOrders = salesOrders.map(order => ({ ...order, type: 'SALES' }))
+  const mappedPurchaseOrders = purchaseOrders.map(order => ({ ...order, type: 'PURCHASE', assignedTo: 'Unassigned' }))
+  const mappedTransferOrders = transferOrders.map(order => ({ ...order, type: 'TRANSFER', assignedTo: 'Unassigned' }))
+  const mappedSalesOrders = salesOrders.map(order => ({ ...order, type: 'SALES', assignedTo: 'Unassigned' }))
   const rawOrders = [...mappedPurchaseOrders, ...mappedTransferOrders, ...mappedSalesOrders]
   const afterAllOrders = rawOrders.map(order => ({ ...order, progress: Math.floor(Math.random() * 101) }))
 
@@ -50,14 +66,14 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const userInfo  = {
+    const userData = {
       userId: user.id,
       name: user.fullName,
       role: user.role
     }
     const deviceID = user.lastLoginDeviceId
     if (!deviceID) {
-      return fail('User is not associated with any device.')
+      return fail('User is not associated with any device.', '400', 400)
     }
     const device = await prisma.device.findFirst({
       where: { id: deviceID },
@@ -79,19 +95,32 @@ export async function GET(req: NextRequest) {
       deviceId: device?.id ?? '',
       deviceName: device?.name ?? ''
     }
-    const bins = await getBinList(prisma, device?.zoneId ?? '')
+    const binList = await getBinList(prisma, device?.zoneId ?? '')
+    const bins = await getBins(prisma, { zoneId: device?.zoneId ?? '' })
+    const normalizedBins = bins.map((bin) => ({
+      id: bin.id,
+      zoneId: bin.zoneId,
+      name: bin.name,
+      isBlocked: bin.isBlocked,
+      blockReason: bin.blockReason,
+      type: bin.type,
+      maxCapacity: toNumberOrZero(bin.maxCapacity),
+      currentCapacity: toNumberOrZero(bin.currentCapacity)
+    }))
+
     const orders = await getOrdersForWarehouseHomePage(device?.warehouseId ?? '')
     const warehouseHomePageData = {
-      userInfo,
+      user: userData,
       warehouseInfo,
       orders,
-      bins: bins
+      bins: normalizedBins,
+      binList
     }
 
     return ok(warehouseHomePageData, 'Warehouse home page data retrieved successfully.')
   } catch (error) {
     console.error('[GET /api/warehouse]', error)
 
-    return fail('Failed to retrieve warehouse home page data.')
+    return fail('Failed to retrieve warehouse home page data.', '', 500)
   }
 }

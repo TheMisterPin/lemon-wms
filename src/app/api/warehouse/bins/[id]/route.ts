@@ -7,6 +7,22 @@ import prisma from '@/lib/prisma'
 
 type Params = { params: Promise<{ id: string }> }
 
+function toNumberOrZero(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value)
+
+    if (Number.isFinite(parsed)) {
+      return parsed
+    }
+  }
+
+  return 0
+}
+
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
 
@@ -42,8 +58,19 @@ export async function GET(req: NextRequest, { params }: Params) {
     }
 
     const items = await getItemsInBin(prisma, bin.id)
+    const normalizedBin = {
+      ...bin,
+      currentCapacity: toNumberOrZero(bin.currentCapacity),
+      maxCapacity: toNumberOrZero(bin.maxCapacity)
+    }
+    const normalizedItems = items.map((item) => ({
+      ...item,
+      quantityAvailable: item.quantityAvailable,
+      quantityReserved: item.quantityReserved,
+      quantityBlocked: item.quantityBlocked
+    }))
 
-    return ok({ bin, items }, 'Bin details retrieved successfully.')
+    return ok({ bin: normalizedBin, items: normalizedItems }, 'Bin details retrieved successfully.')
   } catch (error) {
     console.error('[GET /api/warehouse/bins/[id]]', error)
 

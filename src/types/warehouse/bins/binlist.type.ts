@@ -8,7 +8,6 @@ export interface BinItem {
     name: string
     isBlocked: boolean
     blockReason: string | null
-    active: boolean
     maxCapacity: number
     type: string
     currentCapacity: number
