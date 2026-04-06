@@ -7,7 +7,7 @@ const errorSchema = z.object({
   message: z.string().min(1),
   stack: z.string().optional(),
   type: z.enum(['CLIENT', 'SERVER', 'NETWORK', 'UNKNOWN']),
-  errorCode: z.number().int().optional(),
+  errorCode: z.number().int().optional()
 })
 
 export async function POST(req: Request) {
@@ -24,6 +24,7 @@ export async function POST(req: Request) {
     return ok(null, 'Error logged.')
   } catch (error) {
     console.error('[POST /api/errors]', error)
+
     return fail('Failed to log error.')
   }
 }
