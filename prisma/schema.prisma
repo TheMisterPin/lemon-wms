@@ -673,7 +673,20 @@ model Notification {
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id])
 }
-
+model Error {
+  id        String   @id @default(uuid())
+  message   String
+  stack     String?
+  type      ErrorType
+  errorCode Int?
+  createdAt DateTime @default(now())
+}
+enum ErrorType {
+  CLIENT
+  SERVER
+  NETWORK
+  UNKNOWN
+}
 enum FiscalInventoryEventType {
   RECEIPT
   SHIPMENT
@@ -684,6 +697,7 @@ enum FiscalInventoryEventType {
   TRANSFER_IN
   TRANSFER_OUT
 }
+
 
 enum BinOperationType {
   RECEIVE
@@ -843,6 +857,9 @@ enum AlertRuleType {
 
 enum DeviceType {
   FLOOR
+  HANDHELD
+  PC
+  TABLET
 }
 
 enum BusinessPartyType {
