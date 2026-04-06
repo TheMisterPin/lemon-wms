@@ -1,107 +1,92 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
-import { useEffect, useState } from 'react'
+// TODO: The three separate useAuthStore selectors (user, location, device)
+// create three independent Zustand subscriptions. All three change atomically
+// during setAuth, which triggers three separate re-renders in the same tick.
+// Merge into a single selector:
+//   const { user, location, device } = useAuthStore(
+//     (s) => ({ user: s.user, location: s.location, device: s.device }),
+//     shallow
+//   )
+// Requires importing `shallow` from 'zustand/shallow'.
+
+// TODO: isLoading is hardcoded as `false` and typed as a literal. This hides
+// the real "user not yet populated" state that occurs on page refresh (token
+// is in localStorage but user/location/device are null until setAuth fires).
+// Once store persistence is implemented (see store.ts TODO), isLoading should
+// reflect actual hydration state.
+
+// TODO: Export the AuthState type so callers can type variables without
+// repeating the shape (e.g. `const auth: AuthState = useAuth()`).
+
+import { useMemo } from 'react'
 
 import type { Role } from '@/generated/prisma'
-import { readStoredAccessToken } from '@/lib/auth/store'
-
-export type AuthUser = {
-  userId: string
-  role: Role
-  deviceId?: string
-  zoneId?: string
-  warehouseId?: string
-}
+import {
+  type AuthDevice,
+  type AuthLocation,
+  useAuthStore
+} from '@/lib/auth/store'
+import type { AuthUser } from '@/types'
 
 type AuthState = {
   user: AuthUser | null
+  location: AuthLocation | null
+  device: AuthDevice | null
+  dashboard: {
+    user: AuthUser
+  } | null
+  warehouse: {
+    user: AuthUser
+    location: AuthLocation | null
+    device: AuthDevice | null
+  } | null
   isAuthenticated: boolean
   isOfficeRole: boolean
   isFloorRole: boolean
-  isLoading: boolean
+  isLoading: false
 }
 
 const OFFICE_ROLES: Role[] = ['OWNER', 'OFFICE_MANAGER', 'OFFICE_WORKER']
 const FLOOR_ROLES: Role[] = ['WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER']
 
-const readAccessTokenCookie = (): string | null => {
-  if (typeof document === 'undefined') {
-    return null
-  }
+export function useAuth(): AuthState {
+  const user = useAuthStore((state) => state.user)
+  const location = useAuthStore((state) => state.location)
+  const device = useAuthStore((state) => state.device)
 
-  const match = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith('access_token='))
+  const isOfficeRole = user !== null && OFFICE_ROLES.includes(user.role)
+  const isFloorRole = user !== null && FLOOR_ROLES.includes(user.role)
 
-  if (!match) {
-    return null
-  }
-
-  return match.split('=')[1] ?? null
-}
-
-function parseAccessToken(): AuthUser | null {
-  const token = readStoredAccessToken() ?? readAccessTokenCookie()
-  if (!token) {
-    return null
-  }
-
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) {
+  const dashboard = useMemo(() => {
+    if (!user || !isOfficeRole) {
       return null
     }
 
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    return { user }
+  }, [user, isOfficeRole])
 
-    if (!payload.userId || !payload.role) {
-      return null
-    }
-
-    // Check expiry
-    if (payload.exp && payload.exp * 1000 < Date.now()) {
+  const warehouse = useMemo(() => {
+    if (!user || !isFloorRole) {
       return null
     }
 
     return {
-      userId: payload.userId,
-      role: payload.role as Role,
-      deviceId: payload.deviceId,
-      zoneId: payload.zoneId,
-      warehouseId: payload.warehouseId
+      user,
+      location,
+      device
     }
-  } catch {
-    return null
-  }
-}
-
-export function useAuth(): AuthState {
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const parsed = parseAccessToken()
-    setUser(parsed)
-    setIsLoading(false)
-
-    // Re-check when the tab regains focus (token may have refreshed or expired)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        setUser(parseAccessToken())
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [])
+  }, [user, location, device, isFloorRole])
 
   return {
     user,
+    location,
+    device,
+    dashboard,
+    warehouse,
     isAuthenticated: user !== null,
-    isOfficeRole: user !== null && OFFICE_ROLES.includes(user.role),
-    isFloorRole: user !== null && FLOOR_ROLES.includes(user.role),
-    isLoading
+    isOfficeRole,
+    isFloorRole,
+    isLoading: false
   }
 }

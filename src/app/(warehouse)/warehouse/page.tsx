@@ -12,6 +12,7 @@ import {
 import { GenericTable } from '@/components/tables/generic-table'
 import { Card } from '@/components/ui/card'
 import { OrderStatus, OrderType, Role } from '@/generated/prisma'
+import { useAuth } from '@/hooks/auth/use-auth'
 import { apiClient } from '@/lib/axios'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
@@ -71,8 +72,17 @@ function createInfoCards(data: WarehouseHomePageData['warehouseInfo']): Dashboar
   ]
 }
 
+// TODO: This component is named `DashboardHomePage` but lives in the warehouse
+// route (/warehouse/page.tsx). Rename to `WarehouseHomePage` to match the route.
+
+// TODO: `WarehouseInfo`, `UserInfo`, and `WarehouseHomePageData` partially
+// duplicate data already available in the Zustand auth store (user, location,
+// device). Once `useAuth().warehouse` is fully populated, the /api/warehouse
+// response can drop `user` and `warehouseInfo` fields, and the `UserInfo`/
+// `WarehouseInfo` interfaces below can be removed from this file.
 export default function DashboardHomePage() {
   const router = useRouter()
+  const { warehouse } = useAuth()
 
   const [dashboardData, setDashboardData] = useState<WarehouseHomePageData>({
     warehouseInfo: {
@@ -130,6 +140,24 @@ export default function DashboardHomePage() {
     <main className="select-none flex flex-col h-full bg-linear-50 from-slate-800 to-slate-900 p-6 gap-4 overflow-hidden">
       <Card className=" glass flex-1 overflow-y-auto py-12 px-16">
         <h1 className="text-2xl font-semibold">Warehouse </h1>
+        {warehouse?.user ? (
+          // TODO: `warehouse` is null on page refresh (user not persisted to storage —
+          // see store.ts TODO). This block silently renders nothing until the first
+          // 401 → refresh cycle repopulates the store. Add a skeleton or brief
+          // loading state so the operator doesn't see a blank header.
+          // TODO: `warehouse.location?.zoneId` is a raw UUID. Resolve it to
+          // a zone name (already available from `/api/warehouse` response as
+          // `warehouseInfo.zoneName`) and display that instead.
+          <div className="mt-1 text-sm text-brand-muted">
+            <p>
+              Signed in as {warehouse.user.badgeNumber} ({warehouse.user.role})
+            </p>
+            <p>
+              Device: {warehouse.device?.name ?? 'Unknown'}
+              {warehouse.location?.zoneId ? ` · Zone ${warehouse.location.zoneId}` : ''}
+            </p>
+          </div>
+        ) : null}
 
         <DashboardInfoCards cards={infoCards} />
 
