@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcrypt'
 import { z } from 'zod'
 
+import { LoginType } from '@/generated/prisma/edge'
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
 import {
   persistRefreshToken,
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
   const user = await prisma.user.findUnique({ where: { badgeNumber } })
 
   if (!user) {
-    return NextResponse.json({ error: 'Invalid badge or PIN' }, { status: 401 })
+    return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
   if (!user.isActive) {
@@ -67,9 +68,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: 'Account deactivated' }, { status: 403 })
   }
+  if (user.loginType !== LoginType.BADGE_PIN && user.loginType !== LoginType.BOTH) {
+    return NextResponse.json({ error: 'Invalid Login Type' }, { status: 402 })
+  }
 
-  if (!user.pinHash || (user.loginType !== 'BADGE_PIN' && user.loginType !== 'BOTH')) {
-    return NextResponse.json({ error: 'Invalid badge or PIN' }, { status: 401 })
+  if (!user.pinHash) {
+    return NextResponse.json({ error: 'Missing PIN' }, { status: 401 })
   }
 
   const matches = await bcrypt.compare(pin, user.pinHash)
@@ -86,7 +90,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ error: 'Invalid badge or PIN' }, { status: 401 })
+    return NextResponse.json({ error: 'Wrong PIN' }, { status: 401 })
   }
 
   const accessToken = signAccessToken({
@@ -128,10 +132,16 @@ export async function POST(request: NextRequest) {
       role: user.role,
       badgeNumber: user.badgeNumber
     },
+    location: {
+      warehouseId: device.warehouseId ?? undefined,
+      zoneId: device.zoneId ?? undefined
+    },
     device: {
       id: device.id,
-      warehouseId: device.warehouseId,
-      zoneId: device.zoneId
+      name: device.name,
+      code: device.code,
+      warehouseId: device.warehouseId ?? undefined,
+      zoneId: device.zoneId ?? undefined
     }
   })
 }

@@ -14,7 +14,7 @@ export async function seedUsers(prisma: PrismaClient) {
       email: 'owner@lemon-wms.local',
       passwordHash: await bcrypt.hash('owner1234', SALT_ROUNDS),
       pinHash: await bcrypt.hash('1234', SALT_ROUNDS),
-      badgeNumber: '0000',
+      badgeNumber: 'USR-0000',
       firstName: 'Owner',
       lastName: 'User',
       fullName: 'Owner User',

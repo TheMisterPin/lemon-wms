@@ -8,18 +8,53 @@ import NumericKeypad from '@/components/shared/NumericKeypad'
 import ScanInput from '@/components/shared/ScanInput'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useAuthStore } from '@/lib/auth/store'
-import type { AuthUser } from '@/types'
+import type { AuthDevice, AuthLocation, AuthUser } from '@/types'
 
 type Step = 'device' | 'badge' | 'pin'
 
 type LoginResponse = {
   accessToken: string
   user: AuthUser
-  device: { id: string; warehouseId: string; zoneId: string | null }
+  location: AuthLocation
+  device: AuthDevice
   error?: string
 }
 
+// TODO: These localStorage keys are also referenced (by string) in store.ts and axios.ts.
+// Centralise them in a single constants file (e.g. src/lib/auth/storage-keys.ts) and
+// import everywhere to prevent silent key drift.
 const DEVICE_CODE_KEY = 'wms_device_code'
+const LAST_FLOOR_LOGIN_KEY = 'wms_floor_last_login'
+
+type LastFloorLogin = {
+  deviceCode: string
+  badgeNumber: string
+}
+
+// TODO: `JSON.parse(raw) as LastFloorLogin` is an unsafe cast — a corrupted or
+// tampered localStorage value would pass silently. Replace with a Zod schema:
+//   const schema = z.object({ deviceCode: z.string(), badgeNumber: z.string() })
+//   const result = schema.safeParse(JSON.parse(raw))
+//   if (!result.success) return null
+//   return result.data
+const readLastFloorLogin = (): LastFloorLogin | null => {
+  try {
+    const raw = localStorage.getItem(LAST_FLOOR_LOGIN_KEY)
+    if (!raw) {
+      return null
+    }
+
+    const parsed = JSON.parse(raw) as LastFloorLogin
+
+    if (!parsed.deviceCode || !parsed.badgeNumber) {
+      return null
+    }
+
+    return parsed
+  } catch {
+    return null
+  }
+}
 
 export default function FloorLoginForm() {
   const router = useRouter()
@@ -33,6 +68,8 @@ export default function FloorLoginForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // TODO: deviceInputRef is declared but never used programmatically (no .focus() / .select() calls).
+  // Either wire it to auto-focus the device input on step change, or remove the ref entirely.
   const deviceInputRef = useRef<HTMLInputElement>(null)
 
   // Auto-populate device code from localStorage
@@ -40,9 +77,26 @@ export default function FloorLoginForm() {
     const saved = localStorage.getItem(DEVICE_CODE_KEY)
     if (saved) {
       setDeviceCode(saved)
+
+      const lastLogin = readLastFloorLogin()
+      if (lastLogin && lastLogin.deviceCode === saved) {
+        setBadgeNumber(lastLogin.badgeNumber)
+        setStep('pin')
+
+        return
+      }
+
       setStep('badge')
     }
   }, [])
+
+  const handleChangeUser = () => {
+    setStep('badge')
+    setBadgeNumber('')
+    setPin('')
+    setError(null)
+    localStorage.removeItem(LAST_FLOOR_LOGIN_KEY)
+  }
 
   const handleDeviceSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,6 +132,11 @@ export default function FloorLoginForm() {
           // Go back to badge scan on auth failure
           setStep('badge')
           setBadgeNumber('')
+          // TODO: A 401 here means the badge/PIN combination is wrong, but
+          // LAST_FLOOR_LOGIN_KEY still holds the old badge number. On next mount
+          // the form will skip to pin step for a user that just failed auth.
+          // Consider clearing LAST_FLOOR_LOGIN_KEY on repeated failures, or at
+          // least after a configurable retry limit.
         }
 
         return
@@ -85,8 +144,18 @@ export default function FloorLoginForm() {
 
       // Persist device code for next login
       localStorage.setItem(DEVICE_CODE_KEY, deviceCode.trim())
+      localStorage.setItem(
+        LAST_FLOOR_LOGIN_KEY,
+        JSON.stringify({
+          deviceCode: deviceCode.trim(),
+          badgeNumber: data.user.badgeNumber
+        } satisfies LastFloorLogin)
+      )
 
-      setAuth(data.accessToken, data.user)
+      setAuth(data.accessToken, data.user, {
+        location: data.location,
+        device: data.device
+      })
       router.push('/warehouse')
     } catch {
       setError('Unable to connect. Please try again.')
@@ -222,6 +291,7 @@ export default function FloorLoginForm() {
               value={pin}
               onChange={setPin}
               onConfirm={handlePinConfirm}
+              onChangeUser={handleChangeUser}
               maxLength={4}
               masked
             />
@@ -249,7 +319,7 @@ export default function FloorLoginForm() {
           <button
             type="button"
             onClick={() => {
-              setStep('badge'); setBadgeNumber(''); setPin(''); setError(null)
+              handleChangeUser()
             }}
             className="text-sm text-brand-subtle hover:text-brand-muted"
           >
