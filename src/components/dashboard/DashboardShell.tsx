@@ -9,7 +9,7 @@ import DashboardHeader from './DashboardHeader'
 import DashboardSidebar from './DashboardSidebar'
 
 export default function DashboardShell({ children }: { children: ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
     <PageWrapper

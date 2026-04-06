@@ -5,17 +5,19 @@ import { LogOut, UserCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { useAuth } from '@/hooks'
 import { useAuthStore } from '@/lib/auth/store'
 
 export default function DashboardFooter() {
   const router = useRouter()
   const clearAuth = useAuthStore((s) => s.clearAuth)
-
+  const session = useAuth()
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' })
     clearAuth()
     router.push('/login')
   }
+  const displayName = session.user?.fullName || 'User'
 
   return (
     <footer className="flex h-12 shrink-0 items-center border-t border-brand-border bg-brand-surface px-4">
@@ -23,11 +25,10 @@ export default function DashboardFooter() {
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            size="icon"
-            className="h-9 w-9 text-brand-muted hover:bg-brand-border hover:text-brand-text"
+            className="h-9 gap-2 px-2 text-brand-muted hover:bg-brand-border hover:text-brand-text"
           >
-            <UserCircle className="h-5 w-5" />
-            <span className="sr-only">User menu</span>
+            <UserCircle className="h-5 w-5 shrink-0" />
+            <span className="text-sm">{displayName}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent
