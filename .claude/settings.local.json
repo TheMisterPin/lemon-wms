@@ -13,7 +13,11 @@
       "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"industrial warehouse management dark dashboard modern gradient\" --design-system -p \"Lemon WMS\")",
       "Bash(pnpm build:*)",
       "Bash(npx tsc:*)",
-      "Bash(pnpm vitest:*)"
+      "Bash(pnpm vitest:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/opt/homebrew/opt/node@22/bin:$PATH\")",
+      "Bash(pnpm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
