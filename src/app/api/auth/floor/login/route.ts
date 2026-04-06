@@ -135,8 +135,9 @@ export async function POST(request: NextRequest) {
     device: {
       id: device.id,
       name: device.name,
-      code: device.code
-
+      code: device.code,
+      warehouseId: device.warehouseId ?? undefined,
+      zoneId: device.zoneId ?? undefined
     }
   })
 }

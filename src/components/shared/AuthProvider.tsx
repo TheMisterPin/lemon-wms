@@ -62,6 +62,7 @@ const getUsableAccessToken = (token: string | null): string | null => {
 }
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
+  const user = useAuthStore((s) => s.user)
   const setToken = useAuthStore((s) => s.setToken)
   const setAuth = useAuthStore((s) => s.setAuth)
   const clearAuth = useAuthStore((s) => s.clearAuth)
@@ -74,7 +75,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       getUsableAccessToken(readStoredAccessToken()) ??
       getUsableAccessToken(readCookie('access_token'))
 
-    if (accessToken) {
+    if (accessToken && user) {
       setToken(accessToken)
       setReady(true)
 
@@ -112,7 +113,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [setToken, setAuth, clearAuth])
+  }, [user, setToken, setAuth, clearAuth])
 
   if (!ready) {
     return null

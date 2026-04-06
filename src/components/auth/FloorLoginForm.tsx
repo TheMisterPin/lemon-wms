@@ -8,25 +8,15 @@ import NumericKeypad from '@/components/shared/NumericKeypad'
 import ScanInput from '@/components/shared/ScanInput'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useAuthStore } from '@/lib/auth/store'
-import type { AuthUser } from '@/types'
+import type { AuthDevice, AuthLocation, AuthUser } from '@/types'
 
 type Step = 'device' | 'badge' | 'pin'
 
-// TODO: LoginResponse.location and LoginResponse.device duplicate AuthLocation and
-// AuthDevice defined in store.ts. Import those types directly once they are moved
-// to src/types/ (see store.ts TODO), then replace the inline shapes here.
 type LoginResponse = {
   accessToken: string
   user: AuthUser
-  location: {
-    warehouseId?: string
-    zoneId?: string
-  }
-  device: {
-    id: string
-    name: string
-    code: string
-  }
+  location: AuthLocation
+  device: AuthDevice
   error?: string
 }
 

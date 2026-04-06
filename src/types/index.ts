@@ -12,6 +12,24 @@ export type AuthUser = {
   badgeNumber: string
 }
 
+export type AuthLocation = {
+  warehouseId?: string
+  zoneId?: string
+}
+
+export type AuthDevice = {
+  id: string
+  name: string
+  code: string
+  warehouseId?: string
+  zoneId?: string
+}
+
+export type AuthContext = {
+  location?: AuthLocation
+  device?: AuthDevice
+}
+
 export type JWTPayload = {
   userId: string
   role: Role

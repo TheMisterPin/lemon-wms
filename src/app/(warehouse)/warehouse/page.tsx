@@ -141,10 +141,8 @@ export default function DashboardHomePage() {
       <Card className=" glass flex-1 overflow-y-auto py-12 px-16">
         <h1 className="text-2xl font-semibold">Warehouse </h1>
         {warehouse?.user ? (
-          // TODO: `warehouse` is null on page refresh (user not persisted to storage —
-          // see store.ts TODO). This block silently renders nothing until the first
-          // 401 → refresh cycle repopulates the store. Add a skeleton or brief
-          // loading state so the operator doesn't see a blank header.
+          // TODO: Add a loading/skeleton state for the auth header while the app is
+          // still rehydrating from session storage or waiting on AuthProvider refresh.
           // TODO: `warehouse.location?.zoneId` is a raw UUID. Resolve it to
           // a zone name (already available from `/api/warehouse` response as
           // `warehouseInfo.zoneName`) and display that instead.

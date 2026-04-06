@@ -1,22 +1,23 @@
 'use client'
 
-// TODO: Consider persisting `user`, `location`, and `device` to sessionStorage
-// (not localStorage) so the store re-hydrates fully after a page refresh.
-// Currently only the access token is persisted; `user` is null until the next
-// setAuth call (i.e. after the Axios interceptor triggers a token refresh on
-// the first 401). This means useAuth().isAuthenticated is briefly false and
-// dashboard/warehouse user-info blocks don't render on hard reload.
-
-// TODO: Move AuthLocation, AuthDevice, and AuthContext to src/types/ alongside
-// AuthUser. They are consumed by the hook, the floor login form, and the axios
-// interceptor — keeping them in the store creates an import chain that shouldn't
-// point to a Zustand module.
-
 import { create } from 'zustand'
 
-import type { AuthUser } from '@/types'
+import type { AuthContext, AuthDevice, AuthLocation, AuthUser } from '@/types'
 
 const ACCESS_TOKEN_STORAGE_KEY = 'wms_access_token'
+const AUTH_SESSION_STORAGE_KEY = 'wms_auth_session'
+
+type PersistedAuthSession = {
+  user: AuthUser | null
+  location: AuthLocation | null
+  device: AuthDevice | null
+}
+
+const EMPTY_AUTH_SESSION: PersistedAuthSession = {
+  user: null,
+  location: null,
+  device: null
+}
 
 export const readStoredAccessToken = (): string | null => {
   if (typeof window === 'undefined') {
@@ -46,7 +47,109 @@ const writeStoredAccessToken = (token: string | null): void => {
   }
 }
 
-type AuthState = {
+const isAuthUser = (value: unknown): value is AuthUser => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Partial<AuthUser>
+
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.role === 'string' &&
+    typeof candidate.badgeNumber === 'string' &&
+    (candidate.email === undefined || candidate.email === null || typeof candidate.email === 'string')
+  )
+}
+
+const isAuthLocation = (value: unknown): value is AuthLocation => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Partial<AuthLocation>
+
+  return (
+    (candidate.warehouseId === undefined || typeof candidate.warehouseId === 'string') &&
+    (candidate.zoneId === undefined || typeof candidate.zoneId === 'string')
+  )
+}
+
+const isAuthDevice = (value: unknown): value is AuthDevice => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Partial<AuthDevice>
+
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.name === 'string' &&
+    typeof candidate.code === 'string'
+  )
+}
+
+const readStoredAuthSession = (): PersistedAuthSession => {
+  if (typeof window === 'undefined') {
+    return EMPTY_AUTH_SESSION
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY)
+    if (!raw) {
+      return EMPTY_AUTH_SESSION
+    }
+
+    const parsed = JSON.parse(raw) as {
+      user?: unknown
+      location?: unknown
+      device?: unknown
+    }
+
+    return {
+      user: isAuthUser(parsed.user) ? parsed.user : null,
+      location: isAuthLocation(parsed.location) ? parsed.location : null,
+      device: isAuthDevice(parsed.device) ? parsed.device : null
+    }
+  } catch {
+    return EMPTY_AUTH_SESSION
+  }
+}
+
+const writeStoredAuthSession = (session: PersistedAuthSession | null): void => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    if (session && session.user) {
+      window.sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session))
+    } else {
+      window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY)
+    }
+  } catch {
+    // Ignore storage failures and keep the in-memory auth state usable.
+  }
+}
+
+const readInitialAuthState = (): PersistedAuthSession & { token: string | null } => {
+  const token = readStoredAccessToken()
+  if (!token) {
+    writeStoredAuthSession(null)
+
+    return {
+      token: null,
+      ...EMPTY_AUTH_SESSION
+    }
+  }
+
+  return {
+    token,
+    ...readStoredAuthSession()
+  }
+}
+
+export type AuthStoreState = {
   token: string | null
   user: AuthUser | null
   location: AuthLocation | null
@@ -56,50 +159,34 @@ type AuthState = {
   clearAuth: () => void
 }
 
-export type AuthLocation = {
-  warehouseId?: string
-  zoneId?: string
-}
+const initialState = readInitialAuthState()
 
-export type AuthDevice = {
-  id: string
-  name: string
-  code: string
-}
-
-export type AuthContext = {
-  location?: AuthLocation
-  device?: AuthDevice
-}
-
-export const useAuthStore = create<AuthState>((set) => ({
-  token: readStoredAccessToken(),
-  user: null,
-  location: null,
-  device: null,
+export const useAuthStore = create<AuthStoreState>((set) => ({
+  token: initialState.token,
+  user: initialState.user,
+  location: initialState.location,
+  device: initialState.device,
   setToken: (token) => {
     writeStoredAccessToken(token)
-    // TODO: setToken manually spreads the full state to preserve user/location/device,
-    // but Zustand's set() does a shallow merge by default, so spreading is unnecessary.
-    // Simplify to: set({ token })
-    set((state) => ({
-      token,
-      user: state.user,
-      location: state.location,
-      device: state.device
-    }))
+    set({ token })
   },
   setAuth: (token, user, context) => {
-    writeStoredAccessToken(token)
-    set({
-      token,
+    const session = {
       user,
       location: context?.location ?? null,
       device: context?.device ?? null
+    }
+
+    writeStoredAccessToken(token)
+    writeStoredAuthSession(session)
+    set({
+      token,
+      ...session
     })
   },
   clearAuth: () => {
     writeStoredAccessToken(null)
+    writeStoredAuthSession(null)
     set({ token: null, user: null, location: null, device: null })
   }
 }))
