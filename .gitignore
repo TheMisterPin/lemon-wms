@@ -12,7 +12,8 @@
 
 # testing
 /coverage
-
+# worktrees 
+.claude/worktrees/
 # next.js
 /.next/
 /out/
