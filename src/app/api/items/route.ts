@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { toItemTableRecords } from '@/lib/converters/table-records'
 import { itemFormSchema } from '@/lib/schemas/item'
 import { createItem } from '@/lib/entities/items/create-item'
 import { getItems } from '@/lib/entities/items/get-items'
@@ -19,7 +20,8 @@ export async function GET(req: NextRequest) {
     const categoryId = searchParams.get('categoryId') ?? undefined
     const isActiveParam = searchParams.get('isActive')
     const isActive = isActiveParam !== null ? isActiveParam === 'true' : undefined
-    const items = await getItems(prisma, { categoryId, isActive })
+    const itemRecords = await getItems(prisma, { categoryId, isActive })
+    const items = toItemTableRecords(itemRecords)
 
     return ok(items, 'Items retrieved successfully.')
   } catch (error) {

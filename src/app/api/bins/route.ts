@@ -6,6 +6,7 @@ import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middlewar
 import { binFormSchema } from '@/lib/schemas/bin'
 import { createBin } from '@/lib/entities/bins/create-bin'
 import { getBins } from '@/lib/entities/bins/get-bins'
+import { toBinTableRecords } from '@/lib/converters/table-records'
 import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 
@@ -19,7 +20,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const zoneId = searchParams.get('zoneId') ?? undefined
     const warehouseId = searchParams.get('warehouseId') ?? undefined
-    const bins = await getBins(prisma, { zoneId, warehouseId })
+    const binRecords = await getBins(prisma, { zoneId, warehouseId })
+    const bins = toBinTableRecords(binRecords)
 
     return ok(bins, 'Bins retrieved successfully.')
   } catch (error) {

@@ -10,26 +10,28 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { formatDisplayValue, getValueByPath } from '@/lib/utils/get-value-by-path'
+import {
+  renderDisplayFieldValue,
+  getProgressValues
+} from '@/lib/utils/display-fields'
+import { EMPTY_DISPLAY_VALUE } from '@/lib/utils/get-value-by-path'
 import {
   FactboxFieldConfig,
   GenericFactboxProps
 } from '@/types/components/factbox/generic-factbox.types'
 
 function getFieldValue<T extends FieldValues>(data: T, field: FactboxFieldConfig<T>): React.ReactNode {
-  if (field.render) {
-    return field.render(data)
+  if (field.type === 'progress') {
+    const progress = getProgressValues(data, field)
+
+    if (!progress) {
+      return EMPTY_DISPLAY_VALUE
+    }
+
+    return `${Math.round(progress.percentage)}% (${progress.current}/${progress.max})`
   }
 
-  if (field.accessorPath) {
-    return formatDisplayValue(getValueByPath(data, field.accessorPath))
-  }
-
-  if (field.accessor) {
-    return formatDisplayValue(data[field.accessor])
-  }
-
-  return '—'
+  return renderDisplayFieldValue(data, field)
 }
 
 export function GenericFactbox<T extends FieldValues>({

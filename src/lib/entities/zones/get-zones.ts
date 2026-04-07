@@ -5,6 +5,23 @@ async function getZones(prisma: PrismaClient, filters?: { warehouseId?: string }
     where: {
       ...(filters?.warehouseId ? { warehouseId: filters.warehouseId } : {})
     },
+    select: {
+      id: true,
+      warehouseId: true,
+      name: true,
+      type: true,
+      isActive: true,
+      defaultReceivingBinId: true,
+      defaultQuarantineBinId: true,
+      defaultOutgoingBinId: true,
+      createdAt: true,
+      deletedAt: true,
+      warehouse: {
+        select: {
+          name: true
+        }
+      }
+    },
     orderBy: { createdAt: 'desc' }
   })
 

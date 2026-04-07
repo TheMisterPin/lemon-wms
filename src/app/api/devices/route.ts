@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { toDeviceTableRecords } from '@/lib/converters/table-records'
 import { createDevice } from '@/lib/entities/devices/create-device'
 import { getFilteredDevices } from '@/lib/entities/devices/get-devices'
 import prisma from '@/lib/prisma'
@@ -37,13 +38,14 @@ export async function GET(req: NextRequest) {
       ...(isActiveParam !== null ? { isActive: isActiveParam === 'true' } : {})
     }
 
-    const devices = await getFilteredDevices(prisma, Object.keys(filters).length ? filters : undefined)
+    const deviceRecords = await getFilteredDevices(prisma, Object.keys(filters).length ? filters : undefined)
+    const devices = toDeviceTableRecords(deviceRecords)
 
     return ok(devices, 'Devices retrieved successfully.')
   } catch (error) {
     console.error('[GET /api/devices]', error)
 
-    return ok([], 'No devices found.')
+    return fail('Failed to retrieve devices.')
   }
 }
 

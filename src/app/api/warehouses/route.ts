@@ -6,6 +6,7 @@ import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middlewar
 import { warehouseFormSchema } from '@/lib/schemas/warehouse'
 import { createWarehouse } from '@/lib/entities/warehouses/create-warehouse'
 import { getWarehouses } from '@/lib/entities/warehouses/get-warehouses'
+import { toWarehouseTableRecords } from '@/lib/converters/table-records'
 import prisma from '@/lib/prisma'
 import { generateWarehouseSerial } from '@/utils/serials'
 
@@ -16,7 +17,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const data = await getWarehouses(prisma)
+    const records = await getWarehouses(prisma)
+    const data = toWarehouseTableRecords(records)
 
     return ok(data, 'Warehouses retrieved successfully.')
   } catch (error) {

@@ -7,6 +7,32 @@ async function getBins(prisma: PrismaClient, filters?: { zoneId?: string; wareho
       ...(filters?.zoneId ? { zoneId: filters.zoneId } : {}),
       ...(filters?.warehouseId ? { warehouseId: filters.warehouseId } : {})
     },
+    select: {
+      id: true,
+      zoneId: true,
+      warehouseId: true,
+      name: true,
+      code: true,
+      type: true,
+      isBlocked: true,
+      blockReason: true,
+      maxWeightKg: true,
+      maxVolumeM3: true,
+      maxCapacity: true,
+      currentCapacity: true,
+      createdAt: true,
+      deletedAt: true,
+      zone: {
+        select: {
+          name: true
+        }
+      },
+      warehouse: {
+        select: {
+          name: true
+        }
+      }
+    },
     orderBy: { createdAt: 'desc' }
   })
 

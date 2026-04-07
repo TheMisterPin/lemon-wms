@@ -219,4 +219,47 @@ describe('GenericTable', () => {
 
     expect(screen.queryByText('0 EA')).toBeNull()
   })
+
+  it('filters rows when optional search is enabled', () => {
+    const columns: TableColumnConfig<TestRow>[] = [
+      { label: 'Name', accessor: 'name' },
+      { label: 'Status', accessor: 'status' }
+    ]
+
+    render(
+      <GenericTable
+        columns={columns}
+        records={[
+          {
+            id: 'warehouse-1',
+            name: 'North Hub',
+            status: 'active',
+            uom: 'EA',
+            createdAt: '2025-03-15T00:00:00Z',
+            lastSeenAt: '2025-03-15T09:45:00Z',
+            isActive: true,
+            currentCapacity: 25,
+            maxCapacity: 100
+          },
+          {
+            id: 'warehouse-2',
+            name: 'South Hub',
+            status: 'inactive',
+            uom: 'EA',
+            createdAt: '2025-03-16T00:00:00Z',
+            lastSeenAt: '2025-03-15T18:05:00Z',
+            isActive: false,
+            currentCapacity: 80,
+            maxCapacity: 100
+          }
+        ]}
+        search={{ enabled: true, placeholder: 'Search warehouses' }}
+      />
+    )
+
+    fireEvent.change(screen.getByLabelText('Search records'), { target: { value: 'south' } })
+
+    expect(screen.queryByText('North Hub')).toBeNull()
+    expect(screen.getByText('South Hub')).toBeTruthy()
+  })
 })
