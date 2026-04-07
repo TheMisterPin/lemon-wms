@@ -18,6 +18,7 @@ async function getWarehouseHomeData(prisma: PrismaClient) {
               name: true,
               isBlocked: true,
               blockReason: true,
+              currentCapacity: true,
               maxCapacity: true,
               type: true
             }
@@ -57,7 +58,7 @@ async function getWarehouseHomeData(prisma: PrismaClient) {
         active: !bin.isBlocked,
         maxCapacity: bin.maxCapacity ? bin.maxCapacity.toNumber() : 100,
         type: bin.type,
-        currentCapacity: Math.floor(Math.random() * (bin.maxCapacity ? bin.maxCapacity.toNumber() + 1 : 10))
+        currentCapacity: bin.currentCapacity ? bin.currentCapacity.toNumber() : 0
       }))
     )
   )
