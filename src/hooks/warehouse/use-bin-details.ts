@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-import { apiClient } from '@/lib/axios'
+import { warehouseApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
 export type BinStockRecord = {
@@ -49,7 +49,7 @@ export function useBinDetails(binId: string) {
     async function fetchBinDetails() {
       try {
         setIsLoading(true)
-        const response = await apiClient.get<ApiResponse<BinDetailsResponse>>(`/warehouse/bins/${binId}`)
+        const response = await warehouseApiClient.get<ApiResponse<BinDetailsResponse>>(`/warehouse/bins/${binId}`)
         if (!cancelled && response.success && response.data) {
           setData(response.data)
         }

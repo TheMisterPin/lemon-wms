@@ -55,7 +55,7 @@ describe('middleware — static assets', () => {
 // ---------------------------------------------------------------------------
 
 describe('middleware — api paths', () => {
-  it.each(['/api/auth/login', '/api/auth/floor/login', '/api/auth/refresh', '/api/warehouses'])(
+  it.each(['/api/auth/login', '/api/auth/floor/login', '/api/auth/refresh', '/api/dashboard/warehouses'])(
     'passes through %s without auth checks in middleware',
     (path) => {
       const res = middleware(makeRequest(path))
@@ -76,7 +76,7 @@ describe('middleware — no token', () => {
   })
 
   it('passes protected API routes through to route handlers', () => {
-    const res = middleware(makeRequest('/api/warehouses'))
+    const res = middleware(makeRequest('/api/dashboard/warehouses'))
     expect(res.status).toBe(200)
   })
 
@@ -125,14 +125,14 @@ describe('middleware — expired access token in cookie', () => {
 
   it('passes expired API requests through to route handlers', () => {
     const token = expiredToken('OWNER')
-    const res = middleware(makeRequest('/api/warehouses', { cookie: { name: 'access_token', value: token } }))
+    const res = middleware(makeRequest('/api/dashboard/warehouses', { cookie: { name: 'access_token', value: token } }))
 
     expect(res.status).toBe(200)
   })
 
   it('passes expired API requests through even when refresh token exists', async () => {
     const token = expiredToken('OWNER')
-    const req = makeRequest('/api/warehouses', { cookie: { name: 'access_token', value: token } })
+    const req = makeRequest('/api/dashboard/warehouses', { cookie: { name: 'access_token', value: token } })
     req.cookies.set('refresh_token', 'refresh-token-present')
     const res = middleware(req)
 

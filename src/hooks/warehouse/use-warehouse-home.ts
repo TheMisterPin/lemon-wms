@@ -7,7 +7,7 @@ import { MapPin, Warehouse } from 'lucide-react'
 import type { DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
 import type { DashboardRecordListItem } from '@/components/dashboard/DashboardRecordListSection'
 import { OrderStatus, OrderType, Role } from '@/generated/prisma'
-import { apiClient } from '@/lib/axios'
+import { warehouseApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'
 import type { BinItem } from '@/types/warehouse/bins/binlist.type'
 
@@ -90,7 +90,7 @@ export function useWarehouseHome() {
 
     async function fetchData() {
       try {
-        const response = await apiClient.get<ApiResponse<WarehouseHomePageData>>('/warehouse')
+        const response = await warehouseApiClient.get<ApiResponse<WarehouseHomePageData>>('/warehouse/home')
         if (!cancelled && response.success && response.data) {
           setData(response.data)
         }

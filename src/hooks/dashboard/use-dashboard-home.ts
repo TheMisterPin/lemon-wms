@@ -6,7 +6,7 @@ import { MapPin, ShelvingUnit, Warehouse } from 'lucide-react'
 
 import type { DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
 import type { DashboardRecordListItem } from '@/components/dashboard/DashboardRecordListSection'
-import { apiClient } from '@/lib/axios'
+import { dashboardApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
 const PAGE_SIZE = 3
@@ -97,7 +97,7 @@ export function useDashboardHome() {
 
     async function fetchData() {
       try {
-        const response = await apiClient.get<ApiResponse<DashboardHomePageData>>('/dashboard/warehouse')
+        const response = await dashboardApiClient.get<ApiResponse<DashboardHomePageData>>('/dashboard/home')
         if (!cancelled && response.success && response.data) {
           setData(response.data)
         }

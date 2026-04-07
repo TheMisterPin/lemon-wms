@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import { apiClient } from '@/lib/axios'
+import { warehouseApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
 const SEARCH_DEBOUNCE_MS = 300
@@ -73,7 +73,7 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
           params.q = debouncedSearch
         }
 
-        const response = await apiClient.get<ApiResponse<WarehouseItemsResponse>>('/warehouse/items', params)
+        const response = await warehouseApiClient.get<ApiResponse<WarehouseItemsResponse>>('/warehouse/items', params)
 
         if (!isActive) return
 
@@ -153,7 +153,7 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
       setIsSubmitting(true)
       setError(null)
 
-      const response = await apiClient.post<ApiResponse<{ stockItems: unknown[] }>>(
+      const response = await warehouseApiClient.post<ApiResponse<{ stockItems: unknown[] }>>(
         `/warehouse/stock/addtobin/${binId}`,
         { itemId: selectedItem.id, quantity: parsedQuantity }
       )

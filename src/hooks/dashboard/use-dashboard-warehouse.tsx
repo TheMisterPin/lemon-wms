@@ -12,7 +12,7 @@ import type { ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AxiosError } from 'axios'
 
-import { apiClient } from '@/lib/axios'
+import { dashboardApiClient } from '@/lib/axios'
 import type { BinTableRow } from '@/components/configs/entities/bin/config'
 import type { BinFormValues } from '@/lib/schemas/bin'
 import type { Warehouse } from '@/lib/schemas/warehouse'
@@ -147,9 +147,9 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
           : ''
 
         const [warehousesPayload, zonesPayload, binsPayload] = await Promise.all([
-          apiClient.get<ApiPayload<WarehouseApiRecord[]>>('/warehouses'),
-          apiClient.get<ApiPayload<ZoneApiRecord[]>>(`/zones${queryString}`),
-          apiClient.get<ApiPayload<BinApiRecord[]>>(`/bins${queryString}`)
+          dashboardApiClient.get<ApiPayload<WarehouseApiRecord[]>>('/dashboard/warehouses'),
+          dashboardApiClient.get<ApiPayload<ZoneApiRecord[]>>(`/dashboard/zones${queryString}`),
+          dashboardApiClient.get<ApiPayload<BinApiRecord[]>>(`/dashboard/bins${queryString}`)
         ])
 
         if (!isMounted) {
@@ -242,7 +242,7 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
   const createWarehouse = useCallback(
     async (values: Pick<WarehouseFormValues, 'name'>) => {
       try {
-        await apiClient.post('/warehouses', values)
+        await dashboardApiClient.post('/dashboard/warehouses', values)
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)
@@ -256,7 +256,7 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
   const createZone = useCallback(
     async (values: ZoneFormValues) => {
       try {
-        await apiClient.post('/zones', values)
+        await dashboardApiClient.post('/dashboard/zones', values)
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)
@@ -270,7 +270,7 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
   const createBin = useCallback(
     async (values: BinFormValues) => {
       try {
-        await apiClient.post('/bins', values)
+        await dashboardApiClient.post('/dashboard/bins', values)
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)

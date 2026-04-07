@@ -9,12 +9,18 @@ type RetriableAxiosRequestConfig = InternalAxiosRequestConfig & {
   _retried?: boolean
 }
 
-const api = axios.create({
+type ApiClientKind = 'shared' | 'dashboard' | 'warehouse'
+
+const createApiInstance = () => axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json'
   }
 })
+
+const sharedApi = createApiInstance()
+const dashboardApi = createApiInstance()
+const warehouseApi = createApiInstance()
 
 // Track in-flight refresh to avoid concurrent refresh calls
 let refreshPromise: Promise<string | null> | null = null
@@ -71,59 +77,88 @@ async function attemptTokenRefresh(): Promise<string | null> {
   }
 }
 
-// Request interceptor — attach Bearer token from Zustand auth store
-api.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore.getState().token ?? readStoredAccessToken()
+function withAuthHeaders(
+  config: InternalAxiosRequestConfig,
+  kind: ApiClientKind
+): InternalAxiosRequestConfig {
+  const { token, user, location, device } = useAuthStore.getState()
+  const accessToken = token ?? readStoredAccessToken()
+  const nextHeaders = config.headers ?? {}
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+  if (accessToken) {
+    nextHeaders.Authorization = `Bearer ${accessToken}`
+  }
+
+  if (kind === 'dashboard' || kind === 'warehouse') {
+    if (user?.id) {
+      nextHeaders['x-user-id'] = user.id
     }
+    if (user?.role) {
+      nextHeaders['x-user-role'] = user.role
+    }
+  }
 
-    return config
-  },
-  (error) => Promise.reject(error)
-)
+  if (kind === 'warehouse') {
+    if (location?.warehouseId) {
+      nextHeaders['x-warehouse-id'] = location.warehouseId
+    }
+    if (location?.zoneId) {
+      nextHeaders['x-zone-id'] = location.zoneId
+    }
+    if (device?.id) {
+      nextHeaders['x-device-id'] = device.id
+    }
+  }
 
-// Response interceptor — attempt refresh on 401, then retry original request
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (!shouldAttemptRefresh(error)) {
+  config.headers = nextHeaders
+  return config
+}
+
+function attachInterceptors(instance: ReturnType<typeof createApiInstance>, kind: ApiClientKind) {
+  instance.interceptors.request.use(
+    (config) => withAuthHeaders(config, kind),
+    (error) => Promise.reject(error)
+  )
+
+  instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (!shouldAttemptRefresh(error)) {
+        return Promise.reject(error)
+      }
+
+      const originalRequest = error.config as RetriableAxiosRequestConfig
+      originalRequest._retried = true
+
+      if (!refreshPromise) {
+        refreshPromise = attemptTokenRefresh().finally(() => {
+          refreshPromise = null
+        })
+      }
+
+      const newToken = await refreshPromise
+
+      if (newToken) {
+        originalRequest.headers = originalRequest.headers ?? {}
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+        return instance(originalRequest)
+      }
+
+      useAuthStore.getState().clearAuth()
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+
       return Promise.reject(error)
     }
+  )
+}
 
-    const originalRequest = error.config as RetriableAxiosRequestConfig
+attachInterceptors(sharedApi, 'shared')
+attachInterceptors(dashboardApi, 'dashboard')
+attachInterceptors(warehouseApi, 'warehouse')
 
-    originalRequest._retried = true
-
-    // Deduplicate concurrent refresh attempts
-    if (!refreshPromise) {
-      refreshPromise = attemptTokenRefresh().finally(() => {
-        refreshPromise = null
-      })
-    }
-
-    const newToken = await refreshPromise
-
-    if (newToken) {
-      originalRequest.headers = originalRequest.headers ?? {}
-      originalRequest.headers.Authorization = `Bearer ${newToken}`
-
-      return api(originalRequest)
-    }
-
-    // Refresh failed — clear auth and redirect
-    useAuthStore.getState().clearAuth()
-    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-      window.location.href = '/login'
-    }
-
-    return Promise.reject(error)
-  }
-)
-
-export default api
+export default sharedApi
 
 /**
  * Make an authenticated API request using the Zustand auth store token.
@@ -138,22 +173,13 @@ export async function authenticatedCall<T = any>(
   }
 ): Promise<T> {
   const { method = 'GET', data, params, headers } = options ?? {}
-  const token = useAuthStore.getState().token ?? readStoredAccessToken()
 
-  const response = await api.request<T>({
+  const response = await sharedApi.request<T>({
     method,
     url,
     data,
     params,
-    headers: {
-      ...headers,
-      // TODO: The request interceptor on `api` already attaches the Authorization
-      // header from the store. This manual header is redundant and will shadow
-      // any token update that happens between the time `authenticatedCall` reads
-      // the token and when the interceptor fires. Remove the manual header and
-      // rely on the interceptor exclusively.
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    }
+    headers
   })
 
   return response.data
@@ -176,3 +202,21 @@ export const apiClient = {
   delete: <T = any>(url: string, data?: any) =>
     authenticatedCall<T>(url, { method: 'DELETE', data })
 }
+
+function createTypedClient(instance: typeof sharedApi) {
+  return {
+    get: <T = any>(url: string, params?: any) =>
+      instance.request<T>({ method: 'GET', url, params }).then((response) => response.data),
+    post: <T = any>(url: string, data?: any) =>
+      instance.request<T>({ method: 'POST', url, data }).then((response) => response.data),
+    put: <T = any>(url: string, data?: any) =>
+      instance.request<T>({ method: 'PUT', url, data }).then((response) => response.data),
+    patch: <T = any>(url: string, data?: any) =>
+      instance.request<T>({ method: 'PATCH', url, data }).then((response) => response.data),
+    delete: <T = any>(url: string, data?: any) =>
+      instance.request<T>({ method: 'DELETE', url, data }).then((response) => response.data)
+  }
+}
+
+export const dashboardApiClient = createTypedClient(dashboardApi)
+export const warehouseApiClient = createTypedClient(warehouseApi)

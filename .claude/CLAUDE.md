@@ -501,32 +501,102 @@ npx shadcn@latest add avatar accordion tooltip switch textarea
 
 ## Current status
 
-🟢 **Phase 0 — Complete.**
+🟢 **Phase 0–3 — Mostly Complete. Ready for Phase 4 (Orders).**
 
 ### What is implemented
-- Full Prisma schema (31 models) — pushed to DB via `npx prisma db push`
+
+#### Phase 0 ✅ (Foundation)
+- Full Prisma schema (35+ models: Warehouse, Zone, Bin, User, Device, all 5 order types, 3 log models, alerts)
 - Custom JWT auth — both credential and badge+PIN flows
 - Auth middleware — role-based routing and 403 guards
-- Dashboard shell (`/dashboard`) with sidebar, header, and metric card components
-- Warehouse shell (`/warehouse`) with full-screen layout
-- Login page — dual-tab (credential + floor)
-- Warehouse list page (`/dashboard/warehouses`) — basic GET/POST
-- Zones list API (`GET /api/zones`)
+- Dashboard shell with sidebar, header, metric cards, error modal
+- Warehouse shell with bottom nav
+- Login pages — dual-tab (credential + floor)
 - Auth API routes — login, floor login, logout, refresh
 - GenericTable, GenericFactbox, DynamicForm component system
 - ScanInput and NumericKeypad shared components
 - Zustand auth store
 - Seed scripts for users and warehouses
-- Entity configs for warehouse, zone, user, bin, device
+- Entity configs for all domain models
 
-### What is NOT yet implemented (Phase 1+)
-- Bin CRUD (Phase 1)
-- User CRUD, zone assignments (Phase 2)
-- WARItem, ItemCategory, Lot, SerialNumber APIs (Phase 3)
-- All five order types and execution flows (Phases 4–9)
-- Log chain (UAE → BOE → ILE atomic transactions)
-- Alert rules and in-app notifications (Phase 11)
-- Reports and traceability views (Phase 10)
+#### Phase 1 ✅ (Locations)
+- **Warehouses**: Full CRUD (create, read, list, update, delete), dashboard list page with quick actions
+- **Zones**: Full CRUD, dashboard list page with quick actions, filterable by warehouse
+- **Bins**: Full CRUD, dashboard list page, warehouse home shows bin inventory by zone, includes bin blocking/unblocking
+- All location APIs: `GET/POST /api/warehouses`, `GET/POST/PATCH /api/zones`, `GET/POST/PATCH /api/bins`
+- Warehouse home page shows zone/bin inventory summary
 
-### Next: Phase 1 — Locations
-Warehouse/Zone/Bin CRUD with dashboard UI and warehouse read views.
+#### Phase 2 ✅ Partial (Users & Devices)
+- **Users**: Full CRUD API exists (`GET/POST/PATCH /api/users`), badge number generation (USR-XXXX format)
+- **Devices**: Full CRUD API + authorization flow (`GET/POST /api/devices`, `POST /api/devices/[action]`)
+- Dashboard devices page with authorize/deauthorize actions
+- User dashboard page is **stub only** (needs full implementation with role/zone assignment UI)
+- Zone assignments API exists but no UI yet
+
+#### Phase 3 🟡 Partial (Items)
+- **WARItem**: Full CRUD API (`GET/POST/PATCH /api/items`)
+- **ItemCategory**: Hierarchical model in schema (supports parent/child relationships)
+- **Lots**: Schema defined, model in Prisma
+- **SerialNumber & SerialNumberConfig**: Schema defined, models in Prisma
+- Dashboard items page is **stub only** (needs table, forms, category hierarchy UI)
+- Item lookup on floor side not yet implemented
+
+#### Phases 4–9 🔴 Not Started (Orders)
+- Schema fully defined for: PurchaseOrder, SalesOrder, TransferOrder, ReturnOrder, AdjustmentOrder (all with line items)
+- No service functions, APIs, or UI pages yet
+- Order home shows basic query of orders by status, but no creation/execution flows
+- Order statuses and state machine defined, not enforced
+- Order assignment/WM signoff not implemented
+
+#### Phase 10–11 🔴 Not Started (Logs & Alerts)
+- **UserActivityEntry, BinOperationEntry, ItemLedgerEntry**: Schema defined, models in Prisma
+- Log chain transaction pattern defined, not implemented
+- No APIs or viewers for logs
+- **AlertRule, Notification**: Schema defined, models in Prisma
+- No alert firing logic or notification system yet
+
+#### Phase 12 🔴 Not Started (Polish)
+- No demo prep, onboarding flow, or edge case handling yet
+
+### API Summary
+
+| Endpoint | Methods | Status | Notes |
+|---|---|---|---|
+| `/api/auth/*` | POST | ✅ | Login, floor login, logout, refresh token |
+| `/api/warehouses` | GET, POST, PATCH, DELETE | ✅ | Full CRUD |
+| `/api/zones` | GET, POST, PATCH, DELETE | ✅ | Full CRUD |
+| `/api/bins` | GET, POST, PATCH, DELETE | ✅ | Full CRUD, includes warehouse-scoped view |
+| `/api/users` | GET, POST, PATCH, DELETE | ✅ | Full CRUD, badge generation |
+| `/api/devices` | GET, POST, PATCH, DELETE | ✅ | Full CRUD, authorization flow |
+| `/api/items` | GET, POST, PATCH, DELETE | ✅ | Full CRUD |
+| `/api/warehouse/*` | GET | ✅ | Home page (zone/bin data, order pool) |
+| `/api/warehouse/bins/*` | GET, POST | ✅ | Floor-side bin detail, add to bin |
+| `/api/warehouse/items` | GET | ✅ | Floor-side item lookup |
+| `/api/warehouse/stock/addtobin/*` | POST | ✅ | Add items to bin (floor) |
+| `/api/logs` | GET | 🔴 | Stub only |
+| `/api/errors` | POST | ✅ | Error logging for client |
+| Order endpoints | — | 🔴 | Not yet implemented |
+
+### Dashboard Pages
+
+| Page | Status | Notes |
+|---|---|---|
+| `/dashboard` | 🔴 | Stub (home) |
+| `/dashboard/warehouses` | ✅ | List, create, view |
+| `/dashboard/zones` | ✅ | List, create, view, filterable by warehouse |
+| `/dashboard/bins` | ✅ | List, create, view |
+| `/dashboard/items` | 🔴 | Stub only |
+| `/dashboard/users` | 🔴 | Stub only |
+| `/dashboard/devices` | ✅ | List, authorize, deauthorize |
+
+### Warehouse Pages
+
+| Page | Status | Notes |
+|---|---|---|
+| `/warehouse` | ✅ | Home: zone/bin inventory, order pool |
+| `/warehouse/bins/[id]` | ✅ | Bin detail (floor-side) |
+| `/warehouse/orders/*` | 🔴 | Not yet implemented |
+| `/warehouse/zones/*` | 🔴 | Not yet implemented |
+
+### Next: Phase 4 — Purchase Orders
+Implement PO creation (dashboard), receiving flow (floor), and log chain (UAE → BOE → ILE).

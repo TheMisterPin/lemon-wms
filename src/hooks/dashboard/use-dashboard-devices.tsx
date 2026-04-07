@@ -11,7 +11,7 @@ import {
 import type { ReactNode } from 'react'
 import { AxiosError } from 'axios'
 
-import { apiClient } from '@/lib/axios'
+import { dashboardApiClient } from '@/lib/axios'
 import type { DeviceTableRow } from '@/components/configs/entities/device/config'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
@@ -113,9 +113,9 @@ export function DashboardDevicesProvider({ children }: { children: ReactNode }) 
 
       try {
         const [devicesPayload, warehousesPayload, zonesPayload] = await Promise.all([
-          apiClient.get<ApiPayload<DeviceApiRecord[]>>('/devices'),
-          apiClient.get<ApiPayload<WarehouseApiRecord[]>>('/warehouses'),
-          apiClient.get<ApiPayload<ZoneApiRecord[]>>('/zones')
+          dashboardApiClient.get<ApiPayload<DeviceApiRecord[]>>('/dashboard/devices'),
+          dashboardApiClient.get<ApiPayload<WarehouseApiRecord[]>>('/dashboard/warehouses'),
+          dashboardApiClient.get<ApiPayload<ZoneApiRecord[]>>('/dashboard/zones')
         ])
 
         if (!isMounted) {
@@ -180,7 +180,7 @@ export function DashboardDevicesProvider({ children }: { children: ReactNode }) 
   const authorizeDevice = useCallback(
     async (code: string, warehouseId: string, zoneId: string) => {
       try {
-        await apiClient.post('/devices/authorize', { code, warehouseId, zoneId })
+        await dashboardApiClient.post('/dashboard/devices/authorize', { code, warehouseId, zoneId })
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)
@@ -194,7 +194,7 @@ export function DashboardDevicesProvider({ children }: { children: ReactNode }) 
   const deauthorizeDevice = useCallback(
     async (code: string) => {
       try {
-        await apiClient.post('/devices/deauthorize', { code })
+        await dashboardApiClient.post('/dashboard/devices/deauthorize', { code })
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)

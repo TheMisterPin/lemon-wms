@@ -1,3 +1,5 @@
+import { DashboardItemsPageView } from '@/components/dashboard/pages/items/dashboard-items-page'
+
 export default function ItemPage() {
-  return <p>items page</p>
+  return <DashboardItemsPageView />
 }
