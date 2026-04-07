@@ -6,6 +6,7 @@ import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middlewar
 import { zoneFormSchema } from '@/lib/schemas/zone'
 import { createZone } from '@/lib/entities/zones/create-zone'
 import { getZones } from '@/lib/entities/zones/get-zones'
+import { toZoneTableRecords } from '@/lib/converters/table-records'
 import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 
@@ -18,7 +19,8 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const warehouseId = searchParams.get('warehouseId') ?? undefined
-    const zones = await getZones(prisma, { warehouseId })
+    const zoneRecords = await getZones(prisma, { warehouseId })
+    const zones = toZoneTableRecords(zoneRecords)
 
     return ok(zones, 'Zones retrieved successfully.')
   } catch (error) {

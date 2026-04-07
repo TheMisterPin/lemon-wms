@@ -14,19 +14,43 @@ async function getFilteredDevices(prisma: PrismaClient, filters?: DeviceSearchFi
     Object.entries(filters ?? {}).filter(([, value]) => value !== undefined)
   )
 
-  const devices = await prisma.device.findMany({ where })
-  if (!devices || devices.length === 0) {
-    throw new Error('No devices found with the provided filters')
-  }
+  const devices = await prisma.device.findMany({
+    where,
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      warehouseId: true,
+      zoneId: true,
+      authorized: true,
+      isActive: true,
+      type: true,
+      registeredAt: true,
+      warehouse: {
+        select: {
+          name: true
+        }
+      },
+      zone: {
+        select: {
+          name: true
+        }
+      }
+    },
+    orderBy: {
+      registeredAt: 'desc'
+    }
+  })
 
   return devices
 }
 
 async function getAllDevices(prisma: PrismaClient) {
-  const devices = await prisma.device.findMany()
-  if (!devices || devices.length === 0) {
-    throw new Error('No devices found with the provided filters')
-  }
+  const devices = await prisma.device.findMany({
+    orderBy: {
+      registeredAt: 'desc'
+    }
+  })
 
   return devices
 }

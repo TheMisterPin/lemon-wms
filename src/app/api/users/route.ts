@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { toUserTableRecords } from '@/lib/converters/table-records'
 import { userFormSchema } from '@/lib/schemas/user'
 import { createUser } from '@/lib/entities/users/create-user'
 import { getUsers } from '@/lib/entities/users/get-users'
@@ -19,7 +20,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const users = await getUsers(prisma)
+    const userRecords = await getUsers(prisma)
+    const users = toUserTableRecords(userRecords)
 
     return ok(users, 'Users retrieved successfully.')
   } catch (error) {
