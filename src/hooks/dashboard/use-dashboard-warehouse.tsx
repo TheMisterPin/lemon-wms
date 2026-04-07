@@ -21,6 +21,7 @@ import type { ZoneTableRow } from '@/components/configs/entities/zone/config'
 import type { ZoneFormValues } from '@/lib/schemas/zone'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
+import { MutationError } from '@/types'
 
 // ── API response shapes ──────────────────────────────────────────────
 
@@ -51,14 +52,6 @@ type BinApiRecord = {
   isBlocked: boolean
   createdAt: string
   deletedAt: string | null
-}
-
-// ── Mutation error shape (matches ErrorModal props) ──────────────────
-
-export interface MutationError {
-  message: string
-  code?: string
-  details?: unknown
 }
 
 // ── Context value ────────────────────────────────────────────────────

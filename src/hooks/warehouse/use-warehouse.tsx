@@ -6,18 +6,6 @@ import {
 } from 'react'
 import type { ReactNode } from 'react'
 
-// ── API response shapes ──────────────────────────────────────────────
-
-type ApiPayload<T> = { success: boolean; data: T }
-
-// ── Mutation error shape (matches ErrorModal props) ──────────────────
-
-export interface MutationError {
-  message: string
-  code?: string
-  details?: unknown
-}
-
 // ── Context value ────────────────────────────────────────────────────
 
 interface WarehouseContextValue {

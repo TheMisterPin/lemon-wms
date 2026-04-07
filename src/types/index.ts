@@ -2,6 +2,7 @@ export * from './responses'
 export * from './shared'
 export * from './dashboard'
 export * from './warehouse'
+export * from './errors'
 
 import type { Role } from '@/generated/prisma'
 

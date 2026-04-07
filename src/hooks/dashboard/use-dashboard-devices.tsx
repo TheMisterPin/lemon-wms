@@ -15,6 +15,7 @@ import { dashboardApiClient } from '@/lib/axios'
 import type { DeviceTableRow } from '@/components/configs/entities/device/config'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
+import type { MutationError } from '@/types/errors'
 
 // ── API response shapes ──────────────────────────────────────────────
 
@@ -43,13 +44,6 @@ type ZoneApiRecord = {
   name: string
 }
 
-// ── Mutation error ───────────────────────────────────────────────────
-
- interface MutationError {
-  message: string
-  code?: string
-  details?: unknown
-}
 
 // ── Context value ────────────────────────────────────────────────────
 
