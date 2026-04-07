@@ -1,11 +1,11 @@
+import { useMemo } from 'react'
+import { Search, type LucideIcon } from 'lucide-react'
 import {
   PaginationPosition,
   PaginationSelector
 } from '@/components/shared/PaginationSelector'
 import { Input } from '@/components/ui/input'
 import { OrderStatus } from '@/generated/prisma'
-import { Search, type LucideIcon } from 'lucide-react'
-import { useMemo } from 'react'
 
 export interface DashboardRecordListItem {
   id: string
@@ -109,6 +109,7 @@ export function DashboardRecordListSection({
 
     return records.filter((record) => {
       const haystack = `${record.title} ${record.subtitle} ${record.details ?? ''}`.toLowerCase()
+
       return haystack.includes(normalizedSearch)
     })
   }, [records, normalizedSearch])

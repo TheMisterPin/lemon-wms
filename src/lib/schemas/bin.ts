@@ -1,14 +1,11 @@
 import { z } from 'zod'
 
 export const binTypeValues = [
+  'GENERAL',
   'RECEIVING',
-  'STORAGE',
-  'PICKING',
-  'PACKING',
-  'SHIPPING',
+  'OUTGOING',
   'QUARANTINE',
-  'STAGING',
-  'CUSTOM'
+  'STAGING'
 ] as const
 
 export const binTypeSchema = z.enum(binTypeValues)

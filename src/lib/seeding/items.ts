@@ -1,17 +1,57 @@
 import { type PrismaClient } from '@/generated/prisma'
 
-import { itemCategories, items } from './mocks/items-mock'
+import { items } from './mocks/items-mock'
 
 export async function seedItems(prisma: PrismaClient) {
-  await prisma.itemCategory.createMany({
-    data: itemCategories,
-    skipDuplicates: true
-  })
-
+  await prisma.unitOfMeasure.upsert(
+    { where: { id: 'PC' }, update: {
+      id: 'PC',
+      description: 'Pieces',
+      decimalRound: 0
+    }, create: {
+      id: 'PC',
+      description: 'Pieces',
+      decimalRound: 0
+    } }
+  )
+  await prisma.unitOfMeasure.upsert(
+    { where: { id: 'PCS' }, update: {
+      id: 'PCS',
+      description: 'Pieces',
+      decimalRound: 0
+    }, create: {
+      id: 'PCS',
+      description: 'Pieces',
+      decimalRound: 0
+    } }
+  )
+  await prisma.unitOfMeasure.upsert(
+    { where: { id: 'KGS' }, update: {
+      id: 'KGS',
+      description: 'Kilograms',
+      decimalRound: 3
+    }, create: {
+      id: 'KGS',
+      description: 'Kilograms',
+      decimalRound: 0
+    } }
+  )
+  await prisma.unitOfMeasure.upsert(
+    { where: { id: 'MT' }, update: {
+      id: 'MT',
+      description: 'Meters',
+      decimalRound: 3
+    }, create: {
+      id: 'MT',
+      description: 'Meters',
+      decimalRound: 3
+    } }
+  )
   await prisma.item.createMany({
     data: items,
     skipDuplicates: true
   })
 
-  return { categoriesCount: itemCategories.length, itemsCount: items.length }
+  return { itemsCount: items.length }
+
 }

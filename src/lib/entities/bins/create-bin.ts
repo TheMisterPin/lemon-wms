@@ -1,6 +1,6 @@
-import type { PrismaClient } from '@/generated/prisma'
-import type { BinFormValues } from '@/lib/schemas/bin'
+import type { BinType, PrismaClient } from '@/generated/prisma'
 import { DomainError } from '@/lib/errors'
+import type { BinFormValues } from '@/lib/schemas/bin'
 import { generateBinSerial } from '@/utils/serials'
 
 async function createBin(prisma: PrismaClient, data: BinFormValues) {
@@ -63,7 +63,7 @@ async function createBin(prisma: PrismaClient, data: BinFormValues) {
     data: {
       id: newID,
       name: data.name,
-      type: data.type,
+      type: data.type as BinType,
       zoneId: data.zoneId,
       warehouseId: zone.warehouseId,
       code: newID

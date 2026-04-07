@@ -24,14 +24,11 @@ export type BinFactboxRecord = Bin & {
 }
 
 export const binTypeOptions: SelectOption[] = [
+  { value: 'GENERAL', label: 'General' },
   { value: 'RECEIVING', label: 'Receiving' },
-  { value: 'STORAGE', label: 'Storage' },
-  { value: 'PICKING', label: 'Picking' },
-  { value: 'PACKING', label: 'Packing' },
-  { value: 'SHIPPING', label: 'Shipping' },
+  { value: 'OUTGOING', label: 'Outgoing' },
   { value: 'QUARANTINE', label: 'Quarantine' },
-  { value: 'STAGING', label: 'Staging' },
-  { value: 'CUSTOM', label: 'Custom' }
+  { value: 'STAGING', label: 'Staging' }
 ]
 
 export function createBinFormConfig(
@@ -43,7 +40,7 @@ export function createBinFormConfig(
     defaultValues: {
       zoneId: '',
       name: '',
-      type: 'STORAGE'
+      type: 'GENERAL'
     },
     fields: [
       {

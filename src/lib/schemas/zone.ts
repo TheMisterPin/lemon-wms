@@ -1,13 +1,12 @@
 import { z } from 'zod'
 
 export const zoneTypeValues = [
-  'RECEIVING',
-  'STORAGE',
-  'PICKING',
-  'PACKING',
-  'SHIPPING',
+  'GENERAL',
+  'COLD',
+  'HAZMAT',
   'QUARANTINE',
-  'CUSTOM'
+  'STAGING',
+  'RETURNS'
 ] as const
 
 export const zoneTypeSchema = z.enum(zoneTypeValues)

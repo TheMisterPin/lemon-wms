@@ -11,12 +11,12 @@ import {
 import type { ReactNode } from 'react'
 import { AxiosError } from 'axios'
 
-import { dashboardApiClient } from '@/lib/axios'
 import type { DeviceTableRow } from '@/components/configs/entities/device/config'
-import type { SelectOption } from '@/types/components/form/generic-form.types'
-import type { ApiResponse } from '@/types/responses/basic-response'
-import type { MutationError } from '@/types/errors'
 import { useErrorDialog } from '@/hooks/ui/use-error-dialog'
+import { dashboardApiClient } from '@/lib/axios'
+import type { SelectOption } from '@/types/components/form/generic-form.types'
+import type { MutationError } from '@/types/errors'
+import type { ApiResponse } from '@/types/responses/basic-response'
 
 // ── API response shapes ──────────────────────────────────────────────
 
@@ -44,7 +44,6 @@ type ZoneApiRecord = {
   warehouseId: string
   name: string
 }
-
 
 // ── Context value ────────────────────────────────────────────────────
 

@@ -4,9 +4,9 @@ export type LoginType = 'CREDENTIAL' | 'BADGE_PIN' | 'BOTH'
 
 export type WarehouseStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'
 
-export type ZoneType = 'RECEIVING' | 'STORAGE' | 'PICKING' | 'PACKING' | 'SHIPPING' | 'QUARANTINE' | 'CUSTOM'
+export type ZoneType = 'GENERAL' | 'COLD' | 'HAZMAT' | 'QUARANTINE' | 'STAGING' | 'RETURNS'
 
-export type BinType = 'RECEIVING' | 'STORAGE' | 'PICKING' | 'PACKING' | 'SHIPPING' | 'QUARANTINE' | 'STAGING' | 'CUSTOM'
+export type BinType = 'GENERAL' | 'RECEIVING' | 'OUTGOING' | 'QUARANTINE' | 'STAGING'
 
 export type BinItemStatus = 'AVAILABLE' | 'RESERVED' | 'BLOCKED' | 'IN_TRANSIT'
 

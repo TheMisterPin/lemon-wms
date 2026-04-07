@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -167,17 +168,33 @@ function getCellValue<T extends FieldValues>(row: T, column: TableColumnConfig<T
 }
 
 function compareValues(a: unknown, b: unknown, direction: SortDirection): number {
-  if (a === null && b === null) return 0
-  if (a === undefined && b === undefined) return 0
-  if (a === null || a === undefined) return 1
-  if (b === null || b === undefined) return -1
+  if (a === null && b === null) {
+    return 0
+  }
+  if (a === undefined && b === undefined) {
+    return 0
+  }
+  if (a === null || a === undefined) {
+    return 1
+  }
+  if (b === null || b === undefined) {
+    return -1
+  }
 
   const modifier = direction === 'asc' ? 1 : -1
 
-  if (typeof a === 'string' && typeof b === 'string') return a.localeCompare(b) * modifier
-  if (typeof a === 'number' && typeof b === 'number') return (a - b) * modifier
-  if (a instanceof Date && b instanceof Date) return (a.getTime() - b.getTime()) * modifier
-  if (typeof a === 'boolean' && typeof b === 'boolean') return (Number(a) - Number(b)) * modifier
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a.localeCompare(b) * modifier
+  }
+  if (typeof a === 'number' && typeof b === 'number') {
+    return (a - b) * modifier
+  }
+  if (a instanceof Date && b instanceof Date) {
+    return (a.getTime() - b.getTime()) * modifier
+  }
+  if (typeof a === 'boolean' && typeof b === 'boolean') {
+    return (Number(a) - Number(b)) * modifier
+  }
 
   return String(a).localeCompare(String(b)) * modifier
 }
@@ -260,7 +277,9 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
   useEffect(() => {
-    if (sortColumnIndex === null) return
+    if (sortColumnIndex === null) {
+      return
+    }
 
     if (sortColumnIndex >= visibleColumns.length) {
       setSortColumnIndex(null)
@@ -303,10 +322,14 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   }, [records, search, searchText, visibleColumns])
 
   const sortedRecords = useMemo(() => {
-    if (sortColumnIndex === null) return filteredRecords
+    if (sortColumnIndex === null) {
+      return filteredRecords
+    }
 
     const column = visibleColumns[sortColumnIndex]
-    if (!column || !isDataColumn(column)) return filteredRecords
+    if (!column || !isDataColumn(column)) {
+      return filteredRecords
+    }
 
     return [...filteredRecords].sort((a, b) =>
       compareValues(
@@ -318,8 +341,13 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   }, [filteredRecords, visibleColumns, sortColumnIndex, sortDirection])
 
   function getSortIcon(index: number) {
-    if (sortColumnIndex !== index) return <ArrowUpDown className="size-3.5 opacity-30" />
-    if (sortDirection === 'asc') return <ArrowUp className="size-3.5 text-brand-primary" />
+    if (sortColumnIndex !== index) {
+      return <ArrowUpDown className="size-3.5 opacity-30" />
+    }
+    if (sortDirection === 'asc') {
+      return <ArrowUp className="size-3.5 text-brand-primary" />
+    }
+
     return <ArrowDown className="size-3.5 text-brand-primary" />
   }
 

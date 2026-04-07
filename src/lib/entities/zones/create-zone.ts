@@ -1,7 +1,7 @@
 import { Prisma } from '@/generated/prisma'
 import type { PrismaClient } from '@/generated/prisma'
-import type { ZoneFormValues } from '@/lib/schemas/zone'
 import { DomainError } from '@/lib/errors'
+import type { ZoneFormValues } from '@/lib/schemas/zone'
 import { generateZoneSerial } from '@/utils/serials'
 
 async function createZone(prisma: PrismaClient, data: ZoneFormValues) {

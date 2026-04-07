@@ -20,13 +20,12 @@ export type ZoneFactboxRecord = Zone & {
 }
 
 export const zoneTypeOptions: SelectOption[] = [
-  { value: 'RECEIVING', label: 'Receiving' },
-  { value: 'STORAGE', label: 'Storage' },
-  { value: 'PICKING', label: 'Picking' },
-  { value: 'PACKING', label: 'Packing' },
-  { value: 'SHIPPING', label: 'Shipping' },
+  { value: 'GENERAL', label: 'General' },
+  { value: 'COLD', label: 'Cold' },
+  { value: 'HAZMAT', label: 'Hazmat' },
   { value: 'QUARANTINE', label: 'Quarantine' },
-  { value: 'CUSTOM', label: 'Custom' }
+  { value: 'STAGING', label: 'Staging' },
+  { value: 'RETURNS', label: 'Returns' }
 ]
 
 export function createZoneFormConfig(
@@ -38,7 +37,7 @@ export function createZoneFormConfig(
     defaultValues: {
       warehouseId: '',
       name: '',
-      type: 'STORAGE',
+      type: 'GENERAL',
       isActive: true,
       customPermissions: null,
       defaultReceivingBinId: null,

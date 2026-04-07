@@ -272,7 +272,7 @@ model Item {
   deletedAt           DateTime?
   createdAt           DateTime             @default(now())
   binStockItems       BinStockItem[]
-  category            ItemCategory?        @relation("ItemInCategory", fields: [categoryId], references: [id])
+  category            ItemCategory?        @relation("ItemInCategory", fields: [categoryId], references: [code])
   lots                Lot[]
   serialNumbers       SerialNumber[]
   serialNumberConfigs SerialNumberConfig[]
@@ -281,11 +281,12 @@ model Item {
 
 model ItemCategory {
   id            String         @id @default(uuid())
+  code          String         @unique
   name          String         @unique
   description   String?
   hasChildren   Boolean        @default(false)
-  parentId      String?
-  parent        ItemCategory?  @relation("ItemCategoryChildren", fields: [parentId], references: [id])
+  parentCode    String?
+  parent        ItemCategory?  @relation("ItemCategoryChildren", fields: [parentCode], references: [code])
   children      ItemCategory[] @relation("ItemCategoryChildren")
   handlingFlags Json?
   createdAt     DateTime       @default(now())
@@ -758,24 +759,20 @@ enum WarehouseStatus {
 }
 
 enum ZoneType {
-  RECEIVING
-  STORAGE
-  PICKING
-  PACKING
-  SHIPPING
-  QUARANTINE
-  CUSTOM
+  GENERAL      // Standard storage, no restrictions
+  COLD         // Temperature-controlled
+  HAZMAT       // Hazardous materials, restricted access
+  QUARANTINE   // Hold area, no outbound until WM clears
+  STAGING      // Temporary pre-ship area
+  RETURNS      // Inbound returns, receive-only
 }
 
 enum BinType {
-  RECEIVING
-  STORAGE
-  PICKING
-  PACKING
-  SHIPPING
-  QUARANTINE
-  STAGING
-  CUSTOM
+  GENERAL      // All operations: putaway, pick, move, count
+  RECEIVING    // Inbound staging — receive only
+  OUTGOING     // Pre-ship staging — pick and ship only
+  QUARANTINE   // No picks — WM release only
+  STAGING      // Temporary — flagged if items linger
 }
 
 enum ItemTrackingMode {

@@ -1,14 +1,15 @@
 import { Prisma, ZoneType } from '@/generated/prisma'
 
 const zoneDefinitions: Array<{ name: string, type: ZoneType }> = [
-  { name: 'Receiving', type: ZoneType.RECEIVING },
-  { name: 'Storage', type: ZoneType.STORAGE },
-  { name: 'Picking', type: ZoneType.PICKING },
-  { name: 'Packing', type: ZoneType.PACKING },
-  { name: 'Shipping', type: ZoneType.SHIPPING }
+  { name: 'General Storage', type: ZoneType.GENERAL },
+  { name: 'Hazmat Storage', type: ZoneType.HAZMAT },
+  { name: 'Cold Storage Area', type: ZoneType.COLD },
+  { name: 'Quarantine Area', type: ZoneType.QUARANTINE },
+  { name: 'Staging Area', type: ZoneType.STAGING },
+  { name: 'Returns Area', type: ZoneType.RETURNS }
 ]
 
-export const zones: Prisma.ZoneCreateManyInput[] = Array.from({ length: 10 }, (_, warehouseIndex) => {
+export const zones: Prisma.ZoneCreateManyInput[] = Array.from({ length: 5 }, (_, warehouseIndex) => {
   const warehouseCode = String(warehouseIndex + 1).padStart(4, '0')
   const warehouseId = `WH-${warehouseCode}`
 

@@ -1,9 +1,10 @@
 import { type PrismaClient } from '@/generated/prisma'
 
-import { seedBinStockItems } from './bin-stock-items'
 import { seedBins } from './bins'
 import { seedBusinessParties } from './business-parties'
+import { seedCategories } from './item-categories'
 import { seedItems } from './items'
+import { seedBinStockItems } from './seed-bin-stock-items'
 import { seedUnitsOfMeasure } from './unit-of-measures'
 import { seedUsers } from './users'
 import { seedWarehouses } from './warehouses'
@@ -22,6 +23,8 @@ export async function seedDB(prisma: PrismaClient) {
   console.warn('Cleared zones.')
   await prisma.item.deleteMany()
   console.warn('Cleared items.')
+  await prisma.unitOfMeasure.deleteMany()
+  console.warn('Cleared units of measure.')
   await prisma.itemCategory.deleteMany()
   console.warn('Cleared item categories.')
   await prisma.address.deleteMany()
@@ -53,10 +56,6 @@ export async function seedDB(prisma: PrismaClient) {
   const bins = await seedBins(prisma)
   console.warn(`Seeded ${bins.count} bins.\n`)
 
-  console.warn('Seeding bin stock items...')
-  const binStockItems = await seedBinStockItems(prisma)
-  console.warn(`Seeded ${binStockItems.count} bin stock items.\n`)
-
   console.warn('Seeding users...')
   const users = await seedUsers(prisma)
   console.warn(`Seeded ${users.count} users.\n`)
@@ -65,9 +64,17 @@ export async function seedDB(prisma: PrismaClient) {
   const businessParties = await seedBusinessParties(prisma)
   console.warn(`Seeded ${businessParties.partiesCount} business parties (${businessParties.suppliersCount} suppliers, ${businessParties.customersCount} customers).\n`)
 
+  console.warn('Seeding item categories...')
+  const itemCategories = await seedCategories(prisma)
+  console.warn(`Seeded ${itemCategories.parentCount} parent categories and ${itemCategories.childCount} child categories.\n`)
+
   console.warn('Seeding items...')
   const seededItems = await seedItems(prisma)
-  console.warn(`Seeded ${seededItems.categoriesCount} item categories and ${seededItems.itemsCount} items.\n`)
+  console.warn(`Seeded ${seededItems.itemsCount} items.\n`)
+
+  console.warn('Seeding bin stock items...')
+  const binStockItems = await seedBinStockItems(prisma)
+  console.warn(`Seeded ${binStockItems.count} bin stock items.\n`)
 
   return {
     unitsOfMeasureSeeded: unitsOfMeasure.count,
@@ -77,7 +84,7 @@ export async function seedDB(prisma: PrismaClient) {
     binStockItemsSeeded: binStockItems.count,
     usersSeeded: users.count,
     businessPartiesSeeded: businessParties.partiesCount,
-    itemCategoriesSeeded: seededItems.categoriesCount,
+    itemCategoriesSeeded: itemCategories.parentCount + itemCategories.childCount,
     itemsSeeded: seededItems.itemsCount
   }
 }
