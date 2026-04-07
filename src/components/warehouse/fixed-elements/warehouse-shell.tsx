@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 
+import { AppErrorDialog } from '@/components/shared/AppErrorDialog'
 import PageWrapper from '@/components/shared/PageWrapper'
 import WarehouseFooter from './warehouse-footer'
 import WarehouseHeader from './warehouse-header'
@@ -12,18 +13,21 @@ export default function WarehouseShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <PageWrapper
-      header={
-        <WarehouseHeader
-          sidebarOpen={sidebarOpen}
-          onMenuToggle={() => setSidebarOpen((v) => !v)}
-        />
-      }
-      sidebar={<WarehouseSidebar onClose={() => setSidebarOpen(false)} />}
-      sidebarOpen={sidebarOpen}
-      footer={<WarehouseFooter />}
-    >
-      {children}
-    </PageWrapper>
+    <>
+      <PageWrapper
+        header={
+          <WarehouseHeader
+            sidebarOpen={sidebarOpen}
+            onMenuToggle={() => setSidebarOpen((v) => !v)}
+          />
+        }
+        sidebar={<WarehouseSidebar onClose={() => setSidebarOpen(false)} />}
+        sidebarOpen={sidebarOpen}
+        footer={<WarehouseFooter />}
+      >
+        {children}
+      </PageWrapper>
+      <AppErrorDialog />
+    </>
   )
 }

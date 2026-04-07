@@ -1,4 +1,5 @@
 export * from './AuthProvider'
+export * from './AppErrorDialog'
 export * from './bin-selector-dialog'
 export * from './ErrorModal'
 export * from './NumericKeypad'

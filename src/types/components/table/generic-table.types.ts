@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { FieldValues } from 'react-hook-form'
+import type { LucideIcon } from 'lucide-react'
 
 import type { PaginationPosition } from '@/components/shared/PaginationSelector'
 import type {
@@ -76,4 +77,9 @@ export interface GenericTableProps<T extends FieldValues & { id: string }> {
   actions?: RowAction<T>[]
   pagination?: TablePaginationConfig
   search?: TableSearchConfig<T>
+  section?: {
+    title: string
+    icon?: LucideIcon
+    entityTone?: 'warehouse' | 'zone' | 'bin' | 'item' | 'order'
+  }
 }

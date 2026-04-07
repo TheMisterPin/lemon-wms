@@ -7,7 +7,6 @@ import { Boxes, MapPinned } from 'lucide-react'
 import { warehouseTableColumns } from '@/components/configs/entities/warehouse/config'
 import CreateWarehouseForm from '@/components/dashboard/features/warehouses/create-warehouse-form'
 import PageWithGrid from '@/components/pages/page-with-grid'
-import { ErrorModal } from '@/components/shared/ErrorModal'
 import { Button } from '@/components/ui/button'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
 import type { Warehouse } from '@/lib/schemas/warehouse'
@@ -15,7 +14,7 @@ import type { TableColumnConfig } from '@/types/components/table/generic-table.t
 
 export function DashboardWarehousesPageView() {
   const router = useRouter()
-  const { warehouses, isLoading, error, mutationError, clearMutationError } = useDashboardWarehouse()
+  const { warehouses, isLoading, error } = useDashboardWarehouse()
 
   function handleRowClick(row: Warehouse) {
     // eslint-disable-next-line no-console
@@ -65,22 +64,13 @@ export function DashboardWarehousesPageView() {
   ]), [router])
 
   return (
-    <>
-      <PageWithGrid
-        title="Warehouses"
-        headerActions={<CreateWarehouseForm />}
-        isLoading={isLoading}
-        error={error}
-        tableData={{ columns, records: warehouses }}
-        onRowClick={handleRowClick}
-      />
-      <ErrorModal
-        open={mutationError !== null}
-        message={mutationError?.message ?? ''}
-        code={mutationError?.code}
-        details={mutationError?.details}
-        onClose={clearMutationError}
-      />
-    </>
+    <PageWithGrid
+      title="Warehouses"
+      headerActions={<CreateWarehouseForm />}
+      isLoading={isLoading}
+      error={error}
+      tableData={{ columns, records: warehouses }}
+      onRowClick={handleRowClick}
+    />
   )
 }

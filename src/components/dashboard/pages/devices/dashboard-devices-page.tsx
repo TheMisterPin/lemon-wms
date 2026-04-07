@@ -6,12 +6,11 @@ import { ShieldCheck, ShieldOff } from 'lucide-react'
 import { deviceTableColumns, type DeviceTableRow } from '@/components/configs/entities/device/config'
 import AuthorizeDeviceForm from '@/components/dashboard/features/devices/authorize-device-form'
 import PageWithGrid from '@/components/pages/page-with-grid'
-import { ErrorModal } from '@/components/shared/ErrorModal'
 import { DashboardDevicesProvider, useDashboardDevices } from '@/hooks/dashboard/use-dashboard-devices'
 import type { RowAction } from '@/types/components/table/generic-table.types'
 
 function DevicesContent() {
-  const { devices, isLoading, error, mutationError, clearMutationError, deauthorizeDevice } =
+  const { devices, isLoading, error, deauthorizeDevice } =
     useDashboardDevices()
 
   const [authorizeTarget, setAuthorizeTarget] = useState<DeviceTableRow | null>(null)
@@ -56,14 +55,6 @@ function DevicesContent() {
           onClose={() => setAuthorizeTarget(null)}
         />
       ) : null}
-
-      <ErrorModal
-        open={mutationError !== null}
-        message={mutationError?.message ?? ''}
-        code={mutationError?.code}
-        details={mutationError?.details}
-        onClose={clearMutationError}
-      />
     </>
   )
 }

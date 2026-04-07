@@ -4,8 +4,6 @@ import { MapPin, ShelvingUnit, Warehouse } from 'lucide-react'
 import { DashboardInfoCards } from '@/components/dashboard/DashboardInfoCards'
 import { DashboardRecordListSection } from '@/components/dashboard/DashboardRecordListSection'
 import { GenericTable } from '@/components/tables/generic-table'
-import { Card } from '@/components/ui/card'
-import { useAuth } from '@/hooks/auth/use-auth'
 import { useDashboardHome, type DashboardBinRecord } from '@/hooks/dashboard/use-dashboard-home'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 
@@ -21,24 +19,20 @@ const binColumns: TableColumnConfig<DashboardBinRecord>[] = [
 ]
 
 export function DashboardHomePageView() {
-  const { dashboard } = useAuth()
   const { infoCards, warehouses, zones, bins } = useDashboardHome()
 
   return (
-    <main className="select-none flex flex-col h-full bg-linear-50 from-slate-800 to-slate-900 p-6 gap-4 overflow-hidden">
-      <Card className=" glass flex-1 overflow-y-auto py-12 px-16">
-        <h1 className="text-2xl font-semibold">Warehouse Dashboard</h1>
-        {dashboard?.user ? (
-          <p className="mt-1 text-sm text-brand-muted">
-            Signed in as {dashboard.user.email ?? dashboard.user.badgeNumber} ({dashboard.user.role})
-          </p>
-        ) : null}
+    <main className="flex h-full select-none flex-col overflow-hidden  bg-linear-to-b from-page-bg-from to-page-bg-to">
+      <div className=" mx-auto flex w-full max-w-[1200px] origin-top flex-1 flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
 
-        <DashboardInfoCards cards={infoCards} />
+        <div className="mt-2">
+          <DashboardInfoCards cards={infoCards} />
+        </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           <DashboardRecordListSection
             title="Warehouses"
+            entityTone="warehouse"
             icon={Warehouse}
             records={warehouses.records}
             page={warehouses.page}
@@ -46,9 +40,15 @@ export function DashboardHomePageView() {
             onPrev={warehouses.onPrev}
             onNext={warehouses.onNext}
             paginationPosition="header"
+            selectedRecordId={warehouses.selectedId}
+            onRecordClick={(record) => warehouses.onSelect(record.id)}
+            searchValue={warehouses.search}
+            onSearchChange={warehouses.onSearch}
+            searchPlaceholder="Search warehouses..."
           />
           <DashboardRecordListSection
             title="Zones"
+            entityTone="zone"
             icon={MapPin}
             records={zones.records}
             page={zones.page}
@@ -56,14 +56,23 @@ export function DashboardHomePageView() {
             onPrev={zones.onPrev}
             onNext={zones.onNext}
             paginationPosition="header"
+            selectedRecordId={zones.selectedId}
+            onRecordClick={(record) => zones.onSelect(record.id)}
+            searchValue={zones.search}
+            onSearchChange={zones.onSearch}
+            searchPlaceholder="Search zones..."
           />
-        </div>
+        </section>
 
-        <div className="gap-4 rounded-lg bg-brand-glass/75 border border-slate-500 pb-12">
-          <h2 className="text-xl font-semibold mt-8 px-4">Bins</h2>
+        <section className="mt-6 rounded-lg border border-slate-500 bg-brand-glass/75 p-6">
           <GenericTable
             columns={binColumns}
             records={bins.records}
+            section={{
+              title: 'Bins',
+              icon: ShelvingUnit,
+              entityTone: 'bin'
+            }}
             pagination={{
               page: bins.page,
               totalPages: bins.totalPages,
@@ -71,9 +80,14 @@ export function DashboardHomePageView() {
               onNext: bins.onNext,
               position: 'header'
             }}
+            search={{
+              enabled: true,
+              placeholder: 'Search bins...',
+              fields: ['name', 'type']
+            }}
           />
-        </div>
-      </Card>
+        </section>
+      </div>
     </main>
   )
 }

@@ -49,6 +49,7 @@ async function getWarehouseHomeData(prisma: PrismaClient) {
     warehouse.zones.flatMap((zone) =>
       zone.bins.map((bin) => ({
         id: bin.id,
+        warehouseId: warehouse.id,
         zoneId: zone.id,
         name: bin.name,
         isBlocked: bin.isBlocked,

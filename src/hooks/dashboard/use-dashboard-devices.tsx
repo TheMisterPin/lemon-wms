@@ -16,6 +16,7 @@ import type { DeviceTableRow } from '@/components/configs/entities/device/config
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
 import type { MutationError } from '@/types/errors'
+import { useErrorDialog } from '@/hooks/ui/use-error-dialog'
 
 // ── API response shapes ──────────────────────────────────────────────
 
@@ -53,8 +54,6 @@ interface DashboardDevicesContextValue {
   zoneOptions: SelectOption[]
   isLoading: boolean
   error: string | null
-  mutationError: MutationError | null
-  clearMutationError: () => void
   authorizeDevice: (code: string, warehouseId: string, zoneId: string) => Promise<void>
   deauthorizeDevice: (code: string) => Promise<void>
   refresh: () => void
@@ -91,10 +90,9 @@ export function DashboardDevicesProvider({ children }: { children: ReactNode }) 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
-  const [mutationError, setMutationError] = useState<MutationError | null>(null)
+  const { reportError } = useErrorDialog()
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), [])
-  const clearMutationError = useCallback(() => setMutationError(null), [])
 
   // ── Fetch all data ───────────────────────────────────────────────
 
@@ -178,11 +176,16 @@ export function DashboardDevicesProvider({ children }: { children: ReactNode }) 
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)
-        setMutationError(parsed)
+        reportError(parsed.message, {
+          title: 'Failed to authorize device',
+          source: 'dashboard/devices/authorize',
+          code: parsed.code,
+          details: parsed.details
+        })
         throw new Error(parsed.message)
       }
     },
-    [refresh]
+    [refresh, reportError]
   )
 
   const deauthorizeDevice = useCallback(
@@ -192,11 +195,16 @@ export function DashboardDevicesProvider({ children }: { children: ReactNode }) 
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)
-        setMutationError(parsed)
+        reportError(parsed.message, {
+          title: 'Failed to deauthorize device',
+          source: 'dashboard/devices/deauthorize',
+          code: parsed.code,
+          details: parsed.details
+        })
         throw new Error(parsed.message)
       }
     },
-    [refresh]
+    [refresh, reportError]
   )
 
   // ── Context value ────────────────────────────────────────────────
@@ -208,8 +216,6 @@ export function DashboardDevicesProvider({ children }: { children: ReactNode }) 
       zoneOptions,
       isLoading,
       error,
-      mutationError,
-      clearMutationError,
       authorizeDevice,
       deauthorizeDevice,
       refresh
@@ -220,8 +226,6 @@ export function DashboardDevicesProvider({ children }: { children: ReactNode }) 
       zoneOptions,
       isLoading,
       error,
-      mutationError,
-      clearMutationError,
       authorizeDevice,
       deauthorizeDevice,
       refresh

@@ -22,6 +22,7 @@ import type { ZoneFormValues } from '@/lib/schemas/zone'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
 import { MutationError } from '@/types'
+import { useErrorDialog } from '@/hooks/ui/use-error-dialog'
 
 // ── API response shapes ──────────────────────────────────────────────
 
@@ -54,6 +55,28 @@ type BinApiRecord = {
   deletedAt: string | null
 }
 
+type DashboardHomePayload = {
+  warehouses: {
+    id: string
+    name: string
+  }[]
+  zones: {
+    id: string
+    warehouseId: string
+    name: string
+    type: string
+    isActive: boolean
+  }[]
+  bins: {
+    id: string
+    warehouseId: string
+    zoneId: string
+    name: string
+    type: string
+    isBlocked: boolean
+  }[]
+}
+
 // ── Context value ────────────────────────────────────────────────────
 
 interface DashboardWarehouseContextValue {
@@ -72,10 +95,6 @@ interface DashboardWarehouseContextValue {
   // Loading / error
   isLoading: boolean
   error: string | null
-
-  // Mutation error (for ErrorModal)
-  mutationError: MutationError | null
-  clearMutationError: () => void
 
   // Mutations
   createWarehouse: (values: Pick<WarehouseFormValues, 'name'>) => Promise<void>
@@ -120,10 +139,9 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
-  const [mutationError, setMutationError] = useState<MutationError | null>(null)
+  const { reportError } = useErrorDialog()
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), [])
-  const clearMutationError = useCallback(() => setMutationError(null), [])
 
   // ── Fetch all data ───────────────────────────────────────────────
 
@@ -135,38 +153,68 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
       setError(null)
 
       try {
-        const queryString = warehouseIdFilter
-          ? `?warehouseId=${encodeURIComponent(warehouseIdFilter)}`
-          : ''
-
-        const [warehousesPayload, zonesPayload, binsPayload] = await Promise.all([
-          dashboardApiClient.get<ApiPayload<WarehouseApiRecord[]>>('/dashboard/warehouses'),
-          dashboardApiClient.get<ApiPayload<ZoneApiRecord[]>>(`/dashboard/zones${queryString}`),
-          dashboardApiClient.get<ApiPayload<BinApiRecord[]>>(`/dashboard/bins${queryString}`)
-        ])
+        const homePayload = await dashboardApiClient.get<ApiPayload<DashboardHomePayload>>('/dashboard/home')
 
         if (!isMounted) {
           return
         }
 
-        const warehouses = Array.isArray(warehousesPayload.data)
-          ? warehousesPayload.data
+        const payload = homePayload.data
+        const warehouses = Array.isArray(payload.warehouses)
+          ? payload.warehouses
+          : []
+        const zones = Array.isArray(payload.zones)
+          ? payload.zones
+          : []
+        const bins = Array.isArray(payload.bins)
+          ? payload.bins
           : []
 
         setRawWarehouses(
           warehouses.map((w) => ({
             ...w,
-            createdAt: new Date(w.createdAt),
-            deletedAt: w.deletedAt ? new Date(w.deletedAt) : null
+            status: 'ACTIVE',
+            timezone: 'UTC',
+            currency: 'USD',
+            address: '',
+            createdById: null,
+            createdAt: new Date(),
+            deletedAt: null
           }))
         )
 
+        const mappedZones: ZoneApiRecord[] = zones.map((zone) => ({
+          id: zone.id,
+          warehouseId: zone.warehouseId,
+          name: zone.name,
+          type: zone.type,
+          isActive: zone.isActive,
+          createdAt: new Date().toISOString(),
+          deletedAt: null
+        }))
+
+        const mappedBins: BinApiRecord[] = bins.map((bin) => ({
+          id: bin.id,
+          warehouseId: bin.warehouseId,
+          zoneId: bin.zoneId,
+          name: bin.name,
+          code: bin.name,
+          type: bin.type,
+          isBlocked: bin.isBlocked,
+          createdAt: new Date().toISOString(),
+          deletedAt: null
+        }))
+
         setRawZones(
-          Array.isArray(zonesPayload.data) ? zonesPayload.data : []
+          warehouseIdFilter
+            ? mappedZones.filter((zone) => zone.warehouseId === warehouseIdFilter)
+            : mappedZones
         )
 
         setRawBins(
-          Array.isArray(binsPayload.data) ? binsPayload.data : []
+          warehouseIdFilter
+            ? mappedBins.filter((bin) => bin.warehouseId === warehouseIdFilter)
+            : mappedBins
         )
       } catch {
         if (!isMounted) {
@@ -239,11 +287,16 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)
-        setMutationError(parsed)
+        reportError(parsed.message, {
+          title: 'Failed to create warehouse',
+          source: 'dashboard/warehouses/create',
+          code: parsed.code,
+          details: parsed.details
+        })
         throw new Error(parsed.message)
       }
     },
-    [refresh]
+    [refresh, reportError]
   )
 
   const createZone = useCallback(
@@ -253,11 +306,16 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)
-        setMutationError(parsed)
+        reportError(parsed.message, {
+          title: 'Failed to create zone',
+          source: 'dashboard/zones/create',
+          code: parsed.code,
+          details: parsed.details
+        })
         throw new Error(parsed.message)
       }
     },
-    [refresh]
+    [refresh, reportError]
   )
 
   const createBin = useCallback(
@@ -267,11 +325,16 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
         refresh()
       } catch (err) {
         const parsed = extractMutationError(err)
-        setMutationError(parsed)
+        reportError(parsed.message, {
+          title: 'Failed to create bin',
+          source: 'dashboard/bins/create',
+          code: parsed.code,
+          details: parsed.details
+        })
         throw new Error(parsed.message)
       }
     },
-    [refresh]
+    [refresh, reportError]
   )
 
   // ── Context value ────────────────────────────────────────────────
@@ -286,8 +349,6 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
       warehouseIdFilter,
       isLoading,
       error,
-      mutationError,
-      clearMutationError,
       createWarehouse,
       createZone,
       createBin,
@@ -302,8 +363,6 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
       warehouseIdFilter,
       isLoading,
       error,
-      mutationError,
-      clearMutationError,
       createWarehouse,
       createZone,
       createBin,

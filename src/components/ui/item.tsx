@@ -130,7 +130,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-function ItemDescription({ className, ...props }: React.ComponentProps<'p'>) {
+function name({ className, ...props }: React.ComponentProps<'p'>) {
   return (
     <p
       data-slot="item-description"
@@ -188,7 +188,7 @@ export {
   ItemGroup,
   ItemSeparator,
   ItemTitle,
-  ItemDescription,
+  name,
   ItemHeader,
   ItemFooter,
 }

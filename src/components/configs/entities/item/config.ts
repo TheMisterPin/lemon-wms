@@ -85,7 +85,7 @@ export const itemFormConfig: GenericFormConfig<ItemFormValues> = {
     },
     {
       name: 'weightKg',
-      label: 'Weight (kg)',
+      label: 'weightKg (kg)',
       type: 'number',
       placeholder: '1.5'
     },
@@ -136,7 +136,7 @@ export const itemFactboxSections: FactboxSectionConfig<WARItem>[] = [
       { label: 'Tracking mode', accessor: 'trackingMode' },
       { label: 'Unit of measure', accessor: 'uom' },
       { label: 'Min quantity', accessor: 'minQuantity' },
-      { label: 'Weight (kg)', accessor: 'weightKg' },
+      { label: 'weightKg (kg)', accessor: 'weightKg' },
       { label: 'Active', accessor: 'isActive' },
       { label: 'Category', accessor: 'categoryId' },
       { label: 'Supplier', accessor: 'supplierId' },

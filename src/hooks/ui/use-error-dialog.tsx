@@ -9,7 +9,8 @@ export interface AppError {
   id: string;
   title: string;
   message: string;
-  details?: string;
+  code?: string;
+  details?: unknown;
   severity: ErrorSeverity;
   source?: string; // e.g. "login", "appointments", "api/visits/current"
   timestamp: string;
@@ -29,7 +30,8 @@ interface ErrorDialogContextValue {
       title?: string;
       severity?: ErrorSeverity;
       source?: string;
-      details?: string;
+      code?: string;
+      details?: unknown;
       messageOverride?: string;
     }
   ) => void;
@@ -64,6 +66,7 @@ export const ErrorDialogProvider: React.FC<
       const now = new Date().toISOString()
 
       let message = 'Errore imprevisto.'
+      const code = options?.code
       let details = options?.details
 
       if (options?.messageOverride) {
@@ -87,6 +90,7 @@ export const ErrorDialogProvider: React.FC<
         id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
         title: options?.title ?? 'Qualcosa è andato storto',
         message,
+        code,
         details,
         severity: options?.severity ?? 'error',
         source: options?.source,

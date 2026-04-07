@@ -109,6 +109,19 @@
   --color-dash-gray:       var(--dash-gray);
   --color-dash-gray-dim:   var(--dash-gray-dim);
   --color-dash-gray-text:  var(--dash-gray-text);
+
+  --color-entity-warehouse: var(--entity-warehouse);
+  --color-entity-warehouse-end: var(--entity-warehouse-end);
+  --color-entity-warehouse-soft: var(--entity-warehouse-soft);
+  --color-entity-zone: var(--entity-zone);
+  --color-entity-zone-end: var(--entity-zone-end);
+  --color-entity-zone-soft: var(--entity-zone-soft);
+  --color-entity-bin: var(--entity-bin);
+  --color-entity-bin-end: var(--entity-bin-end);
+  --color-entity-bin-soft: var(--entity-bin-soft);
+
+  --color-page-bg-from: var(--page-bg-from);
+  --color-page-bg-to: var(--page-bg-to);
 }
 
 :root {
@@ -216,6 +229,21 @@
   --dash-gray:       #64748b;
   --dash-gray-dim:   rgba(100, 116, 139, 0.08);
   --dash-gray-text:  #334155;
+
+  /* Entity accents */
+  --entity-warehouse: #10b981;
+  --entity-warehouse-end: #34d399;
+  --entity-warehouse-soft: rgba(16, 185, 129, 0.16);
+  --entity-zone: #38bdf8;
+  --entity-zone-end: #60a5fa;
+  --entity-zone-soft: rgba(56, 189, 248, 0.16);
+  --entity-bin: #a78bfa;
+  --entity-bin-end: #c4b5fd;
+  --entity-bin-soft: rgba(167, 139, 250, 0.16);
+
+  /* Dashboard page background */
+  --page-bg-from: #eff6ff;
+  --page-bg-to: #dbeafe;
 }
 
 .dark {
@@ -321,6 +349,21 @@
   --dash-gray:       #64748b;
   --dash-gray-dim:   rgba(100, 116, 139, 0.12);
   --dash-gray-text:  #94a3b8;
+
+  /* Entity accents */
+  --entity-warehouse: #34d399;
+  --entity-warehouse-end: #6ee7b7;
+  --entity-warehouse-soft: rgba(52, 211, 153, 0.16);
+  --entity-zone: #38bdf8;
+  --entity-zone-end: #7dd3fc;
+  --entity-zone-soft: rgba(56, 189, 248, 0.16);
+  --entity-bin: #a78bfa;
+  --entity-bin-end: #c4b5fd;
+  --entity-bin-soft: rgba(167, 139, 250, 0.16);
+
+  /* Dashboard page background */
+  --page-bg-from: #1f2d46;
+  --page-bg-to: #17233a;
 }
 .glass{
 /* From https://css.glass */

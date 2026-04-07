@@ -95,6 +95,6 @@ No,Category,Issue,Platform,Description,Do,Don't,Code Example Good,Code Example B
 94,Spatial UI,Gaze Hover,VisionOS,Elements should respond to eye tracking before pinch,Scale/highlight element on look,Static element until pinch,hoverEffect(),onTap only,High
 95,Spatial UI,Depth Layering,VisionOS,UI needs Z-depth to separate content from environment,Use glass material and z-offset,Flat opaque panels blocking view,.glassBackgroundEffect(),bg-white,Medium
 96,Sustainability,Auto-Play Video,Web,Video consumes massive data and energy,Click-to-play or pause when off-screen,Auto-play high-res video loops,playsInline muted preload='none',autoplay loop,Medium
-97,Sustainability,Asset Weight,Web,Heavy 3D/Image assets increase carbon footprint,Compress and lazy load 3D models,Load 50MB textures,Draco compression,Raw .obj files,Medium
+97,Sustainability,Asset weightKg,Web,Heavy 3D/Image assets increase carbon footprint,Compress and lazy load 3D models,Load 50MB textures,Draco compression,Raw .obj files,Medium
 98,AI Interaction,Feedback Loop,All,AI needs user feedback to improve,Thumps up/down or 'Regenerate',Static output only,Feedback component,Read-only text,Low
 99,Accessibility,Motion Sensitivity,All,Parallax/Scroll-jacking causes nausea,Respect prefers-reduced-motion,Force scroll effects,@media (prefers-reduced-motion),ScrollTrigger.create(),High

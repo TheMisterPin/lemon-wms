@@ -30,7 +30,7 @@ const NAV_LINKS = [
 ]
 
 interface DashboardSidebarProps {
-  onClose: () => void
+  onClose?: () => void
 }
 
 export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
@@ -54,7 +54,7 @@ export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
             <Link
               key={link.href}
               href={link.href}
-              onClick={onClose}
+              onClick={() => onClose?.()}
               className={[
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                 active

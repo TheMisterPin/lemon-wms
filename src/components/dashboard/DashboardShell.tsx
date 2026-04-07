@@ -1,29 +1,24 @@
 'use client'
-
-import { useState } from 'react'
 import type { ReactNode } from 'react'
 
+import { AppErrorDialog } from '@/components/shared/AppErrorDialog'
 import PageWrapper from '@/components/shared/PageWrapper'
 import DashboardFooter from './DashboardFooter'
 import DashboardHeader from './DashboardHeader'
 import DashboardSidebar from './DashboardSidebar'
 
 export default function DashboardShell({ children }: { children: ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-
   return (
-    <PageWrapper
-      header={
-        <DashboardHeader
-          sidebarOpen={sidebarOpen}
-          onMenuToggle={() => setSidebarOpen((v) => !v)}
-        />
-      }
-      sidebar={<DashboardSidebar onClose={() => setSidebarOpen(false)} />}
-      sidebarOpen={sidebarOpen}
-      footer={<DashboardFooter />}
-    >
-      {children}
-    </PageWrapper>
+    <>
+      <PageWrapper
+        header={<DashboardHeader />}
+        sidebar={<DashboardSidebar />}
+        sidebarOpen
+        footer={<DashboardFooter />}
+      >
+        {children}
+      </PageWrapper>
+      <AppErrorDialog />
+    </>
   )
 }

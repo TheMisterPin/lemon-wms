@@ -194,6 +194,45 @@ function isSortable<T extends FieldValues>(column: TableColumnConfig<T>): boolea
   return column.type === 'progress' || column.type === 'joinValues' || !!(column.accessor || column.accessorPath)
 }
 
+type EntityTone = 'warehouse' | 'zone' | 'bin' | 'item' | 'order'
+
+function getEntityTone(tone?: EntityTone) {
+  const tones = {
+    warehouse: {
+      iconClass: 'text-entity-warehouse',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--entity-warehouse), var(--entity-warehouse-end))'
+      }
+    },
+    zone: {
+      iconClass: 'text-entity-zone',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--entity-zone), var(--entity-zone-end))'
+      }
+    },
+    bin: {
+      iconClass: 'text-entity-bin',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--entity-bin), var(--entity-bin-end))'
+      }
+    },
+    item: {
+      iconClass: 'text-brand-primary',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--brand-primary), var(--brand-primary-end))'
+      }
+    },
+    order: {
+      iconClass: 'text-brand-primary',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--brand-primary), var(--brand-primary-end))'
+      }
+    }
+  } as const
+
+  return tone ? tones[tone] : tones.item
+}
+
 export function GenericTable<T extends FieldValues & { id: string }>({
   columns,
   records,
@@ -202,7 +241,8 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   emptyMessage = 'No records found.',
   actions,
   pagination,
-  search
+  search,
+  section
 }: GenericTableProps<T>) {
   const visibleColumns = useMemo(
     () => columns.filter((column) => !shouldHideColumn(column, records)),
@@ -213,6 +253,7 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   const paginationPosition = pagination?.position ?? 'footer'
   const showHeaderPagination = paginationPosition === 'header'
   const showFooterPagination = paginationPosition === 'footer'
+  const tone = getEntityTone(section?.entityTone)
   const [searchText, setSearchText] = useState('')
 
   const [sortColumnIndex, setSortColumnIndex] = useState<number | null>(null)
@@ -284,7 +325,25 @@ export function GenericTable<T extends FieldValues & { id: string }>({
 
   return (
     <TooltipProvider>
-      <div className="mx-auto w-10/12 overflow-hidden rounded-xl border border-brand-glass-border bg-brand-glass shadow-lg shadow-black/20 backdrop-blur-sm">
+      <div className="mx-auto w-full overflow-hidden shadow-lg shadow-black/20 backdrop-blur-sm rounded-lg">
+        {section?.title && (
+          <div className="flex items-center justify-between gap-4 border-b border-brand-glass-border px-4 py-3">
+            <div className="flex items-center gap-2">
+              {section.icon ? <section.icon size={20} className={tone.iconClass} /> : null}
+              <h2 className="bg-clip-text text-xl font-semibold text-transparent" style={tone.titleStyle}>
+                {section.title}
+              </h2>
+            </div>
+            {pagination && showHeaderPagination && (
+              <PaginationSelector
+                page={pagination.page}
+                totalPages={pagination.totalPages}
+                onPrev={pagination.onPrev}
+                onNext={pagination.onNext}
+              />
+            )}
+          </div>
+        )}
         {search?.enabled && (
           <div className="border-b border-brand-glass-border p-3">
             <div className="relative">
@@ -299,7 +358,7 @@ export function GenericTable<T extends FieldValues & { id: string }>({
             </div>
           </div>
         )}
-        {pagination && showHeaderPagination && (
+        {pagination && showHeaderPagination && !section?.title && (
           <div className="border-b border-brand-glass-border px-4 py-3">
             <PaginationSelector
               page={pagination.page}

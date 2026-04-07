@@ -2,20 +2,23 @@ import {
   PaginationPosition,
   PaginationSelector
 } from '@/components/shared/PaginationSelector'
+import { Input } from '@/components/ui/input'
 import { OrderStatus } from '@/generated/prisma'
-import type { LucideIcon } from 'lucide-react'
+import { Search, type LucideIcon } from 'lucide-react'
+import { useMemo } from 'react'
 
 export interface DashboardRecordListItem {
   id: string
   title: string
   subtitle: string
   progress?: number
-  status? : OrderStatus
+  status?: OrderStatus
   details?: string
 }
 
 interface DashboardRecordListSectionProps {
   title: string
+  entityTone?: 'warehouse' | 'zone' | 'bin' | 'item' | 'order'
   icon: LucideIcon
   records: DashboardRecordListItem[]
   page: number
@@ -24,14 +27,62 @@ interface DashboardRecordListSectionProps {
   onNext: () => void
   paginationPosition: PaginationPosition
   emptyMessage?: string
+  onRecordClick?: (record: DashboardRecordListItem) => void
+  selectedRecordId?: string | null
+  searchValue?: string
+  onSearchChange?: (value: string) => void
+  searchPlaceholder?: string
 }
 
 function normalizeProgress(progress: number) {
   return Math.min(Math.max(progress, 0), 100)
 }
 
+function getEntityTone(tone?: DashboardRecordListSectionProps['entityTone']) {
+  const tones = {
+    warehouse: {
+      iconClass: 'text-entity-warehouse',
+      selectedBorderClass: 'border-entity-warehouse/60',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--entity-warehouse), var(--entity-warehouse-end))'
+      }
+    },
+    zone: {
+      iconClass: 'text-entity-zone',
+      selectedBorderClass: 'border-entity-zone/60',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--entity-zone), var(--entity-zone-end))'
+      }
+    },
+    bin: {
+      iconClass: 'text-entity-bin',
+      selectedBorderClass: 'border-entity-bin/60',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--entity-bin), var(--entity-bin-end))'
+      }
+    },
+    item: {
+      iconClass: 'text-brand-primary',
+      selectedBorderClass: 'border-brand-primary/60',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--brand-primary), var(--brand-primary-end))'
+      }
+    },
+    order: {
+      iconClass: 'text-brand-primary',
+      selectedBorderClass: 'border-brand-primary/60',
+      titleStyle: {
+        backgroundImage: 'linear-gradient(to right, var(--brand-primary), var(--brand-primary-end))'
+      }
+    }
+  } as const
+
+  return tone ? tones[tone] : tones.item
+}
+
 export function DashboardRecordListSection({
   title,
+  entityTone,
   icon,
   records,
   page,
@@ -39,16 +90,38 @@ export function DashboardRecordListSection({
   onPrev,
   onNext,
   paginationPosition = 'header',
-  emptyMessage = `No ${title.toLowerCase()} found.`
+  emptyMessage = `No ${title.toLowerCase()} found.`,
+  onRecordClick,
+  selectedRecordId,
+  searchValue,
+  onSearchChange,
+  searchPlaceholder
 }: DashboardRecordListSectionProps) {
   const Icon = icon
   const showHeaderPagination = paginationPosition === 'header'
   const showFooterPagination = paginationPosition === 'footer'
+  const tone = getEntityTone(entityTone)
+  const normalizedSearch = (searchValue ?? '').trim().toLowerCase()
+  const filteredRecords = useMemo(() => {
+    if (!normalizedSearch) {
+      return records
+    }
+
+    return records.filter((record) => {
+      const haystack = `${record.title} ${record.subtitle} ${record.details ?? ''}`.toLowerCase()
+      return haystack.includes(normalizedSearch)
+    })
+  }, [records, normalizedSearch])
 
   return (
     <div className="rounded-lg border border-slate-500 bg-brand-glass/75 p-4">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold">{title}</h2>
+        <h2
+          className="bg-clip-text text-xl font-semibold text-transparent"
+          style={tone.titleStyle}
+        >
+          {title}
+        </h2>
         {showHeaderPagination && (
           <PaginationSelector
             page={page}
@@ -58,22 +131,45 @@ export function DashboardRecordListSection({
           />
         )}
       </div>
+      {onSearchChange && (
+        <div className="relative mt-4">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-subtle" />
+          <Input
+            value={searchValue ?? ''}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder={searchPlaceholder ?? `Search ${title.toLowerCase()}...`}
+            className="pl-9"
+            aria-label={`Search ${title.toLowerCase()}`}
+          />
+        </div>
+      )}
 
       <div className="mt-4 flex flex-col gap-3 p-4">
-        {records.length === 0 ? (
+        {filteredRecords.length === 0 ? (
           <div className="rounded-lg bg-brand-glass p-4 text-sm text-brand-muted">
             {emptyMessage}
           </div>
         ) : (
-          records.map((record) => {
+          filteredRecords.map((record) => {
             const progress =
               record.progress !== undefined
                 ? normalizeProgress(record.progress)
                 : undefined
 
             return (
-              <div key={record.id} className="flex items-center gap-4 rounded-lg bg-brand-glass p-4">
-                <Icon size={20} className="shrink-0 text-brand-primary" />
+              <button
+                key={record.id}
+                type="button"
+                onClick={() => onRecordClick?.(record)}
+                className={[
+                  'flex w-full items-center gap-4 rounded-lg bg-brand-glass p-4 text-left transition-colors',
+                  onRecordClick ? 'cursor-pointer hover:bg-brand-glass-hover' : '',
+                  selectedRecordId === record.id
+                    ? `border ${tone.selectedBorderClass}`
+                    : 'border border-transparent'
+                ].join(' ')}
+              >
+                <Icon size={20} className={['shrink-0', tone.iconClass].join(' ')} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">{record.title}</p>
                   <p className="text-sm text-brand-muted">{record.subtitle}</p>
@@ -99,7 +195,7 @@ export function DashboardRecordListSection({
                     </div>
                   )}
                 </div>
-              </div>
+              </button>
             )
           })
         )}

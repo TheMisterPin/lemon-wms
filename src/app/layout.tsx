@@ -1,5 +1,6 @@
 import AuthProvider from '@/components/shared/AuthProvider'
 import NotificationDialog from '@/components/shared/NotificationDialog'
+import { ErrorDialogProvider } from '@/hooks/ui/use-error-dialog'
 import type { Metadata } from 'next'
 
 import './globals.css'
@@ -24,7 +25,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <AuthProvider>{children}</AuthProvider>
+        <ErrorDialogProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ErrorDialogProvider>
         <NotificationDialog />
       </body>
     </html>
