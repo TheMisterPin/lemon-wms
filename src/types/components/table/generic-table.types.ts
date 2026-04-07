@@ -1,10 +1,23 @@
 import { ReactNode } from 'react'
-import { FieldPath, FieldValues } from 'react-hook-form'
+import { FieldValues } from 'react-hook-form'
 
 import type { PaginationPosition } from '@/components/shared/PaginationSelector'
+import type {
+  DisplayFieldConfig,
+  IndicatorColorMap,
+  ProgressDisplayFieldConfig
+} from '@/types/components/shared/display-field.types'
 
 export type SortDirection = 'asc' | 'desc'
-export type TableColumnType = 'text' | 'date' | 'datetime' | 'time' | 'boolean' | 'progress' | 'indicator' | 'joinValues'
+export type TableColumnType =
+  | 'text'
+  | 'date'
+  | 'datetime'
+  | 'time'
+  | 'boolean'
+  | 'progress'
+  | 'indicator'
+  | 'joinValues'
 
 export interface BaseColumnConfig {
   label: string
@@ -13,23 +26,25 @@ export interface BaseColumnConfig {
   sortable?: boolean
 }
 
-export interface TypedValueColumnConfig {
-  type?: Exclude<TableColumnType, 'progress' | 'indicator' | 'joinValues'>
+export interface CellColumnConfig<T extends FieldValues> extends BaseColumnConfig {
+  accessor?: never
+  accessorPath?: never
+  cell: (row: T) => ReactNode
+  type?: never
+  progressBarRef?: never
 }
 
-export interface ProgressBarRef<T extends FieldValues> {
-  current: FieldPath<T>
-  max: FieldPath<T>
+export type DataColumnConfig<T extends FieldValues> = DisplayFieldConfig<T> & {
+  className?: string
+  cellClassName?: string
+  sortable?: boolean
 }
 
-export interface JoinValuesRef<T extends FieldValues> {
-  first: FieldPath<T>
-  second: FieldPath<T>
-}
+export type ProgressColumnConfig<T extends FieldValues> = ProgressDisplayFieldConfig<T> & BaseColumnConfig
 
-export interface IndicatorColorMap {
-  [value: string]: string
-}
+export type TableColumnConfig<T extends FieldValues> = DataColumnConfig<T> | CellColumnConfig<T>
+
+export { type IndicatorColorMap }
 
 export interface RowAction<T> {
   icon: ReactNode
@@ -46,71 +61,11 @@ export interface TablePaginationConfig {
   position?: PaginationPosition
 }
 
-export interface AccessorColumnConfig<T extends FieldValues> extends BaseColumnConfig, TypedValueColumnConfig {
-  accessor: Extract<keyof T, string>
-  accessorPath?: never
-  cell?: never
-  progressBarRef?: never
+export interface TableSearchConfig<T extends FieldValues> {
+  enabled?: boolean
+  placeholder?: string
+  fields?: Array<Extract<keyof T, string>>
 }
-
-export interface AccessorPathColumnConfig<T extends FieldValues> extends BaseColumnConfig, TypedValueColumnConfig {
-  accessor?: never
-  accessorPath: FieldPath<T>
-  cell?: never
-  progressBarRef?: never
-}
-
-export interface CellColumnConfig<T extends FieldValues> extends BaseColumnConfig {
-  accessor?: never
-  accessorPath?: never
-  cell: (row: T) => ReactNode
-  type?: never
-  progressBarRef?: never
-}
-
-export interface ProgressColumnConfig<T extends FieldValues> extends BaseColumnConfig {
-  accessor?: never
-  accessorPath?: never
-  cell?: never
-  type: 'progress'
-  progressBarRef: ProgressBarRef<T>
-}
-
-export interface AccessorIndicatorColumnConfig<T extends FieldValues> extends BaseColumnConfig {
-  accessor: Extract<keyof T, string>
-  accessorPath?: never
-  cell?: never
-  type: 'indicator'
-  indicatorColorMap: IndicatorColorMap
-  defaultIndicatorColor?: string
-}
-
-export interface AccessorPathIndicatorColumnConfig<T extends FieldValues> extends BaseColumnConfig {
-  accessor?: never
-  accessorPath: FieldPath<T>
-  cell?: never
-  type: 'indicator'
-  indicatorColorMap: IndicatorColorMap
-  defaultIndicatorColor?: string
-}
-
-export interface JoinValuesColumnConfig<T extends FieldValues> extends BaseColumnConfig {
-  accessor?: never
-  accessorPath?: never
-  cell?: never
-  type: 'joinValues'
-  joinValuesRef: JoinValuesRef<T>
-  separator?: string
-}
-
-export type TableColumnConfig<T extends FieldValues> =
-  | AccessorColumnConfig<T>
-  | AccessorPathColumnConfig<T>
-  | CellColumnConfig<T>
-  | ProgressColumnConfig<T>
-  | AccessorIndicatorColumnConfig<T>
-  | AccessorPathIndicatorColumnConfig<T>
-  | JoinValuesColumnConfig<T>
 
 export interface GenericTableProps<T extends FieldValues & { id: string }> {
   columns: TableColumnConfig<T>[]
@@ -120,4 +75,5 @@ export interface GenericTableProps<T extends FieldValues & { id: string }> {
   emptyMessage?: string
   actions?: RowAction<T>[]
   pagination?: TablePaginationConfig
+  search?: TableSearchConfig<T>
 }
