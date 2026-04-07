@@ -4,7 +4,7 @@ import CreateZoneForm from '@/app/(dashboard)/dashboard/zones/components/create-
 import PageWithGrid from '@/components/pages/page-with-grid'
 import { ErrorModal } from '@/components/shared/ErrorModal'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
-import { zoneTableColumns, type ZoneTableRow } from '@/lib/components/configs/entities/zone/config'
+import { zoneTableColumns, type ZoneTableRow } from '@/components/configs/entities/zone/config'
 
 export default function ZonesHomePage() {
   const { zones, warehouseOptions, isLoading, error, mutationError, clearMutationError } = useDashboardWarehouse()

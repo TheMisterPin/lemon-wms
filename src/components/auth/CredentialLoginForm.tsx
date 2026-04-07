@@ -1,62 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
-import { useAuthStore } from '@/lib/auth/store'
-import type { AuthUser } from '@/types'
-
-type LoginResponse = {
-  accessToken: string
-  user: AuthUser
-  error?: string
-}
+import { useCredentialLogin } from '@/hooks/auth/use-credential-login'
 
 export default function CredentialLoginForm() {
-  const router = useRouter()
-  const setAuth = useAuthStore((s) => s.setAuth)
-
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-
-      const data: LoginResponse = await res.json()
-
-      if (!res.ok) {
-        setError(data.error ?? 'Login failed')
-
-        return
-      }
-
-      setAuth(data.accessToken, data.user)
-
-      const role = data.user.role
-      if (role === 'WAREHOUSE_MANAGER' || role === 'WAREHOUSE_WORKER') {
-        router.push('/warehouse')
-      } else {
-        router.push('/dashboard')
-      }
-    } catch {
-      setError('Unable to connect. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const {
+    fields,
+    setEmail,
+    setPassword,
+    showPassword,
+    toggleShowPassword,
+    error,
+    loading,
+    handleSubmit
+  } = useCredentialLogin()
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -68,7 +26,7 @@ export default function CredentialLoginForm() {
           id="email"
           type="email"
           autoComplete="email"
-          value={email}
+          value={fields.email}
           onChange={(e) => setEmail(e.target.value)}
           required
           disabled={loading}
@@ -86,7 +44,7 @@ export default function CredentialLoginForm() {
             id="password"
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
-            value={password}
+            value={fields.password}
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={loading}
@@ -96,7 +54,7 @@ export default function CredentialLoginForm() {
           <button
             type="button"
             tabIndex={-1}
-            onClick={() => setShowPassword((v) => !v)}
+            onClick={toggleShowPassword}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-subtle hover:text-brand-muted"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
@@ -113,7 +71,7 @@ export default function CredentialLoginForm() {
 
       <button
         type="submit"
-        disabled={loading || !email || !password}
+        disabled={loading || !fields.email || !fields.password}
         className="flex items-center justify-center gap-2 rounded-lg bg-linear-to-r from-brand-primary to-brand-primary-end px-4 py-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading && <Loader2 size={16} className="animate-spin" />}

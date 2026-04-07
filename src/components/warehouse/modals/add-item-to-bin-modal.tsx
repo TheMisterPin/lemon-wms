@@ -1,7 +1,5 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-
 import { Loader2, PackagePlus, Search, X } from 'lucide-react'
 
 import NumericKeypad from '@/components/shared/NumericKeypad'
@@ -15,32 +13,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { apiClient } from '@/lib/axios'
-import type { ApiResponse } from '@/types/responses/basic-response'
-
-const SEARCH_DEBOUNCE_MS = 300
-const MIN_SEARCH_LENGTH = 3
-
-const PAGE_SIZE = 10
-
-type WarehouseItem = {
-  id: string
-  name: string
-  sku: string
-  uom: string
-}
-
-type WarehouseItemsResponse = {
-  items: WarehouseItem[]
-  pagination: {
-    page: number
-    pageSize: number
-    totalItems: number
-    totalPages: number
-    hasPreviousPage: boolean
-    hasNextPage: boolean
-  }
-}
+import { useAddItemToBin } from '@/hooks/warehouse/use-add-item-to-bin'
 
 type AddItemToBinModalProps = {
   binId: string
@@ -48,192 +21,16 @@ type AddItemToBinModalProps = {
 }
 
 export default function AddItemToBinModal({ binId, onSuccess }: AddItemToBinModalProps) {
-  const [isPickerOpen, setIsPickerOpen] = useState(false)
-  const [isQuantityOpen, setIsQuantityOpen] = useState(false)
-  const [items, setItems] = useState<WarehouseItem[]>([])
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [selectedItem, setSelectedItem] = useState<WarehouseItem | null>(null)
-  const [quantity, setQuantity] = useState('')
-  const [isLoadingItems, setIsLoadingItems] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchInput, setSearchInput] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const searchInputRef = useRef<HTMLInputElement>(null)
-
-  // Debounce: fire search after SEARCH_DEBOUNCE_MS when >= MIN_SEARCH_LENGTH chars, clear immediately otherwise
-  useEffect(() => {
-    const trimmed = searchInput.trim()
-
-    if (trimmed.length >= MIN_SEARCH_LENGTH) {
-      const timer = setTimeout(() => {
-        setDebouncedSearch(trimmed)
-        setPage(1)
-      }, SEARCH_DEBOUNCE_MS)
-
-      return () => clearTimeout(timer)
-    }
-
-    setDebouncedSearch('')
-    setPage(1)
-  }, [searchInput])
-
-  useEffect(() => {
-    if (!isPickerOpen) {
-      return
-    }
-
-    let isActive = true
-
-    async function fetchItems() {
-      try {
-        setIsLoadingItems(true)
-        setError(null)
-
-        const params: Record<string, unknown> = { page, pageSize: PAGE_SIZE }
-
-        if (debouncedSearch.length >= MIN_SEARCH_LENGTH) {
-          params.q = debouncedSearch
-        }
-
-        const response = await apiClient.get<ApiResponse<WarehouseItemsResponse>>('/warehouse/items', params)
-
-        if (!isActive) {
-          return
-        }
-
-        if (!response.success || !response.data) {
-          setError(response.error?.code ? 'Unable to load items.' : response.message)
-
-          return
-        }
-
-        setItems(response.data.items)
-        setTotalPages(response.data.pagination.totalPages)
-      } catch (fetchError) {
-        console.error('Failed to load items for bin.', fetchError)
-
-        if (isActive) {
-          setError('Unable to load items.')
-        }
-      } finally {
-        if (isActive) {
-          setIsLoadingItems(false)
-        }
-      }
-    }
-
-    void fetchItems()
-
-    return () => {
-      isActive = false
-    }
-  }, [isPickerOpen, page, debouncedSearch])
-
-  function resetSelectionState() {
-    setSelectedItem(null)
-    setQuantity('')
-    setError(null)
-  }
-
-  function handlePickerOpenChange(open: boolean) {
-    if (isSubmitting) {
-      return
-    }
-
-    setIsPickerOpen(open)
-
-    if (open) {
-      setPage(1)
-      setError(null)
-      setTimeout(() => searchInputRef.current?.focus(), 50)
-
-      return
-    }
-
-    setSearchInput('')
-    setDebouncedSearch('')
-    setItems([])
-    setTotalPages(1)
-    resetSelectionState()
-  }
-
-  function handleSelectItem(item: WarehouseItem) {
-    setSelectedItem(item)
-    setQuantity('')
-    setError(null)
-    setIsPickerOpen(false)
-    setIsQuantityOpen(true)
-  }
-
-  function handleBackToItems() {
-    if (isSubmitting) {
-      return
-    }
-
-    setIsQuantityOpen(false)
-    setQuantity('')
-    setError(null)
-    setIsPickerOpen(true)
-  }
-
-  function handleQuantityOpenChange(open: boolean) {
-    if (isSubmitting) {
-      return
-    }
-
-    setIsQuantityOpen(open)
-
-    if (!open) {
-      resetSelectionState()
-    }
-  }
-
-  async function handleSubmitQuantity() {
-    if (!selectedItem) {
-      setError('Select an item first.')
-
-      return
-    }
-
-    const parsedQuantity = Number.parseInt(quantity, 10)
-
-    if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
-      setError('Enter a valid quantity greater than zero.')
-
-      return
-    }
-
-    try {
-      setIsSubmitting(true)
-      setError(null)
-
-      const response = await apiClient.post<ApiResponse<{ stockItems: unknown[] }>>(
-        `/warehouse/stock/addtobin/${binId}`,
-        {
-          itemId: selectedItem.id,
-          quantity: parsedQuantity
-        }
-      )
-
-      if (!response.success) {
-        setError(response.message || 'Unable to add the item to this bin.')
-
-        return
-      }
-
-      setIsQuantityOpen(false)
-      setIsPickerOpen(false)
-      resetSelectionState()
-      await onSuccess?.()
-    } catch (submitError) {
-      console.error('Failed to add item to bin.', submitError)
-      setError('Unable to add the item to this bin.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const {
+    isPickerOpen, handlePickerOpenChange,
+    items, page, totalPages, isLoadingItems,
+    searchInput, setSearchInput, debouncedSearch, searchInputRef,
+    handleSelectItem, prevPage, nextPage,
+    isQuantityOpen, handleQuantityOpenChange,
+    selectedItem, quantity, setQuantity, isSubmitting,
+    handleSubmitQuantity, handleBackToItems,
+    error, MIN_SEARCH_LENGTH
+  } = useAddItemToBin(binId, onSuccess)
 
   return (
     <>
@@ -247,9 +44,7 @@ export default function AddItemToBinModal({ binId, onSuccess }: AddItemToBinModa
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Select an item</DialogTitle>
-            <DialogDescription>
-              Choose an item to add to the current bin.
-            </DialogDescription>
+            <DialogDescription>Choose an item to add to the current bin.</DialogDescription>
           </DialogHeader>
 
           {/* Search input */}
@@ -264,7 +59,7 @@ export default function AddItemToBinModal({ binId, onSuccess }: AddItemToBinModa
               autoComplete="off"
               className="w-full rounded-lg border border-brand-border bg-brand-surface py-2.5 pl-10 pr-10 text-sm text-brand-text placeholder-brand-subtle outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
             />
-            {searchInput.length > 0 ? (
+            {searchInput.length > 0 && (
               <button
                 type="button"
                 aria-label="Clear search"
@@ -273,71 +68,65 @@ export default function AddItemToBinModal({ binId, onSuccess }: AddItemToBinModa
               >
                 <X className="size-4" />
               </button>
-            ) : null}
+            )}
           </div>
 
-          {/* Search status hint */}
-          {searchInput.trim().length > 0 && searchInput.trim().length < MIN_SEARCH_LENGTH ? (
+          {searchInput.trim().length > 0 && searchInput.trim().length < MIN_SEARCH_LENGTH && (
             <p className="text-xs text-brand-muted px-1">
               Type {MIN_SEARCH_LENGTH - searchInput.trim().length} more character{MIN_SEARCH_LENGTH - searchInput.trim().length !== 1 ? 's' : ''} to search…
             </p>
-          ) : null}
+          )}
 
-          {/* Searching indicator (debounce pending) */}
-          {searchInput.trim() !== debouncedSearch && searchInput.trim().length >= MIN_SEARCH_LENGTH ? (
+          {searchInput.trim() !== debouncedSearch && searchInput.trim().length >= MIN_SEARCH_LENGTH && (
             <p className="flex items-center gap-1.5 text-xs text-brand-muted px-1">
               <Loader2 className="size-3 animate-spin" />
               Searching…
             </p>
-          ) : null}
+          )}
 
           <div className="flex max-h-[45vh] flex-col gap-3 overflow-y-auto pr-1">
-            {isLoadingItems ? (
+            {isLoadingItems && (
               <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-brand-muted">
                 <Loader2 className="animate-spin" />
                 <span>Loading items...</span>
               </div>
-            ) : null}
+            )}
 
-            {!isLoadingItems && items.length === 0 && debouncedSearch.length >= MIN_SEARCH_LENGTH ? (
+            {!isLoadingItems && items.length === 0 && debouncedSearch.length >= MIN_SEARCH_LENGTH && (
               <div className="rounded-lg border border-dashed border-brand-border px-4 py-8 text-center text-sm text-brand-muted">
                 No items match &ldquo;{debouncedSearch}&rdquo;.
               </div>
-            ) : null}
+            )}
 
-            {!isLoadingItems && items.length === 0 && debouncedSearch.length < MIN_SEARCH_LENGTH ? (
+            {!isLoadingItems && items.length === 0 && debouncedSearch.length < MIN_SEARCH_LENGTH && (
               <div className="rounded-lg border border-dashed border-brand-border px-4 py-8 text-center text-sm text-brand-muted">
                 No items available.
               </div>
-            ) : null}
+            )}
 
-            {!isLoadingItems
-              ? items.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleSelectItem(item)}
-                  className="flex min-h-16 items-center justify-between rounded-lg border border-brand-border bg-brand-surface/80 px-4 py-3 text-left transition-colors hover:border-brand-primary hover:bg-brand-surface"
-                >
-                  <span className="flex flex-col gap-1">
-                    <span className="font-medium text-brand-text">{item.name}</span>
-                    <span className="text-xs text-brand-muted">
-                      {item.sku} · {item.uom}
-                    </span>
-                  </span>
-                  <span className="text-xs font-medium uppercase tracking-[0.16em] text-brand-muted">
-                    Select
-                  </span>
-                </button>
-              ))
-              : null}
+            {!isLoadingItems && items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleSelectItem(item)}
+                className="flex min-h-16 items-center justify-between rounded-lg border border-brand-border bg-brand-surface/80 px-4 py-3 text-left transition-colors hover:border-brand-primary hover:bg-brand-surface"
+              >
+                <span className="flex flex-col gap-1">
+                  <span className="font-medium text-brand-text">{item.name}</span>
+                  <span className="text-xs text-brand-muted">{item.sku} · {item.uom}</span>
+                </span>
+                <span className="text-xs font-medium uppercase tracking-[0.16em] text-brand-muted">
+                  Select
+                </span>
+              </button>
+            ))}
           </div>
 
-          {error ? (
+          {error && (
             <p role="alert" className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-2.5 text-sm text-red-400">
               {error}
             </p>
-          ) : null}
+          )}
 
           <DialogFooter className="items-center sm:justify-between">
             <span className="text-sm text-brand-muted">
@@ -346,20 +135,10 @@ export default function AddItemToBinModal({ binId, onSuccess }: AddItemToBinModa
                 : `Page ${page} of ${totalPages}`}
             </span>
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
-                disabled={isLoadingItems || page <= 1}
-              >
+              <Button type="button" variant="outline" onClick={prevPage} disabled={isLoadingItems || page <= 1}>
                 Previous
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 1))}
-                disabled={isLoadingItems || page >= totalPages}
-              >
+              <Button type="button" variant="outline" onClick={nextPage} disabled={isLoadingItems || page >= totalPages}>
                 Next
               </Button>
             </div>
@@ -379,11 +158,11 @@ export default function AddItemToBinModal({ binId, onSuccess }: AddItemToBinModa
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
-            {selectedItem ? (
+            {selectedItem && (
               <div className="rounded-lg border border-brand-border bg-brand-surface/70 px-4 py-3 text-sm text-brand-muted">
                 {selectedItem.sku} · {selectedItem.uom}
               </div>
-            ) : null}
+            )}
 
             <NumericKeypad
               value={quantity}
@@ -394,18 +173,18 @@ export default function AddItemToBinModal({ binId, onSuccess }: AddItemToBinModa
               emptyLabel="Enter quantity"
             />
 
-            {isSubmitting ? (
+            {isSubmitting && (
               <div className="flex items-center justify-center gap-2 text-sm text-brand-muted">
                 <Loader2 className="animate-spin" />
                 <span>Adding item to bin...</span>
               </div>
-            ) : null}
+            )}
 
-            {error ? (
+            {error && (
               <p role="alert" className="rounded-lg border border-red-900 bg-red-950/50 px-4 py-2.5 text-sm text-red-400">
                 {error}
               </p>
-            ) : null}
+            )}
           </div>
 
           <DialogFooter>

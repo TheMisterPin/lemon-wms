@@ -2,8 +2,9 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 
+import { getUsableAccessToken } from '@/lib/auth/decode'
 import { readStoredAccessToken, useAuthStore } from '@/lib/auth/store'
-import type { AuthUser, JWTPayload } from '@/types'
+import type { AuthUser } from '@/types'
 
 type RefreshResponse = {
   accessToken: string
@@ -21,44 +22,6 @@ const readCookie = (name: string): string | null => {
     ?.split('=')[1]
 
   return value ?? null
-}
-
-const decodeAccessToken = (token: string): JWTPayload | null => {
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) {
-      return null
-    }
-
-    const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/')
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
-    const payload = JSON.parse(atob(padded)) as JWTPayload
-
-    if (!payload.userId || !payload.role) {
-      return null
-    }
-
-    return payload
-  } catch {
-    return null
-  }
-}
-
-const getUsableAccessToken = (token: string | null): string | null => {
-  if (!token) {
-    return null
-  }
-
-  const payload = decodeAccessToken(token)
-  if (!payload) {
-    return null
-  }
-
-  if (payload.exp && payload.exp * 1000 <= Date.now()) {
-    return null
-  }
-
-  return token
 }
 
 export default function AuthProvider({ children }: { children: ReactNode }) {

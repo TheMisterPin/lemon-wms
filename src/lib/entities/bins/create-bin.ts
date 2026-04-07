@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@/generated/prisma'
-import type { BinFormValues } from '@/lib/components/configs/entities/bin/types'
+import type { BinFormValues } from '@/lib/schemas/bin'
 import { DomainError } from '@/lib/errors'
 import { generateBinSerial } from '@/utils/serials'
 

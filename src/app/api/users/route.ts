@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { userFormSchema } from '@/lib/components/configs/entities/user/schema'
+import { userFormSchema } from '@/lib/schemas/user'
 import { createUser } from '@/lib/entities/users/create-user'
 import { getUsers } from '@/lib/entities/users/get-users'
 import prisma from '@/lib/prisma'

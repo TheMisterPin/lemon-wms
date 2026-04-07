@@ -1,58 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
 import { MapPin, ShelvingUnit, Warehouse } from 'lucide-react'
-import { DashboardInfoCards, type DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
-import {
-  DashboardRecordListSection,
-  type DashboardRecordListItem
-} from '@/components/dashboard/DashboardRecordListSection'
+import { DashboardInfoCards } from '@/components/dashboard/DashboardInfoCards'
+import { DashboardRecordListSection } from '@/components/dashboard/DashboardRecordListSection'
 import { GenericTable } from '@/components/tables/generic-table'
 import { Card } from '@/components/ui/card'
 import { useAuth } from '@/hooks/auth/use-auth'
-import { apiClient } from '@/lib/axios'
+import { useDashboardHome, type DashboardBinRecord } from '@/hooks/dashboard/use-dashboard-home'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
-import type { ApiResponse } from '@/types/responses/basic-response'
-
-interface DashboardHomePageData {
-  info: {
-    warehouses: number
-    zones: number
-    bins: number
-  }
-  warehouses: {
-    id: string
-    name: string
-    zones: number
-    bins: number
-  }[]
-  zones: {
-    id: string
-    warehouseId: string
-    name: string
-    type: string
-    isActive: boolean
-    bins: number
-  }[]
-  bins: {
-    id: string
-    zoneId: string
-    name: string
-    isBlocked: boolean
-    blockReason: string | null
-    active: boolean
-    maxCapacity: number
-    type: string
-    currentCapacity: number
-  }[]
-}
-
-type DashboardWarehouseRecord = DashboardHomePageData['warehouses'][number]
-type DashboardZoneRecord = DashboardHomePageData['zones'][number]
-type DashboardBinRecord = DashboardHomePageData['bins'][number]
-
-const PAGE_SIZE = 3
 
 const binColumns: TableColumnConfig<DashboardBinRecord>[] = [
   { label: 'Name', accessor: 'name' },
@@ -61,95 +16,19 @@ const binColumns: TableColumnConfig<DashboardBinRecord>[] = [
   {
     label: 'Progress',
     type: 'progress',
-    progressBarRef: {
-      max: 'maxCapacity',
-      current: 'currentCapacity'
-    }
+    progressBarRef: { max: 'maxCapacity', current: 'currentCapacity' }
   }
 ]
 
-function createWarehouseRecords(records: DashboardWarehouseRecord[]): DashboardRecordListItem[] {
-  return records.map((warehouse) => ({
-    id: warehouse.id,
-    title: warehouse.name,
-    subtitle: `${warehouse.zones} zones, ${warehouse.bins} bins`
-  }))
-}
-
-function createZoneRecords(records: DashboardZoneRecord[]): DashboardRecordListItem[] {
-  return records.map((zone) => ({
-    id: zone.id,
-    title: zone.name,
-    subtitle: `${zone.type}, ${zone.bins} bins`
-  }))
-}
-
-function createInfoCards(data: DashboardHomePageData['info']): DashboardInfoCardItem[] {
-  return [
-    { label: 'Warehouses', value: data.warehouses ?? 0, icon: Warehouse },
-    { label: 'Zones', value: data.zones ?? 0, icon: MapPin },
-    { label: 'Bins', value: data.bins ?? 0, icon: ShelvingUnit }
-  ]
-}
-
 export default function DashboardHomePage() {
   const { dashboard } = useAuth()
-  const [dashboardData, setDashboardData] = useState<DashboardHomePageData>({
-    info: {
-      warehouses: 0,
-      zones: 0,
-      bins: 0
-    },
-    warehouses: [],
-    zones: [],
-    bins: []
-  })
-
-  const [warehousePage, setWarehousePage] = useState(0)
-  const [zonePage, setZonePage] = useState(0)
-  const [binPage, setBinPage] = useState(0)
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await apiClient.get<ApiResponse<DashboardHomePageData>>('/dashboard/warehouse')
-
-        if (response.success && response.data) {
-          setDashboardData(response.data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error)
-      }
-    }
-
-    void fetchData()
-  }, [])
-
-  const warehouses = dashboardData.warehouses
-  const zones = dashboardData.zones
-  const bins = dashboardData.bins
-
-  const warehouseTotalPages = Math.max(1, Math.ceil(warehouses.length / PAGE_SIZE))
-  const zoneTotalPages = Math.max(1, Math.ceil(zones.length / PAGE_SIZE))
-  const binTotalPages = Math.max(1, Math.ceil(bins.length / PAGE_SIZE))
-
-  const pagedWarehouses = warehouses.slice(warehousePage * PAGE_SIZE, (warehousePage + 1) * PAGE_SIZE)
-  const pagedZones = zones.slice(zonePage * PAGE_SIZE, (zonePage + 1) * PAGE_SIZE)
-  const pagedBins = bins.slice(binPage * PAGE_SIZE, (binPage + 1) * PAGE_SIZE)
-  const infoCards = createInfoCards(dashboardData.info)
-  const warehouseRecords = createWarehouseRecords(pagedWarehouses)
-  const zoneRecords = createZoneRecords(pagedZones)
+  const { infoCards, warehouses, zones, bins } = useDashboardHome()
 
   return (
     <main className="select-none flex flex-col h-full bg-linear-50 from-slate-800 to-slate-900 p-6 gap-4 overflow-hidden">
       <Card className=" glass flex-1 overflow-y-auto py-12 px-16">
         <h1 className="text-2xl font-semibold">Warehouse Dashboard</h1>
         {dashboard?.user ? (
-          // TODO: `dashboard.user.role` is the raw Prisma enum (e.g. OFFICE_MANAGER).
-          // Format it for display: 'Office Manager'. Add a formatRole() util or use
-          // the existing label utils in src/utils/label/ if one exists.
-          // TODO: Add a loading/skeleton state for the auth header while the app is
-          // still rehydrating from session storage or waiting on AuthProvider refresh.
           <p className="mt-1 text-sm text-brand-muted">
             Signed in as {dashboard.user.email ?? dashboard.user.badgeNumber} ({dashboard.user.role})
           </p>
@@ -161,36 +40,35 @@ export default function DashboardHomePage() {
           <DashboardRecordListSection
             title="Warehouses"
             icon={Warehouse}
-            records={warehouseRecords}
-            page={warehousePage}
-            totalPages={warehouseTotalPages}
-            onPrev={() => setWarehousePage((page) => Math.max(0, page - 1))}
-            onNext={() => setWarehousePage((page) => Math.min(warehouseTotalPages - 1, page + 1))}
+            records={warehouses.records}
+            page={warehouses.page}
+            totalPages={warehouses.totalPages}
+            onPrev={warehouses.onPrev}
+            onNext={warehouses.onNext}
             paginationPosition="header"
           />
           <DashboardRecordListSection
             title="Zones"
             icon={MapPin}
-            records={zoneRecords}
-            page={zonePage}
-            totalPages={zoneTotalPages}
-            onPrev={() => setZonePage((page) => Math.max(0, page - 1))}
-            onNext={() => setZonePage((page) => Math.min(zoneTotalPages - 1, page + 1))}
+            records={zones.records}
+            page={zones.page}
+            totalPages={zones.totalPages}
+            onPrev={zones.onPrev}
+            onNext={zones.onNext}
             paginationPosition="header"
           />
         </div>
 
         <div className="gap-4 rounded-lg bg-brand-glass/75 border border-slate-500 pb-12">
-          {/* Bins table */}
-          <h2 className="text-xl font-semibold mt-8 px-4 ">Bins</h2>
+          <h2 className="text-xl font-semibold mt-8 px-4">Bins</h2>
           <GenericTable
             columns={binColumns}
-            records={pagedBins}
+            records={bins.records}
             pagination={{
-              page: binPage,
-              totalPages: binTotalPages,
-              onPrev: () => setBinPage((page) => Math.max(0, page - 1)),
-              onNext: () => setBinPage((page) => Math.min(binTotalPages - 1, page + 1)),
+              page: bins.page,
+              totalPages: bins.totalPages,
+              onPrev: bins.onPrev,
+              onNext: bins.onNext,
               position: 'header'
             }}
           />

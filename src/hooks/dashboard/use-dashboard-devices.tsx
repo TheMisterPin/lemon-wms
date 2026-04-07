@@ -12,7 +12,7 @@ import type { ReactNode } from 'react'
 import { AxiosError } from 'axios'
 
 import { apiClient } from '@/lib/axios'
-import type { DeviceTableRow } from '@/lib/components/configs/entities/device/config'
+import type { DeviceTableRow } from '@/components/configs/entities/device/config'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
 

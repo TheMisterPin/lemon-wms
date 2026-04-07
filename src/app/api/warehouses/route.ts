@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse/schema'
+import { warehouseFormSchema } from '@/lib/schemas/warehouse'
 import { createWarehouse } from '@/lib/entities/warehouses/create-warehouse'
 import { getWarehouses } from '@/lib/entities/warehouses/get-warehouses'
 import prisma from '@/lib/prisma'

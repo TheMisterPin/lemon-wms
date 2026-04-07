@@ -9,8 +9,8 @@ import PageWithGrid from '@/components/pages/page-with-grid'
 import { ErrorModal } from '@/components/shared/ErrorModal'
 import { Button } from '@/components/ui/button'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
-import { warehouseTableColumns } from '@/lib/components/configs/entities/warehouse/config'
-import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
+import { warehouseTableColumns } from '@/components/configs/entities/warehouse/config'
+import type { Warehouse } from '@/lib/schemas/warehouse'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 
 export default function WarehouseDashboardPage() {

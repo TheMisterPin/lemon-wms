@@ -1,7 +1,8 @@
 'use client'
 
-import axios from 'axios'
 import { create } from 'zustand'
+
+import { apiClient } from '@/lib/axios'
 
 import type { ErrorType } from '@/generated/prisma'
 
@@ -61,8 +62,8 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
 
 function persistError(message: string, type: ErrorType, stack?: string) {
   // Intentionally not awaited — we never block the UI on logging
-  axios
-    .post('/api/errors', { message, stack, type })
+  apiClient
+    .post('/errors', { message, stack, type })
     .catch(() => {
       // Silently fail — console.error in dev only
       if (process.env.NODE_ENV === 'development') {

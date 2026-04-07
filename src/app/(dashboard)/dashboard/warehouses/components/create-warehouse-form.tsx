@@ -15,9 +15,9 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
-import { warehouseFormSchema } from '@/lib/components/configs/entities/warehouse/schema'
-import type { WarehouseFormValues } from '@/lib/components/configs/entities/warehouse/types'
-import { warehouseFormConfig } from '@/lib/components/configs/forms/warehouse-form-config'
+import { warehouseFormSchema } from '@/lib/schemas/warehouse'
+import type { WarehouseFormValues } from '@/lib/schemas/warehouse'
+import { warehouseFormConfig } from '@/components/configs/entities/warehouse/config'
 import type { FormFieldConfig, GenericFormConfig } from '@/types/components/form/generic-form.types'
 
 type CreateWarehouseFormValues = Pick<WarehouseFormValues, 'name'>

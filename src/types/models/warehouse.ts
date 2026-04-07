@@ -1,3 +1,3 @@
-import type { Warehouse } from '@/lib/components/configs/entities/warehouse/types'
+import type { Warehouse } from '@/lib/schemas/warehouse'
 
 export type IWarehouse = Warehouse

@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@/generated/prisma'
-import type { WarehouseFormValues } from '@/lib/components/configs/entities/warehouse/types'
+import type { WarehouseFormValues } from '@/lib/schemas/warehouse'
 
 async function updateWarehouse(
   prisma: PrismaClient,

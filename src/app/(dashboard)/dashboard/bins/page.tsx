@@ -4,7 +4,7 @@ import CreateBinForm from '@/app/(dashboard)/dashboard/bins/components/create-bi
 import PageWithGrid from '@/components/pages/page-with-grid'
 import { ErrorModal } from '@/components/shared/ErrorModal'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
-import { binTableColumns, type BinTableRow } from '@/lib/components/configs/entities/bin/config'
+import { binTableColumns, type BinTableRow } from '@/components/configs/entities/bin/config'
 
 export default function BinsHomePage() {
   const { bins, zoneOptions, warehouseOptions, isLoading, error, mutationError, clearMutationError } = useDashboardWarehouse()

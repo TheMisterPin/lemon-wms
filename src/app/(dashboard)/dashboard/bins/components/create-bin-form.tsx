@@ -15,9 +15,9 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
-import { createBinFormConfig } from '@/lib/components/configs/entities/bin/config'
-import { binFormSchema } from '@/lib/components/configs/entities/bin/schema'
-import type { BinFormValues } from '@/lib/components/configs/entities/bin/types'
+import { createBinFormConfig } from '@/components/configs/entities/bin/config'
+import { binFormSchema } from '@/lib/schemas/bin'
+import type { BinFormValues } from '@/lib/schemas/bin'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 
 type CreateBinFormProps = {
