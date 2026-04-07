@@ -24,12 +24,13 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import {
-  formatDisplayFieldValue,
+  getDisplayFieldTextValue,
   getComparableDisplayFieldValue,
   getDisplayFieldRawValue,
   getProgressValues,
   isJoinPrimaryValueEmpty,
   isNullOrEmptyTextValue,
+  renderDisplayFieldValue,
   isTemporalDisplayFieldType
 } from '@/lib/utils/display-fields'
 import { EMPTY_DISPLAY_VALUE, getValueByPath } from '@/lib/utils/get-value-by-path'
@@ -133,12 +134,12 @@ function formatTypedValue<T extends FieldValues>(row: T, column: DataColumnConfi
   }
 
   if (isTemporalDisplayFieldType(column.type)) {
-    return formatDisplayFieldValue(row, column)
+    return getDisplayFieldTextValue(row, column)
   }
 
   if (column.type === 'indicator') {
     const color = getIndicatorColor(value, column.indicatorColorMap, column.defaultIndicatorColor)
-    const displayValue = formatDisplayFieldValue(row, column)
+    const displayValue = getDisplayFieldTextValue(row, column)
 
     return (
       <div className="flex justify-center">
@@ -154,7 +155,7 @@ function formatTypedValue<T extends FieldValues>(row: T, column: DataColumnConfi
     )
   }
 
-  return formatDisplayFieldValue(row, column)
+  return renderDisplayFieldValue(row, column)
 }
 
 function getCellValue<T extends FieldValues>(row: T, column: TableColumnConfig<T>): React.ReactNode {
@@ -252,7 +253,7 @@ export function GenericTable<T extends FieldValues & { id: string }>({
         ? search.fields.map((fieldName) => record[fieldName])
         : visibleColumns
           .filter((column): column is DataColumnConfig<T> => isDataColumn(column))
-          .map((column) => formatDisplayFieldValue(record, column))
+          .map((column) => getDisplayFieldTextValue(record, column))
 
       return searchableValues
         .map((value) => String(value ?? '').toLowerCase())

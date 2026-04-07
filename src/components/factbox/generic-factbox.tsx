@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import {
-  formatDisplayFieldValue,
+  renderDisplayFieldValue,
   getProgressValues
 } from '@/lib/utils/display-fields'
 import { EMPTY_DISPLAY_VALUE } from '@/lib/utils/get-value-by-path'
@@ -31,7 +31,7 @@ function getFieldValue<T extends FieldValues>(data: T, field: FactboxFieldConfig
     return `${Math.round(progress.percentage)}% (${progress.current}/${progress.max})`
   }
 
-  return formatDisplayFieldValue(data, field)
+  return renderDisplayFieldValue(data, field)
 }
 
 export function GenericFactbox<T extends FieldValues>({

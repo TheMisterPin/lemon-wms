@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { FieldValues } from 'react-hook-form'
 
 import {
@@ -64,9 +65,15 @@ export function isJoinPrimaryValueEmpty(value: unknown): boolean {
   return false
 }
 
-export function formatDisplayFieldValue<T extends FieldValues>(row: T, field: DisplayFieldConfig<T>): string {
+export function getDisplayFieldTextValue<T extends FieldValues>(row: T, field: DisplayFieldConfig<T>): string {
   if ('render' in field && field.render) {
-    return String(field.render(row))
+    const renderedValue = field.render(row)
+
+    if (typeof renderedValue === 'string' || typeof renderedValue === 'number' || typeof renderedValue === 'boolean') {
+      return String(renderedValue)
+    }
+
+    return EMPTY_DISPLAY_VALUE
   }
 
   if (field.type === 'joinValues') {
@@ -94,6 +101,16 @@ export function formatDisplayFieldValue<T extends FieldValues>(row: T, field: Di
 
   return formatDisplayValue(rawValue)
 }
+
+export function renderDisplayFieldValue<T extends FieldValues>(row: T, field: DisplayFieldConfig<T>): ReactNode {
+  if ('render' in field && field.render) {
+    return field.render(row)
+  }
+
+  return getDisplayFieldTextValue(row, field)
+}
+
+export const formatDisplayFieldValue = getDisplayFieldTextValue
 
 export function getProgressValues<T extends FieldValues>(
   row: T,

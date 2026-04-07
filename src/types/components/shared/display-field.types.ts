@@ -38,15 +38,29 @@ export interface RenderDisplayFieldConfig<T extends FieldValues> {
 
 export type IndicatorColorMap = Record<string, string>
 
-export interface IndicatorDisplayFieldConfig<T extends FieldValues> {
+interface IndicatorDisplayFieldBaseConfig {
   label: string
-  accessor?: Extract<keyof T, string>
-  accessorPath?: FieldPath<T>
   render?: never
   type: 'indicator'
   indicatorColorMap: IndicatorColorMap
   defaultIndicatorColor?: string
 }
+
+export interface AccessorIndicatorDisplayFieldConfig<T extends FieldValues>
+  extends IndicatorDisplayFieldBaseConfig {
+  accessor: Extract<keyof T, string>
+  accessorPath?: never
+}
+
+export interface AccessorPathIndicatorDisplayFieldConfig<T extends FieldValues>
+  extends IndicatorDisplayFieldBaseConfig {
+  accessor?: never
+  accessorPath: FieldPath<T>
+}
+
+export type IndicatorDisplayFieldConfig<T extends FieldValues> =
+  | AccessorIndicatorDisplayFieldConfig<T>
+  | AccessorPathIndicatorDisplayFieldConfig<T>
 
 export interface ProgressBarRef<T extends FieldValues> {
   current: FieldPath<T>
