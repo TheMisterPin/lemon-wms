@@ -2,26 +2,10 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { getItemsInBin } from '@/lib/services/bin-operations'
 import prisma from '@/lib/prisma'
+import { getItemsInBin } from '@/lib/services/bin-operations'
 
 type Params = { params: Promise<{ id: string }> }
-
-function toNumberOrZero(value: unknown): number {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return value
-  }
-
-  if (typeof value === 'string' && value.trim() !== '') {
-    const parsed = Number(value)
-
-    if (Number.isFinite(parsed)) {
-      return parsed
-    }
-  }
-
-  return 0
-}
 
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
@@ -60,14 +44,14 @@ export async function GET(req: NextRequest, { params }: Params) {
     const items = await getItemsInBin(prisma, bin.id)
     const normalizedBin = {
       ...bin,
-      currentCapacity: toNumberOrZero(bin.currentCapacity),
-      maxCapacity: toNumberOrZero(bin.maxCapacity)
+      currentCapacity: Number(bin.currentCapacity) || 0,
+      maxCapacity: Number(bin.maxCapacity) || 0
     }
     const normalizedItems = items.map((item) => ({
       ...item,
-      quantityAvailable: item.quantityAvailable,
-      quantityReserved: item.quantityReserved,
-      quantityBlocked: item.quantityBlocked
+      quantityAvailable: Number(item.quantityAvailable) || 0,
+      quantityReserved: Number(item.quantityReserved) || 0,
+      quantityBlocked: Number(item.quantityBlocked) || 0
     }))
 
     return ok({ bin: normalizedBin, items: normalizedItems }, 'Bin details retrieved successfully.')

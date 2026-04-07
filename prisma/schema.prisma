@@ -272,7 +272,7 @@ model Item {
   deletedAt           DateTime?
   createdAt           DateTime             @default(now())
   binStockItems       BinStockItem[]
-  category            ItemCategory?         @relation("ItemInCategory",fields: [categoryId], references: [id])
+  category            ItemCategory?        @relation("ItemInCategory", fields: [categoryId], references: [id])
   lots                Lot[]
   serialNumbers       SerialNumber[]
   serialNumberConfigs SerialNumberConfig[]
@@ -280,11 +280,16 @@ model Item {
 }
 
 model ItemCategory {
-  id            String   @id @default(uuid())
-  name          String   @unique
+  id            String         @id @default(uuid())
+  name          String         @unique
+  description   String?
+  hasChildren   Boolean        @default(false)
+  parentId      String?
+  parent        ItemCategory?  @relation("ItemCategoryChildren", fields: [parentId], references: [id])
+  children      ItemCategory[] @relation("ItemCategoryChildren")
   handlingFlags Json?
-  createdAt     DateTime @default(now())
-  items         Item[]   @relation("ItemInCategory")
+  createdAt     DateTime       @default(now())
+  items         Item[]         @relation("ItemInCategory")
 }
 
 model Lot {
@@ -505,17 +510,17 @@ model ReturnOrder {
 }
 
 model ReturnOrderLine {
-  id              String      @id @default(uuid())
+  id              String        @id @default(uuid())
   returnOrderId   String
   warItemId       String
   binId           String?
   baseQuantity    Decimal
-  handledQuantity Decimal     @default(0)
-  isShort         Boolean     @default(false)
+  handledQuantity Decimal       @default(0)
+  isShort         Boolean       @default(false)
   lotId           String?
   serialNumberId  String?
   uom             String
-  returnOrder     ReturnOrder @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
+  returnOrder     ReturnOrder   @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
   unitOfMeasure   UnitOfMeasure @relation(fields: [uom], references: [id])
 }
 
@@ -673,20 +678,23 @@ model Notification {
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id])
 }
+
 model Error {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   message   String
   stack     String?
   type      ErrorType
   errorCode Int?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
+
 enum ErrorType {
   CLIENT
   SERVER
   NETWORK
   UNKNOWN
 }
+
 enum FiscalInventoryEventType {
   RECEIPT
   SHIPMENT
@@ -697,7 +705,6 @@ enum FiscalInventoryEventType {
   TRANSFER_IN
   TRANSFER_OUT
 }
-
 
 enum BinOperationType {
   RECEIVE
@@ -876,6 +883,7 @@ enum AddressType {
   WAREHOUSE
   HQ
 }
+
 model UnitOfMeasure {
   id           String   @id
   description  String
