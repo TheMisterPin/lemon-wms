@@ -1,6 +1,6 @@
 import { Prisma } from '@/generated/prisma'
 import type { PrismaClient } from '@/generated/prisma'
-import type { ItemFormValues } from '@/lib/components/configs/entities/item/types'
+import type { ItemFormValues } from '@/lib/schemas/item'
 
 import { validateItemRelations } from './validate-item-relations'
 

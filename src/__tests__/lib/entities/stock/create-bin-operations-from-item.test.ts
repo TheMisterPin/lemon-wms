@@ -5,7 +5,7 @@ import {
   getAdjustmentBinOperationParams,
   getMovementBinOperationParams,
   normalizeQuantity
-} from '@/lib/entities/stock'
+} from '@/lib/services/bin-operations'
 
 function createMockPrisma() {
   const tx = {

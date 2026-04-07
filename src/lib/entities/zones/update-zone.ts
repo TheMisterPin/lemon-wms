@@ -1,6 +1,6 @@
 import { Prisma } from '@/generated/prisma'
 import type { PrismaClient } from '@/generated/prisma'
-import type { ZoneFormValues } from '@/lib/components/configs/entities/zone/types'
+import type { ZoneFormValues } from '@/lib/schemas/zone'
 
 async function updateZone(
   prisma: PrismaClient,

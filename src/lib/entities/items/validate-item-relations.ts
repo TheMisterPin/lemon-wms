@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@/generated/prisma'
-import type { ItemFormValues } from '@/lib/components/configs/entities/item/types'
+import type { ItemFormValues } from '@/lib/schemas/item'
 
 type ItemInput = Pick<ItemFormValues, 'uom' | 'categoryId' | 'supplierId'>
 

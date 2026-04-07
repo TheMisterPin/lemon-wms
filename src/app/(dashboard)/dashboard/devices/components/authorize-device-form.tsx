@@ -11,9 +11,9 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { useDashboardDevices } from '@/hooks/dashboard/use-dashboard-devices'
-import { createAuthorizeDeviceFormConfig } from '@/lib/components/configs/entities/device/config'
-import { authorizeDeviceSchema } from '@/lib/components/configs/entities/device/schema'
-import type { AuthorizeDeviceFormValues } from '@/lib/components/configs/entities/device/types'
+import { createAuthorizeDeviceFormConfig } from '@/components/configs/entities/device/config'
+import { authorizeDeviceSchema } from '@/lib/schemas/device'
+import type { AuthorizeDeviceFormValues } from '@/lib/schemas/device'
 
 type AuthorizeDeviceFormProps = {
   deviceCode: string

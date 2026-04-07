@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { zoneFormSchema } from '@/lib/components/configs/entities/zone/schema'
+import { zoneFormSchema } from '@/lib/schemas/zone'
 import { deleteZone } from '@/lib/entities/zones/delete-zone'
 import { getZone } from '@/lib/entities/zones/get-zone'
 import { updateZone } from '@/lib/entities/zones/update-zone'

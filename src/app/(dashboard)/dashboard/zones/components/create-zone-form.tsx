@@ -15,9 +15,9 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
-import { createZoneFormConfig } from '@/lib/components/configs/entities/zone/config'
-import { zoneFormSchema } from '@/lib/components/configs/entities/zone/schema'
-import type { ZoneFormValues } from '@/lib/components/configs/entities/zone/types'
+import { createZoneFormConfig } from '@/components/configs/entities/zone/config'
+import { zoneFormSchema } from '@/lib/schemas/zone'
+import type { ZoneFormValues } from '@/lib/schemas/zone'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 
 type CreateZoneFormProps = {

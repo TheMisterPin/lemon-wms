@@ -7,7 +7,7 @@ import AuthorizeDeviceForm from '@/app/(dashboard)/dashboard/devices/components/
 import PageWithGrid from '@/components/pages/page-with-grid'
 import { ErrorModal } from '@/components/shared/ErrorModal'
 import { DashboardDevicesProvider, useDashboardDevices } from '@/hooks/dashboard/use-dashboard-devices'
-import { deviceTableColumns, type DeviceTableRow } from '@/lib/components/configs/entities/device/config'
+import { deviceTableColumns, type DeviceTableRow } from '@/components/configs/entities/device/config'
 import type { RowAction } from '@/types/components/table/generic-table.types'
 
 function DevicesContent() {

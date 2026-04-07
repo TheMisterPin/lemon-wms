@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { createBinOperationsFromItem } from '@/lib/entities/stock/create-bin-operations-from-item'
+import { createBinOperationsFromItem } from '@/lib/services/bin-operations'
 import prisma from '@/lib/prisma'
 
 type Params = { params: Promise<{ id: string }> }
