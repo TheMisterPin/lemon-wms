@@ -21,8 +21,8 @@ async function createUser(prisma: PrismaClient, data: CreateUserInput) {
     generateBadgeNumber(prisma)
   ])
   const newID = await generateUserSerial(prisma)
-  const user =  prisma.user.create({
 
+  return prisma.user.create({
     data: {
       id: newID,
       firstName: data.firstName,

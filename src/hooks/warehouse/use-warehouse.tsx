@@ -18,7 +18,7 @@ const WarehouseContext = createContext<WarehouseContextValue | null>(null)
 
 // ── Provider ─────────────────────────────────────────────────────────
 
-export function WarehouseProvider({ children }: { children: ReactNode }) {
+export function WarehouseProvider({}: { children: ReactNode }) {
 
 }
 

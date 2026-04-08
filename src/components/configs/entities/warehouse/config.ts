@@ -1,8 +1,7 @@
+import { Warehouse, WarehouseFormValues } from '@/lib/schemas/warehouse'
 import { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import { TableColumnConfig } from '@/types/components/table/generic-table.types'
-
-import { Warehouse, WarehouseFormValues } from '@/lib/schemas/warehouse'
 
 export const warehouseStatusOptions: SelectOption[] = [
   { value: 'ACTIVE', label: 'Active' },

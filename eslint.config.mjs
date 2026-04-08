@@ -1,6 +1,8 @@
 import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
+import importPlugin from 'eslint-plugin-import'
+import reactPlugin from 'eslint-plugin-react'
 import unusedImports from 'eslint-plugin-unused-imports'
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -9,6 +11,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     '.next/**',
+    '.vercel/**',
     'out/**',
     'build/**',
     'next-env.d.ts',
@@ -17,6 +20,8 @@ const eslintConfig = defineConfig([
   ]),
   {
     plugins: {
+      import: importPlugin,
+      react: reactPlugin,
       'unused-imports': unusedImports
     },
     rules: {

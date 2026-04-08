@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const { searchParams } = new URL(req.url)
     const warehouseId = prisma.warehouse.findFirst({
       where: {
         id: 'WH-0001'

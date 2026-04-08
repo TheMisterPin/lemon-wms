@@ -111,6 +111,7 @@ function withAuthHeaders(
   }
 
   config.headers = nextHeaders
+
   return config
 }
 
@@ -141,6 +142,7 @@ function attachInterceptors(instance: ReturnType<typeof createApiInstance>, kind
       if (newToken) {
         originalRequest.headers = originalRequest.headers ?? {}
         originalRequest.headers.Authorization = `Bearer ${newToken}`
+
         return instance(originalRequest)
       }
 

@@ -38,6 +38,7 @@ class ClientLogger {
     }
   }
   info(message: string, data?: any) {
+    // eslint-disable-next-line no-console -- client info logging
     console.log(`[CLIENT LOG] ${message}`, data)
     this.sendLog(this.createLogEntry('info', message, data))
   }
@@ -50,6 +51,7 @@ class ClientLogger {
     this.sendLog(this.createLogEntry('error', message, data))
   }
   debug(message: string, data?: any) {
+    // eslint-disable-next-line no-console -- client debug logging
     console.debug(`[CLIENT LOG] ${message}`, data)
     this.sendLog(this.createLogEntry('debug', message, data))
   }

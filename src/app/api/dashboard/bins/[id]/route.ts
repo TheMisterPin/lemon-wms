@@ -3,11 +3,11 @@ import { z } from 'zod'
 
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { binFormSchema } from '@/lib/schemas/bin'
 import { deleteBin } from '@/lib/entities/bins/delete-bin'
 import { getBin } from '@/lib/entities/bins/get-bin'
 import { updateBin } from '@/lib/entities/bins/update-bin'
 import prisma from '@/lib/prisma'
+import { binFormSchema } from '@/lib/schemas/bin'
 
 type Params = { params: Promise<{ id: string }> }
 

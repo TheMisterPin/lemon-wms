@@ -113,7 +113,10 @@ export function useDashboardHome() {
     }
 
     void fetchData()
-    return () => { cancelled = true }
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const infoCards = useMemo(() => toInfoCards(data.info), [data.info])
@@ -139,6 +142,7 @@ export function useDashboardHome() {
 
     return list.filter((warehouse) => {
       const haystack = `${warehouse.name} ${warehouse.zones} ${warehouse.bins}`.toLowerCase()
+
       return haystack.includes(normalizedWarehouseSearch)
     })
   }, [data.warehouses, normalizedWarehouseSearch, selectedWarehouseId, selectedZoneId, zonesById])
@@ -156,6 +160,7 @@ export function useDashboardHome() {
 
     return list.filter((zone) => {
       const haystack = `${zone.name} ${zone.type} ${zone.bins}`.toLowerCase()
+
       return haystack.includes(normalizedZoneSearch)
     })
   }, [data.zones, normalizedZoneSearch, selectedWarehouseId, selectedZoneId])
@@ -176,35 +181,28 @@ export function useDashboardHome() {
   const zonePages = totalPages(filteredZones.length)
   const binPages = totalPages(filteredBins.length)
 
-  useEffect(() => {
-    setWarehousePage(0)
-  }, [selectedWarehouseId, selectedZoneId, warehouseSearch])
-
-  useEffect(() => {
-    setZonePage(0)
-  }, [selectedWarehouseId, selectedZoneId, zoneSearch])
-
-  useEffect(() => {
-    setBinPage(0)
-  }, [selectedWarehouseId, selectedZoneId])
+  const safeWarehousePage = Math.min(Math.max(0, warehousePage), warehousePages - 1)
+  const safeZonePage = Math.min(Math.max(0, zonePage), zonePages - 1)
+  const safeBinPage = Math.min(Math.max(0, binPage), binPages - 1)
 
   const pagedWarehouses = useMemo(
-    () => toWarehouseRecords(paginate(filteredWarehouses, warehousePage)),
-    [filteredWarehouses, warehousePage]
+    () => toWarehouseRecords(paginate(filteredWarehouses, safeWarehousePage)),
+    [filteredWarehouses, safeWarehousePage]
   )
   const pagedZones = useMemo(
-    () => toZoneRecords(paginate(filteredZones, zonePage)),
-    [filteredZones, zonePage]
+    () => toZoneRecords(paginate(filteredZones, safeZonePage)),
+    [filteredZones, safeZonePage]
   )
   const pagedBins = useMemo(
-    () => paginate(filteredBins, binPage),
-    [filteredBins, binPage]
+    () => paginate(filteredBins, safeBinPage),
+    [filteredBins, safeBinPage]
   )
 
   const toggleWarehouse = (warehouseId: string) => {
     if (selectedWarehouseId === warehouseId) {
       setSelectedWarehouseId(null)
       setSelectedZoneId(null)
+
       return
     }
 
@@ -216,6 +214,7 @@ export function useDashboardHome() {
     if (selectedZoneId === zoneId) {
       setSelectedZoneId(null)
       setSelectedWarehouseId(null)
+
       return
     }
 
@@ -228,10 +227,22 @@ export function useDashboardHome() {
     infoCards,
     warehouses: {
       records: pagedWarehouses,
-      page: warehousePage,
+      page: safeWarehousePage,
       totalPages: warehousePages,
-      onPrev: () => setWarehousePage((p) => Math.max(0, p - 1)),
-      onNext: () => setWarehousePage((p) => Math.min(warehousePages - 1, p + 1)),
+      onPrev: () =>
+        setWarehousePage((p) => {
+          const max = warehousePages - 1
+          const current = Math.min(Math.max(0, p), max)
+
+          return Math.max(0, current - 1)
+        }),
+      onNext: () =>
+        setWarehousePage((p) => {
+          const max = warehousePages - 1
+          const current = Math.min(Math.max(0, p), max)
+
+          return Math.min(max, current + 1)
+        }),
       selectedId: selectedWarehouseId,
       onSelect: toggleWarehouse,
       search: warehouseSearch,
@@ -239,10 +250,22 @@ export function useDashboardHome() {
     },
     zones: {
       records: pagedZones,
-      page: zonePage,
+      page: safeZonePage,
       totalPages: zonePages,
-      onPrev: () => setZonePage((p) => Math.max(0, p - 1)),
-      onNext: () => setZonePage((p) => Math.min(zonePages - 1, p + 1)),
+      onPrev: () =>
+        setZonePage((p) => {
+          const max = zonePages - 1
+          const current = Math.min(Math.max(0, p), max)
+
+          return Math.max(0, current - 1)
+        }),
+      onNext: () =>
+        setZonePage((p) => {
+          const max = zonePages - 1
+          const current = Math.min(Math.max(0, p), max)
+
+          return Math.min(max, current + 1)
+        }),
       selectedId: selectedZoneId,
       onSelect: toggleZone,
       search: zoneSearch,
@@ -250,10 +273,22 @@ export function useDashboardHome() {
     },
     bins: {
       records: pagedBins,
-      page: binPage,
+      page: safeBinPage,
       totalPages: binPages,
-      onPrev: () => setBinPage((p) => Math.max(0, p - 1)),
-      onNext: () => setBinPage((p) => Math.min(binPages - 1, p + 1))
+      onPrev: () =>
+        setBinPage((p) => {
+          const max = binPages - 1
+          const current = Math.min(Math.max(0, p), max)
+
+          return Math.max(0, current - 1)
+        }),
+      onNext: () =>
+        setBinPage((p) => {
+          const max = binPages - 1
+          const current = Math.min(Math.max(0, p), max)
+
+          return Math.min(max, current + 1)
+        })
     }
   }
 }

@@ -30,8 +30,11 @@ type LastFloorLogin = z.infer<typeof lastFloorLoginSchema>
 function readLastFloorLogin(): LastFloorLogin | null {
   try {
     const raw = localStorage.getItem(LAST_FLOOR_LOGIN_KEY)
-    if (!raw) return null
+    if (!raw) {
+      return null
+    }
     const result = lastFloorLoginSchema.safeParse(JSON.parse(raw))
+
     return result.success ? result.data : null
   } catch {
     return null
@@ -58,6 +61,7 @@ export function useFloorLoginFlow() {
       if (lastLogin && lastLogin.deviceCode === saved) {
         setBadgeNumber(lastLogin.badgeNumber)
         setStep('pin')
+
         return
       }
       setStep('badge')
@@ -106,6 +110,7 @@ export function useFloorLoginFlow() {
           setStep('badge')
           setBadgeNumber('')
         }
+
         return
       }
 
@@ -126,13 +131,17 @@ export function useFloorLoginFlow() {
   }
 
   const handlePinConfirm = () => {
-    if (pin.length === 4) submitLogin(pin)
+    if (pin.length === 4) {
+      submitLogin(pin)
+    }
   }
 
   const handleNativePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, '').slice(0, 4)
     setPin(val)
-    if (val.length === 4) submitLogin(val)
+    if (val.length === 4) {
+      submitLogin(val)
+    }
   }
 
   return {
@@ -149,6 +158,8 @@ export function useFloorLoginFlow() {
     handlePinConfirm,
     handleNativePinChange,
     handleChangeUser,
-    goBackToDevice: () => { setStep('device'); setError(null) }
+    goBackToDevice: () => {
+      setStep('device'); setError(null)
+    }
   }
 }

@@ -51,6 +51,7 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
         setDebouncedSearch(trimmed)
         setPage(1)
       }, SEARCH_DEBOUNCE_MS)
+
       return () => clearTimeout(timer)
     }
     setDebouncedSearch('')
@@ -59,7 +60,9 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
 
   // Fetch items whenever picker is open or search/page changes
   useEffect(() => {
-    if (!isPickerOpen) return
+    if (!isPickerOpen) {
+      return
+    }
 
     let isActive = true
 
@@ -75,10 +78,13 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
 
         const response = await warehouseApiClient.get<ApiResponse<WarehouseItemsResponse>>('/warehouse/items', params)
 
-        if (!isActive) return
+        if (!isActive) {
+          return
+        }
 
         if (!response.success || !response.data) {
           setError(response.error?.code ? 'Unable to load items.' : response.message)
+
           return
         }
 
@@ -86,14 +92,21 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
         setTotalPages(response.data.pagination.totalPages)
       } catch (fetchError) {
         console.error('[useAddItemToBin] Failed to load items:', fetchError)
-        if (isActive) setError('Unable to load items.')
+        if (isActive) {
+          setError('Unable to load items.')
+        }
       } finally {
-        if (isActive) setIsLoadingItems(false)
+        if (isActive) {
+          setIsLoadingItems(false)
+        }
       }
     }
 
     void fetchItems()
-    return () => { isActive = false }
+
+    return () => {
+      isActive = false
+    }
   }, [isPickerOpen, page, debouncedSearch])
 
   function resetSelectionState() {
@@ -103,12 +116,15 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
   }
 
   function handlePickerOpenChange(open: boolean) {
-    if (isSubmitting) return
+    if (isSubmitting) {
+      return
+    }
     setIsPickerOpen(open)
     if (open) {
       setPage(1)
       setError(null)
       setTimeout(() => searchInputRef.current?.focus(), 50)
+
       return
     }
     setSearchInput('')
@@ -127,7 +143,9 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
   }
 
   function handleBackToItems() {
-    if (isSubmitting) return
+    if (isSubmitting) {
+      return
+    }
     setIsQuantityOpen(false)
     setQuantity('')
     setError(null)
@@ -135,17 +153,26 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
   }
 
   function handleQuantityOpenChange(open: boolean) {
-    if (isSubmitting) return
+    if (isSubmitting) {
+      return
+    }
     setIsQuantityOpen(open)
-    if (!open) resetSelectionState()
+    if (!open) {
+      resetSelectionState()
+    }
   }
 
   async function handleSubmitQuantity() {
-    if (!selectedItem) { setError('Select an item first.'); return }
+    if (!selectedItem) {
+      setError('Select an item first.')
+
+      return
+    }
 
     const parsedQuantity = Number.parseInt(quantity, 10)
     if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
       setError('Enter a valid quantity greater than zero.')
+
       return
     }
 
@@ -160,6 +187,7 @@ export function useAddItemToBin(binId: string, onSuccess?: () => void | Promise<
 
       if (!response.success) {
         setError(response.message || 'Unable to add the item to this bin.')
+
         return
       }
 

@@ -42,7 +42,9 @@ export function useBinDetails(binId: string) {
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
-    if (!binId) return
+    if (!binId) {
+      return
+    }
 
     let cancelled = false
 
@@ -56,19 +58,29 @@ export function useBinDetails(binId: string) {
       } catch (error) {
         console.error('[useBinDetails] Failed to fetch:', error)
       } finally {
-        if (!cancelled) setIsLoading(false)
+        if (!cancelled) {
+          setIsLoading(false)
+        }
       }
     }
 
     void fetchBinDetails()
-    return () => { cancelled = true }
+
+    return () => {
+      cancelled = true
+    }
   }, [binId, refreshKey])
 
   const occupancy = useMemo(() => {
-    if (!data?.bin) return '0%'
+    if (!data?.bin) {
+      return '0%'
+    }
     const current = Number(data.bin.currentCapacity) || 0
     const max = Number(data.bin.maxCapacity) || 0
-    if (max <= 0) return '0%'
+    if (max <= 0) {
+      return '0%'
+    }
+
     return `${Math.round((current / max) * 100)}%`
   }, [data])
 

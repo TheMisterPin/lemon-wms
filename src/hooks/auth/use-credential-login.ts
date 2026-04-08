@@ -38,6 +38,7 @@ export function useCredentialLogin() {
 
       if (!res.ok) {
         setError(data.error ?? 'Login failed')
+
         return
       }
 

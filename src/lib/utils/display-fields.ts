@@ -157,6 +157,7 @@ export function getJoinValueComparable<T extends FieldValues>(row: T, field: Joi
 
   const second = getValueByPath(row, field.joinValuesRef.second)
   const separator = field.separator ?? ' '
+
   return `${formatDisplayValue(first)}${separator}${formatDisplayValue(second)}`
 }
 

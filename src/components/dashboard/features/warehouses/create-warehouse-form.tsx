@@ -4,8 +4,8 @@ import { useState } from 'react'
 
 import { CirclePlus } from 'lucide-react'
 import { z } from 'zod'
-import DynamicForm from '@/components/dynamic-form'
 import { warehouseFormConfig } from '@/components/configs/entities/warehouse/config'
+import DynamicForm from '@/components/dynamic-form'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

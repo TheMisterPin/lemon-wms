@@ -3,12 +3,12 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { zoneFormSchema } from '@/lib/schemas/zone'
+import { toZoneTableRecords } from '@/lib/converters/table-records'
 import { createZone } from '@/lib/entities/zones/create-zone'
 import { getZones } from '@/lib/entities/zones/get-zones'
-import { toZoneTableRecords } from '@/lib/converters/table-records'
 import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
+import { zoneFormSchema } from '@/lib/schemas/zone'
 
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)

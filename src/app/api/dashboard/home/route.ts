@@ -13,9 +13,11 @@ export async function GET(req: NextRequest) {
 
   try {
     const data = await getWarehouseHomeData(prisma)
+
     return ok(data, 'Warehouses retrieved successfully.')
   } catch (error) {
     console.error('[GET /api/dashboard/home]', error)
+
     return fail('Failed to retrieve warehouses.')
   }
 }

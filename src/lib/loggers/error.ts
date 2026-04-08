@@ -1,5 +1,5 @@
-import prisma from '@/lib/prisma'
 import type { ErrorType } from '@/generated/prisma'
+import prisma from '@/lib/prisma'
 
 interface LogErrorInput {
   message: string
@@ -15,8 +15,8 @@ export async function logError(input: LogErrorInput) {
         message: input.message,
         stack: input.stack ?? null,
         type: input.type,
-        errorCode: input.errorCode ?? null,
-      },
+        errorCode: input.errorCode ?? null
+      }
     })
   } catch (err) {
     // Fallback to console if DB write fails — never throw from the logger

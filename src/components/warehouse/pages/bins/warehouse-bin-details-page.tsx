@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
 import { ArrowLeft, Package } from 'lucide-react'
-import AddItemToBinModal from '@/components/warehouse/modals/add-item-to-bin-modal'
 import { GenericTable } from '@/components/tables/generic-table'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import AddItemToBinModal from '@/components/warehouse/modals/add-item-to-bin-modal'
 import { useBinDetails, type BinStockRecord } from '@/hooks/warehouse/use-bin-details'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 

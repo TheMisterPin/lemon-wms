@@ -2,9 +2,8 @@
 
 import { create } from 'zustand'
 
-import { apiClient } from '@/lib/axios'
-
 import type { ErrorType } from '@/generated/prisma'
+import { apiClient } from '@/lib/axios'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,15 +44,15 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
       title: payload.title,
       message: payload.message,
       errorType: payload.errorType,
-      onConfirm: payload.onConfirm,
+      onConfirm: payload.onConfirm
     }),
 
   dismiss: () =>
     set({
       open: false,
       onConfirm: undefined,
-      errorType: undefined,
-    }),
+      errorType: undefined
+    })
 }))
 
 // ---------------------------------------------------------------------------
@@ -80,7 +79,7 @@ export function showSuccess(message: string) {
   useNotificationStore.getState().show({
     variant: 'success',
     title: 'Success',
-    message,
+    message
   })
 }
 
@@ -88,7 +87,7 @@ export function showWarning(message: string) {
   useNotificationStore.getState().show({
     variant: 'warning',
     title: 'Warning',
-    message,
+    message
   })
 }
 
@@ -103,7 +102,7 @@ export function showWarning(message: string) {
  */
 export function showError(
   input: string | Error | { type: ErrorType; message: string },
-  logError?: boolean,
+  logError?: boolean
 ) {
   let message: string
   let errorType: ErrorType = 'UNKNOWN'
@@ -136,7 +135,7 @@ export function showError(
     variant: 'error',
     title: 'Error',
     message,
-    errorType,
+    errorType
   })
 
   if (logError) {
@@ -149,7 +148,7 @@ export function showConfirm(message: string, onConfirm: () => void) {
     variant: 'confirm',
     title: 'Confirm',
     message,
-    onConfirm,
+    onConfirm
   })
 }
 

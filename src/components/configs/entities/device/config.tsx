@@ -1,7 +1,6 @@
+import type { AuthorizeDeviceFormValues } from '@/lib/schemas/device'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
-
-import type { AuthorizeDeviceFormValues } from '@/lib/schemas/device'
 
 export type DeviceTableRow = {
   id: string

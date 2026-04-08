@@ -4,7 +4,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   CircleHelp,
-  XCircle,
+  XCircle
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -14,11 +14,11 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog'
 import {
   useNotificationStore,
-  type NotificationVariant,
+  type NotificationVariant
 } from '@/lib/notification/store'
 
 const variantConfig: Record<
@@ -28,23 +28,23 @@ const variantConfig: Record<
   success: {
     icon: <CheckCircle2 className="size-6 text-[var(--color-dash-green)]" />,
     color: 'text-[var(--color-dash-green)]',
-    titleColor: 'text-[var(--color-dash-green)]',
+    titleColor: 'text-[var(--color-dash-green)]'
   },
   warning: {
     icon: <AlertTriangle className="size-6 text-[var(--color-dash-amber)]" />,
     color: 'text-[var(--color-dash-amber)]',
-    titleColor: 'text-[var(--color-dash-amber)]',
+    titleColor: 'text-[var(--color-dash-amber)]'
   },
   error: {
     icon: <XCircle className="size-6 text-[var(--color-dash-red)]" />,
     color: 'text-[var(--color-dash-red)]',
-    titleColor: 'text-[var(--color-dash-red)]',
+    titleColor: 'text-[var(--color-dash-red)]'
   },
   confirm: {
     icon: <CircleHelp className="size-6 text-[var(--color-dash-blue)]" />,
     color: 'text-[var(--color-dash-blue)]',
-    titleColor: 'text-[var(--color-dash-blue)]',
-  },
+    titleColor: 'text-[var(--color-dash-blue)]'
+  }
 }
 
 export default function NotificationDialog() {

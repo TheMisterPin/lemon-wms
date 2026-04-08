@@ -3,11 +3,11 @@ import { z } from 'zod'
 
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { userFormSchema } from '@/lib/schemas/user'
 import { deleteUser } from '@/lib/entities/users/delete-user'
 import { getUser } from '@/lib/entities/users/get-user'
 import { updateUser } from '@/lib/entities/users/update-user'
 import prisma from '@/lib/prisma'
+import { userFormSchema } from '@/lib/schemas/user'
 
 type Params = { params: Promise<{ id: string }> }
 

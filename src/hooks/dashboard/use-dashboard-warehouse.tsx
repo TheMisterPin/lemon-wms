@@ -12,26 +12,21 @@ import type { ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AxiosError } from 'axios'
 
-import { dashboardApiClient } from '@/lib/axios'
 import type { BinTableRow } from '@/components/configs/entities/bin/config'
+import type { ZoneTableRow } from '@/components/configs/entities/zone/config'
+import { useErrorDialog } from '@/hooks/ui/use-error-dialog'
+import { dashboardApiClient } from '@/lib/axios'
 import type { BinFormValues } from '@/lib/schemas/bin'
 import type { Warehouse } from '@/lib/schemas/warehouse'
 import type { WarehouseFormValues } from '@/lib/schemas/warehouse'
-import type { ZoneTableRow } from '@/components/configs/entities/zone/config'
 import type { ZoneFormValues } from '@/lib/schemas/zone'
+import { MutationError } from '@/types'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
-import { MutationError } from '@/types'
-import { useErrorDialog } from '@/hooks/ui/use-error-dialog'
 
 // ── API response shapes ──────────────────────────────────────────────
 
 type ApiPayload<T> = { success: boolean; data: T }
-
-type WarehouseApiRecord = Omit<Warehouse, 'createdAt' | 'deletedAt'> & {
-  createdAt: string
-  deletedAt: string | null
-}
 
 type ZoneApiRecord = {
   id: string

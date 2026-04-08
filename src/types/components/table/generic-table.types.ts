@@ -1,6 +1,5 @@
 import { ReactNode } from 'react'
 import { FieldValues } from 'react-hook-form'
-import type { LucideIcon } from 'lucide-react'
 
 import type { PaginationPosition } from '@/components/shared/PaginationSelector'
 import type {
@@ -8,6 +7,7 @@ import type {
   IndicatorColorMap,
   ProgressDisplayFieldConfig
 } from '@/types/components/shared/display-field.types'
+import type { LucideIcon } from 'lucide-react'
 
 export type SortDirection = 'asc' | 'desc'
 export type TableColumnType =

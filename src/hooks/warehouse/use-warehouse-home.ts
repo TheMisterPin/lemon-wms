@@ -100,7 +100,10 @@ export function useWarehouseHome() {
     }
 
     void fetchData()
-    return () => { cancelled = true }
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const infoCards = useMemo(() => toInfoCards(data.warehouseInfo), [data.warehouseInfo])

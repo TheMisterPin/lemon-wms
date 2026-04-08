@@ -29,9 +29,16 @@ export function decodeAccessToken(token: string): JWTPayload | null {
  * Returns the token if it is present and not expired, otherwise null.
  */
 export function getUsableAccessToken(token: string | null): string | null {
-  if (!token) return null
+  if (!token) {
+    return null
+  }
   const payload = decodeAccessToken(token)
-  if (!payload) return null
-  if (payload.exp && payload.exp * 1000 <= Date.now()) return null
+  if (!payload) {
+    return null
+  }
+  if (payload.exp && payload.exp * 1000 <= Date.now()) {
+    return null
+  }
+
   return token
 }

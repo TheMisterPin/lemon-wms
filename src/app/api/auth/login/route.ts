@@ -23,12 +23,14 @@ export async function POST(request: NextRequest) {
       ipAddress: request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? undefined,
       userAgent: request.headers.get('user-agent') ?? undefined
     })
+
     return NextResponse.json(result)
   } catch (error) {
     if (error instanceof DomainError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
     console.error('[POST /api/auth/login]', error)
+
     return NextResponse.json({ error: 'Login failed.' }, { status: 500 })
   }
 }
