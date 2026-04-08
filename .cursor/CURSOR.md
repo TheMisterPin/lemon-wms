@@ -3,12 +3,23 @@
 ## Project name
 Lemon WMS
 
+## Where this file lives (and how Cursor uses it)
+
+This file is at **`.cursor/CURSOR.md`**. It is **project documentation**, not a built-in Cursor rule file.
+
+- **Agents will use it when you `@`-mention it** (e.g. `@.cursor/CURSOR.md`) or when it is already open in context — same as any other doc in the repo.
+- **It is not auto-loaded on every chat.** For instructions you want applied automatically, add a rule under [`.cursor/rules/`](https://docs.cursor.com/context/rules) (e.g. a `.mdc` file with `alwaysApply` or a glob), or keep using **User Rules** in Cursor settings.
+
+Keeping this file in `.cursor/` is fine for discoverability and for pairing with other Cursor config. **Actionable agent rules** for this repo live in **`.cursor/rules/*.mdc`** (core context, API, data layer, React, shadcn dashboard, warehouse floor). Use this file for the long-form spec; rules apply automatically by glob or `alwaysApply`.
+
+---
+
 ## What this is
 A full-featured Warehouse Management System with two distinct sides:
 - **Office side** (`/dashboard`) — used by Owner, Office Manager, Office Worker on desktop
 - **Floor side** (`/warehouse`) — used by Warehouse Manager and Warehouse Worker on tablets/ruggedised terminals
 
-Both sides are in the same Next.js app (monorepo). They share the database and API layer but have completely separate layouts, UX patterns, and component libraries.
+Both sides live in the **same Next.js application** (single package, not a monorepo). They share the database and API layer but use separate layouts, UX patterns, and component emphasis (shadcn on dashboard vs custom floor UI).
 
 ---
 
@@ -23,12 +34,12 @@ Both sides are in the same Next.js app (monorepo). They share the database and A
 | Auth | Custom JWT — two flows: credential (email+password) and badge+PIN |
 | State | Zustand (auth store) + React Hook Form + minimal client state |
 | Forms | React Hook Form + Zod |
-| HTTP client | Axios (`lib/axios.ts`) |
-| API | Next.js API routes in `src/app/api/` |
-| Real-time | React Query polling — no WebSockets for MVP |
+| HTTP client | Axios (`lib/axios.ts`) — dashboard vs warehouse base URLs where needed |
+| API | Next.js Route Handlers under `src/app/api/` — split into `api/dashboard/*` (office) and `api/warehouse/*` (floor) |
+| Real-time | No WebSockets for MVP — client data via fetch/Axios and hooks |
 | Package manager | pnpm 10.29.3 |
 | Deployment | Vercel + managed Postgres (Neon or Supabase) |
-| Testing | None for MVP |
+| Testing | Vitest + Testing Library (`pnpm test`) — light coverage, not full E2E |
 
 ---
 
@@ -37,11 +48,12 @@ Both sides are in the same Next.js app (monorepo). They share the database and A
 ```
 lemon-wms/
 ├── prisma/
-│   ├── schema.prisma                   # 31 models, fully defined
-│   └── migrations/                     # Empty — use `npx prisma db push` in dev
+│   ├── schema.prisma                   # ~35 models (see Domain models)
+│   └── migrations/                     # Often empty in dev — `pnpm exec prisma db push` is common
 ├── seed/
-│   ├── seed-users.ts                   # Entry point: npm run seed:users
-│   └── seed-warehouses.ts             # Entry point: npm run seed:warehouses
+│   ├── seed-all.ts                     # `pnpm run seed:all`
+│   ├── seed-users.ts                   # `pnpm run seed:users`
+│   └── seed-warehouses.ts              # `pnpm run seed:warehouses`
 ├── docs/
 │   ├── create-local-postgres-db.md
 │   ├── seeding-users.md
@@ -57,73 +69,50 @@ lemon-wms/
 │   │   ├── (dashboard)/                # Office side — Owner, OM, OW
 │   │   │   ├── layout.tsx              # DashboardShell wrapper
 │   │   │   └── dashboard/
-│   │   │       ├── page.tsx            # Home stub
+│   │   │       ├── page.tsx            # Home (warehouse/zone/bin overview)
+│   │   │       ├── stock/page.tsx      # Stock dashboard (aggregated stock)
 │   │   │       ├── warehouses/page.tsx
-│   │   │       ├── zones/page.tsx      # (stub)
-│   │   │       ├── items/page.tsx      # (stub)
-│   │   │       └── users/             # (planned)
+│   │   │       ├── zones/page.tsx
+│   │   │       ├── bins/page.tsx
+│   │   │       ├── items/page.tsx      # Placeholder (not item CRUD UI yet)
+│   │   │       ├── users/page.tsx      # Stub
+│   │   │       └── devices/page.tsx
 │   │   ├── (warehouse)/                # Floor side — WM, WW
-│   │   │   ├── layout.tsx              # WarehouseShell wrapper
+│   │   │   ├── layout.tsx              # Warehouse shell
 │   │   │   └── warehouse/
-│   │   │       ├── page.tsx            # Order pool home
-│   │   │       ├── orders/             # (planned)
-│   │   │       └── zones/              # (planned)
+│   │   │       ├── page.tsx            # Home: zones/bins, order pool
+│   │   │       └── bins/[id]/page.tsx  # Bin detail (floor)
 │   │   └── api/
-│   │       ├── auth/
-│   │       │   ├── login/route.ts      # ✅ Credential flow
-│   │       │   ├── floor/login/route.ts # ✅ Badge/PIN flow
-│   │       │   ├── logout/route.ts     # ✅
-│   │       │   └── refresh/route.ts    # ✅
-│   │       ├── warehouses/route.ts     # ✅ GET + POST
-│   │       ├── zones/route.ts          # ✅ GET
+│   │       ├── auth/                   # login, floor/login, logout, refresh
+│   │       ├── dashboard/              # Office: warehouses, zones, bins, users, devices, items, home, stock
+│   │       ├── warehouse/              # Floor: home, bins, items, stock/addtobin
+│   │       ├── errors/route.ts
 │   │       ├── logs/route.ts           # stub
-│   │       └── seed/users/route.ts     # ✅ GET (dev only)
+│   │       └── seed/users/route.ts     # dev only
 │   ├── components/
-│   │   ├── ui/                         # shadcn/ui components
-│   │   ├── shared/                     # Both sides (ScanInput, NumericKeypad, etc.)
-│   │   ├── dashboard/                  # DashboardShell, Sidebar, Header, MetricCard
-│   │   ├── warehouse/                  # WarehouseShell
-│   │   ├── auth/                       # CredentialLoginForm, FloorLoginForm
-│   │   ├── tables/                     # GenericTable, CheckboxTable
-│   │   ├── factbox/                    # GenericFactbox (detail/read-only view)
-│   │   ├── inputs/                     # FormInputs, DateInput
-│   │   └── typography/                 # LemonHeader
-│   ├── lib/
-│   │   ├── prisma.ts                   # Prisma singleton (PrismaPg adapter)
-│   │   ├── axios.ts                    # Axios instance
-│   │   ├── utils.ts                    # Utility helpers
+│   │   ├── ui/                         # shadcn/ui
+│   │   ├── configs/entities/           # Form/table configs (warehouse, zone, bin, device, …)
+│   │   ├── shared/                     # ScanInput, NumericKeypad, etc.
+│   │   ├── dashboard/                  # DashboardShell, pages, features
+│   │   ├── warehouse/                  # Floor shell and views
 │   │   ├── auth/
-│   │   │   ├── jwt.ts                  # signAccessToken, verifyToken
-│   │   │   ├── session.ts              # Cookie helpers, token hashing, refresh token
-│   │   │   ├── middleware.ts           # isOfficeRole, isFloorRole guards
-│   │   │   └── store.ts                # Zustand auth state store
-│   │   ├── entities/                   # Business logic — one folder per domain
-│   │   │   ├── warehouses/
-│   │   │   │   ├── create-warehouse.ts
-│   │   │   │   └── get-warehouses.ts
-│   │   │   └── zones/
-│   │   │       └── get-zones.ts
-│   │   ├── components/
-│   │   │   └── configs/entities/       # Form/table/factbox configs per entity
-│   │   │       ├── warehouse/          # schema, types, config
-│   │   │       ├── zone/
-│   │   │       ├── user/
-│   │   │       ├── bin/
-│   │   │       ├── device/
-│   │   │       └── forms/
+│   │   ├── tables/
+│   │   ├── factbox/
+│   │   ├── inputs/
+│   │   └── typography/
+│   ├── hooks/                          # useAuth, dashboard data hooks
+│   ├── lib/
+│   │   ├── prisma.ts
+│   │   ├── axios.ts
+│   │   ├── api/                        # e.g. shared response helpers
+│   │   ├── auth/                       # jwt, session, guards, Zustand store
+│   │   ├── entities/                   # Domain logic: warehouses, zones, bins, items, users, devices, stock, auth, …
 │   │   ├── seeding/
-│   │   │   ├── users.ts                # 5 seed users (owner, manager, workers)
-│   │   │   └── warehouses.ts          # 1 seed warehouse
 │   │   └── utils/
-│   │       └── get-value-by-path.ts
-│   ├── middleware.ts                    # Auth guard + role-based redirect
+│   ├── middleware.ts                   # Auth + role redirect
 │   ├── types/
-│   │   ├── index.ts                    # Re-exports + AuthUser, JWTPayload
-│   │   ├── models/                     # Role, LoginType, etc.
-│   │   ├── responses/                  # API response shapes
-│   │   └── components/                 # Table, form, factbox prop types
 │   └── generated/
-│       └── prisma/                     # @prisma/client (auto-generated — do not edit)
+│       └── prisma/                     # Client output from `generator output` in schema
 └── public/
 ```
 
@@ -189,56 +178,58 @@ Permissions are role-based and additive downward. No role can be elevated beyond
 
 ### Location hierarchy
 ```
-Warehouse → Zone → Bin → BinItem
+Warehouse → Zone → Bin → BinStockItem (stock row) → Item (catalog SKU)
 ```
 
-**Warehouse**: id (UUID), name, address, timezone (IANA), currency (ISO 4217), status (ACTIVE/INACTIVE/ARCHIVED), createdById, deletedAt
-- Only Owner can create or archive
-- Cannot archive if open orders exist
-- Never hard-deleted
+**Warehouse**: id, name (unique), address, timezone, currency, status, createdById, deletedAt, timestamps
 
-**Zone**: id, warehouseId, name, type enum, customPermissions JSON?, isActive, defaultReceivingBinId?, defaultQuarantineBinId?, defaultOutgoingBinId?, deletedAt
+**Zone**: id, warehouseId, name, type enum, customPermissions JSON?, isActive, default bin FKs (receiving/quarantine/outgoing), deletedAt
 
-**Bin**: id, zoneId, warehouseId, name, code (unique), type enum, isBlocked, blockReason?, maxWeightKg?, maxVolumeM3?, deletedAt
+**Bin**: id, zoneId, warehouseId, name, code (unique), type enum, isBlocked, blockReason?, maxWeightKg?, maxVolumeM3?, maxCapacity?, currentCapacity?, deletedAt
 
-**BinItem**: id, binId, warItemId, lotId?, serialNumberId?, quantityAvailable, quantityReserved, quantityBlocked, uom, status (AVAILABLE/RESERVED/BLOCKED/IN_TRANSIT), expiryDate?
+**BinStockItem** (replaces older “BinItem” naming in docs): id, warehouseId, binId, itemId, lotId?, serialNumberId?, quantities (available / reserved / blocked as `Decimal`), uom (FK to `UnitOfMeasure.id`), status, expiryDate?, description, optional transit/reservation/box/audit fields (`transitDeviceId`, `reservedByOrderId`, `boxId`, `createdByBoeId`, `lastOperationBoeId`, …)
 
-BinItem quantity semantics:
+Quantity semantics (unchanged conceptually):
 - `quantityAvailable` — free to pick or reserve
-- `quantityReserved` — committed to open order, still physically in bin
-- `quantityBlocked` — quarantine or hold, cannot be picked or reserved
-- Effective pickable = `quantityAvailable - quantityReserved`
+- `quantityReserved` — committed to an order, still in bin
+- `quantityBlocked` — hold/quarantine; not pickable
+- Effective pickable ≈ `quantityAvailable - quantityReserved` (business rules may further restrict)
 
-Unique indexes on BinItem:
-- LOT-tracked: `(binId, warItemId, lotId)`
-- SERIAL-tracked: `(binId, warItemId, serialNumberId)`
-- NONE/FIFO: `(binId, warItemId)` where lotId IS NULL and serialNumberId IS NULL
+Unique constraint in schema: `@@unique([binId, itemId, lotId, serialNumberId])` (adjust app logic for tracking mode accordingly).
 
 ---
 
 ### Users
 
-**User**: id, email?, passwordHash?, badgeNumber (USR-XXXX, immutable), pinHash?, role, loginType (CREDENTIAL/BADGE_PIN/BOTH), isActive, deletedAt
-- Badge numbers generated from SerialNumberConfig for entity type USER
-- Format: USR-{####}, starting at 0001, incremental, never reused
+**User**: id, email?, passwordHash?, badgeNumber (unique), pinHash?, firstName, lastName, fullName, role, loginType (CREDENTIAL/BADGE_PIN/BOTH), isActive, deletedAt, lastLoginDeviceId?, isLoggedIn, timestamps
+- Badge numbers still follow the USR-XXXX style from seed/config (see seeding docs)
 
-**RefreshToken**: id, userId, tokenHash (never raw), deviceLabel, deviceId?, expiresAt, revokedAt?
-- When user deactivated → all their refresh tokens revoked immediately
+**RefreshToken**: id, userId, tokenHash (never raw), deviceLabel, deviceId?, expiresAt, revokedAt?, createdAt
 
-**Device**: id, name, code (unique), warehouseId, zoneId (unique — one per zone), isActive, registeredAt, lastSeenAt
+**Device**: id (uuid default), name (unique), code (unique), warehouseId?, zoneId? (unique when set), authorized, isActive, type (`DeviceType`, default FLOOR), registeredAt, lastSeenAt, loginMode (`LoginMode`: PIN / AUTOMATIC), lastUserId?
 
 **WarehouseAssignment**: id, userId, warehouseId, zoneId?
 - `zoneId = null` means WM-level assignment (access to all zones in warehouse)
 - Unique constraint: `(userId, warehouseId, zoneId)`
 
+**OrderAssignment**: links a user to an order (`orderType` + `orderId`) for activity tracking; relates to `UserActivityEntry` via `orderAssignmentId`.
+
+---
+
+### Parties & units (supporting master data)
+
+**BusinessParty** + **ContactPerson** + **Address**: suppliers/customers (and related PO/SO `businessPartyId` links). Used as structured party data alongside legacy string fields on some orders.
+
+**UnitOfMeasure**: canonical UOM rows; `Item.uom` and line/stock UOM fields reference `UnitOfMeasure.id`.
+
 ---
 
 ### Items
 
-**WARItem** (Warehouse Item): id, sku (unique), name, description, barcode?, categoryId, trackingMode (NONE/LOT/SERIAL/FIFO), uom, weightKg?, dimensions JSON?, minQuantity, isActive, supplierId?, deletedAt
-- trackingMode change blocked if any stock exists
+**Item** (catalog / SKU — formerly “WARItem” in older docs): id, sku (unique), name, description?, barcode?, categoryId? (relation to `ItemCategory.code`), trackingMode (NONE/LOT/SERIAL/FIFO), uom → `UnitOfMeasure`, weightKg?, dimensions JSON?, minQuantity, isActive, supplierId?, deletedAt
+- trackingMode change should stay blocked if stock exists (enforce in entity layer)
 
-**ItemCategory**: id, name, handlingFlags JSON (e.g. PERISHABLE, FRAGILE, HAZMAT)
+**ItemCategory**: id, code (unique), name (unique), parent/child via `parentCode`, handlingFlags JSON, hasChildren
 
 Tracking modes:
 | Mode | Behaviour |
@@ -252,7 +243,7 @@ Tracking modes:
 
 ### Lots
 
-**Lot**: id, lotNumber (unique), warItemId, purchaseOrderId?, receivedDate, expiryDate?, status (ACTIVE/QUARANTINE/EXPIRED/CONSUMED)
+**Lot**: id, lotNumber (unique), itemId?, purchaseOrderId?, receivedDate, expiryDate?, status (ACTIVE/QUARANTINE/EXPIRED/CONSUMED)
 
 Status machine:
 ```
@@ -269,9 +260,9 @@ Expiry alert fires when expiryDate is within threshold days (default 30). When e
 
 ### Serial numbers
 
-**SerialNumber**: id, serial (unique), configId, entityType, baseValue, partialCurrent?, partialTotal?, status (IN_STOCK/SHIPPED/RETURNED/SCRAPPED), warItemId?
+**SerialNumber**: id, serial (unique), configId, entityType, baseValue, partialCurrent?, partialTotal?, status (IN_STOCK/SHIPPED/RETURNED/SCRAPPED), itemId?
 
-**SerialNumberConfig**: id, entityType enum (ITEM/BOX/BOX_LINE/PALLET/ORDER/ORDER_LINE/USER), prefix?, format, lastValue, incrementBy, mode (INCREMENTAL/PARTIAL), warItemId?, warehouseId?
+**SerialNumberConfig**: id, entityType enum (ITEM/BOX/BOX_LINE/PALLET/ORDER/ORDER_LINE/USER), prefix?, format, lastValue, incrementBy, mode (INCREMENTAL/PARTIAL), itemId?, warehouseId?
 
 Generation requires row-level lock on config to prevent duplicate base values. Two modes:
 - **Incremental**: one serial per call, lastValue += incrementBy
@@ -283,16 +274,17 @@ Generation requires row-level lock on config to prevent duplicate base values. T
 
 **Box**: id, code (unique), status (OPEN/SEALED/IN_TRANSIT/RECEIVED/SHIPPED/SCRAPPED), binId?, warehouseId, weightKg?, notes?
 
-**BoxLine**: id, boxId, warItemId, quantity, lotId?, serialNumberId?, uom
+**BoxLine**: id, boxId, itemId (→ `BinStockItem` in current schema), quantity, lotId?, serialNumberId?, uom → `UnitOfMeasure`
 
-A box can contain items from multiple lots. A lot can span multiple boxes. No direct FK between Box and Lot — navigate via BoxLine.lotId.
+A box can span multiple stock rows/lots. Navigate Box ↔ stock via `BoxLine` relations.
+
+**Error**: persisted client/server errors for debugging (`ErrorType`: CLIENT / SERVER).
 
 ---
 
 ### Orders — five types, separate tables
 
-All order types share these base fields:
-`id, reference (auto-generated e.g. PO-2025-0001), status, priority (NORMAL/URGENT/EXPRESS), warehouseId, notes, currentWorkerId, parentOrderId, splitIndex, cancelledById, cancelledAt, cancellationReason, createdById, confirmedById, confirmedAt, assignedWMId, deletedAt`
+Common fields (see `schema.prisma` per type — not all columns exist on every model): e.g. `id`, `reference` (unique), `status`, `priority`, `warehouseId`, `notes`, `createdById`, `confirmedById`, `confirmedAt`, `assignedWMId`, `deletedAt`, timestamps. Purchase/sales types also link to **BusinessParty** (`businessPartyId`) and may reference **UserActivityEntry** for audit hooks.
 
 Status machine (shared by all types):
 ```
@@ -310,7 +302,7 @@ DRAFT → CONFIRMED → RELEASED → EXECUTING → EXECUTED → SIGNED_OFF
 | **ReturnOrder (RO)** | Inbound from customer | originSalesOrderId, returnDisposition |
 | **AdjustmentOrder (AO)** | Stock correction | reasonCode |
 
-Each has corresponding line model (e.g. PurchaseOrderLine): warItemId, binId, baseQuantity, handledQuantity, isShort, lotId?, serialNumberId?, uom
+Each has line models (e.g. `PurchaseOrderLine`). Prisma still names the catalog FK **`warItemId`** on several line/ledger models — it refers to **`Item.id`** (historical naming). Lines use `uom` → `UnitOfMeasure`.
 
 ---
 
@@ -323,13 +315,13 @@ Enforced at three levels:
 2. Service layer has only `create` functions — no `update` or `delete`
 3. DB-level triggers in production to reject UPDATE/DELETE
 
-**UserActivityEntry (UAE)**: id, userId, actionType, entityType, entityId, metadata JSON?, warehouseId?, orderId?, orderType?, ipAddress?, notes?, createdAt
+**UserActivityEntry (UAE)**: id, userId, actionType, entityType, entityId, metadata JSON?, warehouseId?, orderId?, orderType?, orderAssignmentId?, ipAddress?, notes?, createdAt
 
-**BinOperationEntry (BOE)**: id, userId, fromBinId?, toBinId, warItemId, quantity, lotId?, serialNumberId?, orderId?, orderType?, uaeId, createdAt
+**BinOperationEntry (BOE)**: includes `warehouseId`, `userId`, `fromBinId?`, `toBinId?`, `warItemId` (Item id), `quantity`, `uom`, `type` (`BinOperationType`), `lotId?`, `serialNumberId?`, `orderId?`, `orderType?`, fiscal flags (`affectsFiscalStock`), reversal keys, optional `userActivityEntryId`, `boxId`, `notes`, `reasonCode`, `createdAt`
 
-**ItemLedgerEntry (ILE)**: id, warehouseId, warItemId, entryType (INBOUND/OUTBOUND/ADJUSTMENT/TRANSFER), quantityChange, lotId?, serialNumberId?, orderId?, orderType?, boeId, createdAt
+**ItemLedgerEntry (ILE)**: auto-increment `id`, `warehouseId`, `warItemId`, `quantityDelta`, `uom`, `eventType` (`FiscalInventoryEventType`), `lotId?`, `serialNumberId?`, `orderId?`, `orderType?`, `boeId?`, `performedByUserId?`, `reasonCode?`, `reference?`, `externalDocumentRef?`, `createdAt`
 
-ILE only fires when total warehouse stock changes. Internal bin-to-bin moves within the same warehouse do NOT generate an ILE.
+ILE semantics: append-only; tie-break and “when to write” rules belong in the service/entity layer (same intent as before: fiscal stock events vs pure bin reshuffles).
 
 Log chain for every stock movement (single DB transaction):
 1. UAE written first
@@ -370,7 +362,7 @@ Props: `placeholder, onScan, mode ('text'|'camera'), autoFocus, disabled`
 Large-button on-screen number pad — not a native input. Touch-accurate on small/ruggedised screens.
 Props: `value, onChange, onConfirm, maxLength, decimal (false for PIN — also masks value)`
 
-**ExecutionStepper** (most complex component overall)
+**ExecutionStepper** (target design for order execution — implement when pick/receive flows land)
 3-step state machine per order line:
 1. Scan bin → 2. Scan item (+ lot/serial if tracked) → 3. Enter quantity + confirm
 
@@ -379,12 +371,10 @@ Must recover gracefully from network errors mid-execution:
 - The WW may have already physically moved the item when the error occurs
 
 ### Dashboard layout
-`DashboardLayout`, `DashboardSidebar` (collapsible, role-aware — hides inaccessible links), `DashboardTopBar` (logo, title, NotificationBell, avatar dropdown)
-
-Sidebar links: Dashboard, Warehouses, Items, Orders (PO/SO/TO/RO/AO), Users, Reports
+`DashboardShell` composes **`DashboardSidebar`** and main content; **`DashboardHeader`** (via `LemonHeader`) sits in the shell. Nav items are defined on the sidebar — align new routes there when adding pages.
 
 ### Warehouse layout
-`WarehouseLayout` (minimal full-screen, large typography), `WarehouseBottomNav` (4 large touch-target buttons: Pool, Zone, Items, Notifications)
+**`WarehouseShell`** wraps floor pages with **`WarehouseHeader`**, collapsible **`WarehouseSidebar`**, and **`WarehouseFooter`** (via `PageWrapper`).
 
 ### Auth
 `CredentialLoginForm`, `FloorLoginForm` (3-step: device code → badge scan → PIN — no keyboard after step 1), `SetupWizard` (onboarding: warehouse → zone/bin → first OM)
@@ -397,14 +387,14 @@ Sidebar links: Dashboard, Warehouses, Items, Orders (PO/SO/TO/RO/AO), Users, Rep
 
 ## Build phases
 
-Build one phase at a time. Always confirm before moving to the next. Run `npm run build` after each phase.
+Build one phase at a time. Always confirm before moving to the next. Run `pnpm build` after each phase.
 
 | Phase | Goal |
 |---|---|
 | **0 — Foundation** | Repo init, full Prisma schema, custom JWT auth (both flows), layouts, middleware, role redirect |
 | **1 — Locations** | Warehouse/Zone/Bin CRUD, dashboard location UI, warehouse read views |
 | **2 — Users** | User CRUD, role management, zone assignments, badge number generation |
-| **3 — Items** | WARItem + categories, lot API, serial number API, item lookup on floor |
+| **3 — Items** | Item + categories, lot/serial APIs, item lookup on floor |
 | **4 — Purchase Orders** | Full inbound: OM creates PO → WW receives → log chain fires → stock appears |
 | **5 — Sales Orders** | Full outbound: OM creates SO → WW picks → stock decrements |
 | **6 — Transfer Orders** | Internal moves, cross-warehouse, box tracking |
@@ -421,7 +411,7 @@ Build one phase at a time. Always confirm before moving to the next. Run `npm ru
 
 - **Server components by default** — `"use client"` only when required
 - **All DB access through Prisma** via `lib/prisma.ts` singleton — never raw SQL in components
-- **Services layer for all business logic** — API routes call services, never DB directly
+- **Entity modules for business logic** — `lib/entities/<domain>/`; API routes call these helpers, not ad-hoc Prisma in handlers (keep handlers thin)
 - **Log chain in a single transaction** — UAE + BOE + ILE written atomically
 - **Zod** for all input validation on both client and server
 - **No `any` types** — TypeScript strict mode throughout
@@ -441,14 +431,18 @@ pnpm build                                 # Production build check
 pnpm lint                                  # ESLint
 
 # Prisma
-npx prisma db push                         # Push schema to DB (no migration file — use in dev)
-npx prisma migrate dev --name <name>       # Create and apply named migration
-npx prisma generate                        # Regenerate client after schema changes
-npx prisma studio                          # Visual DB browser (port 5555)
+pnpm exec prisma db push                   # Push schema to DB (common in dev)
+pnpm exec prisma migrate dev --name <name> # Create and apply named migration
+pnpm exec prisma generate                  # Regenerate client after schema changes
+pnpm exec prisma studio                    # Visual DB browser (port 5555)
 
 # Seeding
-npm run seed:users                         # Seed 5 default users (owner → warehouse worker)
-npm run seed:warehouses                    # Seed 1 default warehouse
+pnpm run seed:all                          # Runs bundled seed flow
+pnpm run seed:users                        # Seed default users
+pnpm run seed:warehouses                   # Seed default warehouse
+
+# Tests
+pnpm test                                  # Vitest (unit/component — limited suite)
 ```
 
 ### Seed credentials
@@ -506,40 +500,36 @@ npx shadcn@latest add avatar accordion tooltip switch textarea
 ### What is implemented
 
 #### Phase 0 ✅ (Foundation)
-- Full Prisma schema (35+ models: Warehouse, Zone, Bin, User, Device, all 5 order types, 3 log models, alerts)
-- Custom JWT auth — both credential and badge+PIN flows
+- Full Prisma schema (~35 models): locations, `Item` / `BinStockItem`, parties (`BusinessParty`, `Address`, `ContactPerson`), `UnitOfMeasure`, users/devices, all five order types + lines, boxes, logs, alerts, `Error`, etc.
+- Custom JWT auth — credential and badge+PIN flows
 - Auth middleware — role-based routing and 403 guards
-- Dashboard shell with sidebar, header, metric cards, error modal
-- Warehouse shell with bottom nav
+- **DashboardShell** (sidebar + header) and shared dashboard patterns (tables, record lists, info cards)
+- **WarehouseShell** (header, sidebar, footer) for floor UX
 - Login pages — dual-tab (credential + floor)
-- Auth API routes — login, floor login, logout, refresh
-- GenericTable, GenericFactbox, DynamicForm component system
-- ScanInput and NumericKeypad shared components
-- Zustand auth store
-- Seed scripts for users and warehouses
-- Entity configs for all domain models
+- Auth handlers — `/api/auth/login`, `/api/auth/floor/login`, `/api/auth/logout`, `/api/auth/refresh`
+- GenericTable, factbox/form patterns, shared floor inputs (ScanInput, NumericKeypad)
+- Zustand auth store; `pnpm run seed:all` / `seed:users` / `seed:warehouses`
+- Entity configs under `src/components/configs/entities/` for implemented dashboard entities (warehouse, zone, bin, device, …)
 
 #### Phase 1 ✅ (Locations)
-- **Warehouses**: Full CRUD (create, read, list, update, delete), dashboard list page with quick actions
-- **Zones**: Full CRUD, dashboard list page with quick actions, filterable by warehouse
-- **Bins**: Full CRUD, dashboard list page, warehouse home shows bin inventory by zone, includes bin blocking/unblocking
-- All location APIs: `GET/POST /api/warehouses`, `GET/POST/PATCH /api/zones`, `GET/POST/PATCH /api/bins`
-- Warehouse home page shows zone/bin inventory summary
+- **Warehouses / Zones / Bins**: CRUD via dashboard APIs and list + create/detail flows on dashboard pages
+- **Bins**: blocking/unblocking supported in domain layer where wired
+- REST shape: collection `GET` + `POST`, item `GET` + **`PUT`** + `DELETE` under `/api/dashboard/warehouses`, `/zones`, `/bins` (and `[id]` segments)
+- Floor **GET** `/api/warehouse` (and `/api/warehouse/home` re-export) for home payload; bin list/detail under `/api/warehouse/bins`
 
-#### Phase 2 ✅ Partial (Users & Devices)
-- **Users**: Full CRUD API exists (`GET/POST/PATCH /api/users`), badge number generation (USR-XXXX format)
-- **Devices**: Full CRUD API + authorization flow (`GET/POST /api/devices`, `POST /api/devices/[action]`)
-- Dashboard devices page with authorize/deauthorize actions
-- User dashboard page is **stub only** (needs full implementation with role/zone assignment UI)
-- Zone assignments API exists but no UI yet
+#### Phase 2 🟡 Partial (Users & Devices)
+- **Users**: CRUD API under `/api/dashboard/users` and `/api/dashboard/users/[id]` (`GET`/`POST`/`PUT`/`DELETE`)
+- **Devices**: `GET`/`POST` `/api/dashboard/devices` plus **`POST /api/dashboard/devices/[action]`** for authorize/deauthorize-style actions; **no `[id]` DELETE route** in `app/api` (adjust docs if soft-delete is added later)
+- Dashboard **devices** page: list + authorize flow
+- Dashboard **users** page: **stub** (placeholder copy)
+- Warehouse assignments: schema + entities as applicable; **no dedicated assignments UI** yet
 
-#### Phase 3 🟡 Partial (Items)
-- **WARItem**: Full CRUD API (`GET/POST/PATCH /api/items`)
-- **ItemCategory**: Hierarchical model in schema (supports parent/child relationships)
-- **Lots**: Schema defined, model in Prisma
-- **SerialNumber & SerialNumberConfig**: Schema defined, models in Prisma
-- Dashboard items page is **stub only** (needs table, forms, category hierarchy UI)
-- Item lookup on floor side not yet implemented
+#### Phase 3 🟡 Partial (Items & stock)
+- **Item**: CRUD API `/api/dashboard/items`, `/api/dashboard/items/[id]`
+- **ItemCategory**, **Lot**, **SerialNumber**, **SerialNumberConfig**: in schema; not fully surfaced as standalone CRUD APIs in the same style as items unless added elsewhere
+- **Stock dashboard**: **GET `/api/dashboard/stock`** + **`/dashboard/stock`** page (aggregated quantities across `BinStockItem`)
+- Dashboard **`/dashboard/items`**: **placeholder** (reuses home-style warehouse overview — **not** item master-data UI)
+- Floor **GET `/api/warehouse/items`** — item lookup; stock add **POST `/api/warehouse/stock/addtobin/[id]`**
 
 #### Phases 4–9 🔴 Not Started (Orders)
 - Schema fully defined for: PurchaseOrder, SalesOrder, TransferOrder, ReturnOrder, AdjustmentOrder (all with line items)
@@ -562,32 +552,36 @@ npx shadcn@latest add avatar accordion tooltip switch textarea
 
 | Endpoint | Methods | Status | Notes |
 |---|---|---|---|
-| `/api/auth/*` | POST | ✅ | Login, floor login, logout, refresh token |
-| `/api/warehouses` | GET, POST, PATCH, DELETE | ✅ | Full CRUD |
-| `/api/zones` | GET, POST, PATCH, DELETE | ✅ | Full CRUD |
-| `/api/bins` | GET, POST, PATCH, DELETE | ✅ | Full CRUD, includes warehouse-scoped view |
-| `/api/users` | GET, POST, PATCH, DELETE | ✅ | Full CRUD, badge generation |
-| `/api/devices` | GET, POST, PATCH, DELETE | ✅ | Full CRUD, authorization flow |
-| `/api/items` | GET, POST, PATCH, DELETE | ✅ | Full CRUD |
-| `/api/warehouse/*` | GET | ✅ | Home page (zone/bin data, order pool) |
-| `/api/warehouse/bins/*` | GET, POST | ✅ | Floor-side bin detail, add to bin |
-| `/api/warehouse/items` | GET | ✅ | Floor-side item lookup |
-| `/api/warehouse/stock/addtobin/*` | POST | ✅ | Add items to bin (floor) |
-| `/api/logs` | GET | 🔴 | Stub only |
-| `/api/errors` | POST | ✅ | Error logging for client |
-| Order endpoints | — | 🔴 | Not yet implemented |
+| `/api/auth/*` | POST | ✅ | Login, floor login, logout, refresh |
+| `/api/dashboard/warehouses`, `.../[id]` | GET, POST; GET, PUT, DELETE | ✅ | Office warehouse CRUD |
+| `/api/dashboard/zones`, `.../[id]` | GET, POST; GET, PUT, DELETE | ✅ | Zone CRUD |
+| `/api/dashboard/bins`, `.../[id]` | GET, POST; GET, PUT, DELETE | ✅ | Bin CRUD |
+| `/api/dashboard/users`, `.../[id]` | GET, POST; GET, PUT, DELETE | ✅ | User CRUD |
+| `/api/dashboard/devices`, `/api/dashboard/devices/[action]` | GET, POST; POST | ✅ | List/create devices; authorize/deauthorize via `[action]` |
+| `/api/dashboard/items`, `.../[id]` | GET, POST; GET, PUT, DELETE | ✅ | Item CRUD |
+| `/api/dashboard/home` | GET | ✅ | Aggregates for dashboard home UI |
+| `/api/dashboard/stock` | GET | ✅ | Stock dashboard aggregates |
+| `/api/warehouse`, `/api/warehouse/home` | GET | ✅ | Floor home (re-export) |
+| `/api/warehouse/bins`, `.../[id]` | GET | ✅ | Floor bin list / detail |
+| `/api/warehouse/items` | GET | ✅ | Floor item lookup |
+| `/api/warehouse/stock/addtobin/[id]` | POST | ✅ | Add stock to bin |
+| `/api/logs` | GET | 🔴 | Stub |
+| `/api/errors` | POST | ✅ | Persisted client/server errors |
+| `/api/seed/users` | GET | ✅ | Dev seeding only |
+| Order APIs | — | 🔴 | No dedicated order route handlers yet (schema only) |
 
 ### Dashboard Pages
 
 | Page | Status | Notes |
 |---|---|---|
-| `/dashboard` | 🔴 | Stub (home) |
+| `/dashboard` | ✅ | Home — warehouses/zones/bins overview (`/api/dashboard/home`) |
+| `/dashboard/stock` | ✅ | Stock totals and per-SKU table |
 | `/dashboard/warehouses` | ✅ | List, create, view |
-| `/dashboard/zones` | ✅ | List, create, view, filterable by warehouse |
+| `/dashboard/zones` | ✅ | List, create, view, filter by warehouse |
 | `/dashboard/bins` | ✅ | List, create, view |
-| `/dashboard/items` | 🔴 | Stub only |
-| `/dashboard/users` | 🔴 | Stub only |
-| `/dashboard/devices` | ✅ | List, authorize, deauthorize |
+| `/dashboard/items` | 🟡 | Placeholder (not item master UI) |
+| `/dashboard/users` | 🔴 | Stub |
+| `/dashboard/devices` | ✅ | List, authorize/deauthorize |
 
 ### Warehouse Pages
 

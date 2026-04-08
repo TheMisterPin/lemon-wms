@@ -1,0 +1,23 @@
+---
+description: Warehouse floor UX — shared scanners, keypad, touch constraints
+globs:
+  - src/components/warehouse/**/*.tsx
+  - src/components/shared/**/*.tsx
+alwaysApply: false
+---
+
+# Warehouse floor UI
+
+## Components
+
+- **`ScanInput`:** USB HID scanners (keyboard wedge, submit on Enter) and optional camera mode; must not drop scans on network errors — allow retry and show errors clearly.
+- **`NumericKeypad`:** large touch targets; PIN entry uses **non-decimal** mode and masked display where implemented.
+
+## Layout
+
+- **`WarehouseShell`:** header, collapsible sidebar, footer — keep full-screen, legible typography.
+- Target **minimum width ~375px** for floor views.
+
+## Stack
+
+- Floor screens are **not** the place for heavy shadcn usage; keep custom components simple and durable on rugged/tablet devices. Dashboard patterns (`GenericTable`, etc.) belong on `/dashboard`, not necessarily here.

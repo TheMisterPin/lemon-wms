@@ -3,12 +3,14 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
-import { ArrowLeft, Package } from 'lucide-react'
+import { ArrowLeft, Package, Truck } from 'lucide-react'
 import { GenericTable } from '@/components/tables/generic-table'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import AddItemToBinModal from '@/components/warehouse/modals/add-item-to-bin-modal'
+import LoadItemToTrolleyModal from '@/components/warehouse/modals/load-item-to-trolley-modal'
 import { useBinDetails, type BinStockRecord } from '@/hooks/warehouse/use-bin-details'
+import { useLoadItemToTrolley } from '@/hooks/warehouse/use-load-item-to-trolley'
 import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
 
 const itemColumns: TableColumnConfig<BinStockRecord>[] = [
@@ -37,6 +39,7 @@ export function WarehouseBinDetailsPageView() {
   const params = useParams<{ id: string }>()
   const binId = params?.id ?? ''
   const { bin, items, isLoading, occupancy, refresh } = useBinDetails(binId)
+  const loadModal = useLoadItemToTrolley(binId, refresh)
 
   return (
     <main className="select-none flex flex-col h-full bg-linear-50 from-slate-800 to-slate-900 p-6 gap-4 overflow-hidden">
@@ -79,9 +82,27 @@ export function WarehouseBinDetailsPageView() {
             columns={itemColumns}
             records={items}
             emptyMessage={isLoading ? 'Loading items...' : 'No items currently in this bin.'}
+            actions={[
+              {
+                icon: <Truck className="size-4" />,
+                tooltip: 'Load to trolley',
+                onClick: (row) => loadModal.openForItem(row)
+              }
+            ]}
           />
         </div>
       </Card>
+
+      <LoadItemToTrolleyModal
+        isOpen={loadModal.isOpen}
+        onOpenChange={loadModal.onOpenChange}
+        selectedItem={loadModal.selectedItem}
+        quantity={loadModal.quantity}
+        onQuantityChange={loadModal.setQuantity}
+        onSubmit={loadModal.submit}
+        isSubmitting={loadModal.isSubmitting}
+        error={loadModal.error}
+      />
     </main>
   )
 }

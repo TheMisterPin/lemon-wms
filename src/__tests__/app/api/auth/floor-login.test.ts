@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/lib/prisma', () => ({
   default: {
-    user: { findUnique: vi.fn() },
+    user: { findUnique: vi.fn(), update: vi.fn().mockResolvedValue({}) },
     userActivityEntry: { create: vi.fn().mockResolvedValue({}) },
     refreshToken: { create: vi.fn().mockResolvedValue({}) }
   }
@@ -123,15 +123,15 @@ describe('POST /api/auth/floor/login', () => {
     expect(body.error).toBe('Device is inactive.')
   })
 
-  it('returns 401 for an unknown badge number', async () => {
+  it('returns 404 for an unknown badge number', async () => {
     mockUpsertDevice().mockResolvedValue({ ...activeDevice, authorized: true })
     mockUser().mockResolvedValue(null)
 
     const req = makeRequest({ deviceCode: 'DEV-001', badgeNumber: 'USR-9999', pin: '1234' })
     const res = await POST(req)
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(404)
     const body = await res.json()
-    expect(body.error).toBe('Invalid badge or PIN')
+    expect(body.error).toBe('User not found')
   })
 
   it('returns 403 for a deactivated user', async () => {
@@ -165,7 +165,7 @@ describe('POST /api/auth/floor/login', () => {
     const res = await POST(req)
     expect(res.status).toBe(401)
     const body = await res.json()
-    expect(body.error).toBe('Invalid badge or PIN')
+    expect(body.error).toBe('Wrong PIN')
   })
 
   it('returns 200 with tokens, user and device on success', async () => {

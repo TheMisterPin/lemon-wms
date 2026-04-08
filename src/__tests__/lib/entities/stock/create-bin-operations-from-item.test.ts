@@ -19,7 +19,9 @@ function createMockPrisma() {
     binStockItem: {
       create: vi.fn(),
       update: vi.fn(),
-      findFirst: vi.fn()
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      delete: vi.fn()
     },
     itemLedgerEntry: {
       create: vi.fn(),
@@ -186,6 +188,10 @@ describe('createBinOperationsFromItem', () => {
       .mockResolvedValueOnce({ id: 'boe-pos' })
 
     tx.binStockItem.update.mockResolvedValueOnce({ id: 'source-stock-updated' })
+    tx.binStockItem.findUnique.mockResolvedValueOnce({
+      id: 'source-stock',
+      quantityAvailable: new Prisma.Decimal(10)
+    })
     tx.binStockItem.create.mockResolvedValueOnce({ id: 'dest-stock-created' })
     tx.itemLedgerEntry.createMany.mockResolvedValue({ count: 2 })
 
@@ -210,7 +216,11 @@ describe('createBinOperationsFromItem', () => {
 
     expect(tx.binStockItem.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ quantityAvailable: { decrement: 4 } })
+        where: { id: 'source-stock' },
+        data: expect.objectContaining({
+          quantityAvailable: new Prisma.Decimal(6),
+          lastOperationBoeId: 'boe-neg'
+        })
       })
     )
 

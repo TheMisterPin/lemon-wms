@@ -1,0 +1,26 @@
+---
+description: Route handler conventions for Lemon WMS API routes
+globs: src/app/api/**/*.ts
+alwaysApply: false
+---
+
+# API route handlers
+
+## Namespace
+
+- **Dashboard (office):** `src/app/api/dashboard/...` — authenticated office roles.
+- **Warehouse (floor):** `src/app/api/warehouse/...` — floor roles / device context.
+- **Auth:** `src/app/api/auth/...` — login, floor login, logout, refresh.
+
+Do not add new “flat” resources under `src/app/api/<entity>` unless intentionally shared; follow the dashboard vs warehouse split.
+
+## Handler shape
+
+- Validate body/query with **Zod**; return consistent JSON (use shared helpers under `src/lib/api/` where the codebase already does).
+- **No Prisma in huge inline blocks** — call **`src/lib/entities/<domain>/`** functions (create, get, list, update, delete).
+- Collection routes: typically **GET** + **POST**. Resource routes `[id]`: **GET**, **PUT** (this project uses **PUT**, not PATCH, for updates), **DELETE** where implemented.
+- Devices: also **`POST /api/dashboard/devices/[action]`** for authorize/deauthorize-style actions.
+
+## Auth
+
+Reuse existing patterns: `verifyAccessTokenFromRequest` / role checks from `lib/auth/middleware` — mirror sibling routes in the same folder.

@@ -181,6 +181,7 @@ model Device {
   warehouse       Warehouse? @relation(fields: [warehouseId], references: [id])
   zone            Zone?      @relation(fields: [zoneId], references: [id])
   loggedInByUsers User[]     @relation("UserLastDevice")
+  transitBinStockItems BinStockItem[] @relation("TransitBinStockItems")
 }
 
 model RefreshToken {
@@ -207,6 +208,7 @@ model BinStockItem {
   quantityBlocked    Decimal       @default(0) @db.Decimal(18, 4)
   uom                String
   status             BinItemStatus @default(AVAILABLE)
+  transitDeviceId    String?
   expiryDate         DateTime?
   createdByBoeId     String?
   lastOperationBoeId String?
@@ -215,6 +217,9 @@ model BinStockItem {
   boxId              String?
   description        String
   reservedByOrderId  String?
+  reservedByOrderLineId String?
+  
+  transitDevice        Device?       @relation("TransitBinStockItems", fields: [transitDeviceId], references: [id])
   bin                Bin           @relation(fields: [binId], references: [id])
   item               Item          @relation(fields: [itemId], references: [id])
   lot                Lot?          @relation(fields: [lotId], references: [id])
@@ -222,7 +227,7 @@ model BinStockItem {
   unitOfMeasure      UnitOfMeasure @relation(fields: [uom], references: [id])
   boxLines           BoxLine[]
 
-  @@unique([binId, itemId, lotId, serialNumberId])
+  @@unique([binId, itemId, lotId, serialNumberId, status, transitDeviceId])
   @@index([warehouseId, itemId])
   @@index([binId, itemId])
   @@index([status])

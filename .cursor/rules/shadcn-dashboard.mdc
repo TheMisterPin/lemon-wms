@@ -1,0 +1,46 @@
+---
+description: shadcn/ui composition, Radix vs base API, styling — dashboard UI
+globs:
+  - src/components/ui/**/*.tsx
+  - src/components/dashboard/**/*.tsx
+alwaysApply: false
+---
+
+# shadcn/ui (dashboard)
+
+Full detail lives in **`.claude/skills/shadcn/rules/`** (`composition.md`, `base-vs-radix.md`, `styling.md`, `forms.md`, `icons.md`). This file is the **condensed** checklist.
+
+## Radix vs `base` UI
+
+- Run `npx shadcn@latest info` and check the **`base`** field for this project.
+- **Radix:** triggers use **`asChild`** (no extra wrapper divs). **`Select`:** items inline in JSX.
+- **Base:** triggers use **`render={<Button />}`**; non-button targets need **`nativeButton={false}`**. **`Select`** needs an **`items`** prop; still wrap items in **`SelectGroup`** inside content.
+
+## Composition (both)
+
+- Menu/list items: wrap in **Group** (`SelectGroup`, `DropdownMenuGroup`, etc.) — never loose items only in the scroll container.
+- **Dialog / Sheet / Drawer:** always include a **Title** (use `className="sr-only"` if hidden). Prefer **AlertDialog** for destructive confirms.
+- **Card:** `CardHeader` + `CardTitle` / `CardDescription`, `CardContent`, optional `CardFooter`.
+- **Tabs:** `TabsTrigger` only inside **`TabsList`**.
+- **Avatar:** always **`AvatarFallback`**.
+- **Button:** no built-in `isLoading` — use **`Spinner`** + **`disabled`** + `data-icon` (see icons rule).
+- Prefer **Separator**, **Skeleton**, **Badge** over hand-rolled `hr` / pulse divs / styled spans.
+
+## Styling
+
+- Use **semantic** classes (`bg-primary`, `text-muted-foreground`, `text-destructive`) and component **variants**, not raw `bg-blue-500` for product UI.
+- Use **`cn()`** for conditional classes. Avoid **`space-x-*` / `space-y-*`** in shadcn layouts where the skill says to use gap/stack patterns.
+- Do not assign manual **z-index** on overlays; use library stacking.
+
+## Forms
+
+- Prefer **`FieldGroup` + `Field` + `FieldLabel`** over ad-hoc `div` + `space-y-*`.
+- Inside **`InputGroup`**, use **`InputGroupInput`** / **`InputGroupTextarea`**, not raw `Input`.
+
+## Icons (this project: lucide-react)
+
+- In **Button** (and similar): **`data-icon="inline-start"`** or **`inline-end`**; **no** `size-4` / `mr-2` on the icon unless the user explicitly wants custom sizing.
+
+## Toasts
+
+- Use **`sonner`** (`toast.success`, etc.) when the project already imports it — stay consistent with existing dashboard code.
