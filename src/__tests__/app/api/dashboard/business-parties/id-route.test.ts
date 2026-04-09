@@ -78,7 +78,7 @@ describe('GET /api/dashboard/business-parties/[id]', () => {
   it('returns 200 with supplier items', async () => {
     mockAuth.mockReturnValue({ userId: 'u1', role: 'OWNER' })
     mockGetItems.mockResolvedValue([
-      { sku: 'A', name: 'Item A', uom: 'EA' }
+      { id: 'ITEM-A', sku: 'A', name: 'Item A', uom: 'EA' }
     ])
     const res = await GET(makeReq('SUP-0001'), {
       params: Promise.resolve({ id: 'SUP-0001' })
@@ -86,6 +86,6 @@ describe('GET /api/dashboard/business-parties/[id]', () => {
     const body = await res.json()
 
     expect(res.status).toBe(200)
-    expect(body.data).toEqual([{ sku: 'A', name: 'Item A', uom: 'EA' }])
+    expect(body.data).toEqual([{ id: 'ITEM-A', sku: 'A', name: 'Item A', uom: 'EA' }])
   })
 })

@@ -15,6 +15,11 @@ export async function getTrolleyItems(
       quantityAvailable: { gt: 0 }
     },
     include: {
+      item: {
+        select: {
+          name: true
+        }
+      },
       bin: {
         select: {
           id: true,
@@ -32,7 +37,7 @@ export async function getTrolleyItems(
     sourceBinName: item.bin.name,
     sourceBinCode: item.bin.code,
     itemId: item.itemId,
-    description: item.description,
+    description: item.item.name,
     lotId: item.lotId,
     serialNumberId: item.serialNumberId,
     uom: item.uom,

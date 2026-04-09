@@ -22,6 +22,7 @@ async function getItemsForVendor(prisma: PrismaClient, businessPartyId: string) 
       deletedAt: null
     },
     select: {
+      id: true,
       sku: true,
       name: true,
       uom: true

@@ -194,7 +194,7 @@ describe('move-operations transit flow', () => {
         id: 'transit-1',
         binId: 'bin-origin',
         itemId: 'item-1',
-        description: 'Widget A',
+        item: { name: 'Widget A' },
         lotId: null,
         serialNumberId: null,
         uom: 'EA',

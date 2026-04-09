@@ -1,5 +1,6 @@
 import { type PrismaClient } from '@/generated/prisma'
 
+import { suppliers } from './mocks/business-parties'
 import { items } from './mocks/items-mock'
 
 export async function seedItems(prisma: PrismaClient) {
@@ -47,11 +48,16 @@ export async function seedItems(prisma: PrismaClient) {
       decimalRound: 3
     } }
   )
+  const itemsWithSuppliers = items.map((item, index) => ({
+    ...item,
+    supplierId: suppliers[index % suppliers.length].party.id
+  }))
+
   await prisma.item.createMany({
-    data: items,
+    data: itemsWithSuppliers,
     skipDuplicates: true
   })
 
-  return { itemsCount: items.length }
+  return { itemsCount: itemsWithSuppliers.length }
 
 }

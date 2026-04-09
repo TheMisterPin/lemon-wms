@@ -1,0 +1,46 @@
+## Summary
+
+- harden purchase-order and warehouse order regression paths with targeted tests
+- fix move-operations type mismatches blocking production build verification
+- align trolley item query mapping with current schema fields (`item.name`, `name/sku` stock upsert inputs)
+- add phase-9 plain-English documentation and JSDoc coverage for core purchase-order flows
+
+## Requirements Check
+
+- BP-01 ✅ complete
+- BP-02 ✅ complete
+- PO-01 ✅ complete
+- PO-02 ✅ complete
+- PO-03 ✅ complete
+- PO-04 ✅ complete
+- PO-05 ✅ complete
+- PO-06 ✅ complete
+- UID-01 ✅ complete
+- UID-02 ✅ complete
+- UID-03 ✅ complete
+- UID-04 ✅ complete
+- UIW-01 ✅ complete
+- UIW-02 ✅ complete
+- UIW-03 ✅ complete
+- UIW-04 ✅ complete
+- TST-01 ✅ complete (phase 8 hardening + regression verification)
+
+## Test Plan
+
+- `pnpm vitest src/__tests__/hooks/warehouse/use-purchase-orders.test.tsx src/__tests__/lib/entities/move-operations/transit-operations.test.ts`
+- `pnpm vitest`
+- `pnpm next build`
+
+## Notes
+
+- an unrelated pre-existing `.planning/PROJECT.md` modification remains intentionally excluded from this PR commit.
+
+## Documentation References
+
+- `.docs/purchase-orders/OVERVIEW.md`
+- `.docs/purchase-orders/create-purchase-order-modal.md`
+- `.docs/purchase-orders/dashboard-orders-page.md`
+- `.docs/purchase-orders/warehouse-orders-page.md`
+- `.docs/purchase-orders/use-purchase-orders-hook.md`
+- `.docs/purchase-orders/create-purchase-order-domain.md`
+- `.docs/purchase-orders/transition-purchase-order-domain.md`

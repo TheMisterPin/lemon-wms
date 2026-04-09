@@ -24,6 +24,10 @@ type PoScopeRow = {
   warehouseId: string
 }
 
+/**
+ * Loads a single purchase order and rejects soft-deleted/missing records.
+ * This gives all transition operations a shared, consistent starting point.
+ */
 async function loadActivePurchaseOrder(
   prisma: PrismaClient,
   id: string
@@ -44,6 +48,10 @@ async function loadActivePurchaseOrder(
   return row
 }
 
+/**
+ * Enforces warehouse ownership for floor-side transitions.
+ * Warehouse users can only control orders belonging to their own warehouse.
+ */
 function assertWarehouseMatch(row: PoScopeRow, tokenWarehouseId: string) {
   if (row.warehouseId !== tokenWarehouseId) {
     throw new DomainError(WAREHOUSE_MISMATCH, 'FORBIDDEN', 403)
@@ -55,6 +63,10 @@ export type TransitionedPurchaseOrder = {
   status: OrderStatus
 }
 
+/**
+ * Releases a draft purchase order so warehouse teams can see and act on it.
+ * Allowed transition: DRAFT -> RELEASED.
+ */
 export async function releasePurchaseOrder(
   prisma: PrismaClient,
   id: string
@@ -74,6 +86,10 @@ export async function releasePurchaseOrder(
   return { id, status: OrderStatus.RELEASED }
 }
 
+/**
+ * Starts operational execution of a released purchase order.
+ * Allowed transition: RELEASED -> EXECUTING.
+ */
 export async function startPurchaseOrder(
   prisma: PrismaClient,
   id: string,
@@ -95,6 +111,10 @@ export async function startPurchaseOrder(
   return { id, status: OrderStatus.EXECUTING }
 }
 
+/**
+ * Pauses an order that is currently being executed on the floor.
+ * Allowed transition: EXECUTING -> PAUSED.
+ */
 export async function pausePurchaseOrder(
   prisma: PrismaClient,
   id: string,
@@ -116,6 +136,10 @@ export async function pausePurchaseOrder(
   return { id, status: OrderStatus.PAUSED }
 }
 
+/**
+ * Resumes a previously paused warehouse execution flow.
+ * Allowed transition: PAUSED -> EXECUTING.
+ */
 export async function resumePurchaseOrder(
   prisma: PrismaClient,
   id: string,
