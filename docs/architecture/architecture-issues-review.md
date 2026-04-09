@@ -15,7 +15,7 @@ There are also notable performance and maintainability risks: heavyweight aggreg
 - **Evidence (paths/symbols):** `middleware()` in `middleware.ts` skips all `/api/`* requests; many API handlers only call `verifyAccessTokenFromRequest()` without role checks (examples: `src/app/api/dashboard/home/route.ts`, `src/app/api/dashboard/items/route.ts` GET, `src/app/api/dashboard/bins/route.ts` GET, `src/app/api/dashboard/devices/route.ts` GET, `src/app/api/dashboard/warehouses/route.ts` GET, `src/app/api/warehouse/items/route.ts`).
 - **Why it matters:** once middleware opts out of API authz, each route must enforce both authentication and authorization boundaries; authentication-only checks are insufficient for a split-surface system.
 - **Likely impact:** cross-role data exposure (office users reading floor datasets, floor users reading dashboard datasets), policy drift, and future regressions as new handlers copy existing patterns.
-- **Recommendation:** add explicit server-side authorization guards per namespace (`requireOfficeRole`, `requireFloorRole`) and apply them to every `/api/dashboard/`* and `/api/warehouse/*` handler; back this with route-level authorization tests.
+- **Recommendation:** add explicit server-side authorization guards per namespace (`requireOfficeRole`, `requireFloorRole`) and apply them to every `/api/dashboard/`* and `/api/warehouse/`* handler; back this with route-level authorization tests.
 
 ### C2. Warehouse scoping is optional in sensitive handlers, enabling broad access paths
 
@@ -31,7 +31,7 @@ There are also notable performance and maintainability risks: heavyweight aggreg
 - **Evidence (paths/symbols):** warehouse routes still import from `src/lib/services/bin-operations/`*; `src/lib/services/bin-operations/create-from-item.ts` is marked `Todo: delete this`; `src/lib/entities/move-operations/use-cases/create-bin-operations-from-item.ts` imports helper logic from `@/lib/services/bin-operations/helpers`.
 - **Why it matters:** this inverts intended layering (`entities` should be the domain source) and creates ambiguity over where business rules should live.
 - **Likely impact:** duplicated logic, harder refactors, and inconsistent behavior between old/new call paths.
-- **Recommendation:** complete migration to `src/lib/entities/`* only; move shared helpers into `entities/move-operations`; deprecate and remove `src/lib/services/*` exports.
+- **Recommendation:** complete migration to `src/lib/entities/`* only; move shared helpers into `entities/move-operations`; deprecate and remove `src/lib/services/`* exports.
 
 ### H3. Error ingestion endpoint is unauthenticated and can be abused
 
@@ -158,7 +158,7 @@ There are also notable performance and maintainability risks: heavyweight aggreg
 
 1. **Complete domain-layer consolidation**
 
-- Migrate all `src/lib/services/bin-operations/`* logic into `src/lib/entities/move-operations/*`, then remove legacy exports.
+- Migrate all `src/lib/services/bin-operations/`* logic into `src/lib/entities/move-operations/`*, then remove legacy exports.
 
 1. **Build a consistent operational observability layer**
 
