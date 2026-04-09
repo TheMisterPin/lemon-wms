@@ -38,7 +38,7 @@ export default function LoadItemToTrolleyModal({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>
-            {selectedItem ? `Load ${selectedItem.description} to trolley` : 'Load item to trolley'}
+            {selectedItem ? `Load ${selectedItem.name} to trolley` : 'Load item to trolley'}
           </DialogTitle>
           <DialogDescription>
             Select the quantity to move from this bin into your trolley.

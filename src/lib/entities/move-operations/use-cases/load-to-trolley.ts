@@ -69,7 +69,8 @@ export async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
           transitDeviceId: deviceId,
           createdByBoeId: transferLoadBoe.id,
           lastOperationBoeId: transferLoadBoe.id,
-          description: source.description
+          name: source.name,
+          sku: source.sku
         }
       })
 

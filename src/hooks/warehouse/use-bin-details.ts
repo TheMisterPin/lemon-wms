@@ -7,8 +7,8 @@ import type { ApiResponse } from '@/types/responses/basic-response'
 
 export type BinStockRecord = {
   id: string
-  description: string
-  itemId: string
+  name: string
+  sku: string
   lotId: string | null
   serialNumberId: string | null
   boxId: string | null

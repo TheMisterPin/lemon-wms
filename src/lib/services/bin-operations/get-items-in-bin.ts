@@ -7,8 +7,8 @@ async function getItemsInBin(
 ) {
   const baseSelect = {
     id: true,
-    description: true,
-    itemId: true,
+    name: true,
+    sku: true,
     lotId: true,
     boxId: true,
     serialNumberId: true,

@@ -6,7 +6,7 @@ import {
   LayoutDashboard,
   Warehouse,
   Package,
-  // ClipboardList,
+  ClipboardList,
   Users,
   // BarChart3,
   MapPin,
@@ -23,7 +23,7 @@ const NAV_LINKS = [
   { label: 'Zones',      href: '/dashboard/zones',      icon: MapPin },
   { label: 'Bins',       href: '/dashboard/bins',       icon: ShelvingUnit },
   { label: 'Items',      href: '/dashboard/items',      icon: Package },
-  // { label: 'Orders',     href: '/dashboard/orders',     icon: ClipboardList },
+  { label: 'Orders',     href: '/dashboard/orders',     icon: ClipboardList },
   { label: 'Users',      href: '/dashboard/users',      icon: Users },
   { label: 'Devices',     href: '/dashboard/devices',     icon: TabletSmartphone }
   // { label: 'Reports',    href: '/dashboard/reports',    icon: BarChart3 }

@@ -14,7 +14,7 @@ export async function seedBinStockItems(prisma: PrismaClient) {
       orderBy: { id: 'asc' }
     }),
     prisma.item.findMany({
-      select: { id: true, uom: true },
+      select: { id: true, uom: true, name: true, sku: true },
       orderBy: { id: 'asc' }
     })
   ])
@@ -50,7 +50,7 @@ export async function seedBinStockItems(prisma: PrismaClient) {
       itemCursor = (itemCursor + 17) % items.length
 
       const quantityType = randomInt(0, 2)
-      const quantity = randomInt(1, 250)
+      const quantity = randomInt(1, 15)
       const quantityAvailable = quantityType === 0 ? quantity : 0
       const quantityReserved = quantityType === 1 ? quantity : 0
       const quantityBlocked = quantityType === 2 ? quantity : 0
@@ -67,7 +67,8 @@ export async function seedBinStockItems(prisma: PrismaClient) {
         binId: bin.id,
         itemId: item.id,
         uom: item.uom,
-        description: `Seeded stock in ${bin.id}`,
+        name: item.name,
+        sku: item.sku,
         quantityAvailable,
         quantityReserved,
         quantityBlocked,

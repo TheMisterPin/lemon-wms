@@ -12,7 +12,8 @@ export type TrolleyItem = {
   sourceBinName: string
   sourceBinCode: string
   itemId: string
-  description: string
+  name: string
+  sku: string
   lotId: string | null
   serialNumberId: string | null
   uom: string

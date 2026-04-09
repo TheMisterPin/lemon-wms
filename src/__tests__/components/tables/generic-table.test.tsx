@@ -262,4 +262,84 @@ describe('GenericTable', () => {
     expect(screen.queryByText('North Hub')).toBeNull()
     expect(screen.getByText('South Hub')).toBeTruthy()
   })
+
+  it('applies rowStyleIf classes using first matching rule (whenPositive)', () => {
+    type QtyRow = {
+      id: string
+      name: string
+      quantityBlocked: number
+      quantityReserved: number
+      quantityAvailable: number
+    }
+
+    const columns: TableColumnConfig<QtyRow>[] = [{ label: 'Name', accessor: 'name' }]
+
+    render(
+      <GenericTable
+        columns={columns}
+        records={[
+          { id: 'a', name: 'Blocked row', quantityBlocked: 1, quantityReserved: 1, quantityAvailable: 0 },
+          { id: 'b', name: 'Reserved row', quantityBlocked: 0, quantityReserved: 2, quantityAvailable: 0 },
+          { id: 'c', name: 'Available row', quantityBlocked: 0, quantityReserved: 0, quantityAvailable: 3 }
+        ]}
+        rowStyleIf={{
+          rules: [
+            {
+              colName: 'quantityBlocked',
+              whenPositive: true,
+              bgClassName: 'bg-red-900',
+              textClassName: 'text-red-50'
+            },
+            {
+              colName: 'quantityReserved',
+              whenPositive: true,
+              bgClassName: 'bg-amber-900',
+              textClassName: 'text-amber-50'
+            },
+            {
+              colName: 'quantityAvailable',
+              whenPositive: true,
+              bgClassName: 'bg-slate-800',
+              textClassName: 'text-slate-100'
+            }
+          ]
+        }}
+      />
+    )
+
+    const rows = screen.getAllByRole('row').filter((row) => row.querySelector('td'))
+    expect(rows[0].className).toContain('bg-red-900')
+    expect(rows[1].className).toContain('bg-amber-900')
+    expect(rows[2].className).toContain('bg-slate-800')
+  })
+
+  it('slices rows when pageSize is set without external pagination', () => {
+    const columns: TableColumnConfig<TestRow>[] = [{ label: 'Name', accessor: 'name' }]
+
+    const records: TestRow[] = Array.from({ length: 12 }, (_, index) => ({
+      id: `r-${index}`,
+      name: `Row ${index}`,
+      status: 'active',
+      uom: 'EA',
+      createdAt: '2025-03-15T00:00:00Z',
+      lastSeenAt: '2025-03-15T09:45:00Z',
+      isActive: true,
+      currentCapacity: 1,
+      maxCapacity: 10
+    }))
+
+    render(<GenericTable columns={columns} records={records} pageSize={10} />)
+
+    expect(screen.getByText('Row 0')).toBeTruthy()
+    expect(screen.getByText('Row 9')).toBeTruthy()
+    expect(screen.queryByText('Row 10')).toBeNull()
+
+    expect(screen.getByText('1 / 2')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: /next page/i }))
+
+    expect(screen.queryByText('Row 0')).toBeNull()
+    expect(screen.getByText('Row 10')).toBeTruthy()
+    expect(screen.getByText('Row 11')).toBeTruthy()
+  })
 })

@@ -73,7 +73,8 @@ export async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
         itemId: transitItem.itemId,
         lotId: transitItem.lotId,
         serialNumberId: transitItem.serialNumberId,
-        description: transitItem.description,
+        name: transitItem.name,
+        sku: transitItem.sku,
         uom: transitItem.uom,
         quantity: unloadQty,
         boeId: transferUnloadBoe.id

@@ -40,7 +40,9 @@ import {
   GenericTableProps,
   ProgressColumnConfig,
   SortDirection,
-  TableColumnConfig
+  TableColumnConfig,
+  TableRowStyleIfConfig,
+  TableRowStyleIfRule
 } from '@/types/components/table/generic-table.types'
 
 function isDataColumn<T extends FieldValues>(column: TableColumnConfig<T>): column is DataColumnConfig<T> {
@@ -69,6 +71,43 @@ function shouldHideColumn<T extends FieldValues>(column: TableColumnConfig<T>, r
   }
 
   return records.every((record) => isNullOrEmptyTextValue(getDisplayFieldRawValue(record, column)))
+}
+
+function rowMatchesStyleRule<T extends FieldValues>(row: T, rule: TableRowStyleIfRule<T>): boolean {
+  const raw = getValueByPath(row, rule.colName)
+
+  if (rule.whenPositive) {
+    return Number(raw) > 0
+  }
+
+  if (rule.value !== undefined) {
+    return raw === rule.value || String(raw) === String(rule.value)
+  }
+
+  return Boolean(raw)
+}
+
+function getRowStyleClasses<T extends FieldValues>(
+  row: T,
+  config?: TableRowStyleIfConfig<T>
+): { bgClassName: string; textClassName: string } {
+  if (!config?.rules?.length) {
+    return { bgClassName: '', textClassName: '' }
+  }
+
+  for (const rule of config.rules) {
+    if (rowMatchesStyleRule(row, rule)) {
+      return {
+        bgClassName: rule.bgClassName ?? '',
+        textClassName: rule.textClassName ?? ''
+      }
+    }
+  }
+
+  return {
+    bgClassName: config.defaultBgClassName ?? '',
+    textClassName: config.defaultTextClassName ?? ''
+  }
 }
 
 function getIndicatorColor(value: unknown, colorMap: Record<string, string>, fallbackColor = '#94a3b8'): string {
@@ -258,6 +297,9 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   emptyMessage = 'No records found.',
   actions,
   pagination,
+  pageSize,
+  rowStyleIf,
+  toolbarExtra,
   search,
   section
 }: GenericTableProps<T>) {
@@ -267,11 +309,9 @@ export function GenericTable<T extends FieldValues & { id: string }>({
   )
 
   const totalColumns = Math.max(1, visibleColumns.length + (actions?.length ? 1 : 0))
-  const paginationPosition = pagination?.position ?? 'footer'
-  const showHeaderPagination = paginationPosition === 'header'
-  const showFooterPagination = paginationPosition === 'footer'
   const tone = getEntityTone(section?.entityTone)
   const [searchText, setSearchText] = useState('')
+  const [internalPage, setInternalPage] = useState(0)
 
   const [sortColumnIndex, setSortColumnIndex] = useState<number | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
@@ -340,6 +380,58 @@ export function GenericTable<T extends FieldValues & { id: string }>({
     )
   }, [filteredRecords, visibleColumns, sortColumnIndex, sortDirection])
 
+  const useBuiltInPagination =
+    pagination === undefined && typeof pageSize === 'number' && pageSize > 0
+
+  const builtInTotalPages = useMemo(() => {
+    if (!useBuiltInPagination || !pageSize) {
+      return 1
+    }
+
+    return Math.max(1, Math.ceil(sortedRecords.length / pageSize))
+  }, [useBuiltInPagination, sortedRecords.length, pageSize])
+
+  useEffect(() => {
+    if (!useBuiltInPagination) {
+      return
+    }
+
+    setInternalPage((previous) => Math.min(previous, builtInTotalPages - 1))
+  }, [useBuiltInPagination, builtInTotalPages])
+
+  const displayRecords = useMemo(() => {
+    if (!useBuiltInPagination || !pageSize) {
+      return sortedRecords
+    }
+
+    const start = internalPage * pageSize
+
+    return sortedRecords.slice(start, start + pageSize)
+  }, [useBuiltInPagination, sortedRecords, internalPage, pageSize])
+
+  const effectivePagination = pagination
+    ?? (useBuiltInPagination
+      ? {
+        page: internalPage,
+        totalPages: builtInTotalPages,
+        onPrev: () => setInternalPage((previous) => Math.max(0, previous - 1)),
+        onNext: () => setInternalPage((previous) => Math.min(builtInTotalPages - 1, previous + 1)),
+        position: 'footer' as const
+      }
+      : undefined)
+
+  const paginationPosition = effectivePagination?.position ?? 'footer'
+  const showHeaderPagination = paginationPosition === 'header'
+  const showFooterPagination = paginationPosition === 'footer'
+
+  useEffect(() => {
+    if (!useBuiltInPagination) {
+      return
+    }
+
+    setInternalPage(0)
+  }, [useBuiltInPagination, searchText, records.length])
+
   function getSortIcon(index: number) {
     if (sortColumnIndex !== index) {
       return <ArrowUpDown className="size-3.5 opacity-30" />
@@ -362,37 +454,45 @@ export function GenericTable<T extends FieldValues & { id: string }>({
                 {section.title}
               </h2>
             </div>
-            {pagination && showHeaderPagination && (
+            {effectivePagination && showHeaderPagination && (
               <PaginationSelector
-                page={pagination.page}
-                totalPages={pagination.totalPages}
-                onPrev={pagination.onPrev}
-                onNext={pagination.onNext}
+                page={effectivePagination.page}
+                totalPages={effectivePagination.totalPages}
+                onPrev={effectivePagination.onPrev}
+                onNext={effectivePagination.onNext}
               />
             )}
           </div>
         )}
-        {search?.enabled && (
-          <div className="border-b border-brand-glass-border p-3">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-subtle" />
-              <Input
-                value={searchText}
-                onChange={(event) => setSearchText(event.target.value)}
-                placeholder={search.placeholder ?? 'Search records...'}
-                className="pl-9"
-                aria-label="Search records"
-              />
-            </div>
+        {(search?.enabled || toolbarExtra) && (
+          <div
+            className={[
+              'border-b border-brand-glass-border p-3 flex flex-wrap items-center gap-3',
+              search?.enabled ? '' : 'justify-end'
+            ].filter(Boolean).join(' ')}
+          >
+            {search?.enabled && (
+              <div className="relative min-w-[200px] flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-subtle" />
+                <Input
+                  value={searchText}
+                  onChange={(event) => setSearchText(event.target.value)}
+                  placeholder={search.placeholder ?? 'Search records...'}
+                  className="pl-9"
+                  aria-label="Search records"
+                />
+              </div>
+            )}
+            {toolbarExtra ? <div className="flex shrink-0 items-center gap-2">{toolbarExtra}</div> : null}
           </div>
         )}
-        {pagination && showHeaderPagination && !section?.title && (
+        {effectivePagination && showHeaderPagination && !section?.title && (
           <div className="border-b border-brand-glass-border px-4 py-3">
             <PaginationSelector
-              page={pagination.page}
-              totalPages={pagination.totalPages}
-              onPrev={pagination.onPrev}
-              onNext={pagination.onNext}
+              page={effectivePagination.page}
+              totalPages={effectivePagination.totalPages}
+              onPrev={effectivePagination.onPrev}
+              onNext={effectivePagination.onNext}
             />
           </div>
         )}
@@ -430,77 +530,83 @@ export function GenericTable<T extends FieldValues & { id: string }>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedRecords.length === 0 ? (
+            {displayRecords.length === 0 ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={totalColumns} className="text-center text-brand-subtle py-12">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
-              sortedRecords.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className={[
-                    'border-b border-brand-glass-border transition-colors duration-200',
-                    onRowClick ? 'cursor-pointer hover:bg-brand-glass-hover' : 'hover:bg-brand-glass-hover/50',
-                    selectedId === row.id ? 'bg-brand-primary/8' : ''
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => onRowClick?.(row)}
-                  data-state={selectedId === row.id ? 'selected' : undefined}
-                >
-                  {visibleColumns.map((column, index) => (
-                    <TableCell
-                      key={index}
-                      className={[
-                        column.cellClassName,
-                        'text-center text-brand-text/90 text-sm select-none'
-                      ].filter(Boolean).join(' ')}
-                    >
-                      {getCellValue(row, column)}
-                    </TableCell>
-                  ))}
-                  {actions?.length && (
-                    <TableCell className='text-center'>
-                      <div className='flex items-center justify-center gap-1'>
-                        {actions.map((action, index) => (
-                          <Tooltip key={index}>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className={[
-                                  'size-8 rounded-lg text-brand-muted hover:text-brand-text hover:bg-brand-glass-hover transition-colors duration-200',
-                                  action.className
-                                ].filter(Boolean).join(' ')}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  action.onClick(row)
-                                }}
-                              >
-                                {action.icon}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {action.tooltip}
-                            </TooltipContent>
-                          </Tooltip>
-                        ))}
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
+              displayRecords.map((row) => {
+                const rowStyles = getRowStyleClasses(row, rowStyleIf)
+
+                return (
+                  <TableRow
+                    key={row.id}
+                    className={[
+                      'border-b border-brand-glass-border transition-colors duration-200',
+                      onRowClick ? 'cursor-pointer hover:bg-brand-glass-hover' : 'hover:bg-brand-glass-hover/50',
+                      selectedId === row.id ? 'bg-brand-primary/8' : '',
+                      rowStyles.bgClassName
+                    ].filter(Boolean).join(' ')}
+                    onClick={() => onRowClick?.(row)}
+                    data-state={selectedId === row.id ? 'selected' : undefined}
+                  >
+                    {visibleColumns.map((column, index) => (
+                      <TableCell
+                        key={index}
+                        className={[
+                          column.cellClassName,
+                          'text-center text-brand-text/90 text-sm select-none',
+                          rowStyles.textClassName
+                        ].filter(Boolean).join(' ')}
+                      >
+                        {getCellValue(row, column)}
+                      </TableCell>
+                    ))}
+                    {actions?.length && (
+                      <TableCell className='text-center'>
+                        <div className='flex items-center justify-center gap-1'>
+                          {actions.map((action, index) => (
+                            <Tooltip key={index}>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={[
+                                    'size-8 rounded-lg text-brand-muted hover:text-brand-text hover:bg-brand-glass-hover transition-colors duration-200',
+                                    action.className
+                                  ].filter(Boolean).join(' ')}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    action.onClick(row)
+                                  }}
+                                >
+                                  {action.icon}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {action.tooltip}
+                              </TooltipContent>
+                            </Tooltip>
+                          ))}
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )
+              })
             )}
           </TableBody>
         </Table>
 
-        {pagination && showFooterPagination && (
+        {effectivePagination && showFooterPagination && (
           <div className="border-t border-brand-glass-border px-4 py-3">
             <PaginationSelector
-              page={pagination.page}
-              totalPages={pagination.totalPages}
-              onPrev={pagination.onPrev}
-              onNext={pagination.onNext}
+              page={effectivePagination.page}
+              totalPages={effectivePagination.totalPages}
+              onPrev={effectivePagination.onPrev}
+              onNext={effectivePagination.onNext}
             />
           </div>
         )}

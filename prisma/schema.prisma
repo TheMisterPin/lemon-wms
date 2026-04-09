@@ -24,6 +24,7 @@ model BusinessParty {
   updatedAt      DateTime          @updatedAt
   addresses      Address[]
   contacts       ContactPerson[]
+  supplierItems  Item[]            @relation("SupplierItems")
   purchaseOrders PurchaseOrder[]   @relation("SupplierPurchaseOrders")
   salesOrders    SalesOrder[]      @relation("CustomerSalesOrders")
 }
@@ -165,22 +166,22 @@ model User {
 }
 
 model Device {
-  id              String     @id @default(uuid())
-  name            String     @unique
-  code            String     @unique
-  warehouseId     String?
-  zoneId          String?    @unique
-  authorized      Boolean    @default(false)
-  isActive        Boolean    @default(true)
-  type            DeviceType @default(FLOOR)
-  registeredAt    DateTime   @default(now())
-  lastSeenAt      DateTime?
-  loginMode       LoginMode  @default(PIN)
-  lastUserId      String?
-  lastUser        User?      @relation("DeviceLastUser", fields: [lastUserId], references: [id])
-  warehouse       Warehouse? @relation(fields: [warehouseId], references: [id])
-  zone            Zone?      @relation(fields: [zoneId], references: [id])
-  loggedInByUsers User[]     @relation("UserLastDevice")
+  id                   String         @id @default(uuid())
+  name                 String         @unique
+  code                 String         @unique
+  warehouseId          String?
+  zoneId               String?        @unique
+  authorized           Boolean        @default(false)
+  isActive             Boolean        @default(true)
+  type                 DeviceType     @default(FLOOR)
+  registeredAt         DateTime       @default(now())
+  lastSeenAt           DateTime?
+  loginMode            LoginMode      @default(PIN)
+  lastUserId           String?
+  lastUser             User?          @relation("DeviceLastUser", fields: [lastUserId], references: [id])
+  warehouse            Warehouse?     @relation(fields: [warehouseId], references: [id])
+  zone                 Zone?          @relation(fields: [zoneId], references: [id])
+  loggedInByUsers      User[]         @relation("UserLastDevice")
   transitBinStockItems BinStockItem[] @relation("TransitBinStockItems")
 }
 
@@ -197,35 +198,36 @@ model RefreshToken {
 }
 
 model BinStockItem {
-  id                 String        @id @default(uuid())
-  warehouseId        String
-  binId              String
-  itemId             String
-  lotId              String?
-  serialNumberId     String?
-  quantityAvailable  Decimal       @default(0) @db.Decimal(18, 4)
-  quantityReserved   Decimal       @default(0) @db.Decimal(18, 4)
-  quantityBlocked    Decimal       @default(0) @db.Decimal(18, 4)
-  uom                String
-  status             BinItemStatus @default(AVAILABLE)
-  transitDeviceId    String?
-  expiryDate         DateTime?
-  createdByBoeId     String?
-  lastOperationBoeId String?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  boxId              String?
-  description        String
-  reservedByOrderId  String?
+  id                    String        @id @default(uuid())
+  warehouseId           String
+  binId                 String
+  itemId                String
+  lotId                 String?
+  serialNumberId        String?
+  quantityAvailable     Decimal       @default(0) @db.Decimal(18, 4)
+  quantityReserved      Decimal       @default(0) @db.Decimal(18, 4)
+  quantityBlocked       Decimal       @default(0) @db.Decimal(18, 4)
+  uom                   String
+  status                BinItemStatus @default(AVAILABLE)
+  transitDeviceId       String?
+  expiryDate            DateTime?
+  createdByBoeId        String?
+  lastOperationBoeId    String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  boxId                 String?
+  name                  String
+  sku                   String
+  reservedByOrderId     String?
   reservedByOrderLineId String?
-  
-  transitDevice        Device?       @relation("TransitBinStockItems", fields: [transitDeviceId], references: [id])
-  bin                Bin           @relation(fields: [binId], references: [id])
-  item               Item          @relation(fields: [itemId], references: [id])
-  lot                Lot?          @relation(fields: [lotId], references: [id])
-  serialNumber       SerialNumber? @relation(fields: [serialNumberId], references: [id])
-  unitOfMeasure      UnitOfMeasure @relation(fields: [uom], references: [id])
-  boxLines           BoxLine[]
+
+  transitDevice Device?       @relation("TransitBinStockItems", fields: [transitDeviceId], references: [id])
+  bin           Bin           @relation(fields: [binId], references: [id])
+  item          Item          @relation(fields: [itemId], references: [id])
+  lot           Lot?          @relation(fields: [lotId], references: [id])
+  serialNumber  SerialNumber? @relation(fields: [serialNumberId], references: [id])
+  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+  boxLines      BoxLine[]
 
   @@unique([binId, itemId, lotId, serialNumberId, status, transitDeviceId])
   @@index([warehouseId, itemId])
@@ -278,6 +280,7 @@ model Item {
   createdAt           DateTime             @default(now())
   binStockItems       BinStockItem[]
   category            ItemCategory?        @relation("ItemInCategory", fields: [categoryId], references: [code])
+  supplier            BusinessParty?       @relation("SupplierItems", fields: [supplierId], references: [id])
   lots                Lot[]
   serialNumbers       SerialNumber[]
   serialNumberConfigs SerialNumberConfig[]
@@ -403,7 +406,9 @@ model PurchaseOrder {
 model PurchaseOrderLine {
   id                  String             @id @default(uuid())
   purchaseOrderId     String
-  warItemId           String
+  lineSequence        Int                @default(autoincrement())
+  itemId              String
+  itemName            String
   binId               String?
   baseQuantity        Decimal
   handledQuantity     Decimal            @default(0)
@@ -764,20 +769,20 @@ enum WarehouseStatus {
 }
 
 enum ZoneType {
-  GENERAL      // Standard storage, no restrictions
-  COLD         // Temperature-controlled
-  HAZMAT       // Hazardous materials, restricted access
-  QUARANTINE   // Hold area, no outbound until WM clears
-  STAGING      // Temporary pre-ship area
-  RETURNS      // Inbound returns, receive-only
+  GENERAL // Standard storage, no restrictions
+  COLD // Temperature-controlled
+  HAZMAT // Hazardous materials, restricted access
+  QUARANTINE // Hold area, no outbound until WM clears
+  STAGING // Temporary pre-ship area
+  RETURNS // Inbound returns, receive-only
 }
 
 enum BinType {
-  GENERAL      // All operations: putaway, pick, move, count
-  RECEIVING    // Inbound staging — receive only
-  OUTGOING     // Pre-ship staging — pick and ship only
-  QUARANTINE   // No picks — WM release only
-  STAGING      // Temporary — flagged if items linger
+  GENERAL // All operations: putaway, pick, move, count
+  RECEIVING // Inbound staging — receive only
+  OUTGOING // Pre-ship staging — pick and ship only
+  QUARANTINE // No picks — WM release only
+  STAGING // Temporary — flagged if items linger
 }
 
 enum ItemTrackingMode {

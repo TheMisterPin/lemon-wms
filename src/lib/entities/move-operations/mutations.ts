@@ -53,7 +53,8 @@ export async function upsertAvailableStockItem(
     itemId: string
     lotId?: string | null
     serialNumberId?: string | null
-    description: string
+    name: string
+    sku: string
     uom: string
     quantity: number
     boeId: string
@@ -73,7 +74,8 @@ export async function upsertAvailableStockItem(
       where: { id: existing.id },
       data: {
         quantityAvailable: { increment: args.quantity },
-        description: args.description,
+        name: args.name,
+        sku: args.sku,
         lastOperationBoeId: args.boeId,
         status: 'AVAILABLE',
         transitDeviceId: null
@@ -84,7 +86,8 @@ export async function upsertAvailableStockItem(
   return tx.binStockItem.create({
     data: {
       warehouseId: args.warehouseId,
-      description: args.description,
+      name: args.name,
+      sku: args.sku,
       binId: args.binId,
       itemId: args.itemId,
       lotId: args.lotId ?? null,

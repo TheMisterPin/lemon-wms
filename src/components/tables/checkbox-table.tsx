@@ -1,5 +1,7 @@
 'use client'
+
 import * as React from 'react'
+
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Table,
@@ -9,35 +11,61 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
+
 interface Column<T> {
   key: keyof T
   label: string
 }
+
 interface CheckBoxTableProps<T extends { id: string }> {
   columns: Column<T>[]
   records: T[]
+  /** Controlled selection. When set, `onSelectionChange` is called on toggle. */
+  selectedIds?: Set<string>
+  /** Used when uncontrolled and `selectedIds` is omitted. */
+  defaultSelectedIds?: Set<string>
+  onSelectionChange?: (ids: Set<string>) => void
 }
+
 export function CheckBoxTable<T extends { id: string }>(props: CheckBoxTableProps<T>) {
-  const { columns, records } = props
-  const [selectedRows, setSelectedRows] = React.useState<Set<string>>(
-    new Set()
+  const { columns, records, selectedIds: selectedIdsProp, defaultSelectedIds, onSelectionChange } = props
+  const isControlled = selectedIdsProp !== undefined
+  const [internalSelected, setInternalSelected] = React.useState<Set<string>>(
+    () => new Set(defaultSelectedIds ?? [])
   )
-  const selectAll = selectedRows.size === records.length
+
+  const selectedRows = isControlled ? selectedIdsProp! : internalSelected
+
+  const setSelected = React.useCallback(
+    (next: Set<string>) => {
+      if (!isControlled) {
+        setInternalSelected(next)
+      }
+
+      onSelectionChange?.(next)
+    },
+    [isControlled, onSelectionChange]
+  )
+
+  const selectAll = records.length > 0 && selectedRows.size === records.length
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedRows(new Set(records.map((row) => row.id)))
+      setSelected(new Set(records.map((row) => row.id)))
     } else {
-      setSelectedRows(new Set())
+      setSelected(new Set())
     }
   }
+
   const handleSelectRow = (id: string, checked: boolean) => {
-    const newSelected = new Set(selectedRows)
+    const next = new Set(selectedRows)
+
     if (checked) {
-      newSelected.add(id)
+      next.add(id)
     } else {
-      newSelected.delete(id)
+      next.delete(id)
     }
-    setSelectedRows(newSelected)
+
+    setSelected(next)
   }
 
   return (
@@ -76,7 +104,10 @@ export function CheckBoxTable<T extends { id: string }>(props: CheckBoxTableProp
               />
             </TableCell>
             {columns.map((column) => (
-              <TableCell key={column.key as string} className={column.key === 'name' ? 'font-medium' : ''}>
+              <TableCell
+                key={column.key as string}
+                className={column.key === 'name' ? 'font-medium' : ''}
+              >
                 {String(row[column.key])}
               </TableCell>
             ))}

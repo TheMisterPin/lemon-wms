@@ -173,7 +173,7 @@ export default function WarehouseFooter() {
                       onCheckedChange={() => toggleSelection(item.id)}
                     />
                     <div className="space-y-0.5 text-sm">
-                      <p className="font-medium text-brand-text">{item.description}</p>
+                      <p className="font-medium text-brand-text">{item.name}</p>
                       <p className="text-brand-muted">
                         Qty: {item.quantityAvailable} {item.uom}
                       </p>
