@@ -30,6 +30,9 @@ type PurchaseOrderRow = {
   businessPartyId: string | null
 }
 
+/**
+ * Converts request-layer errors into readable UI messages.
+ */
 function getApiErrorMessage(err: unknown, fallback: string): string {
   if (axios.isAxiosError(err)) {
     const data = err.response?.data as ApiResponse<unknown> | undefined
@@ -42,6 +45,9 @@ function getApiErrorMessage(err: unknown, fallback: string): string {
   return fallback
 }
 
+/**
+ * Ensures table rows always carry an ISO createdAt string for date rendering.
+ */
 function normalizeRows(data: PurchaseOrderRow[]): PurchaseOrderRow[] {
   return data.map((row) => ({
     ...row,
@@ -60,6 +66,10 @@ const dataColumns: TableColumnConfig<PurchaseOrderRow>[] = [
   { label: 'Created', accessor: 'createdAt', type: 'date', sortable: true }
 ]
 
+/**
+ * Dashboard page for order listing and release action.
+ * Purchase orders are fully supported; other order types show a placeholder state.
+ */
 export function DashboardOrdersPageView({ orderType }: { orderType: string }) {
   const isPurchase = orderType === 'purchase'
   const [rows, setRows] = useState<PurchaseOrderRow[]>([])
@@ -68,6 +78,10 @@ export function DashboardOrdersPageView({ orderType }: { orderType: string }) {
   const [actionError, setActionError] = useState<string | null>(null)
   const [releasingId, setReleasingId] = useState<string | null>(null)
 
+  /**
+   * Loads current purchase orders for the dashboard table.
+   * Silent mode is used after actions to avoid UI flicker.
+   */
   const loadOrders = useCallback(async (opts?: { silent?: boolean }) => {
     if (!isPurchase) {
       return
@@ -105,6 +119,9 @@ export function DashboardOrdersPageView({ orderType }: { orderType: string }) {
     void loadOrders()
   }, [loadOrders])
 
+  /**
+   * Calls the release endpoint for a draft order and refreshes the list.
+   */
   const handleRelease = useCallback(
     async (row: PurchaseOrderRow) => {
       if (releasingId !== null || row.status !== OrderStatus.DRAFT) {

@@ -38,6 +38,10 @@ const step1Schema = z.object({
   warehouseId: z.string().trim().min(1, 'Warehouse is required.')
 })
 
+/**
+ * Builds a readable order reference from type + current list size.
+ * Example: purchase + 7 existing orders => PRCH-0008
+ */
 function buildOrderNo(orderType: string, existingOrderCount: number): string {
   const prefix = orderType === 'purchase'
     ? 'PRCH'
@@ -48,6 +52,9 @@ function buildOrderNo(orderType: string, existingOrderCount: number): string {
   return `${prefix}-${next}`
 }
 
+/**
+ * Normalizes API errors into clear messages for modal-level feedback.
+ */
 function getApiMessage(error: unknown, fallback: string): string {
   if (!axios.isAxiosError(error)) {
     return fallback
@@ -67,6 +74,11 @@ type Props = {
   onCreated: () => Promise<void>
 }
 
+/**
+ * Two-step modal for creating purchase orders:
+ * 1) Header details (reference, supplier, warehouse)
+ * 2) Supplier item selection with quantities
+ */
 export function CreatePurchaseOrderModal({
   orderType,
   existingOrderCount,
@@ -127,6 +139,10 @@ export function CreatePurchaseOrderModal({
     void loadMeta()
   }, [open, reportError])
 
+  /**
+   * Loads the supplier catalog used in step 2.
+   * It resets previous item selections to avoid stale payloads.
+   */
   async function loadSupplierItems(nextSupplierId: string) {
     setIsLoadingItems(true)
     setItems([])
@@ -198,6 +214,9 @@ export function CreatePurchaseOrderModal({
     }
   ]), [selections])
 
+  /**
+   * Restores modal to a clean initial state.
+   */
   function resetModal() {
     setStep(1)
     setFieldErrors({})
@@ -208,6 +227,9 @@ export function CreatePurchaseOrderModal({
     setOpen(false)
   }
 
+  /**
+   * Validates step 1 and moves to step 2 when inputs are valid.
+   */
   async function handleNextStep() {
     const parsed = step1Schema.safeParse({ orderNo, businessPartyId, warehouseId })
     if (!parsed.success) {
@@ -228,6 +250,10 @@ export function CreatePurchaseOrderModal({
     setStep(2)
   }
 
+  /**
+   * Validates final payload and creates the purchase order through the API.
+   * The list refresh callback keeps the dashboard table in sync after success.
+   */
   async function handleCreate() {
     const baseParsed = step1Schema.safeParse({ orderNo, businessPartyId, warehouseId })
     if (!baseParsed.success) {

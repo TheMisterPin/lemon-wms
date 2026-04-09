@@ -18,6 +18,9 @@ export type WarehousePurchaseOrderRow = {
 
 type StatusFilter = 'RELEASED' | 'EXECUTING' | 'PAUSED' | null
 
+/**
+ * Converts HTTP/transport failures into user-safe messages for floor operators.
+ */
 function getApiErrorMessage(err: unknown, fallback: string): string {
   if (axios.isAxiosError(err)) {
     const data = err.response?.data as ApiResponse<unknown> | undefined
@@ -29,6 +32,13 @@ function getApiErrorMessage(err: unknown, fallback: string): string {
   return fallback
 }
 
+/**
+ * Centralizes warehouse purchase-order table behavior:
+ * - load data
+ * - filter by status cards
+ * - run adaptive start/pause/resume actions
+ * - expose loading and error states for the page component
+ */
 export function usePurchaseOrders(orderType: string) {
   const isPurchase = orderType === 'purchase'
   const [rows, setRows] = useState<WarehousePurchaseOrderRow[]>([])

@@ -11,6 +11,12 @@ import type { TableColumnConfig, RowAction } from '@/types/components/table/gene
 
 type Props = { orderType: string }
 
+/**
+ * Floor-facing purchase order page:
+ * - status cards
+ * - filtered operational list
+ * - start/pause/resume row actions
+ */
 export function WarehouseOrdersPageView({ orderType }: Props) {
   const {
     isPurchase,

@@ -3,6 +3,7 @@
 - harden purchase-order and warehouse order regression paths with targeted tests
 - fix move-operations type mismatches blocking production build verification
 - align trolley item query mapping with current schema fields (`item.name`, `name/sku` stock upsert inputs)
+- add phase-9 plain-English documentation and JSDoc coverage for core purchase-order flows
 
 ## Requirements Check
 
@@ -33,3 +34,13 @@
 ## Notes
 
 - an unrelated pre-existing `.planning/PROJECT.md` modification remains intentionally excluded from this PR commit.
+
+## Documentation References
+
+- `.docs/purchase-orders/OVERVIEW.md`
+- `.docs/purchase-orders/create-purchase-order-modal.md`
+- `.docs/purchase-orders/dashboard-orders-page.md`
+- `.docs/purchase-orders/warehouse-orders-page.md`
+- `.docs/purchase-orders/use-purchase-orders-hook.md`
+- `.docs/purchase-orders/create-purchase-order-domain.md`
+- `.docs/purchase-orders/transition-purchase-order-domain.md`

@@ -14,6 +14,14 @@ export type PurchaseOrderCreatedSummary = {
   lines: Array<{ id: string }>
 }
 
+/**
+ * Creates a purchase order and its lines in one transaction.
+ * Flow:
+ * 1) Validate warehouse and supplier eligibility
+ * 2) Validate each selected item against supplier catalog
+ * 3) Build normalized line payloads
+ * 4) Persist order + lines together and return a compact summary
+ */
 async function createPurchaseOrder(
   prisma: PrismaClient,
   input: CreatePurchaseOrderParams
