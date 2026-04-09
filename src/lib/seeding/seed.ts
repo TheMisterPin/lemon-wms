@@ -4,6 +4,7 @@ import { seedBins } from './bins'
 import { seedBusinessParties } from './business-parties'
 import { seedCategories } from './item-categories'
 import { seedItems } from './items'
+import { seedPurchaseOrders } from './purchase-orders'
 import { seedBinStockItems } from './seed-bin-stock-items'
 import { seedUnitsOfMeasure } from './unit-of-measures'
 import { seedUsers } from './users'
@@ -15,6 +16,10 @@ export async function seedDB(prisma: PrismaClient) {
 
   await prisma.userActivityEntry.deleteMany()
   console.warn('Cleared activities.')
+  await prisma.purchaseOrderLine.deleteMany()
+  console.warn('Cleared purchase order lines.')
+  await prisma.purchaseOrder.deleteMany()
+  console.warn('Cleared purchase orders.')
   await prisma.binStockItem.deleteMany()
   console.warn('Cleared stock items.')
   await prisma.bin.deleteMany()
@@ -76,12 +81,17 @@ export async function seedDB(prisma: PrismaClient) {
   const binStockItems = await seedBinStockItems(prisma)
   console.warn(`Seeded ${binStockItems.count} bin stock items.\n`)
 
+  console.warn('Seeding purchase orders...')
+  const purchaseOrders = await seedPurchaseOrders(prisma)
+  console.warn(`Seeded ${purchaseOrders.count} purchase orders.\n`)
+
   return {
     unitsOfMeasureSeeded: unitsOfMeasure.count,
     warehousesSeeded: warehouses.count,
     zonesSeeded: zones.count,
     binsSeeded: bins.count,
     binStockItemsSeeded: binStockItems.count,
+    purchaseOrdersSeeded: purchaseOrders.count,
     usersSeeded: users.count,
     businessPartiesSeeded: businessParties.partiesCount,
     itemCategoriesSeeded: itemCategories.parentCount + itemCategories.childCount,
