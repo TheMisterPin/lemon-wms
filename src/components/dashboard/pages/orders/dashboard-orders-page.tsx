@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { ClipboardList, Truck } from 'lucide-react'
 
+import { CreatePurchaseOrderModal } from '@/components/dashboard/pages/orders/create-purchase-order-modal'
 import { GenericTable } from '@/components/tables/generic-table'
 import { Button } from '@/components/ui/button'
 import {
@@ -239,6 +240,15 @@ export function DashboardOrdersPageView({ orderType }: { orderType: string }) {
               columns={columns}
               records={rows}
               pageSize={DEFAULT_GENERIC_TABLE_PAGE_SIZE}
+              toolbarExtra={(
+                <CreatePurchaseOrderModal
+                  orderType={orderType}
+                  existingOrderCount={rows.length}
+                  onCreated={async () => {
+                    await loadOrders({ silent: true })
+                  }}
+                />
+              )}
               section={{
                 title: 'Orders',
                 icon: ClipboardList,

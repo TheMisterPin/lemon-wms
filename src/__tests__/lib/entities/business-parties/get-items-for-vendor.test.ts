@@ -5,7 +5,7 @@ import { getItemsForVendor } from '@/lib/entities/business-parties/get-items-for
 
 function makePrisma(overrides: {
   findFirstResult?: { id: string } | null
-  findManyResult?: Array<{ sku: string; name: string; uom: string }>
+  findManyResult?: Array<{ id: string; sku: string; name: string; uom: string }>
 }) {
   const findFirst = vi.fn().mockResolvedValue(overrides.findFirstResult ?? null)
   const findMany = vi.fn().mockResolvedValue(overrides.findManyResult ?? [])
@@ -39,7 +39,7 @@ describe('getItemsForVendor', () => {
   })
 
   it('returns items when supplier exists', async () => {
-    const rows = [{ sku: 'SKU-1', name: 'Bolt', uom: 'EA' }]
+    const rows = [{ id: 'ITEM-1', sku: 'SKU-1', name: 'Bolt', uom: 'EA' }]
     const { prisma, findMany } = makePrisma({
       findFirstResult: { id: 'SUP-0001' },
       findManyResult: rows
@@ -54,7 +54,7 @@ describe('getItemsForVendor', () => {
         isActive: true,
         deletedAt: null
       },
-      select: { sku: true, name: true, uom: true },
+      select: { id: true, sku: true, name: true, uom: true },
       orderBy: { name: 'asc' }
     })
   })

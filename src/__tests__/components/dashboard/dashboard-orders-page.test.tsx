@@ -16,6 +16,10 @@ vi.mock('@/lib/axios', () => ({
   }
 }))
 
+vi.mock('@/components/dashboard/pages/orders/create-purchase-order-modal', () => ({
+  CreatePurchaseOrderModal: () => <div data-testid="create-po-modal" />
+}))
+
 const mockGet = vi.mocked(dashboardApiClient.get)
 
 describe('DashboardOrdersPageView', () => {
