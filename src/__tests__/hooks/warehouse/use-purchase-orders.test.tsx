@@ -101,4 +101,29 @@ describe('usePurchaseOrders', () => {
       expect(mockGet).toHaveBeenCalledTimes(2)
     })
   })
+
+  it('surfaces list errors from failed fetch', async () => {
+    mockGet.mockRejectedValue(new Error('network down'))
+
+    const { result } = renderHook(() => usePurchaseOrders('purchase'))
+
+    await act(async () => {
+      await result.current.loadOrders()
+    })
+
+    expect(result.current.listError).toBe('Unable to load purchase orders.')
+    expect(result.current.rows).toEqual([])
+  })
+
+  it('does not call warehouse API when order type is not purchase', async () => {
+    const { result } = renderHook(() => usePurchaseOrders('transfer'))
+
+    await act(async () => {
+      await result.current.loadOrders()
+    })
+
+    expect(mockGet).not.toHaveBeenCalled()
+    expect(result.current.isPurchase).toBe(false)
+    expect(result.current.rows).toEqual([])
+  })
 })

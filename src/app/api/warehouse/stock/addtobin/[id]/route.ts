@@ -47,6 +47,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       select: {
         id: true,
         name: true,
+        sku: true,
         uom: true
       }
 

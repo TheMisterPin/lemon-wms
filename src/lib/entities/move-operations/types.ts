@@ -1,6 +1,6 @@
 import type { Item, OrderType, PrismaClient } from '@/generated/prisma'
 
-export type ItemRef = Pick<Item, 'id' | 'uom' | 'name'>
+export type ItemRef = Pick<Item, 'id' | 'uom' | 'name' | 'sku'>
 
 export type BaseOperationArgs = {
   prisma: PrismaClient

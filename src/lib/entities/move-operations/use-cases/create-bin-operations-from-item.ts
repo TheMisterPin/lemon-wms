@@ -59,7 +59,8 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
         itemId: adjustment.warItemId,
         lotId: adjustment.lotId,
         serialNumberId: adjustment.serialNumberId,
-        description: item.name,
+        name: item.name,
+        sku: item.sku,
         uom: adjustment.uom,
         quantity: adjustment.quantity,
         boeId: positiveEntry.id
@@ -161,7 +162,8 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
       itemId: movement.warItemId,
       lotId: movement.lotId,
       serialNumberId: movement.serialNumberId,
-      description: item.name,
+      name: item.name,
+      sku: item.sku,
       uom: movement.uom,
       quantity: movement.quantity,
       boeId: positiveEntry.id
