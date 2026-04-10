@@ -81,6 +81,25 @@ pnpm dev
 
 Open: `http://localhost:3000`
 
+
+### Option B) Run with Docker Compose (app + PostgreSQL + seed)
+```bash
+docker compose up --build
+```
+
+This compose stack will:
+- Start a blank PostgreSQL 16 container (`wms_db`)
+- Run Prisma schema sync (`prisma db push`)
+- Seed the database (`pnpm seed:all`)
+- Start Next.js on `http://localhost:3000`
+
+To reset the database back to blank and reseed on next startup:
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+
 ---
 
 ## Developer Commands
