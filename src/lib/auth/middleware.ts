@@ -5,7 +5,7 @@ import type { Role } from '@/generated/prisma'
 import { verifyToken, type AccessTokenPayload } from '@/lib/auth/jwt'
 
 const OFFICE_ROLES: Role[] = ['OWNER', 'OFFICE_MANAGER', 'OFFICE_WORKER']
-const FLOOR_ROLES: Role[] = ['WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER']
+const FLOOR_ROLES: Role[] = ['WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER', 'OWNER']
 
 export const getBearerToken = (request: NextRequest): string | null => {
   const authHeader = request.headers.get('authorization')

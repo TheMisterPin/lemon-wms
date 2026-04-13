@@ -14,10 +14,8 @@ import {
 } from '@/components/ui/tooltip'
 import { OrderStatus } from '@/generated/prisma'
 import { dashboardApiClient } from '@/lib/axios'
-import {
-  DEFAULT_GENERIC_TABLE_PAGE_SIZE,
-  type TableColumnConfig
-} from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
+import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
 type PurchaseOrderRow = {
@@ -58,7 +56,7 @@ function normalizeRows(data: PurchaseOrderRow[]): PurchaseOrderRow[] {
   }))
 }
 
-const dataColumns: TableColumnConfig<PurchaseOrderRow>[] = [
+const dataColumns: ColumnConfig<PurchaseOrderRow>[] = [
   { label: 'Reference', accessor: 'reference', sortable: true },
   { label: 'Status', accessor: 'status', sortable: true },
   { label: 'Supplier', accessor: 'supplier', sortable: true },
@@ -154,7 +152,7 @@ export function DashboardOrdersPageView({ orderType }: { orderType: string }) {
     [loadOrders, releasingId]
   )
 
-  const columns = useMemo<TableColumnConfig<PurchaseOrderRow>[]>(() => {
+  const columns = useMemo<ColumnConfig<PurchaseOrderRow>[]>(() => {
     if (!isPurchase) {
       return []
     }
@@ -257,7 +255,7 @@ export function DashboardOrdersPageView({ orderType }: { orderType: string }) {
               columns={columns}
               records={rows}
               pageSize={DEFAULT_GENERIC_TABLE_PAGE_SIZE}
-              toolbarExtra={(
+              headerButtons={(
                 <CreatePurchaseOrderModal
                   orderType={orderType}
                   existingOrderCount={rows.length}
@@ -266,13 +264,10 @@ export function DashboardOrdersPageView({ orderType }: { orderType: string }) {
                   }}
                 />
               )}
-              section={{
-                title: 'Orders',
-                icon: ClipboardList,
-                entityTone: 'order'
-              }}
+              title="Orders"
+              titleIcon={ClipboardList}
+              entityTone="order"
               search={{
-                enabled: true,
                 placeholder: 'Search by reference, supplier, or status...',
                 fields: ['reference', 'supplier', 'status']
               }}

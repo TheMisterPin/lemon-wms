@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { OrderStatus } from '@/generated/prisma'
 import { usePurchaseOrders } from '@/hooks/warehouse/use-purchase-orders'
-import type { TableColumnConfig, RowAction } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
+import type { RowAction } from '@/types/components/table/generic-table.types'
 
 type Props = { orderType: string }
 
@@ -36,18 +37,20 @@ export function WarehouseOrdersPageView({ orderType }: Props) {
     void loadOrders()
   }, [loadOrders])
 
-  const columns = useMemo<TableColumnConfig<(typeof filteredRows)[number]>[]>(() => ([
+  const columns = useMemo<ColumnConfig<(typeof filteredRows)[number]>[]>(() => ([
     { label: 'Reference', accessor: 'reference', sortable: true },
     {
       label: 'Status',
       accessor: 'status',
       type: 'indicator',
-      indicatorColorMap: {
-        released: '#94a3b8',
-        executing: '#4ade80',
-        paused: '#f59e0b'
+      typeValues: {
+        conditions: {
+          released: '#94a3b8',
+          executing: '#4ade80',
+          paused: '#f59e0b'
+        },
+        defaultColor: '#94a3b8'
       },
-      defaultIndicatorColor: '#94a3b8',
       sortable: true
     },
     { label: 'Supplier', accessor: 'supplier', sortable: true },
@@ -57,29 +60,21 @@ export function WarehouseOrdersPageView({ orderType }: Props) {
 
   const rowActions = useMemo<RowAction<(typeof filteredRows)[number]>[]>(() => ([
     {
-      icon: <Play className="size-4" />,
-      tooltip: 'Start / Resume',
-      className: 'text-emerald-300',
+      icon: (row) =>
+        row.status === OrderStatus.EXECUTING ? (
+          <Pause className="size-4" />
+        ) : (
+          <Play className="size-4" />
+        ),
+      tooltip: (row) =>
+        row.status === OrderStatus.EXECUTING ? 'Pause' : 'Start / Resume',
+      className: (row) =>
+        row.status === OrderStatus.EXECUTING ? 'text-amber-300' : 'text-emerald-300',
       onClick: (row) => {
         if (actingId !== null) {
           return
         }
-        if (row.status === OrderStatus.RELEASED || row.status === OrderStatus.PAUSED) {
-          void runAction(row)
-        }
-      }
-    },
-    {
-      icon: <Pause className="size-4" />,
-      tooltip: 'Pause',
-      className: 'text-amber-300',
-      onClick: (row) => {
-        if (actingId !== null) {
-          return
-        }
-        if (row.status === OrderStatus.EXECUTING) {
-          void runAction(row)
-        }
+        void runAction(row)
       }
     }
   ]), [actingId, runAction])
@@ -153,14 +148,11 @@ export function WarehouseOrdersPageView({ orderType }: Props) {
             <GenericTable
               columns={columns}
               records={filteredRows}
-              section={{
-                title: 'Operational orders',
-                icon: ClipboardList,
-                entityTone: 'order'
-              }}
+              title="Operational orders"
+              titleIcon={ClipboardList}
+              entityTone="order"
               actions={rowActions}
               search={{
-                enabled: true,
                 fields: ['reference', 'supplier', 'status'],
                 placeholder: 'Search purchase orders...'
               }}

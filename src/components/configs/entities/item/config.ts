@@ -1,7 +1,7 @@
 import type { ItemFormValues, WARItem } from '@/lib/schemas/item'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
 export const trackingModeOptions: SelectOption[] = [
   { value: 'NONE', label: 'None (fungible)' },
@@ -109,7 +109,7 @@ export const itemFormConfig: GenericFormConfig<ItemFormValues> = {
   ]
 }
 
-export const itemTableColumns: TableColumnConfig<WARItem>[] = [
+export const itemTableColumns: ColumnConfig<WARItem>[] = [
   { label: 'SKU', accessor: 'sku' },
   { label: 'Name', accessor: 'name' },
   { label: 'Tracking', accessor: 'trackingMode' },

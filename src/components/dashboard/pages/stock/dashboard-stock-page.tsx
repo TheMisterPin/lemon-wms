@@ -6,7 +6,7 @@ import { Archive, Boxes, Layers, LockKeyhole, PackageSearch, ShieldBan } from 'l
 import { DashboardInfoCards, type DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
 import { GenericTable } from '@/components/tables/generic-table'
 import { dashboardApiClient } from '@/lib/axios'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
 type StockItemRow = {
@@ -41,29 +41,33 @@ type StockDashboardData = {
   }>
 }
 
-const itemColumns: TableColumnConfig<StockItemRow>[] = [
+const itemColumns: ColumnConfig<StockItemRow>[] = [
   { label: 'SKU', accessor: 'sku' },
   { label: 'Item name', accessor: 'name' },
   { label: 'Bins count', accessor: 'binsCount' },
   {
     label: 'Available',
+    accessor: 'totalAvailable',
     type: 'joinValues',
-    joinValuesRef: { first: 'totalAvailable', second: 'uom' }
+    typeValues: { values: ['totalAvailable', 'uom'] }
   },
   {
     label: 'Reserved',
+    accessor: 'totalReserved',
     type: 'joinValues',
-    joinValuesRef: { first: 'totalReserved', second: 'uom' }
+    typeValues: { values: ['totalReserved', 'uom'] }
   },
   {
     label: 'Blocked',
+    accessor: 'totalBlocked',
     type: 'joinValues',
-    joinValuesRef: { first: 'totalBlocked', second: 'uom' }
+    typeValues: { values: ['totalBlocked', 'uom'] }
   },
   {
     label: 'On hand',
+    accessor: 'totalOnHand',
     type: 'joinValues',
-    joinValuesRef: { first: 'totalOnHand', second: 'uom' }
+    typeValues: { values: ['totalOnHand', 'uom'] }
   }
 ]
 
@@ -212,13 +216,10 @@ export function DashboardStockPageView() {
           <GenericTable
             columns={itemColumns}
             records={itemRows}
-            section={{
-              title: 'Stock by item',
-              icon: PackageSearch,
-              entityTone: 'item'
-            }}
+            title="Stock by item"
+            titleIcon={PackageSearch}
+            entityTone="item"
             search={{
-              enabled: true,
               placeholder: 'Search item by SKU or name...',
               fields: ['sku', 'name', 'uom']
             }}

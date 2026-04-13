@@ -21,10 +21,8 @@ import {
 import { UniversalModal } from '@/components/universal-modal'
 import { useErrorDialog } from '@/hooks/ui/use-error-dialog'
 import { dashboardApiClient } from '@/lib/axios'
-import {
-  DEFAULT_GENERIC_TABLE_PAGE_SIZE,
-  type TableColumnConfig
-} from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
+import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
 type SupplierOption = { id: string; name: string }
@@ -166,7 +164,7 @@ export function CreatePurchaseOrderModal({
 
   const itemRows = useMemo(() => items, [items])
 
-  const itemColumns = useMemo<TableColumnConfig<SupplierItem>[]>(() => ([
+  const itemColumns = useMemo<ColumnConfig<SupplierItem>[]>(() => ([
     {
       label: 'Select',
       cell: (row) => (
@@ -449,7 +447,6 @@ export function CreatePurchaseOrderModal({
             records={itemRows}
             pageSize={DEFAULT_GENERIC_TABLE_PAGE_SIZE}
             search={{
-              enabled: true,
               fields: ['sku', 'name', 'uom'],
               placeholder: 'Search supplier items...'
             }}

@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { GenericTable } from '@/components/tables/generic-table'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
 type TestRow = {
   id: string
@@ -21,35 +21,38 @@ type TestRow = {
 
 describe('GenericTable', () => {
   it('formats temporal columns and renders boolean columns as checkboxes', () => {
-    const columns: TableColumnConfig<TestRow>[] = [
+    const columns: ColumnConfig<TestRow>[] = [
       { label: 'Name', accessor: 'name' },
       {
         label: 'Status',
         accessor: 'status',
         type: 'indicator',
-        indicatorColorMap: {
-          active: '#4ade80',
-          inactive: '#f87171'
+        typeValues: {
+          conditions: {
+            active: '#4ade80',
+            inactive: '#f87171'
+          }
         }
       },
       { label: 'Created', accessor: 'createdAt', type: 'date' },
-      { label: 'Last seen', accessor: 'lastSeenAt', type: 'time' },
+      {
+        label: 'Last seen',
+        accessor: 'lastSeenAt',
+        type: 'date',
+        typeValues: { dateType: 'time' }
+      },
       { label: 'Active', accessor: 'isActive', type: 'boolean' },
       {
         label: 'Progress',
+        accessor: 'currentCapacity',
         type: 'progress',
-        progressBarRef: {
-          current: 'currentCapacity',
-          max: 'maxCapacity'
-        }
+        typeValues: { current: 'currentCapacity', max: 'maxCapacity' }
       },
       {
         label: 'Capacity',
+        accessor: 'currentCapacity',
         type: 'joinValues',
-        joinValuesRef: {
-          first: 'currentCapacity',
-          second: 'uom'
-        }
+        typeValues: { values: ['currentCapacity', 'uom'] }
       }
     ]
 
@@ -104,7 +107,7 @@ describe('GenericTable', () => {
   it('renders shared pagination controls when pagination config is provided', () => {
     const onPrev = vi.fn()
     const onNext = vi.fn()
-    const columns: TableColumnConfig<TestRow>[] = [
+    const columns: ColumnConfig<TestRow>[] = [
       { label: 'Name', accessor: 'name' }
     ]
 
@@ -144,7 +147,7 @@ describe('GenericTable', () => {
   })
 
   it('hides columns when all values are null or empty strings', () => {
-    const columns: TableColumnConfig<TestRow>[] = [
+    const columns: ColumnConfig<TestRow>[] = [
       { label: 'Name', accessor: 'name' },
       { label: 'Hidden Column', accessor: 'hiddenValue' }
     ]
@@ -186,15 +189,13 @@ describe('GenericTable', () => {
   })
 
   it('renders joinValues as empty when first value is zero', () => {
-    const columns: TableColumnConfig<TestRow>[] = [
+    const columns: ColumnConfig<TestRow>[] = [
       { label: 'Name', accessor: 'name' },
       {
         label: 'Capacity',
+        accessor: 'currentCapacity',
         type: 'joinValues',
-        joinValuesRef: {
-          first: 'currentCapacity',
-          second: 'uom'
-        }
+        typeValues: { values: ['currentCapacity', 'uom'] }
       }
     ]
 
@@ -221,7 +222,7 @@ describe('GenericTable', () => {
   })
 
   it('filters rows when optional search is enabled', () => {
-    const columns: TableColumnConfig<TestRow>[] = [
+    const columns: ColumnConfig<TestRow>[] = [
       { label: 'Name', accessor: 'name' },
       { label: 'Status', accessor: 'status' }
     ]
@@ -253,7 +254,7 @@ describe('GenericTable', () => {
             maxCapacity: 100
           }
         ]}
-        search={{ enabled: true, placeholder: 'Search warehouses' }}
+        search={{ placeholder: 'Search warehouses' }}
       />
     )
 
@@ -272,7 +273,7 @@ describe('GenericTable', () => {
       quantityAvailable: number
     }
 
-    const columns: TableColumnConfig<QtyRow>[] = [{ label: 'Name', accessor: 'name' }]
+    const columns: ColumnConfig<QtyRow>[] = [{ label: 'Name', accessor: 'name' }]
 
     render(
       <GenericTable
@@ -285,22 +286,19 @@ describe('GenericTable', () => {
         rowStyleIf={{
           rules: [
             {
-              colName: 'quantityBlocked',
-              whenPositive: true,
-              bgClassName: 'bg-red-900',
-              textClassName: 'text-red-50'
+              accessor: 'quantityBlocked',
+              condition: 'positive',
+              className: 'bg-red-900 text-red-50'
             },
             {
-              colName: 'quantityReserved',
-              whenPositive: true,
-              bgClassName: 'bg-amber-900',
-              textClassName: 'text-amber-50'
+              accessor: 'quantityReserved',
+              condition: 'positive',
+              className: 'bg-amber-900 text-amber-50'
             },
             {
-              colName: 'quantityAvailable',
-              whenPositive: true,
-              bgClassName: 'bg-slate-800',
-              textClassName: 'text-slate-100'
+              accessor: 'quantityAvailable',
+              condition: 'positive',
+              className: 'bg-slate-800 text-slate-100'
             }
           ]
         }}
@@ -314,7 +312,7 @@ describe('GenericTable', () => {
   })
 
   it('slices rows when pageSize is set without external pagination', () => {
-    const columns: TableColumnConfig<TestRow>[] = [{ label: 'Name', accessor: 'name' }]
+    const columns: ColumnConfig<TestRow>[] = [{ label: 'Name', accessor: 'name' }]
 
     const records: TestRow[] = Array.from({ length: 12 }, (_, index) => ({
       id: `r-${index}`,

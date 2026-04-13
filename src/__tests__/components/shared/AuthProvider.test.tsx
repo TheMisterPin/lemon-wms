@@ -11,6 +11,7 @@ import type { AuthUser } from '@/types'
 const officeUser: AuthUser = {
   id: 'user-office-1',
   email: 'owner@lemon-wms.local',
+  fullName: 'Owner User',
   role: 'OWNER',
   badgeNumber: 'USR-0001'
 }

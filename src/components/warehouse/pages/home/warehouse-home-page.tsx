@@ -9,22 +9,25 @@ import { GenericTable } from '@/components/tables/generic-table'
 import { Card } from '@/components/ui/card'
 import { useAuth } from '@/hooks/auth/use-auth'
 import { useWarehouseHome, type WarehouseBinRecord } from '@/hooks/warehouse/use-warehouse-home'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
-const binColumns: TableColumnConfig<WarehouseBinRecord>[] = [
+const binColumns: ColumnConfig<WarehouseBinRecord>[] = [
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
   {
     label: 'Status',
     accessor: 'isBlocked',
     type: 'indicator',
-    indicatorColorMap: { true: '#f87171', false: '#4ade80' },
-    defaultIndicatorColor: '#94a3b8'
+    typeValues: {
+      conditions: { true: '#f87171', false: '#4ade80' },
+      defaultColor: '#94a3b8'
+    }
   },
   {
     label: 'Progress',
+    accessor: 'currentCapacity',
     type: 'progress',
-    progressBarRef: { max: 'maxCapacity', current: 'currentCapacity' }
+    typeValues: { max: 'maxCapacity', current: 'currentCapacity' }
   }
 ]
 

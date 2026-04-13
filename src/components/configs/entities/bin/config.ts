@@ -1,7 +1,7 @@
 import type { Bin, BinFormValues } from '@/lib/schemas/bin'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
 export type BinTableRow = {
   id: string
@@ -70,7 +70,7 @@ export function createBinFormConfig(
 
 export const binFormConfig = createBinFormConfig([])
 
-export const binTableColumns: TableColumnConfig<BinTableRow>[] = [
+export const binTableColumns: ColumnConfig<BinTableRow>[] = [
   { label: 'Code', accessor: 'code' },
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },

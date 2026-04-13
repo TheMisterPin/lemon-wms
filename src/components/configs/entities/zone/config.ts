@@ -1,7 +1,7 @@
 import type { Zone, ZoneFormValues } from '@/lib/schemas/zone'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
 export type ZoneTableRow = {
   id: string
@@ -77,7 +77,7 @@ export function createZoneFormConfig(
 
 export const zoneFormConfig = createZoneFormConfig([])
 
-export const zoneTableColumns: TableColumnConfig<ZoneTableRow>[] = [
+export const zoneTableColumns: ColumnConfig<ZoneTableRow>[] = [
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
   { label: 'Active', accessor: 'isActive', type: 'boolean' },
