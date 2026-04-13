@@ -61,8 +61,7 @@ describe('setAccessTokenCookie', () => {
   })
 
   it('sets secure=true in production', async () => {
-    const orig = process.env.NODE_ENV
-    process.env.NODE_ENV = 'production'
+    vi.stubEnv('NODE_ENV', 'production')
 
     setCalls.length = 0
     await setAccessTokenCookie('test-token')
@@ -70,7 +69,7 @@ describe('setAccessTokenCookie', () => {
     const call = setCalls.find((c) => c.name === 'access_token')
     expect(call!.options.secure).toBe(true)
 
-    process.env.NODE_ENV = orig
+    vi.stubEnv('NODE_ENV', 'test')
   })
 })
 

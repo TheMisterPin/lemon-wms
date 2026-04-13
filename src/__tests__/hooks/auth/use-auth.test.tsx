@@ -12,6 +12,7 @@ import type { AuthDevice, AuthLocation, AuthUser } from '@/types'
 const officeUser: AuthUser = {
   id: 'user-office-1',
   email: 'owner@lemon-wms.local',
+  fullName: 'Owner User',
   role: 'OWNER',
   badgeNumber: 'USR-0001'
 }
@@ -19,6 +20,7 @@ const officeUser: AuthUser = {
 const warehouseUser: AuthUser = {
   id: 'user-floor-1',
   email: null,
+  fullName: 'Floor Worker',
   role: 'WAREHOUSE_WORKER',
   badgeNumber: 'USR-0005'
 }

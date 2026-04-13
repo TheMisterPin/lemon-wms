@@ -1,57 +1,40 @@
-import { ReactNode } from 'react'
-import { FieldValues, FieldPath } from 'react-hook-form'
+import type { ReactNode } from 'react'
 
-import type { PaginationPosition } from '@/components/shared/PaginationSelector'
-import type {
-  DisplayFieldConfig,
-  IndicatorColorMap,
-  ProgressDisplayFieldConfig
-} from '@/types/components/shared/display-field.types'
+import type { ColumnConfig, StyleCondition } from '@/types/components/table/column.types'
 import type { LucideIcon } from 'lucide-react'
 
+/** Matches {@link import('@/components/shared/PaginationSelector').PaginationPosition}. */
+export type GenericTablePaginationPosition = 'header' | 'footer'
+
+export type { ColumnConfig } from '@/types/components/table/column.types'
+export type {
+  BooleanTypeValues,
+  ColumnStyleConfig,
+  ColumnType,
+  CustomCellColumnConfig,
+  DataColumnConfig,
+  DateTypeValues,
+  IndicatorTypeValues,
+  JoinValuesTypeValues,
+  NumberTypeValues,
+  OperationTypeValues,
+  ProgressTypeValues,
+  StyleCondition,
+  StyleIfRule,
+  TableOperation,
+  TextTypeValues,
+  TypeValuesMap
+} from '@/types/components/table/column.types'
+
 export type SortDirection = 'asc' | 'desc'
-export type TableColumnType =
-  | 'text'
-  | 'date'
-  | 'datetime'
-  | 'time'
-  | 'boolean'
-  | 'progress'
-  | 'indicator'
-  | 'joinValues'
 
-export interface BaseColumnConfig {
-  label: string
-  className?: string
-  cellClassName?: string
-  sortable?: boolean
-}
+export type EntityTone = 'warehouse' | 'zone' | 'bin' | 'item' | 'order'
 
-export interface CellColumnConfig<T extends FieldValues> extends BaseColumnConfig {
-  accessor?: never
-  accessorPath?: never
-  cell: (row: T) => ReactNode
-  type?: never
-  progressBarRef?: never
-}
-
-export type DataColumnConfig<T extends FieldValues> = DisplayFieldConfig<T> & {
-  className?: string
-  cellClassName?: string
-  sortable?: boolean
-}
-
-export type ProgressColumnConfig<T extends FieldValues> = ProgressDisplayFieldConfig<T> & BaseColumnConfig
-
-export type TableColumnConfig<T extends FieldValues> = DataColumnConfig<T> | CellColumnConfig<T>
-
-export { type IndicatorColorMap }
-
-export interface RowAction<T> {
-  icon: ReactNode
-  tooltip: string
+export interface RowAction<T extends { id: string }> {
+  icon: ReactNode | ((row: T) => ReactNode)
+  tooltip: string | ((row: T) => string)
   onClick: (row: T) => void
-  className?: string
+  className?: string | ((row: T) => string)
 }
 
 export interface TablePaginationConfig {
@@ -59,43 +42,39 @@ export interface TablePaginationConfig {
   totalPages: number
   onPrev: () => void
   onNext: () => void
-  position?: PaginationPosition
+  position?: GenericTablePaginationPosition
 }
 
-export interface TableSearchConfig<T extends FieldValues> {
-  enabled?: boolean
+/** When {@link GenericTableProps.search} is omitted, search is enabled by default. */
+export type GenericTableSearchConfig = {
   placeholder?: string
-  fields?: Array<Extract<keyof T, string>>
+  fields?: string[]
 }
 
 /** Default rows per page when using built-in {@link GenericTableProps.pageSize} pagination. */
 export const DEFAULT_GENERIC_TABLE_PAGE_SIZE = 10
 
-/**
- * First matching rule wins. Use {@link colName} as a row field path (same shape as column accessors).
- * - {@link whenPositive}: matches when `Number(value) > 0`
- * - Else if {@link value} is set: matches when the field equals that value (string-coerced equality allowed)
- * - Else: matches when the value is truthy
- */
-export interface TableRowStyleIfRule<T extends FieldValues = FieldValues> {
-  colName: FieldPath<T>
-  whenPositive?: boolean
+export interface RowStyleIfRule {
+  accessor: string
+  condition: StyleCondition
   value?: unknown
-  bgClassName?: string
-  textClassName?: string
+  className: string
 }
 
-export interface TableRowStyleIfConfig<T extends FieldValues = FieldValues> {
-  rules: TableRowStyleIfRule<T>[]
-  defaultBgClassName?: string
-  defaultTextClassName?: string
+export interface RowStyleIfConfig {
+  rules: RowStyleIfRule[]
+  defaultClassName?: string
 }
 
-export interface GenericTableProps<T extends FieldValues & { id: string }> {
-  columns: TableColumnConfig<T>[]
+export interface GenericTableProps<T extends { id: string }> {
+  columns: ColumnConfig<T>[]
   records: T[]
   onRowClick?: (row: T) => void
   selectedId?: string
+  title?: string
+  titleIcon?: LucideIcon
+  entityTone?: EntityTone
+  headerButtons?: ReactNode
   emptyMessage?: string
   actions?: RowAction<T>[]
   pagination?: TablePaginationConfig
@@ -104,13 +83,9 @@ export interface GenericTableProps<T extends FieldValues & { id: string }> {
    * Omit for no built-in pagination (show all rows).
    */
   pageSize?: number
-  rowStyleIf?: TableRowStyleIfConfig<T>
-  /** Rendered in the toolbar row (e.g. filter controls), beside search when enabled. */
-  toolbarExtra?: ReactNode
-  search?: TableSearchConfig<T>
-  section?: {
-    title: string
-    icon?: LucideIcon
-    entityTone?: 'warehouse' | 'zone' | 'bin' | 'item' | 'order'
-  }
+  rowStyleIf?: RowStyleIfConfig
+  /**
+   * Search is **on** when this prop is omitted. Pass `false` to disable.
+   */
+  search?: false | GenericTableSearchConfig
 }

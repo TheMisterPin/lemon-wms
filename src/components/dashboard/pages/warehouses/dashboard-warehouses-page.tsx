@@ -10,7 +10,7 @@ import PageWithGrid from '@/components/pages/page-with-grid'
 import { Button } from '@/components/ui/button'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
 import type { Warehouse } from '@/lib/schemas/warehouse'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
 export function DashboardWarehousesPageView() {
   const router = useRouter()
@@ -21,7 +21,7 @@ export function DashboardWarehousesPageView() {
     console.log('Clicked warehouse row:', row)
   }
 
-  const columns = useMemo<TableColumnConfig<Warehouse>[]>(() => ([
+  const columns = useMemo<ColumnConfig<Warehouse>[]>(() => ([
     ...warehouseTableColumns,
     {
       label: 'Zones',

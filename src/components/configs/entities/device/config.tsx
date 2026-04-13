@@ -1,6 +1,6 @@
 import type { AuthorizeDeviceFormValues } from '@/lib/schemas/device'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
 export type DeviceTableRow = {
   id: string
@@ -16,7 +16,7 @@ export type DeviceTableRow = {
   registeredAt: string
 }
 
-export const deviceTableColumns: TableColumnConfig<DeviceTableRow>[] = [
+export const deviceTableColumns: ColumnConfig<DeviceTableRow>[] = [
   { label: 'Name', accessor: 'name' },
   { label: 'Code', accessor: 'code' },
   { label: 'Warehouse', accessor: 'warehouseName' },

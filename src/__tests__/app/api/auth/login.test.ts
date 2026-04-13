@@ -156,7 +156,7 @@ describe('POST /api/auth/login', () => {
 
     const uaeCalls = (prisma.userActivityEntry.create as ReturnType<typeof vi.fn>).mock.calls
     const loginCall = uaeCalls.find(
-      ([arg]: [{ data: { actionType: string } }]) => arg.data.actionType === 'LOGIN'
+      (call: unknown[]) => (call[0] as { data: { actionType: string } }).data.actionType === 'LOGIN'
     )
     expect(loginCall).toBeDefined()
   })
@@ -170,7 +170,7 @@ describe('POST /api/auth/login', () => {
 
     const uaeCalls = (prisma.userActivityEntry.create as ReturnType<typeof vi.fn>).mock.calls
     const failCall = uaeCalls.find(
-      ([arg]: [{ data: { actionType: string } }]) => arg.data.actionType === 'LOGIN_FAILED'
+      (call: unknown[]) => (call[0] as { data: { actionType: string } }).data.actionType === 'LOGIN_FAILED'
     )
     expect(failCall).toBeDefined()
   })

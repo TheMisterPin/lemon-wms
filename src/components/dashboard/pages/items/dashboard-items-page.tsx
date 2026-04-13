@@ -6,16 +6,17 @@ import { DashboardRecordListSection } from '@/components/dashboard/DashboardReco
 import { GenericTable } from '@/components/tables/generic-table'
 import { useAuth } from '@/hooks/auth/use-auth'
 import { useDashboardHome, type DashboardBinRecord } from '@/hooks/dashboard/use-dashboard-home'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
-const binColumns: TableColumnConfig<DashboardBinRecord>[] = [
+const binColumns: ColumnConfig<DashboardBinRecord>[] = [
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
   { label: 'Status', accessor: 'active', type: 'boolean' },
   {
     label: 'Progress',
+    accessor: 'currentCapacity',
     type: 'progress',
-    progressBarRef: { max: 'maxCapacity', current: 'currentCapacity' }
+    typeValues: { max: 'maxCapacity', current: 'currentCapacity' }
   }
 ]
 
@@ -87,7 +88,6 @@ export function DashboardItemsPageView() {
               position: 'header'
             }}
             search={{
-              enabled: true,
               placeholder: 'Search bins...',
               fields: ['name', 'type']
             }}

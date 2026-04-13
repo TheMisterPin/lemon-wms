@@ -15,53 +15,53 @@ import AddItemToBinModal from '@/components/warehouse/modals/add-item-to-bin-mod
 import LoadItemToTrolleyModal from '@/components/warehouse/modals/load-item-to-trolley-modal'
 import { useBinDetails, type BinStockRecord } from '@/hooks/warehouse/use-bin-details'
 import { useLoadItemToTrolley } from '@/hooks/warehouse/use-load-item-to-trolley'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 import {
   DEFAULT_GENERIC_TABLE_PAGE_SIZE,
-  type TableColumnConfig,
-  type TableRowStyleIfConfig
+  type RowStyleIfConfig
 } from '@/types/components/table/generic-table.types'
 
-const itemColumns: TableColumnConfig<BinStockRecord>[] = [
+const itemColumns: ColumnConfig<BinStockRecord>[] = [
   { label: 'SKU', accessor: 'sku' },
   { label: 'name', accessor: 'name' },
   { label: 'Lot', accessor: 'lotId' },
   { label: 'Serial', accessor: 'serialNumberId' },
   {
     label: 'Available',
+    accessor: 'quantityAvailable',
     type: 'joinValues',
-    joinValuesRef: { first: 'quantityAvailable', second: 'uom' }
+    typeValues: { values: ['quantityAvailable', 'uom'] }
   },
   {
     label: 'Reserved',
+    accessor: 'quantityReserved',
     type: 'joinValues',
-    joinValuesRef: { first: 'quantityReserved', second: 'uom' }
+    typeValues: { values: ['quantityReserved', 'uom'] }
   },
   {
     label: 'Blocked',
+    accessor: 'quantityBlocked',
     type: 'joinValues',
-    joinValuesRef: { first: 'quantityBlocked', second: 'uom' }
+    typeValues: { values: ['quantityBlocked', 'uom'] }
   }
 ]
 
-const binRowStyleIf: TableRowStyleIfConfig<BinStockRecord> = {
+const binRowStyleIf: RowStyleIfConfig = {
   rules: [
     {
-      colName: 'quantityBlocked',
-      whenPositive: true,
-      bgClassName: 'bg-red-950/40',
-      textClassName: 'text-red-100'
+      accessor: 'quantityBlocked',
+      condition: 'positive',
+      className: 'bg-red-950/40 text-red-100'
     },
     {
-      colName: 'quantityReserved',
-      whenPositive: true,
-      bgClassName: 'bg-amber-950/40',
-      textClassName: 'text-amber-100'
+      accessor: 'quantityReserved',
+      condition: 'positive',
+      className: 'bg-amber-950/40 text-amber-100'
     },
     {
-      colName: 'quantityAvailable',
-      whenPositive: true,
-      bgClassName: '',
-      textClassName: ''
+      accessor: 'quantityAvailable',
+      condition: 'positive',
+      className: ''
     }
   ]
 }
@@ -203,7 +203,7 @@ export function WarehouseBinDetailsPageView() {
             emptyMessage={isLoading ? 'Loading items...' : 'No items currently in this bin.'}
             pageSize={DEFAULT_GENERIC_TABLE_PAGE_SIZE}
             rowStyleIf={binRowStyleIf}
-            toolbarExtra={
+            headerButtons={
               <Button
                 type="button"
                 variant="secondary"

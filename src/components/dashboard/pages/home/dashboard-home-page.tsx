@@ -5,16 +5,17 @@ import { DashboardInfoCards } from '@/components/dashboard/DashboardInfoCards'
 import { DashboardRecordListSection } from '@/components/dashboard/DashboardRecordListSection'
 import { GenericTable } from '@/components/tables/generic-table'
 import { useDashboardHome, type DashboardBinRecord } from '@/hooks/dashboard/use-dashboard-home'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
-const binColumns: TableColumnConfig<DashboardBinRecord>[] = [
+const binColumns: ColumnConfig<DashboardBinRecord>[] = [
   { label: 'Name', accessor: 'name' },
   { label: 'Type', accessor: 'type' },
   { label: 'Status', accessor: 'active', type: 'boolean' },
   {
     label: 'Progress',
+    accessor: 'currentCapacity',
     type: 'progress',
-    progressBarRef: { max: 'maxCapacity', current: 'currentCapacity' }
+    typeValues: { max: 'maxCapacity', current: 'currentCapacity' }
   }
 ]
 
@@ -68,11 +69,9 @@ export function DashboardHomePageView() {
           <GenericTable
             columns={binColumns}
             records={bins.records}
-            section={{
-              title: 'Bins',
-              icon: ShelvingUnit,
-              entityTone: 'bin'
-            }}
+            title="Bins"
+            titleIcon={ShelvingUnit}
+            entityTone="bin"
             pagination={{
               page: bins.page,
               totalPages: bins.totalPages,
@@ -81,7 +80,6 @@ export function DashboardHomePageView() {
               position: 'header'
             }}
             search={{
-              enabled: true,
               placeholder: 'Search bins...',
               fields: ['name', 'type']
             }}

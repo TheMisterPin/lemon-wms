@@ -1,7 +1,7 @@
 import type { User, UserFormValues } from '@/lib/schemas/user'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
-import type { TableColumnConfig } from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
 
 export const roleOptions: SelectOption[] = [
   { value: 'OWNER', label: 'Owner' },
@@ -71,7 +71,7 @@ export const userFormConfig: GenericFormConfig<UserFormValues> = {
   ]
 }
 
-export const userTableColumns: TableColumnConfig<User>[] = [
+export const userTableColumns: ColumnConfig<User>[] = [
   { label: 'Badge', accessor: 'badgeNumber' },
   { label: 'Email', accessor: 'email' },
   { label: 'Role', accessor: 'role' },

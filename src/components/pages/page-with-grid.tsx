@@ -2,10 +2,8 @@
 
 import React from 'react'
 
-import {
-  TableColumnConfig,
-  type TablePaginationConfig
-} from '@/types/components/table/generic-table.types'
+import type { ColumnConfig } from '@/types/components/table/column.types'
+import type { TablePaginationConfig } from '@/types/components/table/generic-table.types'
 import type { RowAction } from '@/types/components/table/generic-table.types'
 
 import { GenericTable } from '../tables/generic-table'
@@ -16,7 +14,7 @@ interface PageWithGridProps {
     isLoading?: boolean
     error?: string | null
     tableData: {
-        columns: TableColumnConfig<any>[]
+        columns: ColumnConfig<any>[]
         records: any[]
     }
     onRowClick?: (row: any) => void

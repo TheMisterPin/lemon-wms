@@ -11,6 +11,7 @@ const AUTH_SESSION_STORAGE_KEY = 'wms_auth_session'
 const officeUser: AuthUser = {
   id: 'user-office-1',
   email: 'owner@lemon-wms.local',
+  fullName: 'Owner User',
   role: 'OWNER',
   badgeNumber: 'USR-0001'
 }
