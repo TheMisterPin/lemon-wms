@@ -26,13 +26,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return fail('Warehouse context is required.', 'VALIDATION_ERROR', 400)
   }
 
-  try {
-    const rows = await getWarehousePurchaseOrders(prisma, payload.warehouseId)
+  const rows = await getWarehousePurchaseOrders(prisma, payload.warehouseId)
 
-    return ok(rows, 'Purchase orders retrieved successfully.')
-  } catch (error) {
-    console.error('[GET /api/warehouse/orders/[orderType]]', error)
-
-    return fail('Failed to retrieve purchase orders.')
-  }
+  return ok(rows, 'Purchase orders retrieved successfully.')
 }

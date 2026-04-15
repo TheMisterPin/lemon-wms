@@ -15,6 +15,7 @@
     "seed:all": "tsx seed/seed-all.ts",
     "seed:users": "tsx seed/seed-users.ts",
     "seed:warehouses": "tsx seed/seed-warehouses.ts",
+    "seed:stock": "tsx seed/seed-stock.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"

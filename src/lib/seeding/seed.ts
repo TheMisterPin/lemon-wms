@@ -6,6 +6,7 @@ import { seedCategories } from './item-categories'
 import { seedItems } from './items'
 import { seedPurchaseOrders } from './purchase-orders'
 import { seedBinStockItems } from './seed-bin-stock-items'
+import { seedDemoDevice } from './seed-devices'
 import { seedUnitsOfMeasure } from './unit-of-measures'
 import { seedUsers } from './users'
 import { seedWarehouses } from './warehouses'
@@ -94,6 +95,10 @@ export async function seedDB(prisma: PrismaClient) {
   console.warn('Seeding users...')
   const users = await seedUsers(prisma)
   console.warn(`Seeded ${users.count} users.\n`)
+
+  console.warn('Seeding demo device...')
+  await seedDemoDevice(prisma)
+  console.warn('Seeded demo device.\n')
 
   console.warn('Seeding suppliers and customers...')
   const businessParties = await seedBusinessParties(prisma)
