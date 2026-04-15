@@ -9,6 +9,16 @@ import { getUsers } from '@/lib/entities/users/get-users'
 import prisma from '@/lib/prisma'
 import { userFormSchema } from '@/lib/schemas/user'
 
+/**
+ * @swagger
+ * /api/dashboard/users:
+ *   get:
+ *     summary: GET /api/dashboard/users
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -31,6 +41,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/users:
+ *   post:
+ *     summary: POST /api/dashboard/users
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

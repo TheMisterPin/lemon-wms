@@ -15,6 +15,12 @@ import {
   getValueByPath
 } from './get-value-by-path'
 
+/**
+ * getDisplayFieldRawValue.
+ * @param row - Parameter for getDisplayFieldRawValue.
+ * @param field - Parameter for getDisplayFieldRawValue.
+ * @returns Result from getDisplayFieldRawValue.
+ */
 export function getDisplayFieldRawValue<T extends FieldValues>(row: T, field: DisplayFieldConfig<T>): unknown {
   if ('accessorPath' in field && field.accessorPath) {
     return getValueByPath(row, field.accessorPath)
@@ -33,6 +39,11 @@ export function isTemporalDisplayFieldType(
   return fieldType === 'date' || fieldType === 'datetime' || fieldType === 'time'
 }
 
+/**
+ * isNullOrEmptyTextValue.
+ * @param value - Parameter for isNullOrEmptyTextValue.
+ * @returns Result from isNullOrEmptyTextValue.
+ */
 export function isNullOrEmptyTextValue(value: unknown): boolean {
   if (value === null || value === undefined) {
     return true
@@ -45,6 +56,11 @@ export function isNullOrEmptyTextValue(value: unknown): boolean {
   return false
 }
 
+/**
+ * isJoinPrimaryValueEmpty.
+ * @param value - Parameter for isJoinPrimaryValueEmpty.
+ * @returns Result from isJoinPrimaryValueEmpty.
+ */
 export function isJoinPrimaryValueEmpty(value: unknown): boolean {
   if (isNullOrEmptyTextValue(value)) {
     return true
@@ -65,6 +81,12 @@ export function isJoinPrimaryValueEmpty(value: unknown): boolean {
   return false
 }
 
+/**
+ * getDisplayFieldTextValue.
+ * @param row - Parameter for getDisplayFieldTextValue.
+ * @param field - Parameter for getDisplayFieldTextValue.
+ * @returns Result from getDisplayFieldTextValue.
+ */
 export function getDisplayFieldTextValue<T extends FieldValues>(row: T, field: DisplayFieldConfig<T>): string {
   if ('render' in field && field.render) {
     const renderedValue = field.render(row)
@@ -102,6 +124,12 @@ export function getDisplayFieldTextValue<T extends FieldValues>(row: T, field: D
   return formatDisplayValue(rawValue)
 }
 
+/**
+ * renderDisplayFieldValue.
+ * @param row - Parameter for renderDisplayFieldValue.
+ * @param field - Parameter for renderDisplayFieldValue.
+ * @returns Result from renderDisplayFieldValue.
+ */
 export function renderDisplayFieldValue<T extends FieldValues>(row: T, field: DisplayFieldConfig<T>): ReactNode {
   if ('render' in field && field.render) {
     return field.render(row)
@@ -134,6 +162,11 @@ export function getProgressValues<T extends FieldValues>(
   return { current, max, percentage: Math.min(Math.max((current / max) * 100, 0), 100) }
 }
 
+/**
+ * getNumericValue.
+ * @param value - Parameter for getNumericValue.
+ * @returns Result from getNumericValue.
+ */
 function getNumericValue(value: unknown): number | undefined {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value
@@ -149,6 +182,12 @@ function getNumericValue(value: unknown): number | undefined {
   return undefined
 }
 
+/**
+ * getJoinValueComparable.
+ * @param row - Parameter for getJoinValueComparable.
+ * @param field - Parameter for getJoinValueComparable.
+ * @returns Result from getJoinValueComparable.
+ */
 export function getJoinValueComparable<T extends FieldValues>(row: T, field: JoinValuesDisplayFieldConfig<T>): string | undefined {
   const first = getValueByPath(row, field.joinValuesRef.first)
   if (isJoinPrimaryValueEmpty(first)) {
@@ -161,6 +200,12 @@ export function getJoinValueComparable<T extends FieldValues>(row: T, field: Joi
   return `${formatDisplayValue(first)}${separator}${formatDisplayValue(second)}`
 }
 
+/**
+ * getComparableDisplayFieldValue.
+ * @param row - Parameter for getComparableDisplayFieldValue.
+ * @param field - Parameter for getComparableDisplayFieldValue.
+ * @returns Result from getComparableDisplayFieldValue.
+ */
 export function getComparableDisplayFieldValue<T extends FieldValues>(row: T, field: DisplayFieldConfig<T>): unknown {
   if (field.type === 'progress') {
     return getProgressValues(row, field)?.percentage

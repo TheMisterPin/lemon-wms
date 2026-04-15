@@ -7,6 +7,22 @@ import { getItemsInBin } from '@/lib/services/bin-operations'
 
 type Params = { params: Promise<{ id: string }> }
 
+/**
+ * @swagger
+ * /api/warehouse/bins/{id}:
+ *   get:
+ *     summary: GET /api/warehouse/bins/{id}
+ *     tags: [Warehouse]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
 

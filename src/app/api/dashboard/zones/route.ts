@@ -10,6 +10,16 @@ import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 import { zoneFormSchema } from '@/lib/schemas/zone'
 
+/**
+ * @swagger
+ * /api/dashboard/zones:
+ *   get:
+ *     summary: GET /api/dashboard/zones
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -30,6 +40,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/zones:
+ *   post:
+ *     summary: POST /api/dashboard/zones
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

@@ -17,6 +17,22 @@ const unloadSchema = z.object({
   selections: z.array(unloadSelectionSchema).min(1)
 })
 
+/**
+ * @swagger
+ * /api/warehouse/stock/unload/{id}:
+ *   post:
+ *     summary: POST /api/warehouse/stock/unload/{id}
+ *     tags: [Warehouse]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

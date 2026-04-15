@@ -1,5 +1,11 @@
 import type { PrismaClient } from '@/generated/prisma'
 
+/**
+ * getZones.
+ * @param prisma - Parameter for getZones.
+ * @param filters? - Parameter for getZones.
+ * @returns Result from getZones.
+ */
 async function getZones(prisma: PrismaClient, filters?: { warehouseId?: string }) {
   const zones = await prisma.zone.findMany({
     where: {

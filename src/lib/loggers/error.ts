@@ -8,6 +8,11 @@ interface LogErrorInput {
   errorCode?: number | null
 }
 
+/**
+ * logError.
+ * @param input - Parameter for logError.
+ * @returns Result from logError.
+ */
 export async function logError(input: LogErrorInput) {
   try {
     await prisma.error.create({

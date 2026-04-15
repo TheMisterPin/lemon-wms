@@ -2,6 +2,12 @@ import { BinItemStatus, BinType, Prisma, type PrismaClient } from '@/generated/p
 
 const MAX_UNIQUE_ITEMS_PER_BIN = 12
 
+/**
+ * randomInt.
+ * @param min - Parameter for randomInt.
+ * @param max - Parameter for randomInt.
+ * @returns Result from randomInt.
+ */
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }

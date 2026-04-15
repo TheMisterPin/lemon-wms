@@ -1,5 +1,11 @@
 import type { PrismaClient } from '@/generated/prisma'
 
+/**
+ * getBins.
+ * @param prisma - Parameter for getBins.
+ * @param filters? - Parameter for getBins.
+ * @returns Result from getBins.
+ */
 async function getBins(prisma: PrismaClient, filters?: { zoneId?: string; warehouseId?: string }) {
   const bins = await prisma.bin.findMany({
     where: {

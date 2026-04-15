@@ -7,6 +7,11 @@ faker.seed(42) // deterministic output
 // ---------------------------------------------------------------------------
 // Suppliers (30)
 // ---------------------------------------------------------------------------
+/**
+ * buildSuppliers.
+ * @param count - Parameter for buildSuppliers.
+ * @returns Result from buildSuppliers.
+ */
 function buildSuppliers(count = 30) {
   return Array.from({ length: count }, (_, i) => {
     const n   = i + 1
@@ -58,6 +63,11 @@ function buildSuppliers(count = 30) {
 // ---------------------------------------------------------------------------
 // Customers (50)
 // ---------------------------------------------------------------------------
+/**
+ * buildCustomers.
+ * @param count - Parameter for buildCustomers.
+ * @returns Result from buildCustomers.
+ */
 function buildCustomers(count = 50) {
   return Array.from({ length: count }, (_, i) => {
     const n   = i + 1

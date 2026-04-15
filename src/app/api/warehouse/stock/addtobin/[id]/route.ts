@@ -7,6 +7,22 @@ import { createBinOperationsFromItem } from '@/lib/services/bin-operations'
 
 type Params = { params: Promise<{ id: string }> }
 
+/**
+ * @swagger
+ * /api/warehouse/stock/addtobin/{id}:
+ *   post:
+ *     summary: POST /api/warehouse/stock/addtobin/{id}
+ *     tags: [Warehouse]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
 

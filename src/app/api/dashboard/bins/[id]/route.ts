@@ -11,6 +11,22 @@ import { binFormSchema } from '@/lib/schemas/bin'
 
 type Params = { params: Promise<{ id: string }> }
 
+/**
+ * @swagger
+ * /api/dashboard/bins/{id}:
+ *   get:
+ *     summary: GET /api/dashboard/bins/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -33,6 +49,22 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/bins/{id}:
+ *   put:
+ *     summary: PUT /api/dashboard/bins/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function PUT(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -66,6 +98,22 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/bins/{id}:
+ *   delete:
+ *     summary: DELETE /api/dashboard/bins/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function DELETE(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

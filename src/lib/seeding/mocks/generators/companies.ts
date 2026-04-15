@@ -12,6 +12,11 @@ export type SeedCompany = {
   address: FakeAddress
 }
 
+/**
+ * createFakeCompany.
+ * @param counter - Parameter for createFakeCompany.
+ * @returns Result from createFakeCompany.
+ */
 const createFakeCompany = (counter: number): SeedCompany => {
   const padded = counter.toString().padStart(4, '0')
   const companyName = faker.company.name()
@@ -33,6 +38,11 @@ const createFakeCompany = (counter: number): SeedCompany => {
   }
 }
 
+/**
+ * generateFakeCompanies.
+ * @param count - Parameter for generateFakeCompanies.
+ * @returns Result from generateFakeCompanies.
+ */
 export const generateFakeCompanies = (count: number): SeedCompany[] => {
   let counter = 0
 

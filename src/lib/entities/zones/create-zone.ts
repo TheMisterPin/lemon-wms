@@ -4,6 +4,12 @@ import { DomainError } from '@/lib/errors'
 import type { ZoneFormValues } from '@/lib/schemas/zone'
 import { generateZoneSerial } from '@/utils/serials'
 
+/**
+ * createZone.
+ * @param prisma - Parameter for createZone.
+ * @param data - Parameter for createZone.
+ * @returns Result from createZone.
+ */
 async function createZone(prisma: PrismaClient, data: ZoneFormValues) {
   // 1. Verify the warehouse exists and is not soft-deleted
   const warehouse = await prisma.warehouse.findUnique({

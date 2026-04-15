@@ -11,6 +11,11 @@ import {
 import { upsertAvailableStockItem, updateBinCapacityBy, decrementOrDeleteStockItem, findAvailableStockItem } from '../mutations'
 import type { CreateBinOperationsFromItemArgs } from '../types'
 
+/**
+ * createBinOperationsFromItem.
+ * @param args - Parameter for createBinOperationsFromItem.
+ * @returns Result from createBinOperationsFromItem.
+ */
 export async function createBinOperationsFromItem(args: CreateBinOperationsFromItemArgs) {
   const {
     prisma,

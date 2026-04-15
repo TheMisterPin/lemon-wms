@@ -5,6 +5,16 @@ import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { getTrolleyItems } from '@/lib/entities/move-operations'
 import prisma from '@/lib/prisma'
 
+/**
+ * @swagger
+ * /api/warehouse/stock/trolley:
+ *   get:
+ *     summary: GET /api/warehouse/stock/trolley
+ *     tags: [Warehouse]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

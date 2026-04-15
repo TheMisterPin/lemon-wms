@@ -11,6 +11,16 @@ const loginSchema = z.object({
   pin: z.string().regex(/^\d{4}$/)
 })
 
+/**
+ * @swagger
+ * /api/auth/floor/login:
+ *   post:
+ *     summary: POST /api/auth/floor/login
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const parsed = loginSchema.safeParse(body)

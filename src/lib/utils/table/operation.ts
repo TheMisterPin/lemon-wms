@@ -2,6 +2,11 @@ import type { OperationTypeValues } from '@/types/components/table/column.types'
 
 import { getRowValue } from './row-access'
 
+/**
+ * toFiniteNumber.
+ * @param value - Parameter for toFiniteNumber.
+ * @returns Result from toFiniteNumber.
+ */
 function toFiniteNumber(value: unknown): number | undefined {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value
@@ -18,6 +23,12 @@ function toFiniteNumber(value: unknown): number | undefined {
   return undefined
 }
 
+/**
+ * roundResult.
+ * @param n - Parameter for roundResult.
+ * @param decimalRound? - Parameter for roundResult.
+ * @returns Result from roundResult.
+ */
 function roundResult(n: number, decimalRound?: number): number {
   if (decimalRound === undefined) {
     return n

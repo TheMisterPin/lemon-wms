@@ -12,6 +12,11 @@ import { seedUsers } from './users'
 import { seedWarehouses } from './warehouses'
 import { seedZones } from './zones'
 
+/**
+ * seedDB.
+ * @param prisma - Parameter for seedDB.
+ * @returns Result from seedDB.
+ */
 export async function seedDB(prisma: PrismaClient) {
   console.warn('Clearing existing data...\n')
 

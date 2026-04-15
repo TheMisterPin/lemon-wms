@@ -1,5 +1,11 @@
 import type { PrismaClient } from '@/generated/prisma'
 
+/**
+ * deleteUser.
+ * @param prisma - Parameter for deleteUser.
+ * @param id - Parameter for deleteUser.
+ * @returns Result from deleteUser.
+ */
 async function deleteUser(prisma: PrismaClient, id: string) {
   // Deactivate user, soft-delete, and revoke all refresh tokens
   const [user] = await prisma.$transaction([

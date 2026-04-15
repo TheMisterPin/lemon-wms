@@ -9,10 +9,20 @@ const WEIGHTED_STATUSES: OrderStatus[] = [
   ...Array(3).fill(OrderStatus.PAUSED)
 ]
 
+/**
+ * pickStatus.
+ * @param index - Parameter for pickStatus.
+ * @returns Result from pickStatus.
+ */
 function pickStatus(index: number): OrderStatus {
   return WEIGHTED_STATUSES[index % WEIGHTED_STATUSES.length]
 }
 
+/**
+ * seedPurchaseOrders.
+ * @param prisma - Parameter for seedPurchaseOrders.
+ * @returns Result from seedPurchaseOrders.
+ */
 export async function seedPurchaseOrders(prisma: PrismaClient) {
   const warehouse = await prisma.warehouse.findFirst({
     where: { deletedAt: null },

@@ -21,6 +21,11 @@ export type DashboardPurchaseOrderRow = {
   lines: DashboardPurchaseOrderLineRow[]
 }
 
+/**
+ * getDashboardPurchaseOrders.
+ * @param prisma - Parameter for getDashboardPurchaseOrders.
+ * @returns Result from getDashboardPurchaseOrders.
+ */
 async function getDashboardPurchaseOrders(prisma: PrismaClient): Promise<DashboardPurchaseOrderRow[]> {
   const orders = await prisma.purchaseOrder.findMany({
     where: {

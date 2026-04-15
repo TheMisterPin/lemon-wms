@@ -1,6 +1,11 @@
 import type { PrismaClient } from '@/generated/prisma'
 import { BusinessPartyType } from '@/generated/prisma'
 
+/**
+ * getAllVendors.
+ * @param prisma - Parameter for getAllVendors.
+ * @returns Result from getAllVendors.
+ */
 async function getAllVendors(prisma: PrismaClient) {
   const vendors = await prisma.businessParty.findMany({
     where: {

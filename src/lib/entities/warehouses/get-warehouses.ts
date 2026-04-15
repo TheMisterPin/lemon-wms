@@ -1,5 +1,10 @@
 import type { PrismaClient } from '@/generated/prisma'
 
+/**
+ * getWarehouses.
+ * @param prisma - Parameter for getWarehouses.
+ * @returns Result from getWarehouses.
+ */
 async function getWarehouses(prisma: PrismaClient) {
   const warehouses = await prisma.warehouse.findMany({
     select: {

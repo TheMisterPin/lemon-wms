@@ -9,6 +9,10 @@ export type FakeAddress = {
   country: string
 }
 
+/**
+ * createFakeAddress.
+ * @returns Result from createFakeAddress.
+ */
 export const createFakeAddress = (): FakeAddress => ({
   streetLine1: faker.location.streetAddress(),
   streetLine2: faker.datatype.boolean(0.25)

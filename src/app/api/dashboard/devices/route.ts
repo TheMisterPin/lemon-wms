@@ -17,6 +17,16 @@ const createDeviceSchema = z.object({
   isActive: z.boolean().default(true)
 })
 
+/**
+ * @swagger
+ * /api/dashboard/devices:
+ *   get:
+ *     summary: GET /api/dashboard/devices
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -49,6 +59,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/devices:
+ *   post:
+ *     summary: POST /api/dashboard/devices
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

@@ -54,6 +54,16 @@ async function getOrdersForWarehouseHomePage(warehouseId: string) {
 
   return afterAllOrders
 }
+/**
+ * @swagger
+ * /api/warehouse:
+ *   get:
+ *     summary: GET /api/warehouse
+ *     tags: [Warehouse]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
