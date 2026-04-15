@@ -22,6 +22,11 @@ interface AdjustmentBinOperationParams extends BinOperationBaseParams {
   binId: string
 }
 
+/**
+ * normalizeQuantity.
+ * @param quantity - Parameter for normalizeQuantity.
+ * @returns Result from normalizeQuantity.
+ */
 function normalizeQuantity(quantity: number): number {
   if (!Number.isFinite(quantity) || quantity <= 0) {
     throw new Error('Quantity must be a positive number')
@@ -90,14 +95,29 @@ function getAdjustmentBinOperationParams(
   }
 }
 
+/**
+ * mapMovementLedgerEvent.
+ * @param sign - Parameter for mapMovementLedgerEvent.
+ * @returns Result from mapMovementLedgerEvent.
+ */
 function mapMovementLedgerEvent(sign: 'positive' | 'negative'): FiscalInventoryEventType {
   return sign === 'positive' ? 'TRANSFER_IN' : 'TRANSFER_OUT'
 }
 
+/**
+ * mapAdjustmentLedgerEvent.
+ * @param sign - Parameter for mapAdjustmentLedgerEvent.
+ * @returns Result from mapAdjustmentLedgerEvent.
+ */
 function mapAdjustmentLedgerEvent(sign: 'positive' | 'negative'): FiscalInventoryEventType {
   return sign === 'positive' ? 'ADJUSTMENT_IN' : 'ADJUSTMENT_OUT'
 }
 
+/**
+ * resolveOperationType.
+ * @param kind - Parameter for resolveOperationType.
+ * @returns Result from resolveOperationType.
+ */
 function resolveOperationType(kind: 'movement' | 'adjustment'): BinOperationType {
   return kind === 'movement' ? 'MOVE' : 'ADJUST'
 }

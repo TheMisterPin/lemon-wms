@@ -4,6 +4,11 @@ import { decrementOrDeleteStockItem, findAvailableStockItem, upsertAvailableStoc
 import { decimalToNumber, normalizePositiveQuantity } from '../validation'
 import type { UnloadItemsFromTrolleyArgs } from '../types'
 
+/**
+ * unloadItemsFromTrolley.
+ * @param args - Parameter for unloadItemsFromTrolley.
+ * @returns Result from unloadItemsFromTrolley.
+ */
 export async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
   const { prisma, userId, warehouseId, toBinId, selections } = args
   if (!selections.length) {

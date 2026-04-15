@@ -76,6 +76,11 @@ const ww: RbacPermission[] = [
   RbacPermission.ORDER_EXECUTE_FLOOR
 ]
 
+/**
+ * toSet.
+ * @param perms - Parameter for toSet.
+ * @returns Result from toSet.
+ */
 function toSet(perms: RbacPermission[]): ReadonlySet<RbacPermission> {
   return new Set(perms)
 }

@@ -22,6 +22,16 @@ function parsePositiveInteger(value: string | null, fallback: number) {
   return parsedValue
 }
 
+/**
+ * @swagger
+ * /api/warehouse/items:
+ *   get:
+ *     summary: GET /api/warehouse/items
+ *     tags: [Warehouse]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
 

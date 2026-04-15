@@ -27,6 +27,22 @@ function isPrismaUniqueViolation(
   )
 }
 
+/**
+ * @swagger
+ * /api/dashboard/orders/{orderType}/create:
+ *   post:
+ *     summary: POST /api/dashboard/orders/{orderType}/create
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: orderType
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       201:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest, { params }: RouteParams) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

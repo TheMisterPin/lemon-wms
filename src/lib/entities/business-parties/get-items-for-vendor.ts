@@ -1,6 +1,12 @@
 import type { PrismaClient } from '@/generated/prisma'
 import { BusinessPartyType } from '@/generated/prisma'
 
+/**
+ * getItemsForVendor.
+ * @param prisma - Parameter for getItemsForVendor.
+ * @param businessPartyId - Parameter for getItemsForVendor.
+ * @returns Result from getItemsForVendor.
+ */
 async function getItemsForVendor(prisma: PrismaClient, businessPartyId: string) {
   const supplier = await prisma.businessParty.findFirst({
     where: {

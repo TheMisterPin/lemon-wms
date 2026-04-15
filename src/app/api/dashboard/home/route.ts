@@ -5,6 +5,16 @@ import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { getWarehouseHomeData } from '@/lib/entities/warehouses/get-warehouse-home-data'
 import prisma from '@/lib/prisma'
 
+/**
+ * @swagger
+ * /api/dashboard/home:
+ *   get:
+ *     summary: GET /api/dashboard/home
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

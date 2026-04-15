@@ -9,6 +9,12 @@ interface DeviceSearchFilters {
   isActive?: boolean
 }
 
+/**
+ * getFilteredDevices.
+ * @param prisma - Parameter for getFilteredDevices.
+ * @param filters? - Parameter for getFilteredDevices.
+ * @returns Result from getFilteredDevices.
+ */
 async function getFilteredDevices(prisma: PrismaClient, filters?: DeviceSearchFilters) {
   const where = Object.fromEntries(
     Object.entries(filters ?? {}).filter(([, value]) => value !== undefined)
@@ -45,6 +51,11 @@ async function getFilteredDevices(prisma: PrismaClient, filters?: DeviceSearchFi
   return devices
 }
 
+/**
+ * getAllDevices.
+ * @param prisma - Parameter for getAllDevices.
+ * @returns Result from getAllDevices.
+ */
 async function getAllDevices(prisma: PrismaClient) {
   const devices = await prisma.device.findMany({
     orderBy: {

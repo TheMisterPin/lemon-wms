@@ -3,6 +3,12 @@ import { DomainError } from '@/lib/errors'
 import type { BinFormValues } from '@/lib/schemas/bin'
 import { generateBinSerial } from '@/utils/serials'
 
+/**
+ * createBin.
+ * @param prisma - Parameter for createBin.
+ * @param data - Parameter for createBin.
+ * @returns Result from createBin.
+ */
 async function createBin(prisma: PrismaClient, data: BinFormValues) {
   // 1. Verify the zone exists and is not soft-deleted
   const zone = await prisma.zone.findUnique({

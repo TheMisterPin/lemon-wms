@@ -4,6 +4,13 @@ import type { ItemFormValues } from '@/lib/schemas/item'
 
 import { validateItemRelations } from './validate-item-relations'
 
+/**
+ * updateItem.
+ * @param prisma - Parameter for updateItem.
+ * @param id - Parameter for updateItem.
+ * @param data - Parameter for updateItem.
+ * @returns Result from updateItem.
+ */
 async function updateItem(prisma: PrismaClient, id: string, data: Partial<ItemFormValues>) {
   const { dimensions, ...rest } = data
 

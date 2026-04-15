@@ -40,9 +40,17 @@ const createFakeWorker = (
   }
 }
 
+/**
+ * generateFakeUsers.
+ * @returns Result from generateFakeUsers.
+ */
 export const generateFakeUsers = (): SeedUser[] => {
   let counter = 0
 
+  /**
+   * nextCounter.
+   * @returns Result from nextCounter.
+   */
   const nextCounter = () => {
     counter += 1
 

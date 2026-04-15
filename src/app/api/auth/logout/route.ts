@@ -5,6 +5,16 @@ import { readRefreshTokenCookie } from '@/lib/auth/session'
 import { logout } from '@/lib/entities/auth/logout'
 import prisma from '@/lib/prisma'
 
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: POST /api/auth/logout
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(request: NextRequest) {
   const rawRefreshToken = await readRefreshTokenCookie()
   const payload = verifyAccessTokenFromRequest(request)

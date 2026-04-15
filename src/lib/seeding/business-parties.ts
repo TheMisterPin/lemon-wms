@@ -4,6 +4,11 @@ import { customers, suppliers } from './mocks/business-parties'
 
 const allParties = [...suppliers, ...customers]
 
+/**
+ * seedBusinessParties.
+ * @param prisma - Parameter for seedBusinessParties.
+ * @returns Result from seedBusinessParties.
+ */
 export async function seedBusinessParties(prisma: PrismaClient) {
   await prisma.businessParty.createMany({
     data: allParties.map((entry) => entry.party),

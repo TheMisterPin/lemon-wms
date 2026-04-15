@@ -7,6 +7,22 @@ import prisma from '@/lib/prisma'
 
 type RouteParams = { params: Promise<{ orderType: string }> }
 
+/**
+ * @swagger
+ * /api/dashboard/orders/{orderType}:
+ *   get:
+ *     summary: GET /api/dashboard/orders/{orderType}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: orderType
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest, { params }: RouteParams) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

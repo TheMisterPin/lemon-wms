@@ -8,6 +8,27 @@ import prisma from '@/lib/prisma'
 
 type RouteParams = { params: Promise<{ orderType: string; id: string }> }
 
+/**
+ * @swagger
+ * /api/dashboard/orders/{orderType}/{id}/release:
+ *   post:
+ *     summary: POST /api/dashboard/orders/{orderType}/{id}/release
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: orderType
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(_req: NextRequest, { params }: RouteParams) {
   const payload = verifyAccessTokenFromRequest(_req)
   if (!payload) {

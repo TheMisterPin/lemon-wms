@@ -3,10 +3,21 @@ import { BinItemStatus, type Prisma, type PrismaClient } from '@/generated/prism
 const TOTAL_BIN_STOCK_RECORDS = 10_000
 const MAX_ITEMS_PER_BIN = 100
 
+/**
+ * randomInt.
+ * @param min - Parameter for randomInt.
+ * @param max - Parameter for randomInt.
+ * @returns Result from randomInt.
+ */
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
+/**
+ * seedBinStockItems.
+ * @param prisma - Parameter for seedBinStockItems.
+ * @returns Result from seedBinStockItems.
+ */
 export async function seedBinStockItems(prisma: PrismaClient) {
   const [bins, items] = await Promise.all([
     prisma.bin.findMany({

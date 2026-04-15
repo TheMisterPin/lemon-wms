@@ -10,6 +10,16 @@ import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 import { binFormSchema } from '@/lib/schemas/bin'
 
+/**
+ * @swagger
+ * /api/dashboard/bins:
+ *   get:
+ *     summary: GET /api/dashboard/bins
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -31,6 +41,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/bins:
+ *   post:
+ *     summary: POST /api/dashboard/bins
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

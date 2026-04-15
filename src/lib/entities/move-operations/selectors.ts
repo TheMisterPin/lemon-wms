@@ -1,5 +1,11 @@
 import type { Prisma } from '@/generated/prisma'
 
+/**
+ * resolveTransitBinId.
+ * @param tx - Parameter for resolveTransitBinId.
+ * @param warehouseId - Parameter for resolveTransitBinId.
+ * @returns Result from resolveTransitBinId.
+ */
 export async function resolveTransitBinId(tx: Prisma.TransactionClient, warehouseId: string): Promise<string> {
   const transitBin = await tx.bin.findFirst({
     where: {

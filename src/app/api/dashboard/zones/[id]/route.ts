@@ -11,6 +11,22 @@ import { zoneFormSchema } from '@/lib/schemas/zone'
 
 type Params = { params: Promise<{ id: string }> }
 
+/**
+ * @swagger
+ * /api/dashboard/zones/{id}:
+ *   get:
+ *     summary: GET /api/dashboard/zones/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -33,6 +49,22 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/zones/{id}:
+ *   put:
+ *     summary: PUT /api/dashboard/zones/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function PUT(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -66,6 +98,22 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/zones/{id}:
+ *   delete:
+ *     summary: DELETE /api/dashboard/zones/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function DELETE(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

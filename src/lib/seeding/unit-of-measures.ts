@@ -1,5 +1,10 @@
 import { type PrismaClient } from '@/generated/prisma'
 
+/**
+ * seedUnitsOfMeasure.
+ * @param prisma - Parameter for seedUnitsOfMeasure.
+ * @returns Result from seedUnitsOfMeasure.
+ */
 export async function seedUnitsOfMeasure(prisma: PrismaClient) {
   await prisma.unitOfMeasure.upsert(
     { where: { id: 'PC' }, update: {

@@ -3,6 +3,11 @@ import type { RowStyleIfRule } from '@/types/components/table/generic-table.type
 
 import { getRowValue } from './row-access'
 
+/**
+ * toComparableNumber.
+ * @param value - Parameter for toComparableNumber.
+ * @returns Result from toComparableNumber.
+ */
 function toComparableNumber(value: unknown): number | undefined {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value
@@ -95,6 +100,12 @@ export function resolveColumnStyleClassNames(
   return parts.filter(Boolean).join(' ')
 }
 
+/**
+ * evaluateStyleRule.
+ * @param rule - Parameter for evaluateStyleRule.
+ * @param cellValue - Parameter for evaluateStyleRule.
+ * @returns Result from evaluateStyleRule.
+ */
 function evaluateStyleRule(rule: StyleIfRule, cellValue: unknown): boolean {
   return evaluateStyleCondition(rule.condition, cellValue, rule.value)
 }

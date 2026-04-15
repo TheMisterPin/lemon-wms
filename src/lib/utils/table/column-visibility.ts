@@ -8,6 +8,11 @@ import {
 } from './cell-display'
 import { getRowValue, isDataColumn } from './row-access'
 
+/**
+ * isNullOrEmptyTextValue.
+ * @param value - Parameter for isNullOrEmptyTextValue.
+ * @returns Result from isNullOrEmptyTextValue.
+ */
 function isNullOrEmptyTextValue(value: unknown): boolean {
   if (value === null || value === undefined) {
     return true
@@ -20,6 +25,11 @@ function isNullOrEmptyTextValue(value: unknown): boolean {
   return false
 }
 
+/**
+ * isJoinPrimaryEmptyForHide.
+ * @param value - Parameter for isJoinPrimaryEmptyForHide.
+ * @returns Result from isJoinPrimaryEmptyForHide.
+ */
 function isJoinPrimaryEmptyForHide(value: unknown): boolean {
   if (isNullOrEmptyTextValue(value)) {
     return true

@@ -10,6 +10,16 @@ const loginSchema = z.object({
   password: z.string().min(1)
 })
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: POST /api/auth/login
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
   const parsed = loginSchema.safeParse(body)

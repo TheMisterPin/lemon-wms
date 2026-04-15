@@ -1,3 +1,8 @@
+/**
+ * decimalToNumber.
+ * @param value - Parameter for decimalToNumber.
+ * @returns Result from decimalToNumber.
+ */
 export function decimalToNumber(value: unknown): number {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value
@@ -20,6 +25,11 @@ export function decimalToNumber(value: unknown): number {
   return 0
 }
 
+/**
+ * normalizePositiveQuantity.
+ * @param quantity - Parameter for normalizePositiveQuantity.
+ * @returns Result from normalizePositiveQuantity.
+ */
 export function normalizePositiveQuantity(quantity: number): number {
   if (!Number.isFinite(quantity) || quantity <= 0) {
     throw new Error('Quantity must be greater than zero')

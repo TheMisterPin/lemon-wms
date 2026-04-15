@@ -59,6 +59,13 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
 // Helper: persist error to DB via API (fire-and-forget)
 // ---------------------------------------------------------------------------
 
+/**
+ * persistError.
+ * @param message - Parameter for persistError.
+ * @param type - Parameter for persistError.
+ * @param stack? - Parameter for persistError.
+ * @returns Result from persistError.
+ */
 function persistError(message: string, type: ErrorType, stack?: string) {
   // Intentionally not awaited — we never block the UI on logging
   apiClient
@@ -75,6 +82,11 @@ function persistError(message: string, type: ErrorType, stack?: string) {
 // Exported convenience functions — callable from anywhere
 // ---------------------------------------------------------------------------
 
+/**
+ * showSuccess.
+ * @param message - Parameter for showSuccess.
+ * @returns Result from showSuccess.
+ */
 export function showSuccess(message: string) {
   useNotificationStore.getState().show({
     variant: 'success',
@@ -83,6 +95,11 @@ export function showSuccess(message: string) {
   })
 }
 
+/**
+ * showWarning.
+ * @param message - Parameter for showWarning.
+ * @returns Result from showWarning.
+ */
 export function showWarning(message: string) {
   useNotificationStore.getState().show({
     variant: 'warning',
@@ -143,6 +160,12 @@ export function showError(
   }
 }
 
+/**
+ * showConfirm.
+ * @param message - Parameter for showConfirm.
+ * @param onConfirm - Parameter for showConfirm.
+ * @returns Result from showConfirm.
+ */
 export function showConfirm(message: string, onConfirm: () => void) {
   useNotificationStore.getState().show({
     variant: 'confirm',
@@ -152,6 +175,10 @@ export function showConfirm(message: string, onConfirm: () => void) {
   })
 }
 
+/**
+ * dismiss.
+ * @returns Result from dismiss.
+ */
 export function dismiss() {
   useNotificationStore.getState().dismiss()
 }

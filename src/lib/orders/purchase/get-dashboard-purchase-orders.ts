@@ -21,6 +21,11 @@ export type DashboardPurchaseOrderRow = {
   businessPartyId: string | null
 }
 
+/**
+ * getDashboardPurchaseOrders.
+ * @param prisma - Parameter for getDashboardPurchaseOrders.
+ * @returns Result from getDashboardPurchaseOrders.
+ */
 async function getDashboardPurchaseOrders(prisma: PrismaClient): Promise<DashboardPurchaseOrderRow[]> {
   return prisma.purchaseOrder.findMany({
     where: {

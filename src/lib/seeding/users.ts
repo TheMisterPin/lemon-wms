@@ -6,6 +6,11 @@ import { generateFakeUsers } from './mocks/generators/users'
 
 const SALT_ROUNDS = 10
 
+/**
+ * seedUsers.
+ * @param prisma - Parameter for seedUsers.
+ * @returns Result from seedUsers.
+ */
 export async function seedUsers(prisma: PrismaClient) {
   const users = generateFakeUsers()
   await prisma.user.create({

@@ -11,6 +11,13 @@ type UpdateUserInput = {
   isActive?: boolean
 }
 
+/**
+ * updateUser.
+ * @param prisma - Parameter for updateUser.
+ * @param id - Parameter for updateUser.
+ * @param data - Parameter for updateUser.
+ * @returns Result from updateUser.
+ */
 async function updateUser(prisma: PrismaClient, id: string, data: UpdateUserInput) {
   const [passwordHash, pinHash] = await Promise.all([
     data.password ? bcrypt.hash(data.password, 10) : Promise.resolve(undefined),

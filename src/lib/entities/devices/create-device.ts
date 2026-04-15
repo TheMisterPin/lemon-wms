@@ -11,6 +11,12 @@ interface DeviceFormValues {
   type?: DeviceType
 }
 
+/**
+ * upsertDevice.
+ * @param prisma - Parameter for upsertDevice.
+ * @param name - Parameter for upsertDevice.
+ * @returns Result from upsertDevice.
+ */
 async function upsertDevice(prisma: PrismaClient, name: string) {
   await prisma.device.upsert({
     where: { name },
@@ -29,6 +35,12 @@ async function upsertDevice(prisma: PrismaClient, name: string) {
   return prisma.device.findUnique({ where: { name } })
 }
 
+/**
+ * createDevice.
+ * @param prisma - Parameter for createDevice.
+ * @param data - Parameter for createDevice.
+ * @returns Result from createDevice.
+ */
 async function createDevice(prisma: PrismaClient, data: DeviceFormValues) {
   return prisma.device.create({ data })
 }

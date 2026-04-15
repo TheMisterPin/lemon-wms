@@ -1,5 +1,11 @@
 import type { PrismaClient } from '@/generated/prisma'
 
+/**
+ * getItems.
+ * @param prisma - Parameter for getItems.
+ * @param filters? - Parameter for getItems.
+ * @returns Result from getItems.
+ */
 async function getItems(prisma: PrismaClient, filters?: { categoryId?: string; isActive?: boolean }) {
   return prisma.item.findMany({
     where: {

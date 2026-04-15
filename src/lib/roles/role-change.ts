@@ -27,6 +27,12 @@ export function canAssignRole(actor: Role, targetRole: Role): boolean {
   return false
 }
 
+/**
+ * assertCanAssignRole.
+ * @param actor - Parameter for assertCanAssignRole.
+ * @param targetRole - Parameter for assertCanAssignRole.
+ * @returns Result from assertCanAssignRole.
+ */
 export function assertCanAssignRole(actor: Role, targetRole: Role): void {
   if (!can(actor, RbacPermission.USER_CHANGE_ROLE)) {
     throw new DomainError('Forbidden', 'FORBIDDEN', 403)

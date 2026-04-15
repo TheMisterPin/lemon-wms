@@ -3,6 +3,11 @@ import type { BinStockItem, PrismaClient } from '@/generated/prisma'
 import type { IBin } from '@/types/models/bin'
 import type { IBinItem } from '@/types/models/bin-item'
 
+/**
+ * binStockItemToIBinItem.
+ * @param row - Parameter for binStockItemToIBinItem.
+ * @returns Result from binStockItemToIBinItem.
+ */
 function binStockItemToIBinItem(row: BinStockItem): IBinItem {
   return {
     id: row.id,
@@ -30,10 +35,22 @@ function binStockItemToIBinItem(row: BinStockItem): IBinItem {
   }
 }
 
+/**
+ * getBin.
+ * @param prisma - Parameter for getBin.
+ * @param id - Parameter for getBin.
+ * @returns Result from getBin.
+ */
 async function getBin(prisma: PrismaClient, id: string) {
   return prisma.bin.findFirst({ where: { id, deletedAt: null } })
 }
 
+/**
+ * getBinWithContent.
+ * @param prisma - Parameter for getBinWithContent.
+ * @param id - Parameter for getBinWithContent.
+ * @returns Result from getBinWithContent.
+ */
 async function getBinWithContent(prisma: PrismaClient, id: string): Promise<IBin | null> {
   const bin = await prisma.bin.findFirst({ where: { id, deletedAt: null }, include: { binStockItems: true } })
   if (!bin) {

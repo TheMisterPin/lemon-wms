@@ -11,6 +11,10 @@ type RetriableAxiosRequestConfig = InternalAxiosRequestConfig & {
 
 type ApiClientKind = 'shared' | 'dashboard' | 'warehouse'
 
+/**
+ * createApiInstance.
+ * @returns Result from createApiInstance.
+ */
 const createApiInstance = () => axios.create({
   baseURL: '/api',
   headers: {
@@ -25,6 +29,11 @@ const warehouseApi = createApiInstance()
 // Track in-flight refresh to avoid concurrent refresh calls
 let refreshPromise: Promise<string | null> | null = null
 
+/**
+ * shouldAttemptRefresh.
+ * @param error - Parameter for shouldAttemptRefresh.
+ * @returns Result from shouldAttemptRefresh.
+ */
 function shouldAttemptRefresh(error: unknown): boolean {
   if (!axios.isAxiosError(error)) {
     return false
@@ -44,6 +53,10 @@ function shouldAttemptRefresh(error: unknown): boolean {
   return !requestUrl.includes('/auth/refresh')
 }
 
+/**
+ * attemptTokenRefresh.
+ * @returns Result from attemptTokenRefresh.
+ */
 async function attemptTokenRefresh(): Promise<string | null> {
   try {
     const res = await axios.post('/api/auth/refresh')
@@ -115,6 +128,12 @@ function withAuthHeaders(
   return config
 }
 
+/**
+ * attachInterceptors.
+ * @param instance - Parameter for attachInterceptors.
+ * @param kind - Parameter for attachInterceptors.
+ * @returns Result from attachInterceptors.
+ */
 function attachInterceptors(instance: ReturnType<typeof createApiInstance>, kind: ApiClientKind) {
   instance.interceptors.request.use(
     (config) => withAuthHeaders(config, kind),
@@ -205,6 +224,11 @@ export const apiClient = {
     authenticatedCall<T>(url, { method: 'DELETE', data })
 }
 
+/**
+ * createTypedClient.
+ * @param instance - Parameter for createTypedClient.
+ * @returns Result from createTypedClient.
+ */
 function createTypedClient(instance: typeof sharedApi) {
   return {
     get: <T = any>(url: string, params?: any) =>

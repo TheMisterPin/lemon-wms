@@ -9,6 +9,16 @@ import { getItems } from '@/lib/entities/items/get-items'
 import prisma from '@/lib/prisma'
 import { itemFormSchema } from '@/lib/schemas/item'
 
+/**
+ * @swagger
+ * /api/dashboard/items:
+ *   get:
+ *     summary: GET /api/dashboard/items
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -31,6 +41,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/items:
+ *   post:
+ *     summary: POST /api/dashboard/items
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
