@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ShieldCheck, ShieldOff } from 'lucide-react'
+import { ShieldCheck, ShieldOff, Smartphone } from 'lucide-react'
 
 import { deviceTableColumns, type DeviceTableRow } from '@/components/configs/entities/device/config'
 import AuthorizeDeviceForm from '@/components/dashboard/features/devices/authorize-device-form'
@@ -42,6 +42,7 @@ function DevicesContent() {
     <>
       <PageWithGrid
         title="Devices"
+        titleIcon={Smartphone}
         isLoading={isLoading}
         error={error}
         tableData={{ columns: deviceTableColumns, records: devices }}

@@ -53,7 +53,8 @@ export const bins: Prisma.BinCreateManyInput[] = Array.from({ length: 5 }, (_, w
         zoneId,
         name: buildBinName(binType, binIndex + 1),
         type: binType,
-        isBlocked: false
+        isBlocked: false,
+        maxCapacity: 100
       }
     })
   }).flat()

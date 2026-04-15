@@ -81,7 +81,7 @@ export function TableShell<T extends { id: string }>({
 
   return (
     <TooltipProvider>
-      <div className="mx-auto w-full overflow-hidden shadow-lg shadow-black/20 backdrop-blur-sm rounded-lg">
+      <div className="mx-auto w-full min-w-0 overflow-x-auto overflow-y-visible rounded-lg shadow-lg shadow-black/20 backdrop-blur-sm">
         {title ? (
           <div className="flex items-center justify-between gap-4 border-b border-brand-glass-border px-4 py-3">
             <div className="flex items-center gap-2">
@@ -101,6 +101,17 @@ export function TableShell<T extends { id: string }>({
                 onNext={effectivePagination.onNext}
               />
             ) : null}
+          </div>
+        ) : null}
+
+        {effectivePagination && showHeaderPagination && !title ? (
+          <div className="border-b border-brand-glass-border px-4 py-3">
+            <PaginationSelector
+              page={effectivePagination.page}
+              totalPages={effectivePagination.totalPages}
+              onPrev={effectivePagination.onPrev}
+              onNext={effectivePagination.onNext}
+            />
           </div>
         ) : null}
 
@@ -126,17 +137,6 @@ export function TableShell<T extends { id: string }>({
             {headerButtons ? (
               <div className="flex shrink-0 items-center gap-2">{headerButtons}</div>
             ) : null}
-          </div>
-        ) : null}
-
-        {effectivePagination && showHeaderPagination && !title ? (
-          <div className="border-b border-brand-glass-border px-4 py-3">
-            <PaginationSelector
-              page={effectivePagination.page}
-              totalPages={effectivePagination.totalPages}
-              onPrev={effectivePagination.onPrev}
-              onNext={effectivePagination.onNext}
-            />
           </div>
         ) : null}
 

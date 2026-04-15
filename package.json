@@ -6,6 +6,7 @@
   "packageManager": "pnpm@10.29.3",
   "scripts": {
     "dev": "next dev",
+    "dev:webpack": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

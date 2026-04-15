@@ -1,66 +1,90 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client'
 
-import React from 'react'
+import type { ReactNode } from 'react'
 
+import { GenericTable } from '@/components/tables/generic-table'
 import type { ColumnConfig } from '@/types/components/table/column.types'
-import type { TablePaginationConfig } from '@/types/components/table/generic-table.types'
-import type { RowAction } from '@/types/components/table/generic-table.types'
+import type {
+  EntityTone,
+  GenericTableSearchConfig,
+  RowAction,
+  TablePaginationConfig
+} from '@/types/components/table/generic-table.types'
+import type { LucideIcon } from 'lucide-react'
 
-import { GenericTable } from '../tables/generic-table'
-
-interface PageWithGridProps {
-    title: string
-    headerActions?: React.ReactNode
-    isLoading?: boolean
-    error?: string | null
-    tableData: {
-        columns: ColumnConfig<any>[]
-        records: any[]
-    }
-    onRowClick?: (row: any) => void
-    tableActions?: RowAction<any>[]
-    tablePagination?: TablePaginationConfig
+export interface PageWithGridProps<T extends { id: string }> {
+  title: string
+  titleIcon?: LucideIcon
+  entityTone?: EntityTone
+  headerActions?: ReactNode
+  isLoading?: boolean
+  error?: string | null
+  tableData: {
+    columns: ColumnConfig<T>[]
+    records: T[]
+  }
+  onRowClick?: (row: T) => void
+  tableActions?: RowAction<T>[]
+  tablePagination?: TablePaginationConfig
+  /** Forwarded to GenericTable; omit for default search behavior. */
+  search?: false | GenericTableSearchConfig
+  pageSize?: number
 }
 
-export default function PageWithGrid(props: PageWithGridProps) {
-  const { title, headerActions, isLoading, error, tableData, onRowClick, tableActions, tablePagination } = props
+export default function PageWithGrid<T extends { id: string }>(props: PageWithGridProps<T>) {
+  const {
+    title,
+    titleIcon,
+    entityTone,
+    headerActions,
+    isLoading,
+    error,
+    tableData,
+    onRowClick,
+    tableActions,
+    tablePagination,
+    search,
+    pageSize
+  } = props
+
+  const scrollShell =
+    'mx-auto flex w-full max-w-[1200px] origin-top flex-1 flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
 
   return (
-    <main className="h-full rounded-xl bg-brand-content-bg p-6">
-      <div className="flex items-center justify-between mb-6 px-20">
-        <h1 className="bg-linear-to-r from-brand-accent via-brand-accent-mid to-brand-accent-end bg-clip-text text-2xl font-black tracking-tight text-transparent">
-          {title}
-        </h1>
-        <div className="flex items-center gap-2">
-          {headerActions}
-        </div>
+    <main className="flex h-full select-none flex-col overflow-hidden bg-linear-to-b from-page-bg-from to-page-bg-to">
+      <div className={scrollShell}>
+        {isLoading ? (
+          <section className="mt-6 rounded-lg border border-slate-500 bg-brand-glass/75 p-6">
+            <div className="flex flex-col items-center justify-center gap-3 py-12">
+              <div className="size-8 animate-spin rounded-full border-2 border-brand-primary/30 border-t-brand-primary" />
+              <p className="text-sm text-brand-muted">
+                Loading {title.toLowerCase()}…
+              </p>
+            </div>
+          </section>
+        ) : error ? (
+          <section className="mt-6 rounded-lg border border-rose-500/40 bg-rose-500/10 p-6">
+            <p className="text-sm text-rose-200">{error}</p>
+          </section>
+        ) : (
+          <section className="mt-6 rounded-lg border border-slate-500 bg-brand-glass/75 p-6">
+            <GenericTable
+              title={title}
+              titleIcon={titleIcon}
+              entityTone={entityTone}
+              headerButtons={headerActions}
+              columns={tableData.columns}
+              records={tableData.records}
+              onRowClick={onRowClick}
+              actions={tableActions}
+              pagination={tablePagination}
+              search={search}
+              pageSize={pageSize}
+              emptyMessage={`No ${title.toLowerCase()} found.`}
+            />
+          </section>
+        )}
       </div>
-
-      <div className="mx-20 mb-6 h-px bg-linear-to-r from-transparent via-brand-border to-transparent" />
-
-      {isLoading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="flex flex-col items-center gap-3">
-            <div className="size-8 rounded-full border-2 border-brand-primary/30 border-t-brand-primary animate-spin" />
-            <p className="text-sm text-brand-muted">
-              Loading {title.toLowerCase()} data...
-            </p>
-          </div>
-        </div>
-      ) : error ? (
-        <div className="mx-20 rounded-xl border border-dash-red/20 bg-dash-red-dim p-4">
-          <p className="text-sm text-dash-red-text">{error}</p>
-        </div>
-      ) : (
-        <GenericTable
-          columns={tableData.columns}
-          records={tableData.records}
-          onRowClick={onRowClick}
-          actions={tableActions}
-          pagination={tablePagination}
-          emptyMessage={`No ${title.toLowerCase()} found.`}
-        />
-      )}
     </main>
   )
 }

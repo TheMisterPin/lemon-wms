@@ -1,26 +1,36 @@
 'use client'
 
+import { useCallback, useState } from 'react'
+
 import { MapPin, ShelvingUnit, Warehouse } from 'lucide-react'
-import { DashboardInfoCards } from '@/components/dashboard/DashboardInfoCards'
-import { DashboardRecordListSection } from '@/components/dashboard/DashboardRecordListSection'
+
+import { binDirectoryTableColumns } from '@/components/configs/entities/bin/bin-directory-table'
+import { viewBinContentsRowAction } from '@/components/configs/entities/bin/bin-table-actions'
+import { DashboardInfoCards } from '@/components/dashboard/dashboard-info-card'
+import { DashboardRecordListSection } from '@/components/dashboard/dashboard-record-list-section'
+import { BinContentsModal } from '@/components/dashboard/features/bins/bin-contents-modal'
 import { GenericTable } from '@/components/tables/generic-table'
 import { useDashboardHome, type DashboardBinRecord } from '@/hooks/dashboard/use-dashboard-home'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
-const binColumns: ColumnConfig<DashboardBinRecord>[] = [
-  { label: 'Name', accessor: 'name' },
-  { label: 'Type', accessor: 'type' },
-  { label: 'Status', accessor: 'active', type: 'boolean' },
-  {
-    label: 'Progress',
-    accessor: 'currentCapacity',
-    type: 'progress',
-    typeValues: { max: 'maxCapacity', current: 'currentCapacity' }
-  }
-]
+const binColumns: ColumnConfig<DashboardBinRecord>[] = binDirectoryTableColumns
 
 export function DashboardHomePageView() {
   const { infoCards, warehouses, zones, bins } = useDashboardHome()
+  const [contentsBinId, setContentsBinId] = useState<string | null>(null)
+  const [contentsOpen, setContentsOpen] = useState(false)
+
+  const openContents = useCallback((binId: string) => {
+    setContentsBinId(binId)
+    setContentsOpen(true)
+  }, [])
+
+  const onContentsOpenChange = useCallback((open: boolean) => {
+    setContentsOpen(open)
+    if (!open) {
+      setContentsBinId(null)
+    }
+  }, [])
 
   return (
     <main className="flex h-full select-none flex-col overflow-hidden  bg-linear-to-b from-page-bg-from to-page-bg-to">
@@ -81,11 +91,14 @@ export function DashboardHomePageView() {
             }}
             search={{
               placeholder: 'Search bins...',
-              fields: ['name', 'type']
+              fields: ['code', 'name', 'type']
             }}
+            actions={[viewBinContentsRowAction(openContents)]}
           />
         </section>
       </div>
+
+      <BinContentsModal binId={contentsBinId} open={contentsOpen} onOpenChange={onContentsOpenChange} />
     </main>
   )
 }

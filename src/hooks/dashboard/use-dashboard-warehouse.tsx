@@ -48,6 +48,10 @@ type BinApiRecord = {
   isBlocked: boolean
   createdAt: string
   deletedAt: string | null
+  maxCapacity: number | null
+  currentCapacity: number | null
+  filledPercentage: number | null
+  itemsInBin: number
 }
 
 type DashboardHomePayload = {
@@ -67,8 +71,16 @@ type DashboardHomePayload = {
     warehouseId: string
     zoneId: string
     name: string
+    code: string
     type: string
     isBlocked: boolean
+    blockReason: string | null
+    active: boolean
+    maxCapacity: number | null
+    currentCapacity: number | null
+    filledPercentage: number | null
+    itemsInBin: number
+    createdAt: string
   }[]
 }
 
@@ -193,11 +205,15 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
           warehouseId: bin.warehouseId,
           zoneId: bin.zoneId,
           name: bin.name,
-          code: bin.name,
+          code: bin.code,
           type: bin.type,
           isBlocked: bin.isBlocked,
-          createdAt: new Date().toISOString(),
-          deletedAt: null
+          createdAt: bin.createdAt,
+          deletedAt: null,
+          maxCapacity: bin.maxCapacity,
+          currentCapacity: bin.currentCapacity,
+          filledPercentage: bin.filledPercentage,
+          itemsInBin: bin.itemsInBin
         }))
 
         setRawZones(

@@ -5,6 +5,12 @@ import { formatDateValue } from '@/utils/formatters/date-utils'
 import { evaluateOperation } from './operation'
 import { applyIfNull, getRowValue } from './row-access'
 
+/**
+ * Checks if a value is null, undefined, or an empty string.
+ *
+ * @param {unknown} value - The value to check.
+ * @returns {boolean} True if the value is null, undefined, or an empty string; otherwise, false.
+ */
 function isNullOrEmptyTextValue(value: unknown): boolean {
   if (value === null || value === undefined) {
     return true
@@ -17,6 +23,12 @@ function isNullOrEmptyTextValue(value: unknown): boolean {
   return false
 }
 
+/**
+ * Checks if a value is empty, considering numeric zero values and empty strings.
+ *
+ * @param {unknown} value - The value to check.
+ * @returns {boolean} True if the value is null, undefined, an empty string, or zero; otherwise, false.
+ */
 function isJoinPrimaryEmpty(value: unknown): boolean {
   if (isNullOrEmptyTextValue(value)) {
     return true
@@ -37,6 +49,14 @@ function isJoinPrimaryEmpty(value: unknown): boolean {
   return false
 }
 
+/**
+ * Converts a raw number or string to a formatted display string.
+ *
+ * @param {unknown} raw - The raw value to format.
+ * @param {'decimal' | 'int'} mode - The formatting mode ('decimal' or 'int').
+ * @param {number} [decimalRound=2] - The number of decimal places for rounding (default is 2).
+ * @returns {string} The formatted display string.
+ */
 function toDisplayNumber(raw: unknown, mode: 'decimal' | 'int', decimalRound?: number): string {
   if (typeof raw === 'number' && Number.isFinite(raw)) {
     if (mode === 'int') {
@@ -59,6 +79,13 @@ function toDisplayNumber(raw: unknown, mode: 'decimal' | 'int', decimalRound?: n
   return EMPTY_DISPLAY_VALUE
 }
 
+/**
+ * Applies a specified text format to a given string.
+ *
+ * @param {string} text - The text to format.
+ * @param {string} [format] - The format type ('uppercase', 'lowercase', 'capitalize', 'titlecase').
+ * @returns {string} The formatted text.
+ */
 function applyTextFormat(text: string, format?: string): string {
   if (!format) {
     return text
@@ -83,10 +110,24 @@ function applyTextFormat(text: string, format?: string): string {
   return text
 }
 
+/**
+ * Retrieves the raw value of a data column from a row.
+ *
+ * @param {unknown} row - The row containing the data.
+ * @param {DataColumnConfig} column - The configuration for the data column.
+ * @returns {unknown} The raw value of the specified column in the row.
+ */
 export function getDataColumnRawValue(row: unknown, column: DataColumnConfig): unknown {
   return getRowValue(row, column.accessor)
 }
 
+/**
+ * Retrieves the formatted display string of a data column from a row based on its configuration.
+ *
+ * @param {unknown} row - The row containing the data.
+ * @param {DataColumnConfig} column - The configuration for the data column.
+ * @returns {string} The formatted display string of the specified column in the row.
+ */
 export function getDataColumnDisplayString(row: unknown, column: DataColumnConfig): string {
   const ifNull = column.ifNull
 
@@ -226,7 +267,13 @@ export function getDataColumnDisplayString(row: unknown, column: DataColumnConfi
   }
 }
 
-/** Progress bar model aligned with legacy `getProgressValues` / shadcn `Progress` `value` prop. */
+/**
+ * Retrieves the progress bar model for a 'progress' type data column.
+ *
+ * @param {unknown} row - The row containing the data.
+ * @param {DataColumnConfig & { type: 'progress' }} column - The configuration for the 'progress' data column.
+ * @returns {{ current: number, max: number, percentage: number } | undefined} An object representing the progress bar model or undefined if invalid.
+ */
 export function getProgressBarModel(
   row: unknown,
   column: DataColumnConfig & { type: 'progress' }

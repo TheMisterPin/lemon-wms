@@ -1,8 +1,8 @@
 'use client'
 
 import { MapPin, Warehouse } from 'lucide-react'
-import { DashboardInfoCards } from '@/components/dashboard/DashboardInfoCards'
-import { DashboardRecordListSection } from '@/components/dashboard/DashboardRecordListSection'
+import { DashboardInfoCards } from '@/components/dashboard/dashboard-info-card'
+import { DashboardRecordListSection } from '@/components/dashboard/dashboard-record-list-section'
 import { GenericTable } from '@/components/tables/generic-table'
 import { useAuth } from '@/hooks/auth/use-auth'
 import { useDashboardHome, type DashboardBinRecord } from '@/hooks/dashboard/use-dashboard-home'

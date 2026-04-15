@@ -192,10 +192,10 @@ export function WarehouseBinDetailsPageView() {
           </div>
         )}
 
-        <div className="gap-4 rounded-lg bg-brand-glass/75 border border-slate-500 pb-8">
+        <div id="bin-contents" className="gap-4 rounded-lg bg-brand-glass/75 border border-slate-500 pb-8">
           <h2 className="text-xl font-semibold mt-8 px-4 flex items-center gap-2">
             <Package className="size-5" />
-            Items in bin
+            Bin contents
           </h2>
           <GenericTable
             columns={itemColumns}

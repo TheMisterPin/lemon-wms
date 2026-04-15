@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Archive, Boxes, Layers, LockKeyhole, PackageSearch, ShieldBan } from 'lucide-react'
 
-import { DashboardInfoCards, type DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
+import { DashboardInfoCards, type DashboardInfoCardItem } from '@/components/dashboard/dashboard-info-card'
 import { GenericTable } from '@/components/tables/generic-table'
 import { dashboardApiClient } from '@/lib/axios'
 import type { ColumnConfig } from '@/types/components/table/column.types'

@@ -1,17 +1,17 @@
+import {
+  binDirectoryTableColumns,
+  type BinDirectoryRow
+} from '@/components/configs/entities/bin/bin-directory-table'
 import type { Bin, BinFormValues } from '@/lib/schemas/bin'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
-export type BinTableRow = {
-  id: string
+export type BinTableRow = BinDirectoryRow & {
   zoneId: string
   zoneName: string
   warehouseId: string
   warehouseName: string
-  name: string
-  code: string
-  type: string
   isBlocked: boolean
   createdAt: string
   deletedAt: string | null
@@ -70,15 +70,7 @@ export function createBinFormConfig(
 
 export const binFormConfig = createBinFormConfig([])
 
-export const binTableColumns: ColumnConfig<BinTableRow>[] = [
-  { label: 'Code', accessor: 'code' },
-  { label: 'Name', accessor: 'name' },
-  { label: 'Type', accessor: 'type' },
-  { label: 'Blocked', accessor: 'isBlocked', type: 'boolean' },
-  { label: 'Zone', accessor: 'zoneName' },
-  { label: 'Warehouse', accessor: 'warehouseName' },
-  { label: 'Created', accessor: 'createdAt', type: 'date' }
-]
+export const binTableColumns: ColumnConfig<BinTableRow>[] = binDirectoryTableColumns
 
 export const binFactboxSections: FactboxSectionConfig<BinFactboxRecord>[] = [
   {
@@ -94,6 +86,9 @@ export const binFactboxSections: FactboxSectionConfig<BinFactboxRecord>[] = [
   {
     title: 'Capacity',
     fields: [
+      { label: 'Max capacity', accessor: 'maxCapacity' },
+      { label: 'Current', accessor: 'currentCapacity' },
+      { label: 'Filled %', accessor: 'filledPercentage' },
       { label: 'Max weight (kg)', accessor: 'maxWeightKg' },
       { label: 'Max volume (m³)', accessor: 'maxVolumeM3' },
       { label: 'Zone', accessor: 'zoneName' },

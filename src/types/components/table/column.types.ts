@@ -48,6 +48,11 @@ export interface IndicatorTypeValues {
   conditions: Record<string, string>
   defaultColor?: string
   animation?: 'blink' | 'none' | 'spin'
+  /**
+   * When true with {@link animation} `'none'`, dots use the global
+   * `.indicator-sync-blink` keyframes so every row pulses in sync (wrap table in that class).
+   */
+  syncBlink?: boolean
 }
 
 export interface JoinValuesTypeValues {

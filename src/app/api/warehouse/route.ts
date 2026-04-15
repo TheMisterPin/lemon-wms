@@ -97,16 +97,26 @@ export async function GET(req: NextRequest) {
     }
     const binList = await getBinList(prisma, device?.zoneId ?? '')
     const bins = await getBins(prisma, { zoneId: device?.zoneId ?? '' })
-    const normalizedBins = bins.map((bin) => ({
-      id: bin.id,
-      zoneId: bin.zoneId,
-      name: bin.name,
-      isBlocked: bin.isBlocked,
-      blockReason: bin.blockReason,
-      type: bin.type,
-      maxCapacity: toNumberOrZero(bin.maxCapacity),
-      currentCapacity: toNumberOrZero(bin.currentCapacity)
-    }))
+    const normalizedBins = bins.map((bin) => {
+      const maxCapacity = toNumberOrZero(bin.maxCapacity)
+      const currentCapacity = toNumberOrZero(bin.currentCapacity)
+      const filledPercentage =
+        maxCapacity > 0 ? (currentCapacity / maxCapacity) * 100 : null
+
+      return {
+        id: bin.id,
+        zoneId: bin.zoneId,
+        name: bin.name,
+        code: bin.code,
+        isBlocked: bin.isBlocked,
+        blockReason: bin.blockReason,
+        type: bin.type,
+        maxCapacity,
+        currentCapacity,
+        filledPercentage,
+        itemsInBin: bin._count.binStockItems
+      }
+    })
 
     const orders = await getOrdersForWarehouseHomePage(device?.warehouseId ?? '')
     const warehouseHomePageData = {

@@ -1,26 +1,50 @@
 'use client'
 
-import { binTableColumns, type BinTableRow } from '@/components/configs/entities/bin/config'
+import { useCallback, useState } from 'react'
+
+import { Box } from 'lucide-react'
+
+import { viewBinContentsRowAction } from '@/components/configs/entities/bin/bin-table-actions'
+import { binTableColumns } from '@/components/configs/entities/bin/config'
+import { BinContentsModal } from '@/components/dashboard/features/bins/bin-contents-modal'
 import CreateBinForm from '@/components/dashboard/features/bins/create-bin-form'
 import PageWithGrid from '@/components/pages/page-with-grid'
 import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
 
 export function DashboardBinsPageView() {
   const { bins, zoneOptions, isLoading, error } = useDashboardWarehouse()
+  const [contentsBinId, setContentsBinId] = useState<string | null>(null)
+  const [contentsOpen, setContentsOpen] = useState(false)
 
-  function handleRowClick(row: BinTableRow) {
-    // eslint-disable-next-line no-console
-    console.log('Clicked bin row:', row)
-  }
+  const openContents = useCallback((binId: string) => {
+    setContentsBinId(binId)
+    setContentsOpen(true)
+  }, [])
+
+  const onContentsOpenChange = useCallback((open: boolean) => {
+    setContentsOpen(open)
+    if (!open) {
+      setContentsBinId(null)
+    }
+  }, [])
 
   return (
-    <PageWithGrid
-      title="Bins"
-      headerActions={<CreateBinForm zonesList={zoneOptions} />}
-      isLoading={isLoading}
-      error={error}
-      tableData={{ columns: binTableColumns, records: bins }}
-      onRowClick={handleRowClick}
-    />
+    <>
+      <PageWithGrid
+        title="Bins"
+        titleIcon={Box}
+        entityTone="bin"
+        headerActions={<CreateBinForm zonesList={zoneOptions} />}
+        isLoading={isLoading}
+        error={error}
+        tableData={{ columns: binTableColumns, records: bins }}
+        tableActions={[viewBinContentsRowAction(openContents)]}
+        search={{
+          placeholder: 'Search bins...',
+          fields: ['code', 'name', 'type']
+        }}
+      />
+      <BinContentsModal binId={contentsBinId} open={contentsOpen} onOpenChange={onContentsOpenChange} />
+    </>
   )
 }

@@ -32,10 +32,13 @@ type BinWithRelations = {
   blockReason: string | null
   maxWeightKg: DecimalLike | null
   maxVolumeM3: DecimalLike | null
+  maxCapacity: DecimalLike | null
+  currentCapacity: DecimalLike | null
   createdAt: Date
   deletedAt: Date | null
   zone: { name: string }
   warehouse: { name: string }
+  _count: { binStockItems: number }
 }
 
 type DeviceWithRelations = {
@@ -91,6 +94,10 @@ export type BinTableRecord = {
   blockReason: string | null
   maxWeightKg: string | null
   maxVolumeM3: string | null
+  maxCapacity: number | null
+  currentCapacity: number | null
+  filledPercentage: number | null
+  itemsInBin: number
   createdAt: string
   deletedAt: string | null
 }
@@ -180,23 +187,46 @@ export function toZoneTableRecords(records: ZoneWithWarehouseName[]): ZoneTableR
   }))
 }
 
+function decimalLikeToNumber(value: DecimalLike | null | undefined): number | null {
+  if (value === null || value === undefined) {
+    return null
+  }
+
+  const n = Number(value.toString())
+
+  return Number.isFinite(n) ? n : null
+}
+
 export function toBinTableRecords(records: BinWithRelations[]): BinTableRecord[] {
-  return records.map((record) => ({
-    id: record.id,
-    zoneId: record.zoneId,
-    zoneName: record.zone.name,
-    warehouseId: record.warehouseId,
-    warehouseName: record.warehouse.name,
-    name: record.name,
-    code: record.code,
-    type: record.type,
-    isBlocked: record.isBlocked,
-    blockReason: record.blockReason,
-    maxWeightKg: record.maxWeightKg?.toString() ?? null,
-    maxVolumeM3: record.maxVolumeM3?.toString() ?? null,
-    createdAt: record.createdAt.toISOString(),
-    deletedAt: record.deletedAt?.toISOString() ?? null
-  }))
+  return records.map((record) => {
+    const maxCapacity = decimalLikeToNumber(record.maxCapacity)
+    const currentCapacity = decimalLikeToNumber(record.currentCapacity)
+    const filledPercentage =
+      maxCapacity !== null && maxCapacity > 0 && currentCapacity !== null
+        ? (currentCapacity / maxCapacity) * 100
+        : null
+
+    return {
+      id: record.id,
+      zoneId: record.zoneId,
+      zoneName: record.zone.name,
+      warehouseId: record.warehouseId,
+      warehouseName: record.warehouse.name,
+      name: record.name,
+      code: record.code,
+      type: record.type,
+      isBlocked: record.isBlocked,
+      blockReason: record.blockReason,
+      maxWeightKg: record.maxWeightKg?.toString() ?? null,
+      maxVolumeM3: record.maxVolumeM3?.toString() ?? null,
+      maxCapacity,
+      currentCapacity,
+      filledPercentage,
+      itemsInBin: record._count.binStockItems,
+      createdAt: record.createdAt.toISOString(),
+      deletedAt: record.deletedAt?.toISOString() ?? null
+    }
+  })
 }
 
 export function toDeviceTableRecords(records: DeviceWithRelations[]): DeviceTableRecord[] {

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { MapPin, ShelvingUnit, Warehouse } from 'lucide-react'
 
-import type { DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
-import type { DashboardRecordListItem } from '@/components/dashboard/DashboardRecordListSection'
+import type { DashboardInfoCardItem } from '@/components/dashboard/dashboard-info-card'
+import type { DashboardRecordListItem } from '@/components/dashboard/dashboard-record-list-section'
 import { dashboardApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
@@ -36,12 +36,16 @@ interface DashboardHomePageData {
     warehouseId: string
     zoneId: string
     name: string
+    code: string
     isBlocked: boolean
     blockReason: string | null
     active: boolean
-    maxCapacity: number
+    maxCapacity: number | null
+    currentCapacity: number | null
+    filledPercentage: number | null
+    itemsInBin: number
     type: string
-    currentCapacity: number
+    createdAt: string
   }[]
 }
 

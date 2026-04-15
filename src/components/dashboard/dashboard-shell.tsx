@@ -3,9 +3,9 @@ import type { ReactNode } from 'react'
 
 import { AppErrorDialog } from '@/components/shared/AppErrorDialog'
 import PageWrapper from '@/components/shared/PageWrapper'
-import DashboardFooter from './DashboardFooter'
-import DashboardHeader from './DashboardHeader'
-import DashboardSidebar from './DashboardSidebar'
+import DashboardFooter from './dashboard-footer'
+import DashboardHeader from './dashboard-header'
+import DashboardSidebar from './dashboard-sidebar'
 
 export default function DashboardShell({ children }: { children: ReactNode }) {
   return (

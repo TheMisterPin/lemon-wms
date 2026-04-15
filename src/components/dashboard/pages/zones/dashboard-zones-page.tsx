@@ -1,5 +1,7 @@
 'use client'
 
+import { MapPin } from 'lucide-react'
+
 import { zoneTableColumns, type ZoneTableRow } from '@/components/configs/entities/zone/config'
 import CreateZoneForm from '@/components/dashboard/features/zones/create-zone-form'
 import PageWithGrid from '@/components/pages/page-with-grid'
@@ -16,6 +18,8 @@ export function DashboardZonesPageView() {
   return (
     <PageWithGrid
       title="Zones"
+      titleIcon={MapPin}
+      entityTone="zone"
       headerActions={<CreateZoneForm warehouseList={warehouseOptions} />}
       isLoading={isLoading}
       error={error}

@@ -16,11 +16,16 @@ async function getWarehouseHomeData(prisma: PrismaClient) {
             select: {
               id: true,
               name: true,
+              code: true,
+              createdAt: true,
               isBlocked: true,
               blockReason: true,
               currentCapacity: true,
               maxCapacity: true,
-              type: true
+              type: true,
+              _count: {
+                select: { binStockItems: true }
+              }
             }
           }
         }
@@ -48,18 +53,31 @@ async function getWarehouseHomeData(prisma: PrismaClient) {
 
   const bins = rawData.flatMap((warehouse) =>
     warehouse.zones.flatMap((zone) =>
-      zone.bins.map((bin) => ({
-        id: bin.id,
-        warehouseId: warehouse.id,
-        zoneId: zone.id,
-        name: bin.name,
-        isBlocked: bin.isBlocked,
-        blockReason: bin.blockReason,
-        active: !bin.isBlocked,
-        maxCapacity: bin.maxCapacity ? bin.maxCapacity.toNumber() : 100,
-        type: bin.type,
-        currentCapacity: bin.currentCapacity ? bin.currentCapacity.toNumber() : 0
-      }))
+      zone.bins.map((bin) => {
+        const maxCapacity = bin.maxCapacity?.toNumber() ?? null
+        const currentCapacity = bin.currentCapacity?.toNumber() ?? null
+        const filledPercentage =
+          maxCapacity !== null && maxCapacity > 0 && currentCapacity !== null
+            ? (currentCapacity / maxCapacity) * 100
+            : null
+
+        return {
+          id: bin.id,
+          warehouseId: warehouse.id,
+          zoneId: zone.id,
+          name: bin.name,
+          code: bin.code,
+          isBlocked: bin.isBlocked,
+          blockReason: bin.blockReason,
+          active: !bin.isBlocked,
+          maxCapacity,
+          currentCapacity,
+          filledPercentage,
+          itemsInBin: bin._count.binStockItems,
+          type: bin.type,
+          createdAt: bin.createdAt.toISOString()
+        }
+      })
     )
   )
 

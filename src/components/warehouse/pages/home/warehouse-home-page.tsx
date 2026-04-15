@@ -3,33 +3,18 @@
 import { useRouter } from 'next/navigation'
 
 import { Warehouse } from 'lucide-react'
-import { DashboardInfoCards } from '@/components/dashboard/DashboardInfoCards'
-import { DashboardRecordListSection } from '@/components/dashboard/DashboardRecordListSection'
+
+import { binDirectoryTableColumns } from '@/components/configs/entities/bin/bin-directory-table'
+import { viewBinContentsRowAction } from '@/components/configs/entities/bin/bin-table-actions'
+import { DashboardInfoCards } from '@/components/dashboard/dashboard-info-card'
+import { DashboardRecordListSection } from '@/components/dashboard/dashboard-record-list-section'
 import { GenericTable } from '@/components/tables/generic-table'
 import { Card } from '@/components/ui/card'
 import { useAuth } from '@/hooks/auth/use-auth'
 import { useWarehouseHome, type WarehouseBinRecord } from '@/hooks/warehouse/use-warehouse-home'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
-const binColumns: ColumnConfig<WarehouseBinRecord>[] = [
-  { label: 'Name', accessor: 'name' },
-  { label: 'Type', accessor: 'type' },
-  {
-    label: 'Status',
-    accessor: 'isBlocked',
-    type: 'indicator',
-    typeValues: {
-      conditions: { true: '#f87171', false: '#4ade80' },
-      defaultColor: '#94a3b8'
-    }
-  },
-  {
-    label: 'Progress',
-    accessor: 'currentCapacity',
-    type: 'progress',
-    typeValues: { max: 'maxCapacity', current: 'currentCapacity' }
-  }
-]
+const binColumns: ColumnConfig<WarehouseBinRecord>[] = binDirectoryTableColumns
 
 export function WarehouseHomePageView() {
   const router = useRouter()
@@ -68,7 +53,9 @@ export function WarehouseHomePageView() {
           <GenericTable
             columns={binColumns}
             records={bins.records}
-            onRowClick={(bin) => router.push(`/warehouse/bins/${encodeURIComponent(bin.id)}`)}
+            actions={[
+              viewBinContentsRowAction((binId) => router.push(`/warehouse/bins/${encodeURIComponent(binId)}`))
+            ]}
             pagination={{
               page: bins.page,
               totalPages: bins.totalPages,

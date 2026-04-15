@@ -57,15 +57,17 @@ export function IndicatorCell({ row, column }: { row: unknown, column: DataColum
   const conditions = tv?.conditions ?? {}
   const fallback = tv?.defaultColor ?? '#94a3b8'
   const color = resolveIndicatorColor(value, conditions, fallback)
-  const anim = indicatorAnimationClass(tv?.animation)
+  const syncBlink = Boolean(tv?.syncBlink)
+  const anim = syncBlink ? '' : indicatorAnimationClass(tv?.animation)
 
   return (
-    <div className={cn('flex justify-center', styleClass)}>
+    <div className={cn('flex min-h-10 min-w-10 items-center justify-center px-1 py-2', styleClass)}>
       <span
-        className={cn('size-3.5 rounded-full', anim)}
+        data-indicator-dot=""
+        className={cn('size-3.5 shrink-0 rounded-full', anim)}
         style={{
           backgroundColor: color,
-          boxShadow: `0 0 8px ${color}66, 0 0 14px ${color}33`
+          boxShadow: `0 0 6px ${color}55, 0 0 10px ${color}28`
         }}
         aria-label={`${column.label}: ${displayValue}`}
       />

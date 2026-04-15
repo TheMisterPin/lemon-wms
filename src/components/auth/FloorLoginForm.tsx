@@ -29,6 +29,7 @@ export default function FloorLoginForm() {
     handleDeviceSubmit,
     handleBadgeScan,
     handlePinConfirm,
+    handleKeypadPinChange,
     handleNativePinChange,
     handleChangeUser,
     goBackToDevice
@@ -136,11 +137,12 @@ export default function FloorLoginForm() {
           ) : (
             <NumericKeypad
               value={pin}
-              onChange={setPin}
+              onChange={handleKeypadPinChange}
               onConfirm={handlePinConfirm}
               onChangeUser={handleChangeUser}
               maxLength={4}
               masked
+              disabled={loading}
             />
           )}
 

@@ -131,8 +131,21 @@ export function useFloorLoginFlow() {
   }
 
   const handlePinConfirm = () => {
+    if (loading) {
+      return
+    }
     if (pin.length === 4) {
       submitLogin(pin)
+    }
+  }
+
+  const handleKeypadPinChange = (next: string) => {
+    if (loading) {
+      return
+    }
+    setPin(next)
+    if (next.length === 4) {
+      void submitLogin(next)
     }
   }
 
@@ -156,6 +169,7 @@ export function useFloorLoginFlow() {
     handleDeviceSubmit,
     handleBadgeScan,
     handlePinConfirm,
+    handleKeypadPinChange,
     handleNativePinChange,
     handleChangeUser,
     goBackToDevice: () => {

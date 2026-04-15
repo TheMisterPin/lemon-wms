@@ -83,6 +83,11 @@ export interface GenericTableProps<T extends { id: string }> {
    * Omit for no built-in pagination (show all rows).
    */
   pageSize?: number
+  /**
+   * Placement of built-in pagination only (when {@link pageSize} is set and {@link pagination} is not).
+   * @default 'footer'
+   */
+  builtInPaginationPosition?: GenericTablePaginationPosition
   rowStyleIf?: RowStyleIfConfig
   /**
    * Search is **on** when this prop is omitted. Pass `false` to disable.

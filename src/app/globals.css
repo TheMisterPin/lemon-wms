@@ -374,6 +374,27 @@ backdrop-filter: blur(5.3px);
 -webkit-backdrop-filter: blur(5.3px);
 border: 1px solid rgba(245, 245, 246, 0.56);
 }
+
+/* Shared phase for stock status dots (wrap table in .indicator-sync-blink) */
+@keyframes bin-indicator-sync-blink {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  50% {
+    opacity: 0.42;
+    filter: brightness(0.9);
+  }
+}
+
+@layer utilities {
+  .indicator-sync-blink [data-indicator-dot] {
+    animation: bin-indicator-sync-blink 1.15s ease-in-out infinite;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -31,6 +31,9 @@ async function getBins(prisma: PrismaClient, filters?: { zoneId?: string; wareho
         select: {
           name: true
         }
+      },
+      _count: {
+        select: { binStockItems: true }
       }
     },
     orderBy: { createdAt: 'desc' }

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Boxes, MapPinned } from 'lucide-react'
+import { Boxes, MapPinned, Warehouse as WarehouseIcon } from 'lucide-react'
 
 import { warehouseTableColumns } from '@/components/configs/entities/warehouse/config'
 import CreateWarehouseForm from '@/components/dashboard/features/warehouses/create-warehouse-form'
@@ -66,6 +66,8 @@ export function DashboardWarehousesPageView() {
   return (
     <PageWithGrid
       title="Warehouses"
+      titleIcon={WarehouseIcon}
+      entityTone="warehouse"
       headerActions={<CreateWarehouseForm />}
       isLoading={isLoading}
       error={error}

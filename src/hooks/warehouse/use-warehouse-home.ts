@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { MapPin, Warehouse } from 'lucide-react'
 
-import type { DashboardInfoCardItem } from '@/components/dashboard/DashboardInfoCards'
-import type { DashboardRecordListItem } from '@/components/dashboard/DashboardRecordListSection'
+import type { DashboardInfoCardItem } from '@/components/dashboard/dashboard-info-card'
+import type { DashboardRecordListItem } from '@/components/dashboard/dashboard-record-list-section'
 import { OrderStatus, OrderType, Role } from '@/generated/prisma'
 import { warehouseApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'
