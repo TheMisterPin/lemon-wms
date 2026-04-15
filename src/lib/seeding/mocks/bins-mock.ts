@@ -9,6 +9,12 @@ const binTypeByZonePosition: BinType[] = [
   BinType.RECEIVING
 ]
 
+/**
+ * buildBinName.
+ * @param type - Parameter for buildBinName.
+ * @param index - Parameter for buildBinName.
+ * @returns Result from buildBinName.
+ */
 const buildBinName = (type: BinType, index: number): string => {
   if (type === BinType.RECEIVING) {
     return `Dock ${index}`

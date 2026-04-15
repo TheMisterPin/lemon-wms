@@ -14,6 +14,12 @@ type CreateUserInput = {
   isActive?: boolean
 }
 
+/**
+ * createUser.
+ * @param prisma - Parameter for createUser.
+ * @param data - Parameter for createUser.
+ * @returns Result from createUser.
+ */
 async function createUser(prisma: PrismaClient, data: CreateUserInput) {
   const [passwordHash, pinHash, badgeNumber] = await Promise.all([
     data.password ? bcrypt.hash(data.password, 10) : Promise.resolve(null),
@@ -38,6 +44,11 @@ async function createUser(prisma: PrismaClient, data: CreateUserInput) {
   })
 }
 
+/**
+ * generateBadgeNumber.
+ * @param prisma - Parameter for generateBadgeNumber.
+ * @returns Result from generateBadgeNumber.
+ */
 async function generateBadgeNumber(prisma: PrismaClient): Promise<string> {
   const last = await prisma.user.findFirst({
     orderBy: { createdAt: 'desc' },

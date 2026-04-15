@@ -15,6 +15,11 @@ export function getValueByPath<T extends FieldValues, TPath extends FieldPath<T>
   }, obj) as FieldPathValue<T, TPath> | undefined
 }
 
+/**
+ * formatDisplayValue.
+ * @param value - Parameter for formatDisplayValue.
+ * @returns Result from formatDisplayValue.
+ */
 export function formatDisplayValue(value: unknown): string {
   if (value === null || value === undefined || value === '') {
     return EMPTY_DISPLAY_VALUE

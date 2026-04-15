@@ -4,6 +4,16 @@ import { readRefreshTokenCookie } from '@/lib/auth/session'
 import { refreshAccessToken } from '@/lib/entities/auth/refresh-token'
 import { DomainError } from '@/lib/errors'
 
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: POST /api/auth/refresh
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST() {
   const rawRefreshToken = await readRefreshTokenCookie()
 

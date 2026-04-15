@@ -1,5 +1,10 @@
 import type { PrismaClient } from '@/generated/prisma'
 
+/**
+ * getWarehouseHomeData.
+ * @param prisma - Parameter for getWarehouseHomeData.
+ * @returns Result from getWarehouseHomeData.
+ */
 async function getWarehouseHomeData(prisma: PrismaClient) {
   const rawData = await prisma.warehouse.findMany({
     select: {

@@ -3,6 +3,12 @@ import type { ItemFormValues } from '@/lib/schemas/item'
 
 type ItemInput = Pick<ItemFormValues, 'uom' | 'categoryId' | 'supplierId'>
 
+/**
+ * validateItemRelations.
+ * @param prisma - Parameter for validateItemRelations.
+ * @param data - Parameter for validateItemRelations.
+ * @returns Result from validateItemRelations.
+ */
 export async function validateItemRelations(prisma: PrismaClient, data: Partial<ItemInput>) {
   if (data.uom) {
     const uom = await prisma.unitOfMeasure.findUnique({ where: { id: data.uom } })

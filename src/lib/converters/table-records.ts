@@ -157,6 +157,11 @@ type WarehouseRecordInput = {
   deletedAt: Date | null
 }
 
+/**
+ * toWarehouseTableRecords.
+ * @param records - Parameter for toWarehouseTableRecords.
+ * @returns Result from toWarehouseTableRecords.
+ */
 export function toWarehouseTableRecords(records: WarehouseRecordInput[]): WarehouseTableRecord[] {
   return records.map((record) => ({
     id: record.id,
@@ -171,6 +176,11 @@ export function toWarehouseTableRecords(records: WarehouseRecordInput[]): Wareho
   }))
 }
 
+/**
+ * toZoneTableRecords.
+ * @param records - Parameter for toZoneTableRecords.
+ * @returns Result from toZoneTableRecords.
+ */
 export function toZoneTableRecords(records: ZoneWithWarehouseName[]): ZoneTableRecord[] {
   return records.map((record) => ({
     id: record.id,
@@ -187,6 +197,11 @@ export function toZoneTableRecords(records: ZoneWithWarehouseName[]): ZoneTableR
   }))
 }
 
+/**
+ * decimalLikeToNumber.
+ * @param value - Parameter for decimalLikeToNumber.
+ * @returns Result from decimalLikeToNumber.
+ */
 function decimalLikeToNumber(value: DecimalLike | null | undefined): number | null {
   if (value === null || value === undefined) {
     return null
@@ -197,6 +212,11 @@ function decimalLikeToNumber(value: DecimalLike | null | undefined): number | nu
   return Number.isFinite(n) ? n : null
 }
 
+/**
+ * toBinTableRecords.
+ * @param records - Parameter for toBinTableRecords.
+ * @returns Result from toBinTableRecords.
+ */
 export function toBinTableRecords(records: BinWithRelations[]): BinTableRecord[] {
   return records.map((record) => {
     const maxCapacity = decimalLikeToNumber(record.maxCapacity)
@@ -229,6 +249,11 @@ export function toBinTableRecords(records: BinWithRelations[]): BinTableRecord[]
   })
 }
 
+/**
+ * toDeviceTableRecords.
+ * @param records - Parameter for toDeviceTableRecords.
+ * @returns Result from toDeviceTableRecords.
+ */
 export function toDeviceTableRecords(records: DeviceWithRelations[]): DeviceTableRecord[] {
   return records.map((record) => ({
     id: record.id,
@@ -256,6 +281,11 @@ type UserRecordInput = {
   createdAt: Date
 }
 
+/**
+ * toUserTableRecords.
+ * @param records - Parameter for toUserTableRecords.
+ * @returns Result from toUserTableRecords.
+ */
 export function toUserTableRecords(records: UserRecordInput[]): UserTableRecord[] {
   return records.map((record) => ({
     id: record.id,
@@ -287,6 +317,11 @@ type ItemRecordInput = {
   deletedAt: Date | null
 }
 
+/**
+ * toItemTableRecords.
+ * @param records - Parameter for toItemTableRecords.
+ * @returns Result from toItemTableRecords.
+ */
 export function toItemTableRecords(records: ItemRecordInput[]): ItemTableRecord[] {
   return records.map((record) => ({
     id: record.id,

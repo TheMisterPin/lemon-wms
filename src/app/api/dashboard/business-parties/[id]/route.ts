@@ -10,6 +10,22 @@ const pathIdSchema = z.string().trim().min(1)
 
 type Params = { params: Promise<{ id: string }> }
 
+/**
+ * @swagger
+ * /api/dashboard/business-parties/{id}:
+ *   get:
+ *     summary: GET /api/dashboard/business-parties/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

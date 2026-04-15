@@ -3,6 +3,11 @@ import { type PrismaClient } from '@/generated/prisma'
 import { suppliers } from './mocks/business-parties'
 import { items } from './mocks/items-mock'
 
+/**
+ * seedItems.
+ * @param prisma - Parameter for seedItems.
+ * @returns Result from seedItems.
+ */
 export async function seedItems(prisma: PrismaClient) {
   await prisma.unitOfMeasure.upsert(
     { where: { id: 'PC' }, update: {

@@ -5,6 +5,16 @@ import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { getAllVendors } from '@/lib/entities/business-parties'
 import prisma from '@/lib/prisma'
 
+/**
+ * @swagger
+ * /api/dashboard/business-parties:
+ *   get:
+ *     summary: GET /api/dashboard/business-parties
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

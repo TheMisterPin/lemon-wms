@@ -10,6 +10,16 @@ const errorSchema = z.object({
   errorCode: z.number().int().optional()
 })
 
+/**
+ * @swagger
+ * /api/errors:
+ *   post:
+ *     summary: POST /api/errors
+ *     tags: [Errors]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json()

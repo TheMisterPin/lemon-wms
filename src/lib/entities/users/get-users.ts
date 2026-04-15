@@ -1,5 +1,10 @@
 import type { PrismaClient } from '@/generated/prisma'
 
+/**
+ * getUsers.
+ * @param prisma - Parameter for getUsers.
+ * @returns Result from getUsers.
+ */
 async function getUsers(prisma: PrismaClient) {
   return prisma.user.findMany({
     where: { deletedAt: null },

@@ -4,6 +4,11 @@ import { decrementOrDeleteStockItem, updateBinCapacityBy } from '../mutations'
 import { normalizePositiveQuantity } from '../validation'
 import type { RemoveItemsFromBinArgs } from '../types'
 
+/**
+ * removeItemsFromBin.
+ * @param args - Parameter for removeItemsFromBin.
+ * @returns Result from removeItemsFromBin.
+ */
 export async function removeItemsFromBin(args: RemoveItemsFromBinArgs) {
   const { prisma, binStockItemId, quantity, userId, warehouseId, reasonCode, notes } = args
   const normalizedQuantity = normalizePositiveQuantity(quantity)

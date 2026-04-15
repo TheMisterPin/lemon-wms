@@ -18,6 +18,22 @@ const deauthorizeSchema = z.object({
 
 type RouteParams = { params: Promise<{ action: string }> }
 
+/**
+ * @swagger
+ * /api/dashboard/devices/{action}:
+ *   post:
+ *     summary: POST /api/dashboard/devices/{action}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function POST(req: NextRequest, { params }: RouteParams) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

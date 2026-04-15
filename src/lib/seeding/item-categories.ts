@@ -649,6 +649,11 @@ const categories: ParentCategory[] = [
 // Seed function
 // ---------------------------------------------------------------------------
 
+/**
+ * seedCategories.
+ * @param prisma - Parameter for seedCategories.
+ * @returns Result from seedCategories.
+ */
 export async function seedCategories(prisma: PrismaClient): Promise<{ parentCount: number, childCount: number }> {
 
   let parentCount = 0

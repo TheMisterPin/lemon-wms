@@ -11,6 +11,22 @@ import { itemFormSchema } from '@/lib/schemas/item'
 
 type Params = { params: Promise<{ id: string }> }
 
+/**
+ * @swagger
+ * /api/dashboard/items/{id}:
+ *   get:
+ *     summary: GET /api/dashboard/items/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -33,6 +49,22 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/items/{id}:
+ *   put:
+ *     summary: PUT /api/dashboard/items/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function PUT(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
@@ -71,6 +103,22 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 }
 
+/**
+ * @swagger
+ * /api/dashboard/items/{id}:
+ *   delete:
+ *     summary: DELETE /api/dashboard/items/{id}
+ *     tags: [Dashboard]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function DELETE(req: NextRequest, { params }: Params) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {

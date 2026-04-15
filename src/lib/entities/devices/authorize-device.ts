@@ -7,6 +7,12 @@ interface AuthorizeDeviceParams {
   userId: string
 }
 
+/**
+ * isAuthorizedDevice.
+ * @param prisma - Parameter for isAuthorizedDevice.
+ * @param code - Parameter for isAuthorizedDevice.
+ * @returns Result from isAuthorizedDevice.
+ */
 async function isAuthorizedDevice(prisma: PrismaClient, code: string) {
   const device = await prisma.device.findUnique({
     where: { code }
@@ -15,6 +21,12 @@ async function isAuthorizedDevice(prisma: PrismaClient, code: string) {
   return device?.authorized ?? false
 }
 
+/**
+ * authorizeDevice.
+ * @param prisma - Parameter for authorizeDevice.
+ * @param params - Parameter for authorizeDevice.
+ * @returns Result from authorizeDevice.
+ */
 async function authorizeDevice(prisma: PrismaClient, params : AuthorizeDeviceParams) {
   const { warehouseId, zoneId, code, userId } = params
 
@@ -28,6 +40,12 @@ async function authorizeDevice(prisma: PrismaClient, params : AuthorizeDevicePar
   })
 }
 
+/**
+ * deauthorizeDevice.
+ * @param prisma - Parameter for deauthorizeDevice.
+ * @param code - Parameter for deauthorizeDevice.
+ * @returns Result from deauthorizeDevice.
+ */
 async function deauthorizeDevice(prisma: PrismaClient, code: string) {
   await prisma.device.update({
     where: { code },
@@ -35,6 +53,13 @@ async function deauthorizeDevice(prisma: PrismaClient, code: string) {
   })
 }
 
+/**
+ * loginUserInDevice.
+ * @param prisma - Parameter for loginUserInDevice.
+ * @param code - Parameter for loginUserInDevice.
+ * @param userId - Parameter for loginUserInDevice.
+ * @returns Result from loginUserInDevice.
+ */
 async function  loginUserInDevice(prisma: PrismaClient, code: string, userId: string) {
   await prisma.device.update({
     where: { code },
@@ -46,6 +71,13 @@ async function  loginUserInDevice(prisma: PrismaClient, code: string, userId: st
   })
 }
 
+/**
+ * logoutUserFromDevice.
+ * @param prisma - Parameter for logoutUserFromDevice.
+ * @param code - Parameter for logoutUserFromDevice.
+ * @param userId - Parameter for logoutUserFromDevice.
+ * @returns Result from logoutUserFromDevice.
+ */
 async function  logoutUserFromDevice(prisma: PrismaClient, code: string, userId: string) {
   await prisma.device.update({
     where: { code },

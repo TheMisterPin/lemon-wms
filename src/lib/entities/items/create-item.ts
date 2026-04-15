@@ -4,6 +4,12 @@ import type { ItemFormValues } from '@/lib/schemas/item'
 
 import { validateItemRelations } from './validate-item-relations'
 
+/**
+ * createItem.
+ * @param prisma - Parameter for createItem.
+ * @param data - Parameter for createItem.
+ * @returns Result from createItem.
+ */
 async function createItem(prisma: PrismaClient, data: ItemFormValues) {
   const { dimensions, ...rest } = data
 

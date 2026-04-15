@@ -3,6 +3,11 @@ import { Prisma } from '@/generated/prisma'
 import { normalizePositiveQuantity } from '../validation'
 import type { LoadItemsToTrolleyArgs } from '../types'
 
+/**
+ * loadItemsToTrolley.
+ * @param args - Parameter for loadItemsToTrolley.
+ * @returns Result from loadItemsToTrolley.
+ */
 export async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
   const { prisma, userId, warehouseId, deviceId, sourceBinStockItemId, quantity } = args
   const normalizedQuantity = normalizePositiveQuantity(quantity)

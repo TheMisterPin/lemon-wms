@@ -12,6 +12,11 @@ export type SeedCustomer  = {
   address: FakeAddress
 }
 
+/**
+ * createFakeCustomer.
+ * @param counter - Parameter for createFakeCustomer.
+ * @returns Result from createFakeCustomer.
+ */
 const createFakeCustomer = (counter: number): SeedCustomer => {
   const padded = counter.toString().padStart(4, '0')
   const firstName = faker.person.firstName()
@@ -29,6 +34,11 @@ const createFakeCustomer = (counter: number): SeedCustomer => {
   }
 }
 
+/**
+ * generateFakeCustomers.
+ * @param count - Parameter for generateFakeCustomers.
+ * @returns Result from generateFakeCustomers.
+ */
 export const generateFakeCustomers = (count: number): SeedCustomer[] => {
   let counter = 0
 

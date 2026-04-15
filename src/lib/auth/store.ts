@@ -19,6 +19,10 @@ const EMPTY_AUTH_SESSION: PersistedAuthSession = {
   device: null
 }
 
+/**
+ * readStoredAccessToken.
+ * @returns Result from readStoredAccessToken.
+ */
 export const readStoredAccessToken = (): string | null => {
   if (typeof window === 'undefined') {
     return null
@@ -31,6 +35,11 @@ export const readStoredAccessToken = (): string | null => {
   }
 }
 
+/**
+ * writeStoredAccessToken.
+ * @param token - Parameter for writeStoredAccessToken.
+ * @returns Result from writeStoredAccessToken.
+ */
 const writeStoredAccessToken = (token: string | null): void => {
   if (typeof window === 'undefined') {
     return
@@ -47,6 +56,11 @@ const writeStoredAccessToken = (token: string | null): void => {
   }
 }
 
+/**
+ * isAuthUser.
+ * @param value - Parameter for isAuthUser.
+ * @returns Result from isAuthUser.
+ */
 const isAuthUser = (value: unknown): value is AuthUser => {
   if (!value || typeof value !== 'object') {
     return false
@@ -62,6 +76,11 @@ const isAuthUser = (value: unknown): value is AuthUser => {
   )
 }
 
+/**
+ * isAuthLocation.
+ * @param value - Parameter for isAuthLocation.
+ * @returns Result from isAuthLocation.
+ */
 const isAuthLocation = (value: unknown): value is AuthLocation => {
   if (!value || typeof value !== 'object') {
     return false
@@ -75,6 +94,11 @@ const isAuthLocation = (value: unknown): value is AuthLocation => {
   )
 }
 
+/**
+ * isAuthDevice.
+ * @param value - Parameter for isAuthDevice.
+ * @returns Result from isAuthDevice.
+ */
 const isAuthDevice = (value: unknown): value is AuthDevice => {
   if (!value || typeof value !== 'object') {
     return false
@@ -89,6 +113,10 @@ const isAuthDevice = (value: unknown): value is AuthDevice => {
   )
 }
 
+/**
+ * readStoredAuthSession.
+ * @returns Result from readStoredAuthSession.
+ */
 const readStoredAuthSession = (): PersistedAuthSession => {
   if (typeof window === 'undefined') {
     return EMPTY_AUTH_SESSION
@@ -116,6 +144,11 @@ const readStoredAuthSession = (): PersistedAuthSession => {
   }
 }
 
+/**
+ * writeStoredAuthSession.
+ * @param session - Parameter for writeStoredAuthSession.
+ * @returns Result from writeStoredAuthSession.
+ */
 const writeStoredAuthSession = (session: PersistedAuthSession | null): void => {
   if (typeof window === 'undefined') {
     return
@@ -132,6 +165,10 @@ const writeStoredAuthSession = (session: PersistedAuthSession | null): void => {
   }
 }
 
+/**
+ * readInitialAuthState.
+ * @returns Result from readInitialAuthState.
+ */
 const readInitialAuthState = (): PersistedAuthSession & { token: string | null } => {
   const token = readStoredAccessToken()
   if (!token) {

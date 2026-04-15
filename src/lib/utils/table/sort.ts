@@ -13,6 +13,11 @@ type SortPrimitive =
   | { kind: 'string'; s: string }
   | { kind: 'boolean'; b: boolean }
 
+/**
+ * toNumber.
+ * @param raw - Parameter for toNumber.
+ * @returns Result from toNumber.
+ */
 function toNumber(raw: unknown): number | undefined {
   if (typeof raw === 'number' && Number.isFinite(raw)) {
     return raw
@@ -29,6 +34,12 @@ function toNumber(raw: unknown): number | undefined {
   return undefined
 }
 
+/**
+ * getProgressRatio.
+ * @param row - Parameter for getProgressRatio.
+ * @param column - Parameter for getProgressRatio.
+ * @returns Result from getProgressRatio.
+ */
 function getProgressRatio(row: unknown, column: DataColumnConfig & { type: 'progress' }): SortPrimitive {
   const tv = column.typeValues
 
@@ -50,6 +61,12 @@ function getProgressRatio(row: unknown, column: DataColumnConfig & { type: 'prog
   return { kind: 'number', n: current / max }
 }
 
+/**
+ * getSortPrimitive.
+ * @param row - Parameter for getSortPrimitive.
+ * @param column - Parameter for getSortPrimitive.
+ * @returns Result from getSortPrimitive.
+ */
 function getSortPrimitive(row: unknown, column: DataColumnConfig): SortPrimitive {
   switch (column.type) {
   case 'date': {
@@ -143,6 +160,13 @@ function getSortPrimitive(row: unknown, column: DataColumnConfig): SortPrimitive
   }
 }
 
+/**
+ * comparePrimitives.
+ * @param a - Parameter for comparePrimitives.
+ * @param b - Parameter for comparePrimitives.
+ * @param direction - Parameter for comparePrimitives.
+ * @returns Result from comparePrimitives.
+ */
 function comparePrimitives(a: SortPrimitive, b: SortPrimitive, direction: SortDirection): number {
   const dir = direction === 'desc' ? -1 : 1
 
@@ -190,6 +214,12 @@ function comparePrimitives(a: SortPrimitive, b: SortPrimitive, direction: SortDi
   return 0
 }
 
+/**
+ * compareIds.
+ * @param a - Parameter for compareIds.
+ * @param b - Parameter for compareIds.
+ * @returns Result from compareIds.
+ */
 function compareIds<T extends { id: string }>(a: T, b: T): number {
   return a.id.localeCompare(b.id)
 }

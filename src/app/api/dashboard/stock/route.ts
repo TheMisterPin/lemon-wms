@@ -5,6 +5,16 @@ import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middlewar
 import { getStockDashboard } from '@/lib/entities/stock/get-stock-dashboard'
 import prisma from '@/lib/prisma'
 
+/**
+ * @swagger
+ * /api/dashboard/stock:
+ *   get:
+ *     summary: GET /api/dashboard/stock
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 export async function GET(req: NextRequest) {
   const payload = verifyAccessTokenFromRequest(req)
   if (!payload) {
