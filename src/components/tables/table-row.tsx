@@ -37,9 +37,9 @@ export function TableDataRow<T extends { id: string }>({
   return (
     <TableRow
       className={[
-        'border-b border-brand-glass-border transition-colors duration-200',
-        onRowClick ? 'cursor-pointer hover:bg-brand-glass-hover' : 'hover:bg-brand-glass-hover/50',
-        selectedId === row.id ? 'bg-brand-primary/8' : '',
+        'border-b border-dash-border transition-colors duration-200',
+        onRowClick ? 'cursor-pointer hover:bg-dash-card2' : 'hover:bg-dash-card2/50',
+        selectedId === row.id ? 'bg-dash-card2' : '',
         rowRuleClass
       ].filter(Boolean).join(' ')}
       onClick={() => onRowClick?.(row)}
@@ -48,7 +48,7 @@ export function TableDataRow<T extends { id: string }>({
       {visibleColumns.map((column, index) => (
         <TableCell
           key={index}
-          className="text-center text-brand-text/90 text-sm select-none"
+          className="text-center text-dash-text/90 text-sm select-none"
         >
           <CellRenderer row={row} column={column} />
         </TableCell>
@@ -77,7 +77,7 @@ export function TableDataRow<T extends { id: string }>({
                       variant="ghost"
                       size="icon"
                       className={[
-                        'size-8 rounded-lg text-brand-muted hover:text-brand-text hover:bg-brand-glass-hover transition-colors duration-200',
+                        'size-8 rounded-md text-dash-muted hover:text-dash-text hover:bg-dash-card2 transition-colors duration-200',
                         actionClass
                       ].filter(Boolean).join(' ')}
                       onClick={(e) => {

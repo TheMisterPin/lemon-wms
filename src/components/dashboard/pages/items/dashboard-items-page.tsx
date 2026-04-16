@@ -1,6 +1,7 @@
 'use client'
 
 import { MapPin, Warehouse } from 'lucide-react'
+import { DashboardHomeSearchBar } from '@/components/dashboard/dashboard-home-search-bar'
 import { DashboardInfoCards } from '@/components/dashboard/dashboard-info-card'
 import { DashboardRecordListSection } from '@/components/dashboard/dashboard-record-list-section'
 import { GenericTable } from '@/components/tables/generic-table'
@@ -22,7 +23,7 @@ const binColumns: ColumnConfig<DashboardBinRecord>[] = [
 
 export function DashboardItemsPageView() {
   const { dashboard } = useAuth()
-  const { infoCards, warehouses, zones, bins } = useDashboardHome()
+  const { infoCards, warehouses, zones, bins, search } = useDashboardHome()
 
   return (
     <main className="flex h-full select-none flex-col overflow-hidden bg-linear-to-b from-slate-800 to-slate-900 p-6">
@@ -40,6 +41,8 @@ export function DashboardItemsPageView() {
           <DashboardInfoCards cards={infoCards} />
         </div>
 
+        <DashboardHomeSearchBar search={search} />
+
         <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           <DashboardRecordListSection
             title="Warehouses"
@@ -52,9 +55,6 @@ export function DashboardItemsPageView() {
             paginationPosition="header"
             selectedRecordId={warehouses.selectedId}
             onRecordClick={(record) => warehouses.onSelect(record.id)}
-            searchValue={warehouses.search}
-            onSearchChange={warehouses.onSearch}
-            searchPlaceholder="Search warehouses..."
           />
           <DashboardRecordListSection
             title="Zones"
@@ -67,30 +67,17 @@ export function DashboardItemsPageView() {
             paginationPosition="header"
             selectedRecordId={zones.selectedId}
             onRecordClick={(record) => zones.onSelect(record.id)}
-            searchValue={zones.search}
-            onSearchChange={zones.onSearch}
-            searchPlaceholder="Search zones..."
           />
         </section>
 
         <section className="mt-6 rounded-lg border border-slate-500 bg-brand-glass/75">
-          <div className="px-4 pt-5 sm:px-6">
-            <h2 className="text-xl font-semibold">Bins</h2>
-          </div>
           <GenericTable
+            title="Bins"
             columns={binColumns}
             records={bins.records}
-            pagination={{
-              page: bins.page,
-              totalPages: bins.totalPages,
-              onPrev: bins.onPrev,
-              onNext: bins.onNext,
-              position: 'header'
-            }}
-            search={{
-              placeholder: 'Search bins...',
-              fields: ['name', 'type']
-            }}
+            pageSize={bins.pageSize}
+            builtInPaginationPosition="header"
+            search={false}
           />
         </section>
       </div>

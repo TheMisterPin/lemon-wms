@@ -32,11 +32,11 @@ export function PaginationSelector({
         aria-label="Go to previous page"
         onClick={onPrev}
         disabled={page === 0}
-        className="cursor-pointer rounded-md bg-brand-glass p-1.5 text-brand-muted transition-colors hover:text-brand-text disabled:cursor-not-allowed disabled:opacity-30"
+        className="cursor-pointer rounded-md bg-dash-card2 p-1.5 text-dash-muted transition-colors hover:text-dash-text hover:bg-dash-bg disabled:cursor-not-allowed disabled:opacity-30"
       >
         <ChevronLeft size={16} />
       </button>
-      <span className="text-xs text-brand-muted">
+      <span className="text-xs text-dash-muted tabular-nums">
         {page + 1} / {totalPages}
       </span>
       <button
@@ -44,7 +44,7 @@ export function PaginationSelector({
         aria-label="Go to next page"
         onClick={onNext}
         disabled={page >= totalPages - 1}
-        className="cursor-pointer rounded-md bg-brand-glass p-1.5 text-brand-muted transition-colors hover:text-brand-text disabled:cursor-not-allowed disabled:opacity-30"
+        className="cursor-pointer rounded-md bg-dash-card2 p-1.5 text-dash-muted transition-colors hover:text-dash-text hover:bg-dash-bg disabled:cursor-not-allowed disabled:opacity-30"
       >
         <ChevronRight size={16} />
       </button>

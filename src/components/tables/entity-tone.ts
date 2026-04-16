@@ -4,33 +4,23 @@ export function getEntityTone(tone?: EntityTone) {
   const tones = {
     warehouse: {
       iconClass: 'text-entity-warehouse',
-      titleStyle: {
-        backgroundImage: 'linear-gradient(to right, var(--entity-warehouse), var(--entity-warehouse-end))'
-      }
+      titleClass: 'text-entity-warehouse'
     },
     zone: {
       iconClass: 'text-entity-zone',
-      titleStyle: {
-        backgroundImage: 'linear-gradient(to right, var(--entity-zone), var(--entity-zone-end))'
-      }
+      titleClass: 'text-entity-zone'
     },
     bin: {
       iconClass: 'text-entity-bin',
-      titleStyle: {
-        backgroundImage: 'linear-gradient(to right, var(--entity-bin), var(--entity-bin-end))'
-      }
+      titleClass: 'text-entity-bin'
     },
     item: {
       iconClass: 'text-brand-primary',
-      titleStyle: {
-        backgroundImage: 'linear-gradient(to right, var(--brand-primary), var(--brand-primary-end))'
-      }
+      titleClass: 'text-brand-primary'
     },
     order: {
       iconClass: 'text-brand-primary',
-      titleStyle: {
-        backgroundImage: 'linear-gradient(to right, var(--brand-primary), var(--brand-primary-end))'
-      }
+      titleClass: 'text-brand-primary'
     }
   } as const
 

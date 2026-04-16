@@ -23,7 +23,7 @@ export function WarehouseHomePageView() {
 
   return (
     <main className="select-none flex flex-col h-full bg-linear-50 from-slate-800 to-slate-900 p-6 gap-4 overflow-hidden">
-      <Card className=" glass flex-1 overflow-y-auto py-12 px-16">
+      <Card className=" flex-1 overflow-y-auto py-12 px-16">
         <h1 className="text-2xl font-semibold">Warehouse</h1>
         {warehouse?.user ? (
           <div className="mt-1 text-sm text-brand-muted">
@@ -53,16 +53,11 @@ export function WarehouseHomePageView() {
           <GenericTable
             columns={binColumns}
             records={bins.records}
+            pageSize={bins.pageSize}
+            builtInPaginationPosition="header"
             actions={[
               viewBinContentsRowAction((binId) => router.push(`/warehouse/bins/${encodeURIComponent(binId)}`))
             ]}
-            pagination={{
-              page: bins.page,
-              totalPages: bins.totalPages,
-              onPrev: bins.onPrev,
-              onNext: bins.onNext,
-              position: 'header'
-            }}
           />
         </div>
       </Card>

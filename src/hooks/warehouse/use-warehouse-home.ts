@@ -83,7 +83,6 @@ export function useWarehouseHome() {
   })
 
   const [orderPage, setOrderPage] = useState(0)
-  const [binPage, setBinPage] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -109,15 +108,10 @@ export function useWarehouseHome() {
   const infoCards = useMemo(() => toInfoCards(data.warehouseInfo), [data.warehouseInfo])
 
   const orderPages = totalPages(data.orders.length)
-  const binPages = totalPages(data.bins.length)
 
   const pagedOrders = useMemo(
     () => toOrderRecords(paginate(data.orders, orderPage)),
     [data.orders, orderPage]
-  )
-  const pagedBins = useMemo(
-    () => paginate(data.bins, binPage),
-    [data.bins, binPage]
   )
 
   return {
@@ -130,11 +124,8 @@ export function useWarehouseHome() {
       onNext: () => setOrderPage((p) => Math.min(orderPages - 1, p + 1))
     },
     bins: {
-      records: pagedBins,
-      page: binPage,
-      totalPages: binPages,
-      onPrev: () => setBinPage((p) => Math.max(0, p - 1)),
-      onNext: () => setBinPage((p) => Math.min(binPages - 1, p + 1))
+      records: data.bins,
+      pageSize: PAGE_SIZE
     }
   }
 }

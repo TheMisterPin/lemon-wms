@@ -20,12 +20,12 @@ export default function DashboardFooter() {
   const displayName = session.user?.fullName || 'User'
 
   return (
-    <footer className="flex h-12 shrink-0 items-center border-t border-brand-border bg-brand-surface px-4">
+    <footer className="flex h-12 shrink-0 items-center border-t border-dash-border bg-dash-shell px-4">
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            className="h-9 gap-2 px-2 text-brand-muted hover:bg-brand-border hover:text-brand-text"
+            className="h-9 gap-2 px-2 text-dash-muted hover:bg-dash-border hover:text-dash-text"
           >
             <UserCircle className="h-5 w-5 shrink-0" />
             <span className="text-sm">{displayName}</span>
@@ -34,11 +34,11 @@ export default function DashboardFooter() {
         <PopoverContent
           side="top"
           align="start"
-          className="w-40 border-brand-border bg-brand-surface p-1"
+          className="w-40 border-dash-border bg-dash-shell p-1"
         >
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-brand-muted transition-colors hover:bg-brand-border hover:text-brand-text"
+            className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-dash-muted transition-colors hover:bg-dash-border hover:text-dash-text"
           >
             <LogOut className="h-4 w-4" />
             Logout

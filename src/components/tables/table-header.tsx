@@ -20,7 +20,7 @@ export function isSortableColumn<T extends { id: string }>(column: ColumnConfig<
 
 function getSortIcon(sortColumnIndex: number | null, index: number, sortDirection: SortDirection) {
   if (sortColumnIndex !== index) {
-    return <ArrowUpDown className="size-3.5 opacity-30" />
+    return <ArrowUpDown className="size-3.5 text-dash-muted opacity-50" />
   }
 
   if (sortDirection === 'asc') {
@@ -44,7 +44,7 @@ export function TableHeaderRow<T extends { id: string }>({
   actions?: RowAction<T>[]
 }) {
   return (
-    <TableRow className="border-b border-brand-glass-border hover:bg-transparent">
+    <TableRow className="border-b border-dash-border hover:bg-transparent">
       {visibleColumns.map((column, index) => {
         const sortable = isSortableColumn(column)
         const isActive = sortColumnIndex === index
@@ -53,9 +53,9 @@ export function TableHeaderRow<T extends { id: string }>({
           <TableHead
             key={index}
             className={[
-              'bg-brand-surface/80 text-brand-muted text-xs font-semibold uppercase tracking-wider text-center select-none transition-colors duration-200',
-              sortable ? 'cursor-pointer hover:text-brand-text hover:bg-brand-glass-hover' : '',
-              isActive ? 'bg-brand-primary/8 text-brand-primary' : ''
+              'bg-dash-card2 text-dash-muted text-xs font-semibold uppercase tracking-wider text-center select-none transition-colors duration-200',
+              sortable ? 'cursor-pointer hover:text-dash-text hover:bg-dash-bg' : '',
+              isActive ? 'bg-dash-bg text-brand-primary' : ''
             ].filter(Boolean).join(' ')}
             onClick={sortable ? () => onSortColumnClick(index) : undefined}
           >
@@ -67,7 +67,7 @@ export function TableHeaderRow<T extends { id: string }>({
         )
       })}
       {actions?.length ? (
-        <TableHead className="bg-brand-surface/80 text-brand-muted text-xs font-semibold uppercase tracking-wider text-center select-none">
+        <TableHead className="bg-dash-card2 text-dash-muted text-xs font-semibold uppercase tracking-wider text-center select-none">
           Actions
         </TableHead>
       ) : null}

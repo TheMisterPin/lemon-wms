@@ -1,5 +1,5 @@
-import { DashboardItemsPageView } from '@/components/dashboard/pages/items/dashboard-items-page'
+import { DashboardStockPageView } from '@/components/dashboard/pages/stock/dashboard-stock-page'
 
 export default function ItemPage() {
-  return <DashboardItemsPageView />
+  return <DashboardStockPageView />
 }

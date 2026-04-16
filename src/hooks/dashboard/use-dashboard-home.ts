@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { MapPin, ShelvingUnit, Warehouse } from 'lucide-react'
 
@@ -96,11 +96,9 @@ export function useDashboardHome() {
 
   const [warehousePage, setWarehousePage] = useState(0)
   const [zonePage, setZonePage] = useState(0)
-  const [binPage, setBinPage] = useState(0)
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | null>(null)
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null)
-  const [warehouseSearch, setWarehouseSearch] = useState('')
-  const [zoneSearch, setZoneSearch] = useState('')
+  const [searchText, setSearchText] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -123,6 +121,12 @@ export function useDashboardHome() {
     }
   }, [])
 
+  const setSearchTextWithPageReset = useCallback((text: string) => {
+    setSearchText(text)
+    setWarehousePage(0)
+    setZonePage(0)
+  }, [])
+
   const infoCards = useMemo(() => toInfoCards(data.info), [data.info])
 
   const zonesById = useMemo(
@@ -130,8 +134,7 @@ export function useDashboardHome() {
     [data.zones]
   )
 
-  const normalizedWarehouseSearch = warehouseSearch.trim().toLowerCase()
-  const normalizedZoneSearch = zoneSearch.trim().toLowerCase()
+  const normalizedSearch = searchText.trim().toLowerCase()
 
   const filteredWarehouses = useMemo(() => {
     const list = selectedZoneId
@@ -140,16 +143,16 @@ export function useDashboardHome() {
         ? data.warehouses.filter((warehouse) => warehouse.id === selectedWarehouseId)
         : data.warehouses
 
-    if (!normalizedWarehouseSearch) {
+    if (!normalizedSearch) {
       return list
     }
 
     return list.filter((warehouse) => {
       const haystack = `${warehouse.name} ${warehouse.zones} ${warehouse.bins}`.toLowerCase()
 
-      return haystack.includes(normalizedWarehouseSearch)
+      return haystack.includes(normalizedSearch)
     })
-  }, [data.warehouses, normalizedWarehouseSearch, selectedWarehouseId, selectedZoneId, zonesById])
+  }, [data.warehouses, normalizedSearch, selectedWarehouseId, selectedZoneId, zonesById])
 
   const filteredZones = useMemo(() => {
     const list = selectedZoneId
@@ -158,36 +161,42 @@ export function useDashboardHome() {
         ? data.zones.filter((zone) => zone.warehouseId === selectedWarehouseId)
         : data.zones
 
-    if (!normalizedZoneSearch) {
+    if (!normalizedSearch) {
       return list
     }
 
     return list.filter((zone) => {
       const haystack = `${zone.name} ${zone.type} ${zone.bins}`.toLowerCase()
 
-      return haystack.includes(normalizedZoneSearch)
+      return haystack.includes(normalizedSearch)
     })
-  }, [data.zones, normalizedZoneSearch, selectedWarehouseId, selectedZoneId])
+  }, [data.zones, normalizedSearch, selectedWarehouseId, selectedZoneId])
 
   const filteredBins = useMemo(() => {
+    let list = data.bins
+
     if (selectedZoneId) {
-      return data.bins.filter((bin) => bin.zoneId === selectedZoneId)
+      list = list.filter((bin) => bin.zoneId === selectedZoneId)
+    } else if (selectedWarehouseId) {
+      list = list.filter((bin) => bin.warehouseId === selectedWarehouseId)
     }
 
-    if (selectedWarehouseId) {
-      return data.bins.filter((bin) => bin.warehouseId === selectedWarehouseId)
+    if (!normalizedSearch) {
+      return list
     }
 
-    return data.bins
-  }, [data.bins, selectedWarehouseId, selectedZoneId])
+    return list.filter((bin) => {
+      const haystack = `${bin.code} ${bin.name} ${bin.type}`.toLowerCase()
+
+      return haystack.includes(normalizedSearch)
+    })
+  }, [data.bins, normalizedSearch, selectedWarehouseId, selectedZoneId])
 
   const warehousePages = totalPages(filteredWarehouses.length)
   const zonePages = totalPages(filteredZones.length)
-  const binPages = totalPages(filteredBins.length)
 
   const safeWarehousePage = Math.min(Math.max(0, warehousePage), warehousePages - 1)
   const safeZonePage = Math.min(Math.max(0, zonePage), zonePages - 1)
-  const safeBinPage = Math.min(Math.max(0, binPage), binPages - 1)
 
   const pagedWarehouses = useMemo(
     () => toWarehouseRecords(paginate(filteredWarehouses, safeWarehousePage)),
@@ -196,10 +205,6 @@ export function useDashboardHome() {
   const pagedZones = useMemo(
     () => toZoneRecords(paginate(filteredZones, safeZonePage)),
     [filteredZones, safeZonePage]
-  )
-  const pagedBins = useMemo(
-    () => paginate(filteredBins, safeBinPage),
-    [filteredBins, safeBinPage]
   )
 
   const toggleWarehouse = (warehouseId: string) => {
@@ -248,9 +253,7 @@ export function useDashboardHome() {
           return Math.min(max, current + 1)
         }),
       selectedId: selectedWarehouseId,
-      onSelect: toggleWarehouse,
-      search: warehouseSearch,
-      onSearch: setWarehouseSearch
+      onSelect: toggleWarehouse
     },
     zones: {
       records: pagedZones,
@@ -271,28 +274,15 @@ export function useDashboardHome() {
           return Math.min(max, current + 1)
         }),
       selectedId: selectedZoneId,
-      onSelect: toggleZone,
-      search: zoneSearch,
-      onSearch: setZoneSearch
+      onSelect: toggleZone
     },
     bins: {
-      records: pagedBins,
-      page: safeBinPage,
-      totalPages: binPages,
-      onPrev: () =>
-        setBinPage((p) => {
-          const max = binPages - 1
-          const current = Math.min(Math.max(0, p), max)
-
-          return Math.max(0, current - 1)
-        }),
-      onNext: () =>
-        setBinPage((p) => {
-          const max = binPages - 1
-          const current = Math.min(Math.max(0, p), max)
-
-          return Math.min(max, current + 1)
-        })
+      records: filteredBins,
+      pageSize: PAGE_SIZE
+    },
+    search: {
+      text: searchText,
+      setText: setSearchTextWithPageReset
     }
   }
 }

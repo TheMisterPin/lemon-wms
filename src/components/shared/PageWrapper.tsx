@@ -16,7 +16,7 @@ export default function PageWrapper({
   children
 }: PageWrapperProps) {
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-brand-bg text-brand-text">
+    <div className="flex h-full flex-col overflow-hidden bg-dash-bg text-dash-text">
       {header && <div className="shrink-0">{header}</div>}
 
       <div className="flex flex-1 overflow-hidden">

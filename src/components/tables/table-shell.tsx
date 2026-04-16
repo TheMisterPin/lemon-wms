@@ -81,15 +81,12 @@ export function TableShell<T extends { id: string }>({
 
   return (
     <TooltipProvider>
-      <div className="mx-auto w-full min-w-0 overflow-x-auto overflow-y-visible rounded-lg shadow-lg shadow-black/20 backdrop-blur-sm">
+      <div className="mx-auto w-full min-w-0 min-h-7/8 max-h-/8 overflow-x-auto overflow-y-visible rounded-md bg-dash-card">
         {title ? (
-          <div className="flex items-center justify-between gap-4 border-b border-brand-glass-border px-4 py-3">
+          <div className="flex items-center justify-between gap-4 border-b border-dash-border px-4 py-3">
             <div className="flex items-center gap-2">
               {TitleIcon ? <TitleIcon size={20} className={tone.iconClass} /> : null}
-              <h2
-                className="bg-clip-text text-xl font-semibold text-transparent"
-                style={tone.titleStyle}
-              >
+              <h2 className={['text-xl font-semibold tracking-tight', tone.titleClass].join(' ')}>
                 {title}
               </h2>
             </div>
@@ -105,7 +102,7 @@ export function TableShell<T extends { id: string }>({
         ) : null}
 
         {effectivePagination && showHeaderPagination && !title ? (
-          <div className="border-b border-brand-glass-border px-4 py-3">
+          <div className="border-b border-dash-border px-4 py-3">
             <PaginationSelector
               page={effectivePagination.page}
               totalPages={effectivePagination.totalPages}
@@ -118,7 +115,7 @@ export function TableShell<T extends { id: string }>({
         {hasSearchRow ? (
           <div
             className={[
-              'border-b border-brand-glass-border p-3 flex flex-wrap items-center gap-3',
+              'border-b border-dash-border p-3 flex flex-wrap items-center gap-3',
               searchEnabled ? '' : 'justify-end'
             ].filter(Boolean).join(' ')}
           >
@@ -141,7 +138,7 @@ export function TableShell<T extends { id: string }>({
         ) : null}
 
         <Table>
-          <TableHeader>
+          <TableHeader className="border-b border-dash-border">
             <TableHeaderRow
               visibleColumns={visibleColumns}
               sortColumnIndex={sortColumnIndex}
@@ -162,7 +159,7 @@ export function TableShell<T extends { id: string }>({
         </Table>
 
         {effectivePagination && showFooterPagination ? (
-          <div className="border-t border-brand-glass-border px-4 py-3">
+          <div className="border-t border-dash-border px-4 py-3">
             <PaginationSelector
               page={effectivePagination.page}
               totalPages={effectivePagination.totalPages}

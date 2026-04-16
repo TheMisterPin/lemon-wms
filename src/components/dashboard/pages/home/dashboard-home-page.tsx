@@ -2,10 +2,11 @@
 
 import { useCallback, useState } from 'react'
 
-import { MapPin, ShelvingUnit, Warehouse } from 'lucide-react'
+import { MapPin, Warehouse } from 'lucide-react'
 
 import { binDirectoryTableColumns } from '@/components/configs/entities/bin/bin-directory-table'
 import { viewBinContentsRowAction } from '@/components/configs/entities/bin/bin-table-actions'
+import { DashboardHomeSearchBar } from '@/components/dashboard/dashboard-home-search-bar'
 import { DashboardInfoCards } from '@/components/dashboard/dashboard-info-card'
 import { DashboardRecordListSection } from '@/components/dashboard/dashboard-record-list-section'
 import { BinContentsModal } from '@/components/dashboard/features/bins/bin-contents-modal'
@@ -16,7 +17,7 @@ import type { ColumnConfig } from '@/types/components/table/column.types'
 const binColumns: ColumnConfig<DashboardBinRecord>[] = binDirectoryTableColumns
 
 export function DashboardHomePageView() {
-  const { infoCards, warehouses, zones, bins } = useDashboardHome()
+  const { infoCards, warehouses, zones, bins, search } = useDashboardHome()
   const [contentsBinId, setContentsBinId] = useState<string | null>(null)
   const [contentsOpen, setContentsOpen] = useState(false)
 
@@ -33,14 +34,13 @@ export function DashboardHomePageView() {
   }, [])
 
   return (
-    <main className="flex h-full select-none flex-col overflow-hidden  bg-linear-to-b from-page-bg-from to-page-bg-to">
-      <div className=" mx-auto flex w-full max-w-[1200px] origin-top flex-1 flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <main className="flex h-full select-none flex-col overflow-hidden bg-linear-to-b from-page-bg-from to-page-bg-to">
+      <div className="mx-auto flex h-full  w-[95%] flex-1 flex-col gap-6 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <DashboardInfoCards cards={infoCards} />
 
-        <div className="mt-2">
-          <DashboardInfoCards cards={infoCards} />
-        </div>
+        <DashboardHomeSearchBar search={search} />
 
-        <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 min-h-3/8 max-h-3/8">
           <DashboardRecordListSection
             title="Warehouses"
             entityTone="warehouse"
@@ -53,9 +53,6 @@ export function DashboardHomePageView() {
             paginationPosition="header"
             selectedRecordId={warehouses.selectedId}
             onRecordClick={(record) => warehouses.onSelect(record.id)}
-            searchValue={warehouses.search}
-            onSearchChange={warehouses.onSearch}
-            searchPlaceholder="Search warehouses..."
           />
           <DashboardRecordListSection
             title="Zones"
@@ -69,33 +66,22 @@ export function DashboardHomePageView() {
             paginationPosition="header"
             selectedRecordId={zones.selectedId}
             onRecordClick={(record) => zones.onSelect(record.id)}
-            searchValue={zones.search}
-            onSearchChange={zones.onSearch}
-            searchPlaceholder="Search zones..."
           />
         </section>
 
-        <section className="mt-6 rounded-lg border border-slate-500 bg-brand-glass/75 p-6">
+        <section className="min-h-3/8 max-h-3/8">
           <GenericTable
             columns={binColumns}
             records={bins.records}
             title="Bins"
-            titleIcon={ShelvingUnit}
             entityTone="bin"
-            pagination={{
-              page: bins.page,
-              totalPages: bins.totalPages,
-              onPrev: bins.onPrev,
-              onNext: bins.onNext,
-              position: 'header'
-            }}
-            search={{
-              placeholder: 'Search bins...',
-              fields: ['code', 'name', 'type']
-            }}
+            pageSize={bins.pageSize}
+            builtInPaginationPosition="header"
+            search={false}
             actions={[viewBinContentsRowAction(openContents)]}
           />
         </section>
+
       </div>
 
       <BinContentsModal binId={contentsBinId} open={contentsOpen} onOpenChange={onContentsOpenChange} />

@@ -33,7 +33,7 @@ export function TableBodyRows<T extends { id: string }>({
     <TableBody>
       {displayRecords.length === 0 ? (
         <TableRow className="hover:bg-transparent">
-          <TableCell colSpan={totalColumns} className="text-center text-brand-subtle py-12">
+          <TableCell colSpan={totalColumns} className="text-center text-dash-muted py-12">
             {emptyMessage ?? 'No records found.'}
           </TableCell>
         </TableRow>
