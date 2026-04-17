@@ -12,16 +12,31 @@ import {
 const poId = 'po-1'
 const whA = 'wh-a'
 const whB = 'wh-b'
+const userId = 'usr-1'
 
 function prismaWith(
   findFirstResult: unknown,
   updateManyCount = 1
 ): PrismaClient {
+  const tx = {
+    purchaseOrder: {
+      updateMany: vi.fn().mockResolvedValue({ count: updateManyCount })
+    },
+    userActivityEntry: {
+      create: vi.fn().mockResolvedValue({ id: 'uae-1' })
+    }
+  }
+
   return {
     purchaseOrder: {
       findFirst: vi.fn().mockResolvedValue(findFirstResult),
       updateMany: vi.fn().mockResolvedValue({ count: updateManyCount })
-    }
+    },
+    userActivityEntry: {
+      create: vi.fn().mockResolvedValue({ id: 'uae-1' })
+    },
+    __tx: tx,
+    $transaction: vi.fn().mockImplementation(async (callback) => callback(tx))
   } as unknown as PrismaClient
 }
 
@@ -29,13 +44,14 @@ describe('releasePurchaseOrder', () => {
   it('releases DRAFT → RELEASED', async () => {
     const prisma = prismaWith({
       id: poId,
+      reference: 'PO-0001',
       status: OrderStatus.DRAFT,
       deletedAt: null,
       warehouseId: whA
     })
-    const out = await releasePurchaseOrder(prisma, poId)
+    const out = await releasePurchaseOrder(prisma, poId, userId)
     expect(out).toEqual({ id: poId, status: OrderStatus.RELEASED })
-    expect(prisma.purchaseOrder.updateMany).toHaveBeenCalledWith({
+    expect((prisma as unknown as { __tx: { purchaseOrder: { updateMany: ReturnType<typeof vi.fn> } } }).__tx.purchaseOrder.updateMany).toHaveBeenCalledWith({
       where: { id: poId, status: OrderStatus.DRAFT, deletedAt: null },
       data: { status: OrderStatus.RELEASED }
     })
@@ -43,7 +59,7 @@ describe('releasePurchaseOrder', () => {
 
   it('throws NOT_FOUND when missing', async () => {
     const prisma = prismaWith(null)
-    await expect(releasePurchaseOrder(prisma, poId)).rejects.toMatchObject({
+    await expect(releasePurchaseOrder(prisma, poId, userId)).rejects.toMatchObject({
       code: 'NOT_FOUND',
       status: 404
     })
@@ -52,11 +68,12 @@ describe('releasePurchaseOrder', () => {
   it('throws NOT_FOUND when soft-deleted', async () => {
     const prisma = prismaWith({
       id: poId,
+      reference: 'PO-0001',
       status: OrderStatus.DRAFT,
       deletedAt: new Date(),
       warehouseId: whA
     })
-    await expect(releasePurchaseOrder(prisma, poId)).rejects.toMatchObject({
+    await expect(releasePurchaseOrder(prisma, poId, userId)).rejects.toMatchObject({
       code: 'NOT_FOUND',
       status: 404
     })
@@ -65,11 +82,12 @@ describe('releasePurchaseOrder', () => {
   it('throws INVALID_TRANSITION when not DRAFT', async () => {
     const prisma = prismaWith({
       id: poId,
+      reference: 'PO-0001',
       status: OrderStatus.RELEASED,
       deletedAt: null,
       warehouseId: whA
     })
-    await expect(releasePurchaseOrder(prisma, poId)).rejects.toMatchObject({
+    await expect(releasePurchaseOrder(prisma, poId, userId)).rejects.toMatchObject({
       code: 'INVALID_TRANSITION',
       status: 409
     })
@@ -79,13 +97,14 @@ describe('releasePurchaseOrder', () => {
     const prisma = prismaWith(
       {
         id: poId,
+        reference: 'PO-0001',
         status: OrderStatus.DRAFT,
         deletedAt: null,
         warehouseId: whA
       },
       0
     )
-    await expect(releasePurchaseOrder(prisma, poId)).rejects.toMatchObject({
+    await expect(releasePurchaseOrder(prisma, poId, userId)).rejects.toMatchObject({
       code: 'INVALID_TRANSITION',
       status: 409
     })
@@ -96,22 +115,24 @@ describe('startPurchaseOrder', () => {
   it('starts RELEASED → EXECUTING when warehouse matches', async () => {
     const prisma = prismaWith({
       id: poId,
+      reference: 'PO-0001',
       status: OrderStatus.RELEASED,
       deletedAt: null,
       warehouseId: whA
     })
-    const out = await startPurchaseOrder(prisma, poId, whA)
+    const out = await startPurchaseOrder(prisma, poId, whA, userId)
     expect(out).toEqual({ id: poId, status: OrderStatus.EXECUTING })
   })
 
   it('throws FORBIDDEN on warehouse mismatch', async () => {
     const prisma = prismaWith({
       id: poId,
+      reference: 'PO-0001',
       status: OrderStatus.RELEASED,
       deletedAt: null,
       warehouseId: whA
     })
-    await expect(startPurchaseOrder(prisma, poId, whB)).rejects.toMatchObject({
+    await expect(startPurchaseOrder(prisma, poId, whB, userId)).rejects.toMatchObject({
       code: 'FORBIDDEN',
       status: 403
     })
@@ -120,11 +141,12 @@ describe('startPurchaseOrder', () => {
   it('throws INVALID_TRANSITION when not RELEASED', async () => {
     const prisma = prismaWith({
       id: poId,
+      reference: 'PO-0001',
       status: OrderStatus.DRAFT,
       deletedAt: null,
       warehouseId: whA
     })
-    await expect(startPurchaseOrder(prisma, poId, whA)).rejects.toMatchObject({
+    await expect(startPurchaseOrder(prisma, poId, whA, userId)).rejects.toMatchObject({
       code: 'INVALID_TRANSITION',
       status: 409
     })
@@ -135,13 +157,14 @@ describe('pausePurchaseOrder', () => {
   it('pauses EXECUTING → PAUSED', async () => {
     const prisma = prismaWith({
       id: poId,
+      reference: 'PO-0001',
       status: OrderStatus.EXECUTING,
       deletedAt: null,
       warehouseId: whA
     })
-    const out = await pausePurchaseOrder(prisma, poId, whA)
+    const out = await pausePurchaseOrder(prisma, poId, whA, userId)
     expect(out).toEqual({ id: poId, status: OrderStatus.PAUSED })
-    expect(prisma.purchaseOrder.updateMany).toHaveBeenCalledWith({
+    expect((prisma as unknown as { __tx: { purchaseOrder: { updateMany: ReturnType<typeof vi.fn> } } }).__tx.purchaseOrder.updateMany).toHaveBeenCalledWith({
       where: { id: poId, status: OrderStatus.EXECUTING, deletedAt: null },
       data: { status: OrderStatus.PAUSED }
     })
@@ -152,6 +175,7 @@ describe('resumePurchaseOrder', () => {
   it('resumes PAUSED → EXECUTING', async () => {
     const prisma = prismaWith({
       id: poId,
+      reference: 'PO-0001',
       status: OrderStatus.PAUSED,
       deletedAt: null,
       warehouseId: whA

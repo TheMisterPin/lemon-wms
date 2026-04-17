@@ -29,7 +29,7 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const data = await releasePurchaseOrder(prisma, id)
+    const data = await releasePurchaseOrder(prisma, id, payload.userId)
 
     return ok(data, 'Purchase order released successfully.')
   } catch (error) {

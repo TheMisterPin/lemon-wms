@@ -8,6 +8,12 @@ import {
   setAccessTokenCookie,
   setRefreshTokenCookie
 } from '@/lib/auth/session'
+import {
+  AUTH_LOG_FAILURE_REASONS,
+  AUTH_LOG_METHODS,
+  createUserActivityEntry,
+  LOG_ACTION_TYPES
+} from '@/lib/entities/logs'
 import { DomainError } from '@/lib/errors'
 
 type CredentialLoginParams = {
@@ -41,15 +47,18 @@ export async function credentialLogin(
   }
 
   if (!user.isActive) {
-    await prisma.userActivityEntry.create({
-      data: {
-        userId: user.id,
-        actionType: 'LOGIN_FAILED',
-        entityType: 'USER',
-        entityId: user.id,
-        ipAddress,
-        notes: 'Account deactivated'
-      }
+    await createUserActivityEntry({
+      prisma,
+      userId: user.id,
+      actionType: LOG_ACTION_TYPES.LOGIN_FAILED,
+      entityType: 'USER',
+      entityId: user.id,
+      ipAddress,
+      metadata: {
+        method: AUTH_LOG_METHODS.CREDENTIAL,
+        reason: AUTH_LOG_FAILURE_REASONS.USER_INACTIVE
+      },
+      notes: 'Account deactivated'
     })
     throw new DomainError('Account deactivated', 'FORBIDDEN', 403)
   }
@@ -60,15 +69,18 @@ export async function credentialLogin(
 
   const matches = await bcrypt.compare(password, user.passwordHash)
   if (!matches) {
-    await prisma.userActivityEntry.create({
-      data: {
-        userId: user.id,
-        actionType: 'LOGIN_FAILED',
-        entityType: 'USER',
-        entityId: user.id,
-        ipAddress,
-        notes: 'Invalid password'
-      }
+    await createUserActivityEntry({
+      prisma,
+      userId: user.id,
+      actionType: LOG_ACTION_TYPES.LOGIN_FAILED,
+      entityType: 'USER',
+      entityId: user.id,
+      ipAddress,
+      metadata: {
+        method: AUTH_LOG_METHODS.CREDENTIAL,
+        reason: AUTH_LOG_FAILURE_REASONS.INVALID_PASSWORD
+      },
+      notes: 'Invalid password'
     })
     throw new DomainError('Invalid email or password', 'UNAUTHORIZED', 401)
   }
@@ -86,13 +98,15 @@ export async function credentialLogin(
   await Promise.all([
     setRefreshTokenCookie(refreshToken),
     setAccessTokenCookie(accessToken),
-    prisma.userActivityEntry.create({
-      data: {
-        userId: user.id,
-        actionType: 'LOGIN',
-        entityType: 'USER',
-        entityId: user.id,
-        ipAddress
+    createUserActivityEntry({
+      prisma,
+      userId: user.id,
+      actionType: LOG_ACTION_TYPES.LOGIN,
+      entityType: 'USER',
+      entityId: user.id,
+      ipAddress,
+      metadata: {
+        method: AUTH_LOG_METHODS.CREDENTIAL
       }
     })
   ])

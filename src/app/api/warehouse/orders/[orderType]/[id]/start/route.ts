@@ -33,7 +33,7 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const data = await startPurchaseOrder(prisma, id, payload.warehouseId)
+    const data = await startPurchaseOrder(prisma, id, payload.warehouseId, payload.userId)
 
     return ok(data, 'Purchase order execution started.')
   } catch (error) {

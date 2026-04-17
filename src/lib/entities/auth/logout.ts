@@ -5,6 +5,7 @@ import {
   findValidRefreshToken,
   revokeRefreshToken
 } from '@/lib/auth/session'
+import { createUserActivityEntry, LOG_ACTION_TYPES } from '@/lib/entities/logs'
 
 type LogoutParams = {
   rawRefreshToken: string | null
@@ -28,14 +29,13 @@ export async function logout(
   }
 
   if (resolvedUserId) {
-    await prisma.userActivityEntry.create({
-      data: {
-        userId: resolvedUserId,
-        actionType: 'LOGOUT',
-        entityType: 'USER',
-        entityId: resolvedUserId,
-        ipAddress
-      }
+    await createUserActivityEntry({
+      prisma,
+      userId: resolvedUserId,
+      actionType: LOG_ACTION_TYPES.LOGOUT,
+      entityType: 'USER',
+      entityId: resolvedUserId,
+      ipAddress
     })
   }
 
