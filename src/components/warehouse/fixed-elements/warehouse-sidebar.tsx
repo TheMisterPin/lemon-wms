@@ -13,10 +13,10 @@ import {
 import { useTheme } from '@/hooks/use-theme'
 
 const NAV_LINKS = [
-  { label: 'Order Pool', href: '/warehouse',        icon: ClipboardList },
-  { label: 'Zone',       href: '/warehouse/zones',   icon: MapPin },
-  { label: 'Items',      href: '/warehouse/items',   icon: Package },
-  { label: 'Alerts',     href: '/warehouse/alerts',  icon: Bell }
+  { label: 'Order Pool', href: '/warehouse/orders/purchase', icon: ClipboardList },
+  { label: 'Zone',       href: '/warehouse/zones',           icon: MapPin },
+  { label: 'Items',      href: '/warehouse/items',           icon: Package },
+  { label: 'Alerts',     href: '/warehouse/alerts',          icon: Bell }
 ]
 
 interface WarehouseSidebarProps {
@@ -34,10 +34,7 @@ export default function WarehouseSidebar({ onClose }: WarehouseSidebarProps) {
           Floor
         </p>
         {NAV_LINKS.map((link) => {
-          const active =
-            link.href === '/warehouse'
-              ? pathname === '/warehouse'
-              : pathname.startsWith(link.href)
+          const active = pathname.startsWith(link.href)
           const Icon = link.icon
 
           return (

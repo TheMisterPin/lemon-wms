@@ -156,7 +156,7 @@ export function WarehouseOrdersPageView({ orderType }: Props) {
                 fields: ['reference', 'supplier', 'status'],
                 placeholder: 'Search purchase orders...'
               }}
-              emptyMessage="No orders in this status."
+              emptyMessage="No released orders found. Ask office staff to release orders from the dashboard."
             />
           </section>
         ) : null}
