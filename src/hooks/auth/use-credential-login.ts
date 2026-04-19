@@ -21,6 +21,15 @@ export function useCredentialLogin() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const normalizeToLowerCase = (value: string) => value.toLowerCase()
+
+  const handleEmailChange = (value: string) => {
+    setEmail(normalizeToLowerCase(value))
+  }
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(normalizeToLowerCase(value))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,10 +37,12 @@ export function useCredentialLogin() {
     setLoading(true)
 
     try {
+      const normalizedEmail = normalizeToLowerCase(email)
+      const normalizedPassword = normalizeToLowerCase(password)
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: normalizedEmail, password: normalizedPassword })
       })
 
       const data: LoginResponse = await res.json()
@@ -59,8 +70,8 @@ export function useCredentialLogin() {
 
   return {
     fields: { email, password },
-    setEmail,
-    setPassword,
+    setEmail: handleEmailChange,
+    setPassword: handlePasswordChange,
     showPassword,
     toggleShowPassword: () => setShowPassword((v) => !v),
     error,
