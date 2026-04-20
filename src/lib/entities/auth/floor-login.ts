@@ -9,6 +9,12 @@ import {
   setRefreshTokenCookie
 } from '@/lib/auth/session'
 import { upsertDevice } from '@/lib/entities/devices/create-device'
+import {
+  AUTH_LOG_FAILURE_REASONS,
+  AUTH_LOG_METHODS,
+  createUserActivityEntry,
+  LOG_ACTION_TYPES
+} from '@/lib/entities/logs'
 import { DomainError } from '@/lib/errors'
 
 type FloorLoginParams = {
@@ -65,16 +71,19 @@ export async function floorLogin(
   }
 
   if (!user.isActive) {
-    await prisma.userActivityEntry.create({
-      data: {
-        userId: user.id,
-        actionType: 'LOGIN_FAILED',
-        entityType: 'USER',
-        entityId: user.id,
-        warehouseId: device.warehouseId ?? undefined,
-        ipAddress,
-        notes: 'Account deactivated'
-      }
+    await createUserActivityEntry({
+      prisma,
+      userId: user.id,
+      actionType: LOG_ACTION_TYPES.LOGIN_FAILED,
+      entityType: 'USER',
+      entityId: user.id,
+      warehouseId: device.warehouseId ?? undefined,
+      ipAddress,
+      metadata: {
+        method: AUTH_LOG_METHODS.BADGE_PIN,
+        reason: AUTH_LOG_FAILURE_REASONS.USER_INACTIVE
+      },
+      notes: 'Account deactivated'
     })
     throw new DomainError('Account deactivated', 'FORBIDDEN', 403)
   }
@@ -89,16 +98,19 @@ export async function floorLogin(
 
   const matches = await bcrypt.compare(pin, user.pinHash)
   if (!matches) {
-    await prisma.userActivityEntry.create({
-      data: {
-        userId: user.id,
-        actionType: 'LOGIN_FAILED',
-        entityType: 'USER',
-        entityId: user.id,
-        warehouseId: device.warehouseId ?? undefined,
-        ipAddress,
-        notes: 'Invalid PIN'
-      }
+    await createUserActivityEntry({
+      prisma,
+      userId: user.id,
+      actionType: LOG_ACTION_TYPES.LOGIN_FAILED,
+      entityType: 'USER',
+      entityId: user.id,
+      warehouseId: device.warehouseId ?? undefined,
+      ipAddress,
+      metadata: {
+        method: AUTH_LOG_METHODS.BADGE_PIN,
+        reason: AUTH_LOG_FAILURE_REASONS.INVALID_PIN
+      },
+      notes: 'Invalid PIN'
     })
     throw new DomainError('Wrong PIN', 'UNAUTHORIZED', 401)
   }
@@ -128,14 +140,16 @@ export async function floorLogin(
       where: { id: user.id },
       data: { lastLoginDeviceId: device.id }
     }),
-    prisma.userActivityEntry.create({
-      data: {
-        userId: user.id,
-        actionType: 'LOGIN',
-        entityType: 'USER',
-        entityId: user.id,
-        warehouseId: device.warehouseId ?? undefined,
-        ipAddress
+    createUserActivityEntry({
+      prisma,
+      userId: user.id,
+      actionType: LOG_ACTION_TYPES.LOGIN,
+      entityType: 'USER',
+      entityId: user.id,
+      warehouseId: device.warehouseId ?? undefined,
+      ipAddress,
+      metadata: {
+        method: AUTH_LOG_METHODS.BADGE_PIN
       }
     })
   ])
