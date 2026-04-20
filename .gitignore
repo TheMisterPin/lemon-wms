@@ -17,7 +17,11 @@
 # next.js
 /.next/
 /out/
-
+# graphify
+graphify-out/
+graphify-out-tmp/
+graphify-input-src/
+graphify-input-src-tmp/
 # production
 /build
 
