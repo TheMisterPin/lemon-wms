@@ -122,7 +122,7 @@ lemon-wms/
     │   │   ├── return.ts
     │   │   └── adjustment.ts
     │   ├── logs/
-    │   │   └── log.service.ts         # THE most important file — see Log Layer section
+    │   │   └── log.service.ts         
     │   └── system/
     │       ├── notifications.ts
     │       └── alerts.ts
@@ -148,7 +148,7 @@ lemon-wms/
     │   │   │   └── adjustment/
     │   │   └── reports/
     │   │
-    │   ├── (warehouse)/               # Floor side — WAREHOUSE_MANAGER, WAREHOUSE_WORKER
+    │   ├── (warehouse)/               # Floor side — OWNER, WAREHOUSE_MANAGER, WAREHOUSE_WORKER
     │   │   ├── layout.tsx
     │   │   ├── page.tsx               # Order pool
     │   │   ├── zones/

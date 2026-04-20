@@ -1,12 +1,12 @@
-import { AnyNull } from '@prisma/client-runtime-utils';
-import { DbNull } from '@prisma/client-runtime-utils';
-import { Decimal } from '@prisma/client-runtime-utils';
-import { isAnyNull } from '@prisma/client-runtime-utils';
-import { isDbNull } from '@prisma/client-runtime-utils';
-import { isJsonNull } from '@prisma/client-runtime-utils';
-import { isObjectEnumValue } from '@prisma/client-runtime-utils';
-import { JsonNull } from '@prisma/client-runtime-utils';
-import { NullTypes } from '@prisma/client-runtime-utils';
+import { AnyNull } from '@prisma/client-runtime-utils'
+import { DbNull } from '@prisma/client-runtime-utils'
+import { Decimal } from '@prisma/client-runtime-utils'
+import { isAnyNull } from '@prisma/client-runtime-utils'
+import { isDbNull } from '@prisma/client-runtime-utils'
+import { isJsonNull } from '@prisma/client-runtime-utils'
+import { isObjectEnumValue } from '@prisma/client-runtime-utils'
+import { JsonNull } from '@prisma/client-runtime-utils'
+import { NullTypes } from '@prisma/client-runtime-utils'
 
 export { AnyNull }
 
@@ -74,7 +74,7 @@ declare type Operation = 'findFirst' | 'findFirstOrThrow' | 'findUnique' | 'find
 
 declare namespace Public {
     export {
-        validator
+      validator
     }
 }
 export { Public }

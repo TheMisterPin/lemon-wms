@@ -16,7 +16,16 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
     'src/generated/**',
-    'src/components/ui/**'
+    'src/components/ui/**',
+    '.graphify-input-src/**',
+    'graphify-out/**',
+    '.cursor/**',
+    '.codex/**',
+    '.claude/**',
+    '.qwen/**',
+    '.qwen-cli/**',
+    '.qwen-cli-config.json',
+    '.qwen-cli-config.json'
   ]),
   {
     plugins: {

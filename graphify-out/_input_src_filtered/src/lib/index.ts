@@ -1,6 +1,0 @@
-export * from './api'
-export * from './auth'
-export * from './axios'
-export * from './errors'
-export * from './prisma'
-export * from './utils'
