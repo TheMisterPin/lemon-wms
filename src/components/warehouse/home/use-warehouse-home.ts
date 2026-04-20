@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MapPin, Warehouse } from 'lucide-react'
 
-import { warehouseApiClient } from '@/lib/axios'
-import type { ApiResponse } from '@/types/responses/basic-response'
 import type {
   DashboardInfoCardItem,
   DashboardRecordListItem,
   WarehouseHomeData
 } from '@/components/warehouse/home/types'
+import { warehouseApiClient } from '@/lib/axios'
+import type { ApiResponse } from '@/types/responses/basic-response'
 
 const POLL_INTERVAL_MS = 30_000
 const PAGE_SIZE = 3

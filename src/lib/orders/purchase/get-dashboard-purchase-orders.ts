@@ -38,7 +38,7 @@ async function getDashboardPurchaseOrders(prisma: PrismaClient): Promise<Dashboa
       id: true,
       reference: true,
       status: true,
-      supplier: true,
+      supplierNameSnapshot: true,
       warehouseId: true,
       createdAt: true,
       businessParty: {
@@ -46,7 +46,14 @@ async function getDashboardPurchaseOrders(prisma: PrismaClient): Promise<Dashboa
           name: true
         }
       },
-      lines: true
+      lines: true,
+      receiptLines: {
+        select: {
+          id: true,
+          masterLineId: true,
+          receivedQuantity: true
+        }
+      }
     },
     orderBy: { createdAt: 'desc' }
   })
@@ -63,10 +70,10 @@ async function getDashboardPurchaseOrders(prisma: PrismaClient): Promise<Dashboa
     lines: order.lines.map(line => ({
       id: line.id,
       itemId: line.itemId,
-      itemName: line.itemName,
+      itemName: line.itemNameSnapshot,
       uom: line.uom,
-      baseQuantity: line.baseQuantity.toNumber(),
-      handledQuantity: line.handledQuantity.toNumber()
+      baseQuantity: line.orderedQuantity.toNumber(),
+      handledQuantity: order.receiptLines.reduce((acc, receiptLine) => acc + receiptLine.receivedQuantity.toNumber(), 0)
     }))
   }))
 

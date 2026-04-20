@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { createAuthorizeDeviceFormConfig } from '@/components/configs/entities/device/config'
+import { useDashboardDevices } from '@/components/dashboard/devices/use-dashboard-devices'
 import DynamicForm from '@/components/dynamic-form'
 import {
   Dialog,
@@ -11,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { useDashboardDevices } from '@/components/dashboard/devices/use-dashboard-devices'
 import { authorizeDeviceSchema } from '@/lib/schemas/device'
 import type { AuthorizeDeviceFormValues } from '@/lib/schemas/device'
 

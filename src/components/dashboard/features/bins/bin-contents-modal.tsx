@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Package } from 'lucide-react'
 
 import { TableShell } from '@/components/tables/table-shell'
+import { useTableShellController } from '@/components/tables/use-table-shell-controller'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -12,7 +13,6 @@ import {
   DialogFooter,
   DialogTitle
 } from '@/components/ui/dialog'
-import { useTableShellController } from '@/components/tables/use-table-shell-controller'
 import { dashboardApiClient } from '@/lib/axios'
 import type { BinWithContent } from '@/lib/schemas/bin'
 import { cn } from '@/lib/utils'

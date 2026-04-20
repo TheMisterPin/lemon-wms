@@ -3,11 +3,11 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { toUserTableRecords } from '@/lib/converters/table-records'
 import { createUser } from '@/lib/entities/users/create-user'
 import { getUsers } from '@/lib/entities/users/get-users'
 import prisma from '@/lib/prisma'
 import { userFormSchema } from '@/lib/schemas/user'
+import { toUserTableRecords } from '@/utils/converters/table-records'
 
 /**
  * @swagger

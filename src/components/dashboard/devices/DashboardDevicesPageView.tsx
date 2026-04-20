@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { ShieldCheck, ShieldOff, Smartphone } from 'lucide-react'
 
 import { deviceTableColumns, type DeviceTableRow } from '@/components/configs/entities/device/config'
-import AuthorizeDeviceForm from '@/components/dashboard/features/devices/authorize-device-form'
 import { DashboardDevicesProvider, useDashboardDevices } from '@/components/dashboard/devices/use-dashboard-devices'
+import AuthorizeDeviceForm from '@/components/dashboard/features/devices/authorize-device-form'
 import PageWithGrid from '@/components/pages/page-with-grid'
 import type { RowAction } from '@/types/components/table/generic-table.types'
 

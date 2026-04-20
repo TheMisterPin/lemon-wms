@@ -33,6 +33,7 @@ async function createUser(prisma: PrismaClient, data: CreateUserInput) {
       id: newID,
       firstName: data.firstName,
       lastName: data.lastName,
+      fullName: `${data.firstName} ${data.lastName}`,
       email: data.email ?? null,
       passwordHash,
       pinHash,

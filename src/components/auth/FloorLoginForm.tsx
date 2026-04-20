@@ -4,10 +4,10 @@ import { useRef } from 'react'
 
 import { Loader2 } from 'lucide-react'
 
+import { useFloorLoginFlow } from '@/components/auth/use-floor-login-flow'
 import NumericKeypad from '@/components/shared/NumericKeypad'
 import ScanInput from '@/components/shared/ScanInput'
 import { useIsMobile } from '@/components/shared/use-mobile'
-import { useFloorLoginFlow } from '@/components/auth/use-floor-login-flow'
 
 type Step = 'device' | 'badge' | 'pin'
 
@@ -23,7 +23,6 @@ export default function FloorLoginForm() {
     setDeviceCode,
     badgeNumber,
     pin,
-    setPin,
     error,
     loading,
     handleDeviceSubmit,

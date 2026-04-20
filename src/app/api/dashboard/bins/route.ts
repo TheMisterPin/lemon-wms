@@ -3,12 +3,12 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { toBinTableRecords } from '@/lib/converters/table-records'
 import { createBin } from '@/lib/entities/bins/create-bin'
 import { getBins } from '@/lib/entities/bins/get-bins'
 import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 import { binFormSchema } from '@/lib/schemas/bin'
+import { toBinTableRecords } from '@/utils/converters/table-records'
 
 /**
  * @swagger

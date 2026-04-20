@@ -4,8 +4,9 @@ import '@testing-library/jest-dom/vitest'
 
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { OrderStatus } from '@/generated/prisma'
+import { usePurchaseOrders } from '@/components/warehouse/orders/use-purchase-orders'
 import { WarehouseOrdersPageView } from '@/components/warehouse/orders/WarehouseOrdersPageView'
+import { OrderStatus } from '@/generated/prisma'
 
 const mockLoadOrders = vi.fn()
 const mockToggleStatusFilter = vi.fn()
@@ -14,8 +15,6 @@ const mockRunAction = vi.fn()
 vi.mock('@/components/warehouse/orders/use-purchase-orders', () => ({
   usePurchaseOrders: vi.fn()
 }))
-
-import { usePurchaseOrders } from '@/components/warehouse/orders/use-purchase-orders'
 
 const mockUsePurchaseOrders = vi.mocked(usePurchaseOrders)
 

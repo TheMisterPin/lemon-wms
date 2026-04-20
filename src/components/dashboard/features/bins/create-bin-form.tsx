@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { CirclePlus } from 'lucide-react'
 
 import { createBinFormConfig } from '@/components/configs/entities/bin/config'
+import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import DynamicForm from '@/components/dynamic-form'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import { binFormSchema } from '@/lib/schemas/bin'
 import type { BinFormValues } from '@/lib/schemas/bin'
 import type { SelectOption } from '@/types/components/form/generic-form.types'

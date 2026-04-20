@@ -110,14 +110,14 @@ describe('isOfficeRole', () => {
 })
 
 describe('isFloorRole', () => {
-  it.each(['OWNER','WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER'] as const)(
+  it.each(['OWNER', 'WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER'] as const)(
     'returns true for %s',
     (role) => {
       expect(isFloorRole(role)).toBe(true)
     }
   )
 
-  it.each([ 'OFFICE_MANAGER', 'OFFICE_WORKER'] as const)(
+  it.each(['OFFICE_MANAGER', 'OFFICE_WORKER'] as const)(
     'returns false for %s',
     (role) => {
       expect(isFloorRole(role)).toBe(false)

@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { CirclePlus } from 'lucide-react'
 import { z } from 'zod'
 import { warehouseFormConfig } from '@/components/configs/entities/warehouse/config'
+import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import DynamicForm from '@/components/dynamic-form'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import { warehouseFormSchema } from '@/lib/schemas/warehouse'
 import type { WarehouseFormValues } from '@/lib/schemas/warehouse'
 import type { FormFieldConfig, GenericFormConfig } from '@/types/components/form/generic-form.types'

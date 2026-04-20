@@ -105,12 +105,21 @@ async function createPurchaseOrder(
         reference: orderNo,
         warehouseId,
         businessPartyId,
-        supplier: supplier.name,
+        supplierNameSnapshot: supplier.name,
         createdById,
         notes: notes ?? null,
         expectedDate: expectedDate ?? null,
         lines: {
-          create: lineCreates
+          createMany: {
+            data: lineCreates.map(line => ({
+              lineSequence: line.lineSequence,
+              itemId: line.itemId,
+              itemNameSnapshot: line.itemName,
+              orderedQuantity: line.baseQuantity,
+              uom: line.uom,
+              baseQuantity: line.baseQuantity
+            }))
+          }
         }
       },
       select: {

@@ -3,10 +3,10 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { toDeviceTableRecords } from '@/lib/converters/table-records'
 import { createDevice } from '@/lib/entities/devices/create-device'
 import { getFilteredDevices } from '@/lib/entities/devices/get-devices'
 import prisma from '@/lib/prisma'
+import { toDeviceTableRecords } from '@/utils/converters/table-records'
 
 const createDeviceSchema = z.object({
   name: z.string().min(1, 'Name is required'),
