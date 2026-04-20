@@ -6,8 +6,8 @@ import { Loader2 } from 'lucide-react'
 
 import NumericKeypad from '@/components/shared/NumericKeypad'
 import ScanInput from '@/components/shared/ScanInput'
-import { useFloorLoginFlow } from '@/hooks/auth/use-floor-login-flow'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/components/shared/use-mobile'
+import { useFloorLoginFlow } from '@/components/auth/use-floor-login-flow'
 
 type Step = 'device' | 'badge' | 'pin'
 

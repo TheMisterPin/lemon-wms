@@ -1,4 +1,4 @@
-import { DashboardDevicesPageView } from '@/components/dashboard/pages/devices/dashboard-devices-page'
+import { DashboardDevicesPageView } from '@/components/dashboard/devices/DashboardDevicesPageView'
 
 export default function DevicesPage() {
   return <DashboardDevicesPageView />

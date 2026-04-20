@@ -2,10 +2,8 @@
 
 import { create } from 'zustand'
 
+import { ACCESS_TOKEN_STORAGE_KEY, AUTH_SESSION_STORAGE_KEY } from '@/lib/auth/constants'
 import type { AuthContext, AuthDevice, AuthLocation, AuthUser } from '@/types'
-
-const ACCESS_TOKEN_STORAGE_KEY = 'wms_access_token'
-const AUTH_SESSION_STORAGE_KEY = 'wms_auth_session'
 
 type PersistedAuthSession = {
   user: AuthUser | null

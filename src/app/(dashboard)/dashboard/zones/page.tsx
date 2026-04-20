@@ -1,4 +1,4 @@
-import { DashboardZonesPageView } from '@/components/dashboard/pages/zones/dashboard-zones-page'
+import { DashboardZonesPageView } from '@/components/dashboard/zones/DashboardZonesPageView'
 
 export default function ZonesHomePage() {
   return <DashboardZonesPageView />

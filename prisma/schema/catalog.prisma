@@ -1,0 +1,105 @@
+// =============================================================================
+// catalog.prisma
+// Item catalog — definitions of what things are.
+//
+// This domain answers: "what is this thing?" Not "where is it?" or "how many?"
+// Those are locations.prisma and stock.prisma respectively.
+//
+// Models: Item, ItemCategory, UnitOfMeasure, SerialNumberConfig
+//
+// Dependencies:
+//   → parties.prisma (BusinessParty) — optional supplier link on Item
+//   → locations.prisma (Warehouse) — SerialNumberConfig can be warehouse-scoped
+// =============================================================================
+
+// Unit of measure definition. Used by Item as the canonical UoM and by every
+// operational record (order lines, BOE, ILE) that needs a unit.
+// id is the UoM code string — e.g. "EA", "KG", "L", "M3"
+model UnitOfMeasure {
+  id           String   @id         // e.g. "EA", "KG", "L", "M3"
+  description  String
+  decimalRound Int                  // How many decimal places are valid for this UoM
+  createdAt    DateTime @default(now())
+
+  // Everything that uses a UoM references this table
+  items                Item[]
+  binStockItems        BinStockItem[]
+  boxLines             BoxLine[]
+  purchaseOrderLines   PurchaseOrderLine[]
+  salesOrderLines      SalesOrderLine[]
+  transferOrderLines   TransferOrderLine[]
+  returnOrderLines     ReturnOrderLine[]
+  adjustmentOrderLines AdjustmentOrderLine[]
+  binOperationEntries  BinOperationEntry[]
+  itemLedgerEntries    ItemLedgerEntry[]
+}
+
+// Two-level category hierarchy. Parent categories have hasChildren = true.
+// code is the primary key for lookup — e.g. "ELEC", "ELEC-BATT"
+// SKU format follows: PARENT-CHILD-{sequence}
+model ItemCategory {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String   @unique
+  description String?
+  hasChildren Boolean  @default(false)
+  parentCode  String?
+  handlingFlags Json?  // e.g. { "COLD": true, "HAZMAT": false }
+  createdAt   DateTime @default(now())
+
+  parent   ItemCategory?  @relation("ItemCategoryChildren", fields: [parentCode], references: [code])
+  children ItemCategory[] @relation("ItemCategoryChildren")
+  items    Item[]         @relation("ItemInCategory")
+}
+
+// The item master record. Defines what a physical item is.
+// Does not store quantity — that lives in BinStockItem and is derived from ItemLedgerEntry.
+model Item {
+  id          String           @id @default(uuid())
+  sku         String           @unique // Format: PARENT-CHILD-{####}
+  name        String
+  description String?
+  barcode     String?
+  categoryId  String?
+  trackingMode ItemTrackingMode
+  uom         String           // FK → UnitOfMeasure.id
+  weightKg    Decimal?
+  dimensions  Json?            // { l, w, h } in cm
+  minQuantity Decimal          @default(0) // Below this → LOW_STOCK alert fires
+  isActive    Boolean          @default(true)
+  supplierId  String?
+  deletedAt   DateTime?
+  createdAt   DateTime         @default(now())
+
+  category      ItemCategory?  @relation("ItemInCategory", fields: [categoryId], references: [code])
+  supplier      BusinessParty? @relation("SupplierItems", fields: [supplierId], references: [id])
+  unitOfMeasure UnitOfMeasure  @relation(fields: [uom], references: [id])
+
+  // Stock and tracking
+  binStockItems BinStockItem[]
+  lots          Lot[]
+  serialNumbers SerialNumber[]
+
+  // Serial number config — one config per entity type per item
+  serialNumberConfigs SerialNumberConfig[]
+}
+
+// Configuration for sequential or partial serial number generation.
+// Used for: user badge numbers (USER), order references (ORDER), box codes (BOX), etc.
+// Can be warehouse-scoped (warehouseId set) or global (warehouseId null).
+model SerialNumberConfig {
+  id          String           @id @default(uuid())
+  entityType  SerialEntityType
+  prefix      String?          // e.g. "USR-", "PO-", "BOX-"
+  format      String           // Pattern string — e.g. "{prefix}{####}"
+  lastValue   Int              @default(0)
+  incrementBy Int              @default(1)
+  mode        SerialMode       @default(INCREMENTAL)
+  warehouseId String?
+  itemId      String?
+  createdAt   DateTime         @default(now())
+
+  item      Item?      @relation(fields: [itemId], references: [id])
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
+  serials   SerialNumber[]
+}

@@ -1,4 +1,4 @@
-import { DashboardOrdersPageView } from '@/components/dashboard/pages/orders/dashboard-orders-page'
+import { DashboardOrdersPageView } from '@/components/dashboard/orders/DashboardOrdersPageView'
 
 type PageProps = {
   params: Promise<{ orderType: string }>

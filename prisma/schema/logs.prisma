@@ -1,0 +1,137 @@
+// =============================================================================
+// logs.prisma
+// The three-layer immutable audit log.
+//
+// These three models always write together in a single transaction.
+// They never write alone. The write order is always: UAE → BOE → ILE.
+// This is enforced in lib/logs/log.service.ts — it is the only place that
+// writes to these tables.
+//
+// RULE: Never call prisma.userActivityEntry.create() directly from an API route
+//       or any service other than log.service.ts.
+//
+// RULE: Never update or delete any row in these tables. Ever.
+//       Mistakes are corrected with compensating entries (opposite values).
+//       The original entry and its reversal are both preserved.
+//
+// RULE: Timestamps are set by the database (@default(now())) — never by the app.
+//       This prevents clock skew from corrupting chronological order.
+//
+// Models: UserActivityEntry, BinOperationEntry, ItemLedgerEntry
+//
+// Dependencies:
+//   → iam.prisma (User, Warehouse)
+//   → catalog.prisma (UnitOfMeasure)
+// =============================================================================
+
+// Layer 1 — WHO did WHAT to WHICH entity and WHEN.
+// Written for every meaningful user action — not just stock movements.
+// See 02-users.md for the full actionType list.
+model UserActivityEntry {
+  id                String     @id @default(uuid())
+  userId            String
+  actionType        String     // e.g. "LINE_HANDLED", "BIN_BLOCKED", "USER_CREATED"
+  entityType        String     // e.g. "PurchaseOrder", "Bin", "User"
+  entityId          String
+  metadata          Json?      // Action-specific payload — structure defined per actionType
+  warehouseId       String?
+  orderId           String?
+  orderType         OrderType?
+  ipAddress         String?
+  notes             String?    // Human-readable freeform — NOT for structured data
+  orderAssignmentId String?
+  createdAt         DateTime   @default(now())
+
+  user            User             @relation(fields: [userId], references: [id])
+  warehouse       Warehouse?       @relation(fields: [warehouseId], references: [id])
+  orderAssignment OrderAssignment? @relation("OrderAssignmentActivities", fields: [orderAssignmentId], references: [id])
+
+  // Reverse relations — each order type links its UAE
+  boes BinOperationEntry[]
+
+  @@index([userId, actionType, entityType, entityId])
+  @@index([orderId, orderType])
+  @@index([createdAt])
+  @@index([orderAssignmentId])
+}
+
+// Layer 2 — WHAT MOVED, from WHERE to WHERE.
+// Written for every physical stock movement or operation.
+// affectsFiscalStock = true means an ILE must be written alongside this BOE.
+// affectsFiscalStock = false means intra-warehouse move — no ILE needed.
+//
+// FIFO stamping: for RECEIVE operations on FIFO-tracked items, receivingDate and
+// receivingSequence are set here from the PurchaseOrder. These values are immutable
+// once written — they cannot be reconstructed later via joins.
+model BinOperationEntry {
+  id                  String           @id @default(uuid())
+  userId              String
+  warehouseId         String
+  type                BinOperationType
+  fromBinId           String?
+  toBinId             String?
+  warItemId           String
+  quantity            Decimal          @db.Decimal(18, 4)
+  uom                 String
+  lotId               String?
+  serialNumberId      String?
+  orderId             String?
+  orderType           OrderType?
+  affectsFiscalStock  Boolean          @default(false)
+  boxId               String?
+  notes               String?
+  reasonCode          String?
+  reversedByEntryId   String?          // Points to the compensating BOE if this was reversed
+  reversesEntryId     String?          // Points to the original BOE this entry reverses
+  userActivityEntryId String?
+  createdAt           DateTime         @default(now())
+
+  user              User               @relation(fields: [userId], references: [id])
+  warehouse         Warehouse          @relation(fields: [warehouseId], references: [id])
+  unitOfMeasure     UnitOfMeasure      @relation(fields: [uom], references: [id])
+  userActivityEntry UserActivityEntry? @relation(fields: [userActivityEntryId], references: [id])
+
+  itemLedgers ItemLedgerEntry[]
+
+  @@index([warehouseId, warItemId, createdAt])
+  @@index([fromBinId, createdAt])
+  @@index([toBinId, createdAt])
+  @@index([type, createdAt])
+  @@index([orderType, orderId])
+}
+
+// Layer 3 — FISCAL STOCK IMPACT.
+// Written only when affectsFiscalStock = true on the parent BOE.
+// Current stock for any item = SUM(quantityDelta) filtered by warehouseId + warItemId.
+// There is no snapshot field anywhere in the system. The ledger is the source of truth.
+//
+// id is an autoincrement integer — provides a guaranteed global ordering within
+// the warehouse that UUIDs cannot provide.
+model ItemLedgerEntry {
+  id                  Int                      @id @default(autoincrement())
+  warehouseId         String
+  warItemId           String
+  uom                 String
+  eventType           FiscalInventoryEventType
+  quantityDelta       Decimal                  @db.Decimal(18, 4) // Positive = stock in, Negative = stock out
+  lotId               String?
+  serialNumberId      String?
+  orderId             String?
+  orderType           OrderType?
+  boeId               String?
+  reference           String?                  // Human-readable order reference snapshot
+  externalDocumentRef String?
+  performedByUserId   String?
+  reasonCode          String?
+  createdAt           DateTime                 @default(now())
+
+  boe           BinOperationEntry? @relation(fields: [boeId], references: [id])
+  unitOfMeasure UnitOfMeasure      @relation(fields: [uom], references: [id])
+  warehouse     Warehouse          @relation(fields: [warehouseId], references: [id])
+
+  @@index([warehouseId, warItemId, createdAt])
+  @@index([warehouseId, eventType, createdAt])
+  @@index([orderType, orderId])
+  @@index([lotId])
+  @@index([serialNumberId])
+}

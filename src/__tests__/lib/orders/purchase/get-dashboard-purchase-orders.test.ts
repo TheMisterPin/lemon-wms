@@ -23,7 +23,12 @@ describe('getDashboardPurchaseOrders', () => {
         supplier: true,
         warehouseId: true,
         createdAt: true,
-        businessPartyId: true
+        businessParty: {
+          select: {
+            name: true
+          }
+        },
+        lines: true
       },
       orderBy: { createdAt: 'desc' }
     })

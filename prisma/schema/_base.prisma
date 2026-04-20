@@ -1,0 +1,231 @@
+// =============================================================================
+// _base.prisma
+// Generator, datasource, and all enums for Lemon WMS.
+//
+// ALL enums live here regardless of which domain uses them.
+// Enums are referenced across domain boundaries constantly — scattering them
+// into domain files means hunting across files every time you need to check a
+// value. Keep them here.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// IAM enums
+// -----------------------------------------------------------------------------
+
+enum Role {
+  OWNER
+  OFFICE_MANAGER
+  OFFICE_WORKER
+  WAREHOUSE_MANAGER
+  WAREHOUSE_WORKER
+}
+
+enum LoginType {
+  CREDENTIAL  // Email + password — office side
+  BADGE_PIN   // Badge number + 4-digit PIN — floor side
+  BOTH        // Either method — managers who work both sides
+}
+
+enum LoginMode {
+  PIN
+  AUTOMATIC
+}
+
+enum DeviceType {
+  FLOOR
+  HANDHELD
+  PC
+  TABLET
+}
+
+// -----------------------------------------------------------------------------
+// Location enums
+// -----------------------------------------------------------------------------
+
+enum WarehouseStatus {
+  ACTIVE    // Fully operational
+  INACTIVE  // Visible but locked — no new orders released
+  ARCHIVED  // Read-only — terminal state
+}
+
+enum ZoneType {
+  GENERAL    // Standard storage — all operations permitted
+  COLD       // Temperature-controlled — COLD-flagged items only
+  HAZMAT     // Hazardous materials — restricted access
+  QUARANTINE // Hold area — no outbound until WM clears
+  STAGING    // Temporary pre-ship — items must leave before order closes
+  RETURNS    // Inbound returns — receive-only, triggers return order flow
+}
+
+enum BinType {
+  GENERAL    // All operations: putaway, pick, move, count
+  RECEIVING  // Inbound staging — receive only
+  OUTGOING   // Pre-ship staging — pick and ship only
+  QUARANTINE // No picks — WM release only
+  STAGING    // Temporary — flagged if items linger past threshold
+}
+
+// -----------------------------------------------------------------------------
+// Stock enums
+// -----------------------------------------------------------------------------
+
+enum BinItemStatus {
+  AVAILABLE
+  RESERVED
+  BLOCKED
+  IN_TRANSIT
+}
+
+enum ItemTrackingMode {
+  NONE   // Commodity items — quantity only
+  LOT    // Batch-traceable or regulated goods
+  SERIAL // High-value assets — one record per physical unit
+  FIFO   // First-in first-out — stamped at receive time
+}
+
+enum LotStatus {
+  ACTIVE
+  QUARANTINE
+  EXPIRED
+  CONSUMED
+}
+
+enum SerialStatus {
+  IN_STOCK
+  SHIPPED
+  RETURNED
+  SCRAPPED
+}
+
+enum SerialEntityType {
+  ITEM
+  BOX
+  BOX_LINE
+  PALLET
+  ORDER
+  ORDER_LINE
+  USER
+}
+
+enum SerialMode {
+  INCREMENTAL
+  PARTIAL
+}
+
+enum BoxStatus {
+  OPEN
+  SEALED
+  IN_TRANSIT
+  RECEIVED
+  SHIPPED
+  SCRAPPED
+}
+
+// -----------------------------------------------------------------------------
+// Order enums
+// -----------------------------------------------------------------------------
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  RELEASED
+  EXECUTING
+  PAUSED
+  EXECUTED
+  EXECUTED_WITH_PROBLEMS
+  SIGNED_OFF
+  CANCELLED
+}
+
+enum OrderPriority {
+  NORMAL
+  URGENT
+  EXPRESS
+}
+
+enum OrderType {
+  PURCHASE
+  SALES
+  TRANSFER
+  RETURN
+  ADJUSTMENT
+}
+
+// -----------------------------------------------------------------------------
+// Log enums
+// -----------------------------------------------------------------------------
+
+enum BinOperationType {
+  RECEIVE
+  PUTAWAY
+  MOVE
+  PICK
+  SHIP
+  BOX
+  UNBOX
+  ADJUST
+  BLOCK
+  UNBLOCK
+  COUNT
+  TRANSFER_LOAD
+  TRANSFER_UNLOAD
+  RETURN_RECEIVE
+  RETURN_PUTAWAY
+  REVERSE_OPERATION
+}
+
+enum FiscalInventoryEventType {
+  RECEIPT
+  SHIPMENT
+  RETURN_IN
+  RETURN_OUT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+// -----------------------------------------------------------------------------
+// Party enums
+// -----------------------------------------------------------------------------
+
+enum BusinessPartyType {
+  CUSTOMER
+  SUPPLIER
+  CARRIER
+}
+
+enum AddressType {
+  PRIMARY
+  BILLING
+  SHIPPING
+  RETURNS
+  WAREHOUSE
+  HQ
+}
+
+// -----------------------------------------------------------------------------
+// System enums
+// -----------------------------------------------------------------------------
+
+enum AlertRuleType {
+  LOW_STOCK
+  EXPIRY
+  BIN_CAPACITY
+}
+
+enum ErrorType {
+  CLIENT
+  SERVER
+  NETWORK
+  UNKNOWN
+}

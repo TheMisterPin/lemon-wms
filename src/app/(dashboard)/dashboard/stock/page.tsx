@@ -1,4 +1,4 @@
-import { DashboardStockPageView } from '@/components/dashboard/pages/stock/dashboard-stock-page'
+import { DashboardStockPageView } from '@/components/dashboard/stock/DashboardStockPageView'
 
 export default function StockPage() {
   return <DashboardStockPageView />

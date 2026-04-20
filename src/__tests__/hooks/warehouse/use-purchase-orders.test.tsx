@@ -3,7 +3,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { OrderStatus } from '@/generated/prisma'
-import { usePurchaseOrders } from '@/hooks/warehouse/use-purchase-orders'
+import { usePurchaseOrders } from '@/components/warehouse/orders/use-purchase-orders'
 
 vi.mock('@/lib/axios', () => ({
   warehouseApiClient: {

@@ -1,0 +1,334 @@
+// =============================================================================
+// orders.prisma
+// All five order types and their lines. OrderAssignment.
+//
+// All order types share the same status machine:
+//   DRAFT → CONFIRMED → RELEASED → EXECUTING ⇄ PAUSED
+//     → EXECUTED | EXECUTED_WITH_PROBLEMS
+//     → SIGNED_OFF
+//     → CANCELLED (from any pre-EXECUTED status)
+//
+// When an order closes with EXECUTED_WITH_PROBLEMS, the WM can trigger a split:
+//   parent order → /1 child (COMPLETED — the handled portion)
+//                → /2 child (DRAFT — the remainder, re-enters OM workflow)
+//
+// Models:
+//   PurchaseOrder, PurchaseOrderLine, PurchaseOrderReceiptLine
+//   SalesOrder, SalesOrderLine
+//   TransferOrder, TransferOrderLine
+//   ReturnOrder, ReturnOrderLine
+//   AdjustmentOrder, AdjustmentOrderLine
+//   OrderAssignment
+//
+// Dependencies:
+//   → locations.prisma (Warehouse, Bin)
+//   → catalog.prisma (Item, UnitOfMeasure)
+//   → stock.prisma (Lot, SerialNumber)
+//   → parties.prisma (BusinessParty)
+//   → iam.prisma (User)
+// =============================================================================
+
+// Tracks which user is currently responsible for executing an order.
+// One row per (orderType, orderId, userId) — a user can be assigned to multiple orders.
+model OrderAssignment {
+  id         String    @id @default(uuid())
+  orderId    String
+  orderType  OrderType
+  userId     String
+  assignedAt DateTime  @default(now())
+  releasedAt DateTime?
+  notes      String?
+
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userActivities UserActivityEntry[] @relation("OrderAssignmentActivities")
+
+  @@unique([orderType, orderId, userId])
+  @@index([userId, assignedAt])
+  @@index([orderType, orderId])
+}
+
+// =============================================================================
+// Purchase Orders — inbound stock from suppliers
+// =============================================================================
+
+// kind = MASTER: the original order created by OM
+// kind = RECEIPT: a child order created when a MASTER closes with problems (the /2 remainder)
+// receivingSequence: incremented per warehouse per calendar day — used for FIFO stamping
+model PurchaseOrder {
+  id                   String        @id @default(uuid())
+  reference            String        @unique
+  status               OrderStatus   @default(DRAFT)
+  priority             OrderPriority @default(NORMAL)
+  warehouseId          String
+  businessPartyId      String?
+  supplierNameSnapshot String? // Denormalized — preserves name if party is later renamed
+  notes                String?
+  expectedDate         DateTime?
+  parentOrderId        String? // Set on /2 split child — points to the MASTER
+  receivingSequence    Int? // For FIFO: day-scoped sequence within warehouse
+  createdById          String
+  confirmedById        String?
+  assignedToId         String?
+  confirmedAt          DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime      @default(now())
+
+  warehouse     Warehouse      @relation(fields: [warehouseId], references: [id])
+  businessParty BusinessParty? @relation("SupplierPurchaseOrders", fields: [businessPartyId], references: [id])
+  assignedTo    User?          @relation("PurchaseOrderAssignedTo", fields: [assignedToId], references: [id])
+
+  parentOrder PurchaseOrder?  @relation("PurchaseOrderHierarchy", fields: [parentOrderId], references: [id])
+  childOrders PurchaseOrder[] @relation("PurchaseOrderHierarchy")
+
+  lines        PurchaseOrderLine[]
+  receiptLines PurchaseOrderReceiptLine[] @relation("ReceiptOrderLines")
+
+  @@index([warehouseId, status])
+  @@index([businessPartyId])
+  @@index([parentOrderId])
+  @@index([status])
+  @@index([assignedToId])
+}
+
+// One line per item expected on the purchase order.
+// orderedQuantity is what was ordered. Actual received quantities live in PurchaseOrderReceiptLine.
+model PurchaseOrderLine {
+  id               String  @id @default(uuid())
+  purchaseOrderId  String
+  lineSequence     Int
+  itemId           String
+  itemNameSnapshot String
+  orderedQuantity  Decimal @db.Decimal(18, 4)
+  uom              String
+  notes            String?
+
+  purchaseOrder PurchaseOrder              @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure UnitOfMeasure              @relation(fields: [uom], references: [id])
+  receiptLines  PurchaseOrderReceiptLine[]
+
+  @@unique([purchaseOrderId, lineSequence])
+  @@index([itemId])
+  @@index([purchaseOrderId])
+}
+
+// The actual received quantities per line — multiple receipt lines can exist per master line
+// (split receipts, corrections). receivedQuantity can be less than orderedQuantity (short).
+// correctionGroupId links a correction to the original receipt line it corrects.
+model PurchaseOrderReceiptLine {
+  id                String    @id @default(uuid())
+  receiptOrderId    String
+  masterLineId      String
+  receivedQuantity  Decimal   @db.Decimal(18, 4)
+  correctionGroupId String?
+  correctedAt       DateTime?
+  notes             String?
+  stockItemId       String?
+  createdAt         DateTime  @default(now())
+
+  receiptOrder PurchaseOrder     @relation("ReceiptOrderLines", fields: [receiptOrderId], references: [id], onDelete: Cascade)
+  masterLine   PurchaseOrderLine @relation(fields: [masterLineId], references: [id], onDelete: Cascade)
+  stockItem    BinStockItem?      @relation("BinStockItemPurchaseOrderReceiptLines", fields: [stockItemId], references: [id])
+  @@index([receiptOrderId])
+  @@index([masterLineId])
+  @@index([correctionGroupId])
+  @@index([stockItemId])
+}
+
+// =============================================================================
+// Sales Orders — outbound stock to customers
+// =============================================================================
+
+model SalesOrder {
+  id              String        @id @default(uuid())
+  reference       String        @unique
+  status          OrderStatus   @default(DRAFT)
+  priority        OrderPriority @default(NORMAL)
+  warehouseId     String
+  businessPartyId String?
+  customerName    String // Required — denormalized for display
+  deliveryAddress String?
+  carrierId       String?
+  notes           String?
+  createdById     String
+  confirmedById   String?
+  deletedAt       DateTime?
+  createdAt       DateTime      @default(now())
+
+  warehouse     Warehouse      @relation(fields: [warehouseId], references: [id])
+  businessParty BusinessParty? @relation("CustomerSalesOrders", fields: [businessPartyId], references: [id])
+
+  lines SalesOrderLine[]
+
+  @@index([warehouseId, status])
+  @@index([businessPartyId])
+}
+
+model SalesOrderLine {
+  id               String  @id @default(uuid())
+  salesOrderId     String
+  itemId           String
+  itemNameSnapshot String
+  destinationBinId String?
+  originBinId      String?
+  baseQuantity     Decimal @db.Decimal(18, 4)
+  handledQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  isShort          Boolean @default(false)
+  lotId            String?
+  serialNumberId   String?
+  uom              String
+
+  salesOrder    SalesOrder    @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+
+  @@index([salesOrderId])
+  @@index([itemId])
+}
+
+// =============================================================================
+// Transfer Orders — stock movement between bins or warehouses
+// =============================================================================
+
+// isCrossWarehouse = true: two ILEs written on completion (TRANSFER_OUT + TRANSFER_IN)
+// isCrossWarehouse = false: BOE MOVE only — no ILE (intra-warehouse, fiscal stock unchanged)
+model TransferOrder {
+  id               String        @id @default(uuid())
+  reference        String        @unique
+  status           OrderStatus   @default(DRAFT)
+  priority         OrderPriority @default(NORMAL)
+  warehouseId      String
+  notes            String?
+  originBinId      String?
+  destinationBinId String?
+  isCrossWarehouse Boolean       @default(false)
+  createdById      String
+  confirmedById    String?
+  deletedAt        DateTime?
+  createdAt        DateTime      @default(now())
+
+  warehouse      Warehouse @relation(fields: [warehouseId], references: [id])
+  originBin      Bin?      @relation("TransferFromBin", fields: [originBinId], references: [id])
+  destinationBin Bin?      @relation("TransferToBin", fields: [destinationBinId], references: [id])
+
+  lines TransferOrderLine[]
+
+  @@index([warehouseId, status])
+}
+
+model TransferOrderLine {
+  id               String  @id @default(uuid())
+  transferOrderId  String
+  itemId           String
+  itemNameSnapshot String
+  binId            String?
+  baseQuantity     Decimal @db.Decimal(18, 4)
+  handledQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  isShort          Boolean @default(false)
+  lotId            String?
+  serialNumberId   String?
+  uom              String
+
+  transferOrder TransferOrder @relation(fields: [transferOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+
+  @@index([transferOrderId])
+  @@index([itemId])
+}
+
+// =============================================================================
+// Return Orders — inbound stock from customers
+// =============================================================================
+
+// originSalesOrderId links back to the SO this return came from (optional).
+// returnDisposition: RESTOCK | QUARANTINE | SCRAP | RETURN_TO_SUPPLIER
+//   Determines what happens to stock on order completion.
+model ReturnOrder {
+  id                 String        @id @default(uuid())
+  reference          String        @unique
+  status             OrderStatus   @default(DRAFT)
+  priority           OrderPriority @default(NORMAL)
+  warehouseId        String
+  notes              String?
+  originSalesOrderId String?
+  returnDisposition  String?
+  createdById        String
+  confirmedById      String?
+  deletedAt          DateTime?
+  createdAt          DateTime      @default(now())
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  lines ReturnOrderLine[]
+
+  @@index([warehouseId, status])
+  @@index([originSalesOrderId])
+}
+
+model ReturnOrderLine {
+  id               String  @id @default(uuid())
+  returnOrderId    String
+  itemId           String
+  itemNameSnapshot String
+  binId            String?
+  baseQuantity     Decimal @db.Decimal(18, 4)
+  handledQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  isShort          Boolean @default(false)
+  lotId            String?
+  serialNumberId   String?
+  uom              String
+
+  returnOrder   ReturnOrder   @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+
+  @@index([returnOrderId])
+  @@index([itemId])
+}
+
+// =============================================================================
+// Adjustment Orders — stock corrections with full audit trail
+// =============================================================================
+
+// reasonCode: CYCLE_COUNT | DAMAGE | SHRINKAGE | FOUND | CORRECTION | OTHER
+// Requires WM/OM approval before execution (CONFIRMED → RELEASED).
+// Each line writes an ILE: ADJUSTMENT_IN (positive delta) or ADJUSTMENT_OUT (negative).
+model AdjustmentOrder {
+  id            String        @id @default(uuid())
+  reference     String        @unique
+  status        OrderStatus   @default(DRAFT)
+  priority      OrderPriority @default(NORMAL)
+  warehouseId   String
+  notes         String?
+  reasonCode    String
+  createdById   String
+  confirmedById String?
+  deletedAt     DateTime?
+  createdAt     DateTime      @default(now())
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  lines AdjustmentOrderLine[]
+
+  @@index([warehouseId, status])
+  @@index([reasonCode])
+}
+
+// sequence is the composite PK component — auto-increments per order.
+model AdjustmentOrderLine {
+  adjustmentOrderId String
+  sequence          Int     @default(autoincrement())
+  itemId            String
+  itemNameSnapshot  String
+  binId             String?
+  baseQuantity      Decimal @db.Decimal(18, 4)
+  handledQuantity   Decimal @default(0) @db.Decimal(18, 4)
+  isShort           Boolean @default(false)
+  lotId             String?
+  serialNumberId    String?
+  uom               String
+
+  adjustmentOrder AdjustmentOrder @relation(fields: [adjustmentOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure   UnitOfMeasure   @relation(fields: [uom], references: [id])
+
+  @@id([adjustmentOrderId, sequence])
+  @@index([adjustmentOrderId])
+  @@index([itemId])
+}

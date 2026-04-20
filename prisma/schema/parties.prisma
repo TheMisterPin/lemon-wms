@@ -1,0 +1,80 @@
+// =============================================================================
+// parties.prisma
+// Business party master data.
+//
+// Who you do business with: suppliers, customers, carriers.
+// This is reference data. Parties do not know about orders — orders reference
+// parties. The dependency flows one way.
+//
+// Models: BusinessParty, ContactPerson, Address
+//
+// Dependencies: none — this domain has no upstream dependencies.
+// =============================================================================
+
+model BusinessParty {
+  id        String            @id @default(uuid())
+  code      String            @unique // Short reference code — e.g. "ACME-001"
+  type      BusinessPartyType
+  name      String
+  legalName String?
+  email     String?
+  phone     String?
+  website   String?
+  vatNumber String?
+  taxId     String?
+  isActive  Boolean           @default(true)
+  notes     String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  addresses ContactPerson[]
+  contacts  Address[]
+
+  // Orders referencing this party
+  supplierItems  Item[]          @relation("SupplierItems")
+  purchaseOrders PurchaseOrder[] @relation("SupplierPurchaseOrders")
+  salesOrders    SalesOrder[]    @relation("CustomerSalesOrders")
+}
+
+// Individual contact within a business party.
+// A party can have multiple contacts; one is flagged as primary.
+model ContactPerson {
+  id              String        @id @default(uuid())
+  businessPartyId String
+  firstName       String
+  lastName        String
+  fullName        String
+  roleTitle       String?
+  email           String?
+  phone           String?
+  mobile          String?
+  isPrimary       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  businessParty BusinessParty @relation(fields: [businessPartyId], references: [id], onDelete: Cascade)
+
+  @@index([businessPartyId])
+}
+
+// Physical or mailing address for a business party.
+// A party can have multiple addresses of different types.
+model Address {
+  id              String      @id @default(uuid())
+  businessPartyId String
+  type            AddressType
+  label           String?     // Optional human label — e.g. "Main Dock"
+  streetLine1     String
+  streetLine2     String?
+  city            String
+  state           String?
+  postalCode      String
+  country         String
+  isPrimary       Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  businessParty BusinessParty @relation(fields: [businessPartyId], references: [id], onDelete: Cascade)
+
+  @@index([businessPartyId])
+}

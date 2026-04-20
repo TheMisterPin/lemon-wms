@@ -1,6 +1,6 @@
 import AuthProvider from '@/components/shared/AuthProvider'
 import NotificationDialog from '@/components/shared/NotificationDialog'
-import { ErrorDialogProvider } from '@/hooks/ui/use-error-dialog'
+import { ErrorDialogProvider } from '@/components/shared/use-error-dialog'
 import type { Metadata } from 'next'
 
 import './globals.css'

@@ -1,7 +1,7 @@
 'use client'
 
 import { ErrorModal } from '@/components/shared/ErrorModal'
-import { useErrorDialog } from '@/hooks/ui/use-error-dialog'
+import { useErrorDialog } from '@/components/shared/use-error-dialog'
 
 export function AppErrorDialog() {
   const { currentError, isOpen, clearError } = useErrorDialog()

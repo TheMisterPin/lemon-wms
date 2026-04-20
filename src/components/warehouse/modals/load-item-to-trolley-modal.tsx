@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import type { BinStockRecord } from '@/hooks/warehouse/use-bin-details'
+import type { BinStockRecord } from '@/components/warehouse/items/use-bin-details'
 
 type LoadItemToTrolleyModalProps = {
   isOpen: boolean

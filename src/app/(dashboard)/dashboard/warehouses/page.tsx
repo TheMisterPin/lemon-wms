@@ -1,4 +1,4 @@
-import { DashboardWarehousesPageView } from '@/components/dashboard/pages/warehouses/dashboard-warehouses-page'
+import { DashboardWarehousesPageView } from '@/components/dashboard/warehouses/DashboardWarehousesPageView'
 
 export default function WarehouseDashboardPage() {
   return <DashboardWarehousesPageView />

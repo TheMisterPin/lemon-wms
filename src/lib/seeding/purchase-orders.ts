@@ -98,16 +98,17 @@ export async function seedPurchaseOrders(prisma: PrismaClient) {
         reference: `PO-SEED-${sequence}`,
         status: pickStatus(i),
         warehouseId: warehouse.id,
-        supplier: supplier.name,
+        supplierNameSnapshot: supplier.name,
         businessPartyId: supplier.id,
         createdById,
         lines: {
           create: [
             {
               itemId: item.id,
-              itemName: item.name,
+              lineSequence: i + 1,
+              itemNameSnapshot: item.name,
               uom: item.uom,
-              baseQuantity: 5 + (i % 10)
+              orderedQuantity: 5 + (i % 10)
             }
           ]
         }

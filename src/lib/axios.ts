@@ -65,21 +65,10 @@ async function attemptTokenRefresh(): Promise<string | null> {
     if (accessToken && user) {
       const { setAuth, location, device } = useAuthStore.getState()
 
-      // TODO: The conditional here means office users (location/device both null)
-      // call setAuth(token, user) with no third argument. In store.setAuth, that
-      // defaults context to undefined, which resets location and device to null.
-      // That is harmless for office users but creates a hidden dependency: if the
-      // branch logic ever changes, floor context could be silently zeroed.
-      // Always pass context explicitly to make intent clear:
-      //   setAuth(accessToken, user, { location: location ?? undefined, device: device ?? undefined })
-      if (location || device) {
-        setAuth(accessToken, user, {
-          location: location ?? undefined,
-          device: device ?? undefined
-        })
-      } else {
-        setAuth(accessToken, user)
-      }
+      setAuth(accessToken, user, {
+        location: location ?? undefined,
+        device: device ?? undefined
+      })
 
       return accessToken
     }
@@ -179,7 +168,8 @@ attachInterceptors(sharedApi, 'shared')
 attachInterceptors(dashboardApi, 'dashboard')
 attachInterceptors(warehouseApi, 'warehouse')
 
-export default sharedApi
+/** Auth-only client with bearer auth headers. */
+export { sharedApi }
 
 /**
  * Make an authenticated API request using the Zustand auth store token.
@@ -244,5 +234,7 @@ function createTypedClient(instance: typeof sharedApi) {
   }
 }
 
+/** Dashboard client with bearer + user role headers. */
 export const dashboardApiClient = createTypedClient(dashboardApi)
+/** Warehouse floor client with bearer + floor context headers. */
 export const warehouseApiClient = createTypedClient(warehouseApi)

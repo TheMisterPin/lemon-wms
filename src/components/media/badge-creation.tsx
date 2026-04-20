@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 
-import { useErrorDialog } from '@/hooks/ui/use-error-dialog'
-import { useCamera } from '@/hooks/useCamera'
+import { useCamera } from '@/components/shared/use-camera'
+import { useErrorDialog } from '@/components/shared/use-error-dialog'
 
 const BADGE_CANVAS_WIDTH = 900
 const BADGE_CANVAS_HEIGHT = 560

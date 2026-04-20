@@ -50,8 +50,8 @@ export const readRefreshTokenCookie = async (): Promise<string | null> => {
   return cookieStore.get(REFRESH_COOKIE_NAME)?.value ?? null
 }
 
-// Access token cookie — non-httpOnly so middleware (Edge) can read it
-// Cleared on logout; re-set on login and refresh
+// Access token cookie is server-readable only and used by middleware/auth flow.
+// Cleared on logout; re-set on login and refresh.
 /**
  * setAccessTokenCookie.
  * @param token - Parameter for setAccessTokenCookie.
@@ -60,11 +60,11 @@ export const readRefreshTokenCookie = async (): Promise<string | null> => {
 export const setAccessTokenCookie = async (token: string): Promise<void> => {
   const cookieStore = await cookies()
   cookieStore.set(ACCESS_COOKIE_NAME, token, {
-    httpOnly: false,
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7 // 7 days — cookie persists; JWT itself expires in 15m
+    maxAge: 60 * 15
   })
 }
 

@@ -5,7 +5,7 @@ import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { DashboardOrdersPageView } from '@/components/dashboard/pages/orders/dashboard-orders-page'
+import { DashboardOrdersPageView } from '@/components/dashboard/orders/DashboardOrdersPageView'
 import { OrderStatus } from '@/generated/prisma'
 import { dashboardApiClient } from '@/lib/axios'
 
@@ -16,7 +16,7 @@ vi.mock('@/lib/axios', () => ({
   }
 }))
 
-vi.mock('@/components/dashboard/pages/orders/create-purchase-order-modal', () => ({
+vi.mock('@/components/dashboard/orders/CreatePurchaseOrderModal', () => ({
   CreatePurchaseOrderModal: () => <div data-testid="create-po-modal" />
 }))
 

@@ -1,4 +1,4 @@
-import { DashboardHomePageView } from '@/components/dashboard/pages/home/dashboard-home-page'
+import { DashboardHomePageView } from '@/components/dashboard/home/DashboardHomePageView'
 
 export default function DashboardHomePage() {
   return <DashboardHomePageView />

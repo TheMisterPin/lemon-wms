@@ -56,7 +56,7 @@ describe('useAuth', () => {
     expect(result.current.isAuthenticated).toBe(true)
     expect(result.current.isOfficeRole).toBe(true)
     expect(result.current.isFloorRole).toBe(false)
-    expect(result.current.isLoading).toBe(false)
+    expect(result.current.isHydrating).toBe(false)
   })
 
   it('returns the warehouse slice for floor roles', () => {
@@ -79,7 +79,7 @@ describe('useAuth', () => {
     expect(result.current.isAuthenticated).toBe(true)
     expect(result.current.isOfficeRole).toBe(false)
     expect(result.current.isFloorRole).toBe(true)
-    expect(result.current.isLoading).toBe(false)
+    expect(result.current.isHydrating).toBe(false)
   })
 
   it('reports loading while a token exists but the user has not been hydrated', () => {
@@ -95,7 +95,7 @@ describe('useAuth', () => {
     const { result } = renderHook(() => useAuth())
 
     expect(result.current.isAuthenticated).toBe(false)
-    expect(result.current.isLoading).toBe(true)
+    expect(result.current.isHydrating).toBe(true)
     expect(result.current.dashboard).toBeNull()
     expect(result.current.warehouse).toBeNull()
   })

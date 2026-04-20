@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
+import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import { zoneFormSchema } from '@/lib/schemas/zone'
 import type { ZoneFormValues } from '@/lib/schemas/zone'
 import type { SelectOption } from '@/types/components/form/generic-form.types'

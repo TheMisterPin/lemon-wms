@@ -1,0 +1,83 @@
+import { NextRequest } from 'next/server'
+import { z } from 'zod'
+
+import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
+import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { toBinTableRecords } from '@/lib/converters/table-records'
+import { createBin } from '@/lib/entities/bins/create-bin'
+import { getBins } from '@/lib/entities/bins/get-bins'
+import { DomainError } from '@/lib/errors'
+import prisma from '@/lib/prisma'
+import { binFormSchema } from '@/lib/schemas/bin'
+
+/**
+ * @swagger
+ * /api/dashboard/bins:
+ *   get:
+ *     summary: GET /api/dashboard/bins
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
+export async function GET(req: NextRequest) {
+  const payload = verifyAccessTokenFromRequest(req)
+  if (!payload) {
+    return unauthorized()
+  }
+
+  try {
+    const { searchParams } = new URL(req.url)
+    const zoneId = searchParams.get('zoneId') ?? undefined
+    const warehouseId = searchParams.get('warehouseId') ?? undefined
+    const binRecords = await getBins(prisma, { zoneId, warehouseId })
+    const bins = toBinTableRecords(binRecords)
+
+    return ok(bins, 'Bins retrieved successfully.')
+  } catch (error) {
+    console.error('[GET /api/dashboard/bins]', error)
+
+    return fail('Failed to retrieve bins.')
+  }
+}
+
+/**
+ * @swagger
+ * /api/dashboard/bins:
+ *   post:
+ *     summary: POST /api/dashboard/bins
+ *     tags: [Dashboard]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
+export async function POST(req: NextRequest) {
+  const payload = verifyAccessTokenFromRequest(req)
+  if (!payload) {
+    return unauthorized()
+  }
+
+  if (!isOfficeRole(payload.role)) {
+    return fail('Only office users can create bins.', 'FORBIDDEN', 403)
+  }
+
+  try {
+    const body = await req.json()
+    const parsed = binFormSchema.parse(body)
+    const bin = await createBin(prisma, parsed)
+
+    return created(bin, 'Bin created successfully.')
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return validationFail(error)
+    }
+
+    if (error instanceof DomainError) {
+      return fail(error.message, error.code, error.status)
+    }
+
+    console.error('[POST /api/dashboard/bins]', error)
+
+    return fail('Failed to create bin.')
+  }
+}

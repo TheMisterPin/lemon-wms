@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { useDashboardDevices } from '@/hooks/dashboard/use-dashboard-devices'
+import { useDashboardDevices } from '@/components/dashboard/devices/use-dashboard-devices'
 import { authorizeDeviceSchema } from '@/lib/schemas/device'
 import type { AuthorizeDeviceFormValues } from '@/lib/schemas/device'
 

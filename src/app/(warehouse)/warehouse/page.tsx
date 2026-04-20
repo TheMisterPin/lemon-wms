@@ -1,4 +1,4 @@
-import { WarehouseHomePageView } from '@/components/warehouse/pages/home/warehouse-home-page'
+import { WarehouseHomePageView } from '@/components/warehouse/home/WarehouseHomePageView'
 
 export default function WarehouseHomePage() {
   return <WarehouseHomePageView />

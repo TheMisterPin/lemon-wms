@@ -1,0 +1,123 @@
+// =============================================================================
+// locations.prisma
+// Physical structure of the warehouse operation.
+//
+// Where things live. Nothing about what things are or how many there are.
+// That is stock.prisma's concern.
+//
+// Models: Warehouse, Zone, Bin
+//
+// Hierarchy: Warehouse → Zone → Bin
+//   A warehouse must exist before zones can be created.
+//   A zone must exist before bins can be created.
+//   A bin must exist before stock can be placed.
+//   This hierarchy is enforced at the API layer — it cannot be bypassed.
+//
+// Dependencies:
+//   → iam.prisma (User) — createdBy on Warehouse
+//   → iam.prisma (WarehouseAssignment, Device) — reverse relations
+// =============================================================================
+
+model Warehouse {
+  id          String          @id @default(uuid())
+  name        String          @unique
+  address     String?
+  timezone    String?         // IANA — e.g. "America/Los_Angeles"
+  currency    String?         // ISO 4217 — e.g. "USD"
+  status      WarehouseStatus @default(ACTIVE)
+  createdById String?
+  deletedAt   DateTime?
+  createdAt   DateTime        @default(now())
+
+  createdBy   User?           @relation("WarehouseCreatedBy", fields: [createdById], references: [id])
+
+  // Structure
+  zones       Zone[]
+  bins        Bin[]
+
+  // IAM reverse relations
+  assignments         WarehouseAssignment[]
+  devices             Device[]
+
+  // Operations
+  purchaseOrders      PurchaseOrder[]
+  salesOrders         SalesOrder[]
+  transferOrders      TransferOrder[]
+  returnOrders        ReturnOrder[]
+  adjustOrders        AdjustmentOrder[]
+
+  // Logs
+  binOperationEntries BinOperationEntry[]
+  itemLedger          ItemLedgerEntry[]
+  uaeEntries          UserActivityEntry[]
+
+  // Config
+  alertRules          AlertRule[]
+  serialConfigs       SerialNumberConfig[]
+  boxes               Box[]
+}
+
+model Zone {
+  id          String   @id @default(uuid())
+  warehouseId String
+  name        String
+  type        ZoneType
+  isActive    Boolean  @default(true)
+
+  // Custom permission overrides — cannot exceed the type ceiling defined by ZoneType.
+  // Stored as JSON because the shape varies per zone type.
+  customPermissions Json?
+
+  // Default bin pointers — nullable until first bin is created.
+  // All three are set to the first bin after zone creation.
+  // The two-step creation flow (zone → bin → update zone) is required because
+  // of the circular FK: Zone references Bin, Bin references Zone.
+  defaultReceivingBinId  String?
+  defaultQuarantineBinId String?
+  defaultOutgoingBinId   String?
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  bins        Bin[]
+  assignments WarehouseAssignment[]
+
+  // One device per zone — enforced by unique constraint on Device.zoneId
+  device Device?
+
+  @@unique([warehouseId, name])
+}
+
+model Bin {
+  id          String   @id @default(uuid())
+  zoneId      String
+  warehouseId String
+  name        String
+  code        String   @unique // Scannable — unique across the entire system, not just per zone
+  type        BinType
+  isBlocked   Boolean  @default(false)
+  blockReason String?           // Required when isBlocked = true
+
+  // Soft capacity limits — warn on breach, do not hard block by default.
+  // AlertRule with type BIN_CAPACITY can escalate to a hard block.
+  maxWeightKg     Decimal? @db.Decimal(18, 4)
+  maxVolumeM3     Decimal? @db.Decimal(18, 4)
+  maxCapacity     Decimal? @db.Decimal(18, 4)
+  currentCapacity Decimal? @db.Decimal(18, 4)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  zone      Zone      @relation(fields: [zoneId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  // Stock
+  binStockItems BinStockItem[]
+  boxes         Box[]
+
+  // Transfer order source/destination
+  toTransfers   TransferOrder[] @relation("TransferToBin")
+  fromTransfers TransferOrder[] @relation("TransferFromBin")
+}

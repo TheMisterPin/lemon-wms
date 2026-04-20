@@ -1,0 +1,67 @@
+// =============================================================================
+// system.prisma
+// System infrastructure — notifications, error tracking, alert configuration.
+//
+// These models are not part of any warehouse operation domain. They are
+// supporting infrastructure that reacts to events from other domains.
+//
+// Models: Notification, Error, AlertRule
+//
+// Dependencies:
+//   → iam.prisma (User)
+//   → locations.prisma (Warehouse)
+// =============================================================================
+
+// In-app notification for a specific user.
+// Created by the alert service (LOW_STOCK, EXPIRY, BIN_CAPACITY) or by
+// system events (order state changes, assignment changes).
+// Never emailed for MVP — in-app only.
+model Notification {
+  id         String   @id @default(uuid())
+  userId     String
+  type       String   // Matches AlertRuleType or a system event name
+  title      String
+  body       String
+  entityType String?  // e.g. "PurchaseOrder", "Bin" — for navigation on tap
+  entityId   String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead, createdAt])
+}
+
+// Application error log. Written by the global error handler.
+// Used for monitoring and debugging — not exposed to end users beyond a generic message.
+model Error {
+  id        String    @id @default(uuid())
+  message   String
+  stack     String?
+  type      ErrorType
+  errorCode Int?
+  createdAt DateTime  @default(now())
+}
+
+// Configures when to fire a notification for a specific condition.
+// Evaluated after every ILE write by alert.service.ts.
+//
+// type = LOW_STOCK:    fires when SUM(quantityDelta) for warItemId < threshold
+// type = EXPIRY:       fires when a Lot.expiryDate is within `threshold` days
+// type = BIN_CAPACITY: fires when Bin.currentCapacity > threshold (as percentage)
+//
+// recipientRole: all active users with this role in the warehouse receive a Notification.
+model AlertRule {
+  id            String        @id @default(uuid())
+  type          AlertRuleType
+  warehouseId   String
+  warItemId     String?       // null = applies to all items in the warehouse
+  threshold     Int
+  recipientRole Role
+  createdAt     DateTime      @default(now())
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@index([warehouseId, type])
+  @@index([warItemId])
+}

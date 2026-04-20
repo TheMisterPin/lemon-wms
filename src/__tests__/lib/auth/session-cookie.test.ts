@@ -33,23 +33,23 @@ import { setAccessTokenCookie, setRefreshTokenCookie } from '@/lib/auth/session'
 // ---------------------------------------------------------------------------
 
 describe('setAccessTokenCookie', () => {
-  it('sets maxAge to 7 days so the cookie outlives the 15m JWT expiry', async () => {
+  it('sets maxAge to 15 minutes to match short-lived access token', async () => {
     setCalls.length = 0
     await setAccessTokenCookie('test-token')
 
     const call = setCalls.find((c) => c.name === 'access_token')
     expect(call).toBeDefined()
 
-    const sevenDaysInSeconds = 60 * 60 * 24 * 7
-    expect(call!.options.maxAge).toBe(sevenDaysInSeconds)
+    const fifteenMinutesInSeconds = 60 * 15
+    expect(call!.options.maxAge).toBe(fifteenMinutesInSeconds)
   })
 
-  it('is not httpOnly (middleware needs to read it on Edge)', async () => {
+  it('is httpOnly for server-only token access', async () => {
     setCalls.length = 0
     await setAccessTokenCookie('test-token')
 
     const call = setCalls.find((c) => c.name === 'access_token')
-    expect(call!.options.httpOnly).toBe(false)
+    expect(call!.options.httpOnly).toBe(true)
   })
 
   it('uses sameSite lax', async () => {

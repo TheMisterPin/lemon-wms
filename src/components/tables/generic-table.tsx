@@ -1,7 +1,7 @@
 'use client'
 
 import { TableShell } from '@/components/tables/table-shell'
-import { useTableShellController } from '@/hooks/table/use-table-shell-controller'
+import { useTableShellController } from '@/components/tables/use-table-shell-controller'
 import type { GenericTableProps } from '@/types/components/table/generic-table.types'
 
 export function GenericTable<T extends { id: string }>({

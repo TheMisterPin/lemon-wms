@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
+import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import { warehouseFormSchema } from '@/lib/schemas/warehouse'
 import type { WarehouseFormValues } from '@/lib/schemas/warehouse'
 import type { FormFieldConfig, GenericFormConfig } from '@/types/components/form/generic-form.types'

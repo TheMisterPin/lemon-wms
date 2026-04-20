@@ -1,4 +1,4 @@
-import { WarehouseOrdersPageView } from '@/components/warehouse/pages/orders/warehouse-orders-page'
+import { WarehouseOrdersPageView } from '@/components/warehouse/orders/WarehouseOrdersPageView'
 
 type PageProps = {
   params: Promise<{ orderType: string }>

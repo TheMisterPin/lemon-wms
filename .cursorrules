@@ -1,0 +1,214 @@
+# Lemon WMS — Cursor Agent Rules
+
+These rules govern every file you create or modify in this codebase.
+Read ARCHITECTURE.md and DATA-LAYER.md before writing any code.
+These rules assume you have read both.
+
+---
+
+## Before you write any code
+
+1. Read ARCHITECTURE.md if you have not already.
+2. Read DATA-LAYER.md if you have not already.
+3. Identify which domain the work belongs to. Every file belongs to exactly one domain.
+4. Identify which layer (lib, api, components) the work belongs to.
+5. Check that you are not crossing the client/server boundary.
+
+---
+
+## Hard stops — ask before proceeding
+
+Do not proceed silently. Stop and ask the developer when:
+
+- A new database migration is required (schema change, new model, new column, new index).
+- A new npm dependency needs to be installed.
+- A file needs to move from one folder to another.
+- A domain boundary is unclear and two domains could plausibly own a piece of logic.
+- A business rule is ambiguous and the wrong interpretation would require a rewrite.
+
+These are not interruptions. Getting them wrong is far more expensive than asking.
+
+---
+
+## Domain rules
+
+Every file lives in exactly one domain. The domain names are:
+`iam`, `locations`, `parties`, `catalog`, `stock`, `orders`, `logs`, `system`
+
+These names are used consistently in:
+- `prisma/schema/{domain}.prisma`
+- `lib/{domain}/{file}.ts`
+- `app/api/` — resource-named routes (NOT domain-named — see API rules)
+- `components/dashboard/{domain}/` and `components/warehouse/{domain}/`
+
+If you cannot assign a file to a domain without hesitation, flag it before creating it.
+
+---
+
+## Layer rules
+
+### `lib/` — server only
+
+- Contains Prisma queries and business logic.
+- Never imported by anything in `components/` or by client-side code.
+- One file per model or logical grouping within the domain.
+- Functions have explicit TypeScript return types — always.
+- Functions never return raw Prisma objects — always map to a typed response shape.
+
+### `app/api/` — the boundary
+
+- Route handlers do exactly three things: `withAuth` → Zod parse → call `lib/` function.
+- No business logic in route handlers. None. Not even "simple" validation beyond Zod.
+- No Prisma calls in route handlers. Not even a `findUnique`. That goes in `lib/`.
+- Every response uses the `ApiResponse<T>` envelope — see DATA-LAYER.md.
+- URL structure reflects resource hierarchy, not internal domain grouping.
+  - Correct: `/api/warehouses`, `/api/zones/:id/bins`, `/api/orders/purchase`
+  - Wrong: `/api/locations/warehouses`, `/api/iam/users`
+
+### `components/` — client only
+
+- Hooks live next to the component that uses them — same folder.
+- A hook is promoted to a shared location only when it is genuinely used from
+  two or more separate component locations. Do not pre-promote.
+- Types that are only used within a component cluster live in a `types.ts` file
+  in that component folder — not in `src/types/`.
+- `src/types/` is for types that genuinely cross the client/server boundary:
+  API response envelopes, the JWT payload shape, shared enums.
+
+---
+
+## Data fetching rules
+
+This codebase does not use React Query. Server state is managed with custom hooks
+using `useState` + `useEffect` + Axios. Read DATA-LAYER.md for the full contract.
+
+The short version:
+
+- Every data hook exposes `isLoading`, `error`, and `refetch`. Always. No exceptions.
+- Errors are never silently swallowed with `console.error`. They set `error` state.
+- Mutations return `{ success: boolean; error?: string }` — they never throw to the caller.
+- The order pool and any time-sensitive screen polls on an interval. Set it in the hook.
+- Components never call Axios directly. They consume hook return values only.
+- Components render three states: loading skeleton, error banner, data. Always all three.
+
+---
+
+## Log layer rules — read carefully
+
+`lib/logs/log.service.ts` is the only file that writes to `UserActivityEntry`,
+`BinOperationEntry`, or `ItemLedgerEntry`.
+
+**Never call `prisma.userActivityEntry.create()` from any other file.**
+**Never call `prisma.binOperationEntry.create()` from any other file.**
+**Never call `prisma.itemLedgerEntry.create()` from any other file.**
+
+Every function in every other service that moves stock must call
+`log.service.ts` functions, not Prisma directly.
+
+The three log tables are never updated and never deleted. If a mistake was made,
+write a compensating entry with the opposite `quantityDelta`. Both entries stay.
+
+Write order within a transaction: UAE first, then BOE, then ILE.
+
+The ILE↔BOE circular reference is resolved by pre-generating UUIDs for both
+before the transaction begins, then inserting both in the same transaction.
+
+---
+
+## Prisma rules
+
+- `select` fields only accept `true` — never a dynamic boolean value.
+- Soft deletes only. Use `deletedAt = new Date()`. Never call `.delete()` on any
+  model that has a `deletedAt` field.
+- Never expose raw Prisma model types in API responses. Define a response type
+  and map to it explicitly.
+- Schema changes require confirmation before writing a migration.
+- All enums live in `prisma/schema/_base.prisma` — never in a domain schema file.
+
+---
+
+## TypeScript rules
+
+- Strict mode. `any` is not permitted. If you think you need `any`, you need
+  a more specific type or an unknown with a type guard.
+- No type assertions (`as SomeType`) without a comment explaining why the
+  type system cannot infer this correctly.
+- Functional only. No classes. No `this`.
+- Named exports only. Default exports are only used for Next.js page and layout
+  components, which require them by convention.
+- Explicit return types on every function in `lib/`. Return types on components
+  are optional but encouraged.
+
+---
+
+## Component rules
+
+- Props interface declared above the component, not inline.
+- One component per file.
+- No inline styles. Tailwind classes only.
+- Dashboard components use shadcn/ui primitives.
+- Floor components use the custom minimal design system — see FLOOR-TERMINAL-AESTHETIC.md.
+  Do not use shadcn/ui components in floor-side files. They are not optimised for
+  touch or the dark industrial aesthetic.
+- Every component that consumes a data hook must handle loading, error, and data
+  states explicitly. A component that renders empty defaults while loading is a bug.
+
+---
+
+## Auth rules
+
+- Every API route uses `withAuth(req, allowedRoles)` as the first call.
+- Auth routes (`/api/auth/*`) are the only unprotected routes.
+- Role checks use the `Role` enum — never compare role strings directly.
+- Never log the raw access token or refresh token. Never store them unencrypted.
+- PINs are 4-digit numeric strings hashed with bcrypt. Treat them with the same
+  care as passwords even though they are short.
+- The access token lives in localStorage and the Zustand auth store. The refresh
+  token lives in an httpOnly cookie only. Do not move these without explicit instruction.
+- Floor context (warehouseId, zoneId, deviceId) is injected as request headers
+  by `warehouseApiClient`. Never pass floor context in the request body.
+
+---
+
+## Axios client rules
+
+Three Axios instances exist. Use the correct one for the context:
+
+- `sharedApi` — bearer token only. For routes that need auth but no role context.
+- `dashboardApiClient` — bearer token + `x-user-id` + `x-user-role`. Dashboard routes.
+- `warehouseApiClient` — bearer token + user headers + `x-warehouse-id` + `x-zone-id`
+  + `x-device-id`. All floor routes.
+
+Never call `sharedApi` from a dashboard or floor component when a typed client exists.
+Never create a fourth Axios instance without explicit instruction.
+
+---
+
+## Naming conventions
+
+| Thing | Convention | Example |
+|---|---|---|
+| Files | kebab-case | `bin-stock.ts`, `use-warehouse-home.ts` |
+| Components | PascalCase | `WarehouseCard.tsx` |
+| Hooks | camelCase with `use` prefix | `useWarehouseHome.ts` |
+| Service functions | camelCase | `createWarehouse`, `getZoneById` |
+| Types / interfaces | PascalCase | `WarehouseResponse`, `CreateBinInput` |
+| Zod schemas | camelCase with `Schema` suffix | `createBinSchema` |
+| API response fields | camelCase | `{ warehouseId, createdAt }` |
+
+---
+
+## What not to build for MVP
+
+Do not build, scaffold, or stub these unless explicitly instructed:
+
+- Box / BoxLine service logic or API routes (schema only — deferred)
+- Email notification sending (in-app Notification model only)
+- WebSocket or SSE real-time updates (polling only — interval set in hook)
+- CSV import or export endpoints
+- PDF generation
+- Multi-tenancy logic
+- Dark mode toggle
+- Audit log export endpoint
+
+If a task description touches any of these, confirm before proceeding.

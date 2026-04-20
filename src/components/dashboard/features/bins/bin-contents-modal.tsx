@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogTitle
 } from '@/components/ui/dialog'
-import { useTableShellController } from '@/hooks/table/use-table-shell-controller'
+import { useTableShellController } from '@/components/tables/use-table-shell-controller'
 import { dashboardApiClient } from '@/lib/axios'
 import type { BinWithContent } from '@/lib/schemas/bin'
 import { cn } from '@/lib/utils'

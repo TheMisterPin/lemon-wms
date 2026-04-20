@@ -1,4 +1,4 @@
-import { WarehouseBinDetailsPageView } from '@/components/warehouse/pages/bins/warehouse-bin-details-page'
+import { WarehouseBinDetailsPageView } from '@/components/warehouse/items/WarehouseBinDetailsPageView'
 
 export default function WarehouseBinDetailsPage() {
   return <WarehouseBinDetailsPageView />

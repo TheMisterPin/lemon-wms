@@ -31,7 +31,7 @@ vi.mock('@/lib/auth/store', () => ({
 // ---------------------------------------------------------------------------
 // Import the module under test AFTER mocks are in place
 // ---------------------------------------------------------------------------
-import api from '@/lib/axios'
+import { sharedApi } from '@/lib/axios'
 
 // ---------------------------------------------------------------------------
 // We need a separate mock adapter for the raw axios instance used by
@@ -41,7 +41,7 @@ let mockApi: MockAdapter
 let mockRawAxios: MockAdapter
 
 beforeEach(() => {
-  mockApi = new MockAdapter(api)
+  mockApi = new MockAdapter(sharedApi)
   mockRawAxios = new MockAdapter(axios)
   mockStore.token = 'valid-token'
   mockStore.user = { id: 'u1', role: 'OWNER' }
@@ -63,7 +63,7 @@ describe('axios request interceptor', () => {
     mockStore.token = 'my-token'
     mockApi.onGet('/test').reply(200, { ok: true })
 
-    const res = await api.get('/test')
+    const res = await sharedApi.get('/test')
     expect(res.config.headers.Authorization).toBe('Bearer my-token')
   })
 
@@ -71,7 +71,7 @@ describe('axios request interceptor', () => {
     mockStore.token = null
     mockApi.onGet('/test').reply(200, { ok: true })
 
-    const res = await api.get('/test')
+    const res = await sharedApi.get('/test')
     expect(res.config.headers.Authorization).toBeUndefined()
   })
 })
@@ -99,11 +99,15 @@ describe('axios 401 refresh interceptor', () => {
       user: { id: 'u1', role: 'OWNER', email: 'test@test.com', badgeNumber: 'USR-0001' }
     })
 
-    const res = await api.get('/protected')
+    const res = await sharedApi.get('/protected')
 
     expect(res.status).toBe(200)
     expect(res.data).toEqual({ data: 'success' })
-    expect(mockStore.setAuth).toHaveBeenCalledWith('new-token', expect.objectContaining({ id: 'u1' }))
+    expect(mockStore.setAuth).toHaveBeenCalledWith(
+      'new-token',
+      expect.objectContaining({ id: 'u1' }),
+      { location: undefined, device: undefined }
+    )
   })
 
   it('redirects to /login when refresh also fails', async () => {
@@ -117,7 +121,7 @@ describe('axios 401 refresh interceptor', () => {
       value: { ...originalLocation, pathname: '/dashboard', href: '' }
     })
 
-    await expect(api.get('/protected')).rejects.toThrow()
+    await expect(sharedApi.get('/protected')).rejects.toThrow()
     expect(mockStore.clearAuth).toHaveBeenCalled()
 
     // Restore
@@ -130,7 +134,7 @@ describe('axios 401 refresh interceptor', () => {
 
     mockRawAxios.onPost('/api/auth/refresh').reply(401, { error: 'Invalid refresh token' })
 
-    await expect(api.get('/public')).rejects.toThrow()
+    await expect(sharedApi.get('/public')).rejects.toThrow()
     expect(mockRawAxios.history.post.length).toBe(1)
     expect(mockStore.clearAuth).toHaveBeenCalled()
   })
@@ -153,11 +157,15 @@ describe('axios 401 refresh interceptor', () => {
       user: { id: 'u1', role: 'OWNER', email: 'test@test.com', badgeNumber: 'USR-0001' }
     })
 
-    const res = await api.get('/cookie-backed')
+    const res = await sharedApi.get('/cookie-backed')
 
     expect(res.status).toBe(200)
     expect(res.data).toEqual({ data: 'success' })
-    expect(mockStore.setAuth).toHaveBeenCalledWith('new-token', expect.objectContaining({ id: 'u1' }))
+    expect(mockStore.setAuth).toHaveBeenCalledWith(
+      'new-token',
+      expect.objectContaining({ id: 'u1' }),
+      { location: undefined, device: undefined }
+    )
   })
 
   it('does not retry more than once per request', async () => {
@@ -176,7 +184,7 @@ describe('axios 401 refresh interceptor', () => {
       value: { ...originalLocation, pathname: '/dashboard', href: '' }
     })
 
-    await expect(api.get('/always-401')).rejects.toThrow()
+    await expect(sharedApi.get('/always-401')).rejects.toThrow()
 
     // Should have called refresh only once (not an infinite loop)
     expect(mockRawAxios.history.post.length).toBe(1)
@@ -210,7 +218,7 @@ describe('axios 401 refresh interceptor', () => {
       user: { id: 'u1', role: 'OWNER', email: 'test@test.com', badgeNumber: 'USR-0001' }
     })
 
-    const [resA, resB] = await Promise.all([api.get('/route-a'), api.get('/route-b')])
+    const [resA, resB] = await Promise.all([sharedApi.get('/route-a'), sharedApi.get('/route-b')])
 
     expect(resA.data).toEqual({ route: 'a' })
     expect(resB.data).toEqual({ route: 'b' })

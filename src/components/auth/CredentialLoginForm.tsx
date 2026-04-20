@@ -2,7 +2,7 @@
 
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
-import { useCredentialLogin } from '@/hooks/auth/use-credential-login'
+import { useCredentialLogin } from '@/components/auth/use-credential-login'
 
 export default function CredentialLoginForm() {
   const {

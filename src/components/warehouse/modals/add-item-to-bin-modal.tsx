@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { useAddItemToBin } from '@/hooks/warehouse/use-add-item-to-bin'
+import { useAddItemToBin } from '@/components/warehouse/items/use-add-item-to-bin'
 
 type AddItemToBinModalProps = {
   binId: string
