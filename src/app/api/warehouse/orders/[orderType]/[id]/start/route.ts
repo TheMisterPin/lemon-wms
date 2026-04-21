@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isFloorRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
+import { logAppError } from '@/lib/logs/app-logger'
 import { startPurchaseOrder } from '@/lib/orders/purchase'
 import prisma from '@/lib/prisma'
 
@@ -62,7 +63,7 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
       return fail(error.message, error.code, error.status)
     }
 
-    console.error('[POST /api/warehouse/orders/[orderType]/[id]/start]', error)
+    logAppError('[POST /api/warehouse/orders/[orderType]/[id]/start]', error)
 
     return fail('Failed to start purchase order.')
   }

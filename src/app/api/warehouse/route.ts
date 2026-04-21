@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { getBinList, getBins } from '@/lib/locations'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 function toNumberOrZero(value: unknown): number {
@@ -139,7 +140,7 @@ export async function GET(req: NextRequest) {
 
     return ok(warehouseHomePageData, 'Warehouse home page data retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/warehouse]', error)
+    logAppError('[GET /api/warehouse]', error)
 
     return fail('Failed to retrieve warehouse home page data.', '', 500)
   }

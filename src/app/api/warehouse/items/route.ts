@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 const DEFAULT_PAGE = 1
@@ -100,7 +101,7 @@ export async function GET(req: NextRequest) {
       }
     }, 'Items retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/warehouse/items]', error)
+    logAppError('[GET /api/warehouse/items]', error)
 
     return fail('Failed to retrieve items.', '', 500)
   }

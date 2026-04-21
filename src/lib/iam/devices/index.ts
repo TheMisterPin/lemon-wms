@@ -1,4 +1,4 @@
-export * from './queries'
-export * from './mutations'
+export * from './devices-queries'
+export * from './devices-mutations'
 export * from './session'
-export * from './schemas'
+export * from './devices-schemas'

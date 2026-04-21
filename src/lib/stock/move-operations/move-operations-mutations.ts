@@ -1,7 +1,7 @@
 import { Prisma } from '@/generated/prisma'
 import type { Prisma as PrismaTypes } from '@/generated/prisma'
 
-import { decimalToNumber } from './validation'
+import { decimalToNumber } from './move-operations-validators'
 
 export async function findAvailableStockItem(
   tx: PrismaTypes.TransactionClient,

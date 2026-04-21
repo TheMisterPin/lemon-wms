@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
+import { logAppError } from '@/lib/logs/app-logger'
 import { getItemsForVendor } from '@/lib/parties/business-parties'
 import prisma from '@/lib/prisma'
 
@@ -46,7 +47,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     return ok(items, 'Supplier items retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/business-parties/[id]]', error)
+    logAppError('[GET /api/dashboard/business-parties/[id]]', error)
 
     return fail('Failed to retrieve supplier items.')
   }

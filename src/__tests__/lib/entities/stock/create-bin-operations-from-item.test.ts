@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import { Prisma } from '@/generated/prisma'
-import { createBinOperationsFromItem } from '@/lib/entities/move-operations/use-cases/create-bin-operations-from-item'
 import {
   getAdjustmentBinOperationParams,
   getMovementBinOperationParams,
   normalizeQuantity
 } from '@/lib/services/bin-operations'
+import { createBinOperationsFromItem } from '@/lib/stock/move-operations'
 
 function createMockPrisma() {
   const tx = {

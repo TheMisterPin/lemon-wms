@@ -1,6 +1,6 @@
 import type { Role } from '@/generated/prisma'
 
-import { RbacPermission, ROLE_PERMISSIONS } from './schemas'
+import { RbacPermission, ROLE_PERMISSIONS } from './roles-schemas'
 
 function can(role: Role, permission: RbacPermission): boolean {
   if (role === 'OWNER') {

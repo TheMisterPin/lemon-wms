@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { deleteUser, getUser, updateUser, userFormSchema } from '@/lib/iam'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 type Params = { params: Promise<{ id: string }> }
@@ -44,7 +45,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     return ok(user, 'User retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/users/[id]]', error)
+    logAppError('[GET /api/dashboard/users/[id]]', error)
 
     return fail('Failed to retrieve user.')
   }
@@ -93,7 +94,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
-    console.error('[PUT /api/dashboard/users/[id]]', error)
+    logAppError('[PUT /api/dashboard/users/[id]]', error)
 
     return fail('Failed to update user.')
   }
@@ -141,7 +142,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
     return ok(user, 'User deactivated successfully.')
   } catch (error) {
-    console.error('[DELETE /api/dashboard/users/[id]]', error)
+    logAppError('[DELETE /api/dashboard/users/[id]]', error)
 
     return fail('Failed to deactivate user.')
   }

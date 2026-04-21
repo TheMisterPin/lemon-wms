@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { unloadItemsFromTrolley } from '@/lib/stock/bin-stock-items/bin-stock-items-mutations'
 
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       return fail(error.message, 'BAD_REQUEST', 400)
     }
 
-    console.error('[POST /api/warehouse/stock/unload/[id]]', error)
+    logAppError('[POST /api/warehouse/stock/unload/[id]]', error)
 
     return fail('Failed to unload trolley items.')
   }

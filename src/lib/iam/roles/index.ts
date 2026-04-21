@@ -1,3 +1,3 @@
-export * from './queries'
-export * from './mutations'
-export * from './schemas'
+export * from './roles-queries'
+export * from './roles-mutations'
+export * from './roles-schemas'

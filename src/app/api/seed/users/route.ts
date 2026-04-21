@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { seedUsers } from '@/lib/seeding/users'
 
@@ -23,7 +24,7 @@ export async function POST() {
 
     return NextResponse.json({ success: true, ...result })
   } catch (error) {
-    console.error('Failed to seed users from API:', error)
+    logAppError('Failed to seed users from API:', error)
 
     return NextResponse.json({ error: 'Failed to seed users.' }, { status: 500 })
   }

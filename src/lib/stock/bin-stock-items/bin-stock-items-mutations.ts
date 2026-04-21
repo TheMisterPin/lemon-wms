@@ -1,9 +1,9 @@
 import { Prisma } from '@/generated/prisma'
 
-import { updateBinCapacity } from '@/lib/locations/bins/mutations'
+import { updateBinCapacity } from '@/lib/locations/bins/bins-mutations'
 import type { UnloadItemsFromTrolleyArgs } from '@/types/stock'
-import { decrementOrDeleteStockItem, findAvailableStockItem, upsertAvailableStockItem } from '../mutations'
-import { decimalToNumber, normalizePositiveQuantity } from '../validation'
+import { decrementOrDeleteStockItem, findAvailableStockItem, upsertAvailableStockItem } from '../stock-mutations'
+import { decimalToNumber, normalizePositiveQuantity } from '../stock-validators'
 
 /**
  * unloadItemsFromTrolley.

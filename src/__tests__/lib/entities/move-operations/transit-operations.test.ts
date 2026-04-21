@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { Prisma } from '@/generated/prisma'
 
-import { getTrolleyItems, loadItemsToTrolley, unloadItemsFromTrolley } from '@/lib/entities/move-operations'
+import { getTrolleyItems, loadItemsToTrolley, unloadItemsFromTrolley } from '@/lib/stock/move-operations'
 
 function createMockPrisma() {
   const tx = {

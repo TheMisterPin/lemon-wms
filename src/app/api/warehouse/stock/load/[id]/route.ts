@@ -3,8 +3,9 @@ import { z } from 'zod'
 
 import { fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { loadItemsToTrolley } from '@/lib/entities/move-operations/use-cases/load-to-trolley'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
+import { loadItemsToTrolley } from '@/lib/stock/move-operations'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       return fail(error.message, 'BAD_REQUEST', 400)
     }
 
-    console.error('[POST /api/warehouse/stock/load/[id]]', error)
+    logAppError('[POST /api/warehouse/stock/load/[id]]', error)
 
     return fail('Failed to load item to trolley.')
   }

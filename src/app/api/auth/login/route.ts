@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { credentialLogin } from '@/lib/auth/credential-login'
 import { DomainError } from '@/lib/errors'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 const loginSchema = z.object({
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof DomainError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
-    console.error('[POST /api/auth/login]', error)
+    logAppError('[POST /api/auth/login]', error)
 
     return NextResponse.json({ error: 'Login failed.' }, { status: 500 })
   }

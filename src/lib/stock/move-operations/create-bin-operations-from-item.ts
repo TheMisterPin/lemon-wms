@@ -7,10 +7,10 @@ import {
   mapAdjustmentLedgerEvent,
   mapMovementLedgerEvent,
   resolveOperationType
-} from '@/lib/services/bin-operations/helpers'
+} from '@/lib/stock/stock-selectors'
 
 import type { CreateBinOperationsFromItemArgs } from '@/types/stock'
-import { decrementOrDeleteStockItem, findAvailableStockItem, upsertAvailableStockItem } from '../mutations'
+import { decrementOrDeleteStockItem, findAvailableStockItem, upsertAvailableStockItem } from './move-operations-mutations'
 
 /**
  * createBinOperationsFromItem.

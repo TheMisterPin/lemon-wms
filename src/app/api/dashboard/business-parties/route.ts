@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
+import { logAppError } from '@/lib/logs/app-logger'
 import { getAllVendors } from '@/lib/parties/business-parties'
 import prisma from '@/lib/prisma'
 
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     return ok(vendors, 'Vendors retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/business-parties]', error)
+    logAppError('[GET /api/dashboard/business-parties]', error)
 
     return fail('Failed to retrieve vendors.')
   }

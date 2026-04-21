@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@/generated/prisma'
 
-import type { WarehouseFormValues } from './schemas'
+import type { WarehouseFormValues } from './warehouses-schemas'
 
 type CreateWarehouseInput = WarehouseFormValues & { createdById?: string, id: string }
 

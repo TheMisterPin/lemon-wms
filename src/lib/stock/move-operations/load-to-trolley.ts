@@ -1,7 +1,7 @@
 import { Prisma } from '@/generated/prisma'
 
 import type { LoadItemsToTrolleyArgs } from '@/types/stock'
-import { normalizePositiveQuantity } from '../validation'
+import { normalizePositiveQuantity } from './move-operations-validators'
 
 /**
  * loadItemsToTrolley.

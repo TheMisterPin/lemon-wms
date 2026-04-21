@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { refreshAccessToken } from '@/lib/auth/refresh-token'
 import { readRefreshTokenCookie } from '@/lib/auth/session'
 import { DomainError } from '@/lib/errors'
+import { logAppError } from '@/lib/logs/app-logger'
 
 /**
  * @swagger
@@ -25,7 +26,7 @@ export async function POST() {
     if (error instanceof DomainError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
-    console.error('[POST /api/auth/refresh]', error)
+    logAppError('[POST /api/auth/refresh]', error)
 
     return NextResponse.json({ error: 'Token refresh failed.' }, { status: 500 })
   }

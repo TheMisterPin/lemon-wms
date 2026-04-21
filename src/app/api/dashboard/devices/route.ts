@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { createDevice, getFilteredDevices } from '@/lib/iam'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { toDeviceTableRecords } from '@/utils/converters/table-records'
 
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest) {
 
     return ok(devices, 'Devices retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/devices]', error)
+    logAppError('[GET /api/dashboard/devices]', error)
 
     return fail('Failed to retrieve devices.')
   }
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
-    console.error('[POST /api/dashboard/devices]', error)
+    logAppError('[POST /api/dashboard/devices]', error)
 
     return fail('Failed to register device.')
   }

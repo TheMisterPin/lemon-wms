@@ -10,6 +10,7 @@ import {
 } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
+import { logAppError } from '@/lib/logs/app-logger'
 import { createPurchaseOrder } from '@/lib/orders/purchase'
 import prisma from '@/lib/prisma'
 import { purchaseOrderCreateSchema } from '@/lib/schemas/purchase-order-create'
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return conflict('This record conflicts with an existing row.')
     }
 
-    console.error('[POST /api/dashboard/orders/[orderType]/create]', error)
+    logAppError('[POST /api/dashboard/orders/[orderType]/create]', error)
 
     return fail('Failed to create purchase order.')
   }

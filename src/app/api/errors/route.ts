@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { ok, fail, validationFail } from '@/lib/api/response'
+import { logAppError } from '@/lib/logs/app-logger'
 import { logError } from '@/lib/logs/error'
 
 const errorSchema = z.object({
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
 
     return ok(null, 'Error logged.')
   } catch (error) {
-    console.error('[POST /api/errors]', error)
+    logAppError('[POST /api/errors]', error)
 
     return fail('Failed to log error.')
   }

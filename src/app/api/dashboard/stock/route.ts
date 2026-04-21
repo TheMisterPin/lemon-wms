@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server'
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { getStockDashboard } from '@/lib/entities/stock/get-stock-dashboard'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 /**
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
 
     return ok(stock, 'Stock retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/stock]', error)
+    logAppError('[GET /api/dashboard/stock]', error)
 
     return fail('Failed to retrieve stock.')
   }

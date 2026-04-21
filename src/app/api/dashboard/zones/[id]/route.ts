@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { deleteZone, getZone, updateZone, zoneFormSchema } from '@/lib/locations'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 type Params = { params: Promise<{ id: string }> }
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     return ok(zone, 'Zone retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/zones/[id]]', error)
+    logAppError('[GET /api/dashboard/zones/[id]]', error)
 
     return fail('Failed to retrieve zone.')
   }
@@ -89,7 +90,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
-    console.error('[PUT /api/dashboard/zones/[id]]', error)
+    logAppError('[PUT /api/dashboard/zones/[id]]', error)
 
     return fail('Failed to update zone.')
   }
@@ -133,7 +134,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
     return ok(zone, 'Zone deleted successfully.')
   } catch (error) {
-    console.error('[DELETE /api/dashboard/zones/[id]]', error)
+    logAppError('[DELETE /api/dashboard/zones/[id]]', error)
 
     return fail('Failed to delete zone.')
   }

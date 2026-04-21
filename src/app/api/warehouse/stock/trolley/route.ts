@@ -2,8 +2,9 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
-import { getTrolleyItems } from '@/lib/stock/queries'
+import { getTrolleyItems } from '@/lib/stock/move-operations'
 
 /**
  * @swagger
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest) {
       'Trolley items retrieved successfully.'
     )
   } catch (error) {
-    console.error('[GET /api/warehouse/stock/trolley]', error)
+    logAppError('[GET /api/warehouse/stock/trolley]', error)
 
     return fail('Failed to retrieve trolley items.')
   }
