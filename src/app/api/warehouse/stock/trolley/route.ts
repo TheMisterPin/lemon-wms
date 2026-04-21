@@ -4,7 +4,7 @@ import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
-import { getTrolleyItems } from '@/lib/stock/move-operations'
+import { getTrolleyItems } from '@/lib/stock/bin-stock-items/bin-stock-items-queries'
 
 /**
  * @swagger

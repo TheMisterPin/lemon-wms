@@ -5,7 +5,7 @@ import { fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
-import { loadItemsToTrolley } from '@/lib/stock/move-operations'
+import { loadItemsToTrolley } from '@/lib/stock'
 
 type Params = { params: Promise<{ id: string }> }
 

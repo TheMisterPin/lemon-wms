@@ -1,16 +1,7 @@
 import { Prisma } from '@/generated/prisma'
-
 import { updateBinCapacity } from '@/lib/locations'
-import {
-  getAdjustmentBinOperationParams,
-  getMovementBinOperationParams,
-  mapAdjustmentLedgerEvent,
-  mapMovementLedgerEvent,
-  resolveOperationType
-} from '@/lib/stock/stock-selectors'
-
+import { decrementOrDeleteStockItem, findAvailableStockItem, getAdjustmentBinOperationParams, getMovementBinOperationParams, mapAdjustmentLedgerEvent, mapMovementLedgerEvent, resolveOperationType, upsertAvailableStockItem } from '@/lib/stock'
 import type { CreateBinOperationsFromItemArgs } from '@/types/stock'
-import { decrementOrDeleteStockItem, findAvailableStockItem, upsertAvailableStockItem } from './move-operations-mutations'
 
 /**
  * createBinOperationsFromItem.

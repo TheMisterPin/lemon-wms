@@ -3,8 +3,8 @@ import { NextRequest } from 'next/server'
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { logAppError } from '@/lib/logs/app-logger'
+import { createBinOperationsFromItem } from '@/lib/logs/bin-operation-entries/create-from-item'
 import prisma from '@/lib/prisma'
-import { createBinOperationsFromItem } from '@/lib/stock/move-operations'
 
 type Params = { params: Promise<{ id: string }> }
 

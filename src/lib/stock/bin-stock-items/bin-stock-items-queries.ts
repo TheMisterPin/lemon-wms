@@ -32,7 +32,8 @@ async function getItemsInBin(
 
   return itemsInBin
 }
-export async function getTrolleyItems(
+
+async function getTrolleyItems(
   prisma: PrismaClient,
   warehouseId: string,
   deviceId: string
@@ -74,4 +75,4 @@ export async function getTrolleyItems(
     quantityAvailable: Number(item.quantityAvailable) || 0
   }))
 }
-export { getItemsInBin }
+export { getItemsInBin, getTrolleyItems }
