@@ -1,7 +1,7 @@
 import { Prisma } from '@/generated/prisma'
 import type { Prisma as PrismaTypes } from '@/generated/prisma'
 
-import { decimalToNumber } from './validation'
+import { decimalToNumber } from './stock-validators'
 
 export async function updateBinCapacityBy(
   tx: PrismaTypes.TransactionClient,

@@ -3,7 +3,7 @@ import type { BinType } from '@/generated/prisma'
 import { DomainError } from '@/lib/errors'
 import { generateBinSerial } from '@/utils/serials'
 
-import type { BinFormValues } from './schemas'
+import type { BinFormValues } from './bins-schemas'
 
 type PrismaExecutor = PrismaClient | Prisma.TransactionClient
 

@@ -1,3 +1,3 @@
-export * from './queries'
-export * from './mutations'
-export * from './schemas'
+export * from './zones-queries'
+export * from './zones-mutations'
+export * from './zones-schemas'

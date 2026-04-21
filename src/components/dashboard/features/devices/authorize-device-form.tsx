@@ -15,7 +15,7 @@ import {
 import {
   authorizeDeviceSchema,
   type AuthorizeDeviceFormValues
-} from '@/lib/iam/devices/schemas'
+} from '@/lib/iam/devices/devices-schemas'
 
 type AuthorizeDeviceFormProps = {
   deviceCode: string

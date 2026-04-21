@@ -5,6 +5,7 @@ import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/resp
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { deleteItem, getItem, updateItem } from '@/lib/catalog/items/items-queries'
 import { itemFormSchema } from '@/lib/catalog/items/items-schemas'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 type Params = { params: Promise<{ id: string }> }
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     return ok(item, 'Item retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/items/[id]]', error)
+    logAppError('[GET /api/dashboard/items/[id]]', error)
 
     return fail('Failed to retrieve item.')
   }
@@ -108,7 +109,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       return fail(error.message, 'VALIDATION_ERROR', 400)
     }
 
-    console.error('[PUT /api/dashboard/items/[id]]', error)
+    logAppError('[PUT /api/dashboard/items/[id]]', error)
 
     return fail('Failed to update item.')
   }
@@ -152,7 +153,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
     return ok(item, 'Item archived successfully.')
   } catch (error) {
-    console.error('[DELETE /api/dashboard/items/[id]]', error)
+    logAppError('[DELETE /api/dashboard/items/[id]]', error)
 
     return fail('Failed to archive item.')
   }

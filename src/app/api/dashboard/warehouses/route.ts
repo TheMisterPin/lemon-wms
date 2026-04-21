@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { createWarehouse, getWarehouses, warehouseFormSchema } from '@/lib/locations'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { toWarehouseTableRecords } from '@/utils/converters/table-records'
 import { generateWarehouseSerial } from '@/utils/serials'
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
 
     return ok(data, 'Warehouses retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/warehouses]', error)
+    logAppError('[GET /api/dashboard/warehouses]', error)
 
     return fail('Failed to retrieve warehouses.')
   }
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
-    console.error('[POST /api/dashboard/warehouses]', error)
+    logAppError('[POST /api/dashboard/warehouses]', error)
 
     return fail('Failed to create warehouse.')
   }

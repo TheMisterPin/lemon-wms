@@ -3,7 +3,7 @@ import type { PrismaClient } from '@/generated/prisma'
 import { DomainError } from '@/lib/errors'
 import { generateZoneSerial } from '@/utils/serials'
 
-import type { ZoneFormValues } from './schemas'
+import type { ZoneFormValues } from './zones-schemas'
 
 async function createZone(prisma: PrismaClient, data: ZoneFormValues) {
   const warehouse = await prisma.warehouse.findUnique({

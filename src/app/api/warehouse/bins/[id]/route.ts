@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { getItemsInBin } from '@/lib/stock/bin-stock-items/bin-stock-items-queries'
 
@@ -72,7 +73,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     return ok({ bin: normalizedBin, items: normalizedItems }, 'Bin details retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/warehouse/bins/[id]]', error)
+    logAppError('[GET /api/warehouse/bins/[id]]', error)
 
     return fail('Failed to retrieve bin details.')
   }

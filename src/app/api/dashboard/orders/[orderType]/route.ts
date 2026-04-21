@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { logAppError } from '@/lib/logs/app-logger'
 import { getDashboardPurchaseOrders } from '@/lib/orders/purchase'
 import prisma from '@/lib/prisma'
 
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     return ok(rows, 'Purchase orders retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/orders/[orderType]]', error)
+    logAppError('[GET /api/dashboard/orders/[orderType]]', error)
 
     return fail('Failed to retrieve purchase orders.')
   }

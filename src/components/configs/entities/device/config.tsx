@@ -1,4 +1,4 @@
-import type { AuthorizeDeviceFormValues } from '@/lib/iam/devices/schemas'
+import type { AuthorizeDeviceFormValues } from '@/lib/iam/devices/devices-schemas'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 

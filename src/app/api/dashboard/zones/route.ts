@@ -5,6 +5,7 @@ import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/respo
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
 import { createZone, getZones, zoneFormSchema } from '@/lib/locations'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { toZoneTableRecords } from '@/utils/converters/table-records'
 
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     return ok(zones, 'Zones retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/zones]', error)
+    logAppError('[GET /api/dashboard/zones]', error)
 
     return fail('Failed to retrieve zones.')
   }
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
       return fail(error.message, error.code, error.status)
     }
 
-    console.error('[POST /api/dashboard/zones]', error)
+    logAppError('[POST /api/dashboard/zones]', error)
 
     return fail('Failed to create zone.')
   }

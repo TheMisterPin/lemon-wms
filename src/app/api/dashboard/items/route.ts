@@ -5,6 +5,7 @@ import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/respo
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { createItem, getItemsWithFilters } from '@/lib/catalog/items/items-queries'
 import { itemFormSchema } from '@/lib/catalog/items/items-schemas'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { toItemTableRecords } from '@/utils/converters/table-records'
 
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
 
     return ok({ items: toItemTableRecords(itemRecords) }, 'Items retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/items]', error)
+    logAppError('[GET /api/dashboard/items]', error)
 
     return fail('Failed to retrieve items.')
   }
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
       return fail(error.message, 'VALIDATION_ERROR', 400)
     }
 
-    console.error('[POST /api/dashboard/items]', error)
+    logAppError('[POST /api/dashboard/items]', error)
 
     return fail('Failed to create item.')
   }

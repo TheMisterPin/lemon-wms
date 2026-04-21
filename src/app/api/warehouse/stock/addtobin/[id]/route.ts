@@ -2,8 +2,9 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { createBinOperationsFromItem } from '@/lib/entities/move-operations/use-cases/create-bin-operations-from-item'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
+import { createBinOperationsFromItem } from '@/lib/stock/move-operations'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return ok({ bin, stockItems: binItem.stockItems }, 'Item added to bin successfully.')
   } catch (error) {
-    console.error('[POST /api/warehouse/stock/addtobin/[id]]', error)
+    logAppError('[POST /api/warehouse/stock/addtobin/[id]]', error)
 
     return fail('Failed to add item to bin.')
   }

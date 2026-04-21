@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { authorizeDevice, deauthorizeDevice } from '@/lib/iam'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 const authorizeSchema = z.object({
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     return fail(`Unknown action: ${action}`, 'BAD_REQUEST', 400)
   } catch (error) {
-    console.error(`[POST /api/dashboard/devices/${action}]`, error)
+    logAppError(`[POST /api/dashboard/devices/${action}]`, error)
 
     return fail(`Failed to ${action} device.`)
   }

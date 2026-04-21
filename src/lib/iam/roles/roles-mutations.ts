@@ -1,8 +1,8 @@
 import type { Role } from '@/generated/prisma'
 import { DomainError } from '@/lib/errors'
 
-import { can, canAssignRole } from './queries'
-import { RbacPermission } from './schemas'
+import { can, canAssignRole } from './roles-queries'
+import { RbacPermission } from './roles-schemas'
 
 function assertCan(role: Role, permission: RbacPermission): void {
   if (!can(role, permission)) {

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { createUser, getUsers, userFormSchema } from '@/lib/iam'
+import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { toUserTableRecords } from '@/utils/converters/table-records'
 
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
 
     return ok(users, 'Users retrieved successfully.')
   } catch (error) {
-    console.error('[GET /api/dashboard/users]', error)
+    logAppError('[GET /api/dashboard/users]', error)
 
     return fail('Failed to retrieve users.')
   }
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return validationFail(error)
     }
-    console.error('[POST /api/dashboard/users]', error)
+    logAppError('[POST /api/dashboard/users]', error)
 
     return fail('Failed to create user.')
   }
