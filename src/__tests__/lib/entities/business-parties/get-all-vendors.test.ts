@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { PrismaClient } from '@/generated/prisma'
 import { BusinessPartyType } from '@/generated/prisma'
-import { getAllVendors } from '@/lib/entities/business-parties/get-all-vendors'
+import { getAllVendors } from '@/lib/parties/business-parties/get-all-vendors'
 
 describe('getAllVendors', () => {
   it('queries active suppliers ordered by name', async () => {

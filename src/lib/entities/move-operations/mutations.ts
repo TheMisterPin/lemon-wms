@@ -3,27 +3,6 @@ import type { Prisma as PrismaTypes } from '@/generated/prisma'
 
 import { decimalToNumber } from './validation'
 
-export async function updateBinCapacityBy(
-  tx: PrismaTypes.TransactionClient,
-  binId: string,
-  delta: number
-) {
-  const bin = await tx.bin.findUnique({
-    where: { id: binId },
-    select: { currentCapacity: true }
-  })
-
-  if (!bin) {
-    throw new Error('Bin not found')
-  }
-
-  const nextCapacity = Math.max(0, decimalToNumber(bin.currentCapacity) + delta)
-  await tx.bin.update({
-    where: { id: binId },
-    data: { currentCapacity: new Prisma.Decimal(nextCapacity) }
-  })
-}
-
 export async function findAvailableStockItem(
   tx: PrismaTypes.TransactionClient,
   warehouseId: string,

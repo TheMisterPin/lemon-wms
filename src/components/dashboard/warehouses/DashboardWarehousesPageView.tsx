@@ -9,7 +9,7 @@ import CreateWarehouseForm from '@/components/dashboard/features/warehouses/crea
 import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import PageWithGrid from '@/components/pages/page-with-grid'
 import { Button } from '@/components/ui/button'
-import type { Warehouse } from '@/lib/schemas/warehouse'
+import type { Warehouse } from '@/lib/locations'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
 export function DashboardWarehousesPageView() {

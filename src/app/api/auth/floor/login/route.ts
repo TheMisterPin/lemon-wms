@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { floorLogin } from '@/lib/entities/auth/floor-login'
+import { floorLogin } from '@/lib/auth/floor-login'
 import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 

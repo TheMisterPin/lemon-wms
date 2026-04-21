@@ -3,8 +3,7 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { createDevice } from '@/lib/entities/devices/create-device'
-import { getFilteredDevices } from '@/lib/entities/devices/get-devices'
+import { createDevice, getFilteredDevices } from '@/lib/iam'
 import prisma from '@/lib/prisma'
 import { toDeviceTableRecords } from '@/utils/converters/table-records'
 

@@ -1,4 +1,4 @@
-import type { ItemFormValues, WARItem } from '@/lib/schemas/item'
+import type { ItemFormValues, WARItem } from '@/lib/catalog/items/items-schemas'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import type { ColumnConfig } from '@/types/components/table/column.types'

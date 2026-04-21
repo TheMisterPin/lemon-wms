@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { getBinList, getBins } from '@/lib/entities/bins'
+import { getBinList, getBins } from '@/lib/locations'
 import prisma from '@/lib/prisma'
 
 function toNumberOrZero(value: unknown): number {

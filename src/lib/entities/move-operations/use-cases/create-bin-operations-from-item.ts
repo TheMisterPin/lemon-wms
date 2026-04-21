@@ -1,5 +1,6 @@
 import { Prisma } from '@/generated/prisma'
 
+import { updateBinCapacity } from '@/lib/locations'
 import {
   getAdjustmentBinOperationParams,
   getMovementBinOperationParams,
@@ -8,8 +9,8 @@ import {
   resolveOperationType
 } from '@/lib/services/bin-operations/helpers'
 
-import { upsertAvailableStockItem, updateBinCapacityBy, decrementOrDeleteStockItem, findAvailableStockItem } from '../mutations'
-import type { CreateBinOperationsFromItemArgs } from '../types'
+import type { CreateBinOperationsFromItemArgs } from '@/types/stock'
+import { decrementOrDeleteStockItem, findAvailableStockItem, upsertAvailableStockItem } from '../mutations'
 
 /**
  * createBinOperationsFromItem.
@@ -71,7 +72,7 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
         boeId: positiveEntry.id
       })
 
-      await updateBinCapacityBy(tx, adjustment.binId, adjustment.quantity)
+      await updateBinCapacity(tx, adjustment.binId)
 
       await tx.itemLedgerEntry.create({
         data: {
@@ -174,8 +175,8 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
       boeId: positiveEntry.id
     })
 
-    await updateBinCapacityBy(tx, movement.fromBinId, -movement.quantity)
-    await updateBinCapacityBy(tx, movement.toBinId, movement.quantity)
+    await updateBinCapacity(tx, movement.fromBinId)
+    await updateBinCapacity(tx, movement.toBinId)
 
     await tx.itemLedgerEntry.createMany({
       data: [

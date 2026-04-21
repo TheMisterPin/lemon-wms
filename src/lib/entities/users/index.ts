@@ -1,5 +1,0 @@
-export { createUser } from './create-user'
-export { getUsers } from './get-users'
-export { getUser } from './get-user'
-export { updateUser } from './update-user'
-export { deleteUser } from './delete-user'

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
+import { refreshAccessToken } from '@/lib/auth/refresh-token'
 import { readRefreshTokenCookie } from '@/lib/auth/session'
-import { refreshAccessToken } from '@/lib/entities/auth/refresh-token'
 import { DomainError } from '@/lib/errors'
 
 /**

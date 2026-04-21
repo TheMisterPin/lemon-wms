@@ -15,7 +15,7 @@ vi.mock('@/lib/prisma', () => ({
 
 import { GET } from '@/app/api/dashboard/business-parties/[id]/route'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { getItemsForVendor } from '@/lib/entities/business-parties'
+import { getItemsForVendor } from '@/lib/parties/business-parties'
 
 const mockAuth = verifyAccessTokenFromRequest as ReturnType<typeof vi.fn>
 const mockGetItems = getItemsForVendor as ReturnType<typeof vi.fn>

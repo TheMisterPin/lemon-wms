@@ -1,8 +1,9 @@
 import { Prisma } from '@/generated/prisma'
 
-import { decrementOrDeleteStockItem, updateBinCapacityBy } from '../mutations'
+import { updateBinCapacityBy } from '@/lib/stock/mutations'
+import type { RemoveItemsFromBinArgs } from '@/types/stock'
+import { decrementOrDeleteStockItem } from '../mutations'
 import { normalizePositiveQuantity } from '../validation'
-import type { RemoveItemsFromBinArgs } from '../types'
 
 /**
  * removeItemsFromBin.

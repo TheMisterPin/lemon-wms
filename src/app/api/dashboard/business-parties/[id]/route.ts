@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { getItemsForVendor } from '@/lib/entities/business-parties'
+import { getItemsForVendor } from '@/lib/parties/business-parties'
 import prisma from '@/lib/prisma'
 
 const pathIdSchema = z.string().trim().min(1)

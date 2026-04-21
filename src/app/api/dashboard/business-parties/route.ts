@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { getAllVendors } from '@/lib/entities/business-parties'
+import { getAllVendors } from '@/lib/parties/business-parties'
 import prisma from '@/lib/prisma'
 
 /**

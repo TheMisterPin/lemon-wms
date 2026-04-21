@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server'
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import prisma from '@/lib/prisma'
-import { getItemsInBin } from '@/lib/services/bin-operations'
+import { getItemsInBin } from '@/lib/stock/bin-stock-items/bin-stock-items-queries'
 
 type Params = { params: Promise<{ id: string }> }
 

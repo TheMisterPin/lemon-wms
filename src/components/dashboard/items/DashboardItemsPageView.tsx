@@ -6,7 +6,7 @@ import { DashboardInfoCards } from '@/components/dashboard/dashboard-info-card'
 import { DashboardRecordListSection } from '@/components/dashboard/dashboard-record-list-section'
 import { useDashboardHome, type DashboardBinRecord } from '@/components/dashboard/home/use-dashboard-home'
 import { GenericTable } from '@/components/tables/generic-table'
-import { useAuth } from '@/hooks/auth/use-auth'
+import { useAuth } from '@/lib/auth/use-auth'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
 const binColumns: ColumnConfig<DashboardBinRecord>[] = [

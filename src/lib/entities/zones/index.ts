@@ -1,5 +1,0 @@
-export { createZone } from './create-zone'
-export { getZones } from './get-zones'
-export { getZone } from './get-zone'
-export { updateZone } from './update-zone'
-export { deleteZone } from './delete-zone'

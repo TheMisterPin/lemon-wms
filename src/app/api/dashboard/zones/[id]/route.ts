@@ -3,11 +3,8 @@ import { z } from 'zod'
 
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { deleteZone } from '@/lib/entities/zones/delete-zone'
-import { getZone } from '@/lib/entities/zones/get-zone'
-import { updateZone } from '@/lib/entities/zones/update-zone'
+import { deleteZone, getZone, updateZone, zoneFormSchema } from '@/lib/locations'
 import prisma from '@/lib/prisma'
-import { zoneFormSchema } from '@/lib/schemas/zone'
 
 type Params = { params: Promise<{ id: string }> }
 

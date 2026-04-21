@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { Prisma } from '@/generated/prisma'
+import { createBinOperationsFromItem } from '@/lib/entities/move-operations/use-cases/create-bin-operations-from-item'
 import {
-  createBinOperationsFromItem,
   getAdjustmentBinOperationParams,
   getMovementBinOperationParams,
   normalizeQuantity

@@ -1,8 +1,8 @@
 import type { Prisma, PrismaClient } from '@/generated/prisma'
 import { OrderStatus } from '@/generated/prisma'
 
-import { createUserActivityEntry, LOG_ACTION_TYPES } from '@/lib/entities/logs'
 import { DomainError } from '@/lib/errors'
+import { createUserActivityEntry, LOG_ACTION_TYPES } from '@/lib/logs'
 
 const PO_NOT_FOUND = 'Purchase order not found.'
 

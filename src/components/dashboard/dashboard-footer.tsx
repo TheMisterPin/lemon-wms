@@ -5,8 +5,8 @@ import { LogOut, UserCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { useAuth } from '@/hooks/auth/use-auth'
 import { useAuthStore } from '@/lib/auth/store'
+import { useAuth } from '@/lib/auth/use-auth'
 
 export default function DashboardFooter() {
   const router = useRouter()

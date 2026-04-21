@@ -12,8 +12,10 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { authorizeDeviceSchema } from '@/lib/schemas/device'
-import type { AuthorizeDeviceFormValues } from '@/lib/schemas/device'
+import {
+  authorizeDeviceSchema,
+  type AuthorizeDeviceFormValues
+} from '@/lib/iam/devices/schemas'
 
 type AuthorizeDeviceFormProps = {
   deviceCode: string

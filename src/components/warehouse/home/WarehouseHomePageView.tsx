@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import type { WarehouseBinRecord } from '@/components/warehouse/home/types'
 import { useWarehouseHome } from '@/components/warehouse/home/use-warehouse-home'
-import { useAuth } from '@/hooks/auth/use-auth'
+import { useAuth } from '@/lib/auth/use-auth'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
 const binColumns: ColumnConfig<WarehouseBinRecord>[] = binDirectoryTableColumns

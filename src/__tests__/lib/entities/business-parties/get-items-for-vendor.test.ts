@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { PrismaClient } from '@/generated/prisma'
 import { BusinessPartyType } from '@/generated/prisma'
-import { getItemsForVendor } from '@/lib/entities/business-parties/get-items-for-vendor'
+import { getItemsForVendor } from '@/lib/parties/business-parties/get-items-for-vendor'
 
 function makePrisma(overrides: {
   findFirstResult?: { id: string } | null

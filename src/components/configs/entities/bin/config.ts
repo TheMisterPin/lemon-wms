@@ -2,7 +2,7 @@ import {
   binDirectoryTableColumns,
   type BinDirectoryRow
 } from '@/components/configs/entities/bin/bin-directory-table'
-import type { Bin, BinFormValues } from '@/lib/schemas/bin'
+import type { Bin, BinFormValues } from '@/lib/locations'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import type { ColumnConfig } from '@/types/components/table/column.types'

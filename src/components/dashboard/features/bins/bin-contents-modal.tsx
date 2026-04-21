@@ -14,7 +14,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { dashboardApiClient } from '@/lib/axios'
-import type { BinWithContent } from '@/lib/schemas/bin'
+import type { BinWithContent } from '@/lib/locations'
 import { cn } from '@/lib/utils'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'

@@ -1,5 +1,5 @@
+import type { AddItemsToBinArgs } from '@/types/stock'
 import { createBinOperationsFromItem } from './create-bin-operations-from-item'
-import type { AddItemsToBinArgs } from '../types'
 
 /**
  * addItemsToBin.

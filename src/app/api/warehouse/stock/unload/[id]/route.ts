@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 import { fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { unloadItemsFromTrolley } from '@/lib/entities/move-operations'
 import prisma from '@/lib/prisma'
+import { unloadItemsFromTrolley } from '@/lib/stock/bin-stock-items/bin-stock-items-mutations'
 
 type Params = { params: Promise<{ id: string }> }
 

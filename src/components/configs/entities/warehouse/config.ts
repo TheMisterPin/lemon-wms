@@ -1,4 +1,4 @@
-import { Warehouse, WarehouseFormValues } from '@/lib/schemas/warehouse'
+import { Warehouse, WarehouseFormValues } from '@/lib/locations'
 import { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import type { ColumnConfig } from '@/types/components/table/column.types'

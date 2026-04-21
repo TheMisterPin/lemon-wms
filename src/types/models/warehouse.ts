@@ -1,3 +1,3 @@
-import type { Warehouse } from '@/lib/schemas/warehouse'
+import type { Warehouse } from '@/lib/locations'
 
 export type IWarehouse = Warehouse

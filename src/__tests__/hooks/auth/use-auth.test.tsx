@@ -5,8 +5,8 @@ import { act } from 'react'
 import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { useAuth } from '@/hooks/auth/use-auth'
 import { useAuthStore } from '@/lib/auth/store'
+import { useAuth } from '@/lib/auth/use-auth'
 import type { AuthDevice, AuthLocation, AuthUser } from '@/types'
 
 const officeUser: AuthUser = {

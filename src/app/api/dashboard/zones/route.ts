@@ -3,11 +3,9 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { createZone } from '@/lib/entities/zones/create-zone'
-import { getZones } from '@/lib/entities/zones/get-zones'
 import { DomainError } from '@/lib/errors'
+import { createZone, getZones, zoneFormSchema } from '@/lib/locations'
 import prisma from '@/lib/prisma'
-import { zoneFormSchema } from '@/lib/schemas/zone'
 import { toZoneTableRecords } from '@/utils/converters/table-records'
 
 /**

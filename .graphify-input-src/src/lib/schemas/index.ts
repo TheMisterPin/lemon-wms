@@ -1,7 +1,0 @@
-export * from './purchase-order-create'
-export * from './warehouse'
-export * from './zone'
-export * from './bin'
-export * from './item'
-export * from './user'
-export * from './device'

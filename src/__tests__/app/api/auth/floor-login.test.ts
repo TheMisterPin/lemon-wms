@@ -20,7 +20,7 @@ vi.mock('@/lib/auth/session', () => ({
   setRefreshTokenCookie: vi.fn().mockResolvedValue(undefined)
 }))
 
-vi.mock('@/lib/entities/devices/create-device', () => ({
+vi.mock('@/lib/iam', () => ({
   upsertDevice: vi.fn()
 }))
 
@@ -29,7 +29,7 @@ vi.mock('@/lib/entities/devices/create-device', () => ({
 // ---------------------------------------------------------------------------
 
 import { POST } from '@/app/api/auth/floor/login/route'
-import { upsertDevice } from '@/lib/entities/devices/create-device'
+import { upsertDevice } from '@/lib/iam'
 import prisma from '@/lib/prisma'
 
 // ---------------------------------------------------------------------------

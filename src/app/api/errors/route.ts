@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { ok, fail, validationFail } from '@/lib/api/response'
-import { logError } from '@/lib/loggers/error'
+import { logError } from '@/lib/logs/error'
 
 const errorSchema = z.object({
   message: z.string().min(1),

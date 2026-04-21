@@ -16,8 +16,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { warehouseFormSchema } from '@/lib/schemas/warehouse'
-import type { WarehouseFormValues } from '@/lib/schemas/warehouse'
+import { warehouseFormSchema } from '@/lib/locations'
+import type { WarehouseFormValues } from '@/lib/locations'
 import type { FormFieldConfig, GenericFormConfig } from '@/types/components/form/generic-form.types'
 
 type CreateWarehouseFormValues = Pick<WarehouseFormValues, 'name'>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
-import { credentialLogin } from '@/lib/entities/auth/credential-login'
+import { credentialLogin } from '@/lib/auth/credential-login'
 import { DomainError } from '@/lib/errors'
 import prisma from '@/lib/prisma'
 

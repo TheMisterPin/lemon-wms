@@ -9,6 +9,8 @@ export interface IBinItem {
   quantityAvailable: number
   quantityReserved: number
   quantityBlocked: number
+  quantity: number
+  actualQuantity: number
   uom: string
   status: BinItemStatus
 transitDeviceId: string | null

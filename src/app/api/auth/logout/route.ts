@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { logout } from '@/lib/auth/logout'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { readRefreshTokenCookie } from '@/lib/auth/session'
-import { logout } from '@/lib/entities/auth/logout'
 import prisma from '@/lib/prisma'
 
 /**

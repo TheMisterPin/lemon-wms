@@ -3,11 +3,9 @@ import { z } from 'zod'
 
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { deleteItem } from '@/lib/entities/items/delete-item'
-import { getItem } from '@/lib/entities/items/get-item'
-import { updateItem } from '@/lib/entities/items/update-item'
+import { deleteItem, getItem, updateItem } from '@/lib/catalog/items/items-queries'
+import { itemFormSchema } from '@/lib/catalog/items/items-schemas'
 import prisma from '@/lib/prisma'
-import { itemFormSchema } from '@/lib/schemas/item'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -85,7 +83,20 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     const body = await req.json()
     const parsed = itemFormSchema.partial().parse(body)
-    const item = await updateItem(prisma, id, parsed)
+    const item = await updateItem(prisma, id, {
+      sku: parsed.sku ?? '',
+      name: parsed.name ?? '',
+      description: parsed.description ?? null,
+      barcode: parsed.barcode ?? null,
+      categoryId: parsed.categoryId ?? '',
+      trackingMode: parsed.trackingMode ?? 'NONE',
+      uom: parsed.uom ?? 'PZ',
+      minQuantity: parsed.minQuantity ?? 0,
+      isActive: parsed.isActive ?? true,
+      weightKg: parsed.weightKg ?? null,
+      dimensions: parsed.dimensions ?? null,
+      supplierId: parsed.supplierId ?? null
+    })
 
     return ok(item, 'Item updated successfully.')
   } catch (error) {

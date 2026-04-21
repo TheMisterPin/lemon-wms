@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { getWarehouseHomeData } from '@/lib/entities/warehouses/get-warehouse-home-data'
+import { getWarehouseHomeData } from '@/lib/locations'
 import prisma from '@/lib/prisma'
 
 /**

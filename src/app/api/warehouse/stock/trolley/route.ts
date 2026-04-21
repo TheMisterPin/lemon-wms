@@ -2,8 +2,8 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
-import { getTrolleyItems } from '@/lib/entities/move-operations'
 import prisma from '@/lib/prisma'
+import { getTrolleyItems } from '@/lib/stock/queries'
 
 /**
  * @swagger

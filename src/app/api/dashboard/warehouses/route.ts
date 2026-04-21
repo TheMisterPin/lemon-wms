@@ -3,10 +3,8 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { createWarehouse } from '@/lib/entities/warehouses/create-warehouse'
-import { getWarehouses } from '@/lib/entities/warehouses/get-warehouses'
+import { createWarehouse, getWarehouses, warehouseFormSchema } from '@/lib/locations'
 import prisma from '@/lib/prisma'
-import { warehouseFormSchema } from '@/lib/schemas/warehouse'
 import { toWarehouseTableRecords } from '@/utils/converters/table-records'
 import { generateWarehouseSerial } from '@/utils/serials'
 

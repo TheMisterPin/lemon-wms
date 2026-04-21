@@ -16,8 +16,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { zoneFormSchema } from '@/lib/schemas/zone'
-import type { ZoneFormValues } from '@/lib/schemas/zone'
+import { zoneFormSchema } from '@/lib/locations'
+import type { ZoneFormValues } from '@/lib/locations'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 
 type CreateZoneFormProps = {

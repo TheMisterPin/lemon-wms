@@ -3,10 +3,9 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { createItem } from '@/lib/entities/items/create-item'
-import { getItems } from '@/lib/entities/items/get-items'
+import { createItem, getItemsWithFilters } from '@/lib/catalog/items/items-queries'
+import { itemFormSchema } from '@/lib/catalog/items/items-schemas'
 import prisma from '@/lib/prisma'
-import { itemFormSchema } from '@/lib/schemas/item'
 import { toItemTableRecords } from '@/utils/converters/table-records'
 
 /**
@@ -30,10 +29,9 @@ export async function GET(req: NextRequest) {
     const categoryId = searchParams.get('categoryId') ?? undefined
     const isActiveParam = searchParams.get('isActive')
     const isActive = isActiveParam !== null ? isActiveParam === 'true' : undefined
-    const itemRecords = await getItems(prisma, { categoryId, isActive })
-    const items = toItemTableRecords(itemRecords)
+    const itemRecords = await getItemsWithFilters(prisma, { categoryId, isActive })
 
-    return ok(items, 'Items retrieved successfully.')
+    return ok({ items: toItemTableRecords(itemRecords) }, 'Items retrieved successfully.')
   } catch (error) {
     console.error('[GET /api/dashboard/items]', error)
 

@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { authorizeDevice, deauthorizeDevice } from '@/lib/entities/devices/authorize-device'
+import { authorizeDevice, deauthorizeDevice } from '@/lib/iam'
 import prisma from '@/lib/prisma'
 
 const authorizeSchema = z.object({

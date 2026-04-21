@@ -16,8 +16,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { binFormSchema } from '@/lib/schemas/bin'
-import type { BinFormValues } from '@/lib/schemas/bin'
+import { binFormSchema } from '@/lib/locations'
+import type { BinFormValues } from '@/lib/locations'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 
 type CreateBinFormProps = {

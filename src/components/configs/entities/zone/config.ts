@@ -1,4 +1,4 @@
-import type { Zone, ZoneFormValues } from '@/lib/schemas/zone'
+import type { Zone, ZoneFormValues } from '@/lib/locations'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import type { ColumnConfig } from '@/types/components/table/column.types'
