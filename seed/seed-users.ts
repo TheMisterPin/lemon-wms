@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import prisma from '../src/lib/prisma'
-import { seedUsers } from '../src/lib/seeding/users'
+import { seedUsers } from './lib/users'
 
 async function runSeedUsers() {
   console.warn('Seeding users...\n')

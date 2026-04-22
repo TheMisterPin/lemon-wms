@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { seedDB } from '@/lib/seeding/seed'
+import { seedDB } from './lib/seed'
 import prisma from '../src/lib/prisma'
 
 async function runSeedDB() {

@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { seedBinStockItems } from '@/lib/seeding/seed-bin-stock-items'
+import { seedBinStockItems } from './lib/seed-bin-stock-items'
 import prisma from '../src/lib/prisma'
 
 async function runSeedStock() {

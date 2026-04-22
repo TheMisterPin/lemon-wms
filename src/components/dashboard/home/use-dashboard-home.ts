@@ -1,13 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { MapPin, ShelvingUnit, Warehouse } from 'lucide-react'
-
-import type { DashboardInfoCardItem } from '@/components/dashboard/dashboard-info-card'
-import type { DashboardRecordListItem } from '@/components/dashboard/dashboard-record-list-section'
 import { dashboardApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'
-
+import type { DashboardOverviewCard, DashboardWarehouseDisplayRecord, DashboardZoneDisplayRecord, DashboardBinDisplayRecord } from '../warehouses/components/dashboard-types'
 const PAGE_SIZE = 3
 
 interface DashboardHomePageData {
@@ -48,33 +44,25 @@ interface DashboardHomePageData {
   }[]
 }
 
-type DashboardWarehouseRecord = DashboardHomePageData['warehouses'][number]
-type DashboardZoneRecord = DashboardHomePageData['zones'][number]
-export type DashboardBinRecord = DashboardHomePageData['bins'][number]
-
-function toWarehouseRecords(records: DashboardWarehouseRecord[]): DashboardRecordListItem[] {
-  return records.map((w) => ({
-    id: w.id,
-    title: w.name,
-    subtitle: `${w.zones} zones, ${w.bins} bins`
-  }))
+export type DashboardPagedList<T> = {
+  records: T[]
+  page: number
+  totalPages: number
+  onPrev: () => void
+  onNext: () => void
 }
 
-function toZoneRecords(records: DashboardZoneRecord[]): DashboardRecordListItem[] {
-  return records.map((z) => ({
-    id: z.id,
-    title: z.name,
-    subtitle: `${z.type}, ${z.bins} bins`,
-    details: z.warehouseId
-  }))
+export type DashboardSearchModel = {
+  text: string
+  setText: (text: string) => void
 }
 
-function toInfoCards(info: DashboardHomePageData['info']): DashboardInfoCardItem[] {
-  return [
-    { label: 'Warehouses', value: info.warehouses ?? 0, icon: Warehouse },
-    { label: 'Zones', value: info.zones ?? 0, icon: MapPin },
-    { label: 'Bins', value: info.bins ?? 0, icon: ShelvingUnit }
-  ]
+export type UseDashboardHomeReturn = {
+  overviewCards: DashboardOverviewCard[]
+  warehouses: DashboardPagedList<DashboardWarehouseDisplayRecord>
+  zones: DashboardPagedList<DashboardZoneDisplayRecord>
+  bins: DashboardBinDisplayRecord[]
+  search: DashboardSearchModel
 }
 
 function paginate<T>(items: T[], page: number): T[] {
@@ -85,7 +73,51 @@ function totalPages(count: number): number {
   return Math.max(1, Math.ceil(count / PAGE_SIZE))
 }
 
-export function useDashboardHome() {
+function toOverviewCards(info: DashboardHomePageData['info']): DashboardOverviewCard[] {
+  return [
+    { label: 'Warehouses', value: info.warehouses ?? 0 },
+    { label: 'Zones', value: info.zones ?? 0 },
+    { label: 'Bins', value: info.bins ?? 0 }
+  ]
+}
+
+function toWarehouseDisplayRecords(
+  records: DashboardHomePageData['warehouses']
+): DashboardWarehouseDisplayRecord[] {
+  return records.map((warehouse) => ({
+    id: warehouse.id,
+    name: warehouse.name,
+    subtitle: `${warehouse.id} · ${warehouse.zones} zones`,
+    metric: `${warehouse.bins} bins`
+  }))
+}
+
+function toZoneDisplayRecords(
+  records: DashboardHomePageData['zones']
+): DashboardZoneDisplayRecord[] {
+  return records.map((zone) => ({
+    id: zone.id,
+    name: zone.name,
+    subtitle: `${zone.id} · ${zone.type}`,
+    metric: `${zone.bins} bins`
+  }))
+}
+
+function toBinDisplayRecords(
+  records: DashboardHomePageData['bins']
+): DashboardBinDisplayRecord[] {
+  return records.map((bin) => ({
+    id: bin.id,
+    name: bin.name,
+    type: bin.type,
+    itemsInBin: bin.itemsInBin,
+    filledPercentage: bin.filledPercentage ?? 0,
+    active: bin.active,
+    isBlocked: bin.isBlocked
+  }))
+}
+
+export function useDashboardHome(): UseDashboardHomeReturn {
   const [data, setData] = useState<DashboardHomePageData>({
     info: { warehouses: 0, zones: 0, bins: 0 },
     warehouses: [],
@@ -104,7 +136,9 @@ export function useDashboardHome() {
 
     async function fetchData() {
       try {
-        const response = await dashboardApiClient.get<ApiResponse<DashboardHomePageData>>('/dashboard/home')
+        const response =
+          await dashboardApiClient.get<ApiResponse<DashboardHomePageData>>('/dashboard/home')
+
         if (!cancelled && response.success && response.data) {
           setData(response.data)
         }
@@ -126,8 +160,6 @@ export function useDashboardHome() {
     setZonePage(0)
   }, [])
 
-  const infoCards = useMemo(() => toInfoCards(data.info), [data.info])
-
   const zonesById = useMemo(
     () => new Map(data.zones.map((zone) => [zone.id, zone])),
     [data.zones]
@@ -137,7 +169,9 @@ export function useDashboardHome() {
 
   const filteredWarehouses = useMemo(() => {
     const list = selectedZoneId
-      ? data.warehouses.filter((warehouse) => warehouse.id === zonesById.get(selectedZoneId)?.warehouseId)
+      ? data.warehouses.filter(
+        (warehouse) => warehouse.id === zonesById.get(selectedZoneId)?.warehouseId
+      )
       : selectedWarehouseId
         ? data.warehouses.filter((warehouse) => warehouse.id === selectedWarehouseId)
         : data.warehouses
@@ -147,7 +181,7 @@ export function useDashboardHome() {
     }
 
     return list.filter((warehouse) => {
-      const haystack = `${warehouse.name} ${warehouse.zones} ${warehouse.bins}`.toLowerCase()
+      const haystack = `${warehouse.id} ${warehouse.name} ${warehouse.zones} ${warehouse.bins}`.toLowerCase()
 
       return haystack.includes(normalizedSearch)
     })
@@ -165,7 +199,7 @@ export function useDashboardHome() {
     }
 
     return list.filter((zone) => {
-      const haystack = `${zone.name} ${zone.type} ${zone.bins}`.toLowerCase()
+      const haystack = `${zone.id} ${zone.name} ${zone.type} ${zone.bins}`.toLowerCase()
 
       return haystack.includes(normalizedSearch)
     })
@@ -185,7 +219,7 @@ export function useDashboardHome() {
     }
 
     return list.filter((bin) => {
-      const haystack = `${bin.code} ${bin.name} ${bin.type}`.toLowerCase()
+      const haystack = `${bin.id} ${bin.name} ${bin.type}`.toLowerCase()
 
       return haystack.includes(normalizedSearch)
     })
@@ -198,15 +232,21 @@ export function useDashboardHome() {
   const safeZonePage = Math.min(Math.max(0, zonePage), zonePages - 1)
 
   const pagedWarehouses = useMemo(
-    () => toWarehouseRecords(paginate(filteredWarehouses, safeWarehousePage)),
+    () => toWarehouseDisplayRecords(paginate(filteredWarehouses, safeWarehousePage)),
     [filteredWarehouses, safeWarehousePage]
   )
+
   const pagedZones = useMemo(
-    () => toZoneRecords(paginate(filteredZones, safeZonePage)),
+    () => toZoneDisplayRecords(paginate(filteredZones, safeZonePage)),
     [filteredZones, safeZonePage]
   )
 
-  const toggleWarehouse = (warehouseId: string) => {
+  const displayBins = useMemo(
+    () => toBinDisplayRecords(filteredBins),
+    [filteredBins]
+  )
+
+  const toggleWarehouse = useCallback((warehouseId: string) => {
     if (selectedWarehouseId === warehouseId) {
       setSelectedWarehouseId(null)
       setSelectedZoneId(null)
@@ -216,9 +256,9 @@ export function useDashboardHome() {
 
     setSelectedWarehouseId(warehouseId)
     setSelectedZoneId(null)
-  }
+  }, [selectedWarehouseId])
 
-  const toggleZone = (zoneId: string) => {
+  const toggleZone = useCallback((zoneId: string) => {
     if (selectedZoneId === zoneId) {
       setSelectedZoneId(null)
       setSelectedWarehouseId(null)
@@ -229,56 +269,25 @@ export function useDashboardHome() {
     const zone = zonesById.get(zoneId)
     setSelectedZoneId(zoneId)
     setSelectedWarehouseId(zone?.warehouseId ?? null)
-  }
+  }, [selectedZoneId, zonesById])
 
   return {
-    infoCards,
+    overviewCards: toOverviewCards(data.info),
     warehouses: {
       records: pagedWarehouses,
-      page: safeWarehousePage,
+      page: safeWarehousePage + 1,
       totalPages: warehousePages,
-      onPrev: () =>
-        setWarehousePage((p) => {
-          const max = warehousePages - 1
-          const current = Math.min(Math.max(0, p), max)
-
-          return Math.max(0, current - 1)
-        }),
-      onNext: () =>
-        setWarehousePage((p) => {
-          const max = warehousePages - 1
-          const current = Math.min(Math.max(0, p), max)
-
-          return Math.min(max, current + 1)
-        }),
-      selectedId: selectedWarehouseId,
-      onSelect: toggleWarehouse
+      onPrev: () => setWarehousePage((p) => Math.max(0, p - 1)),
+      onNext: () => setWarehousePage((p) => Math.min(warehousePages - 1, p + 1))
     },
     zones: {
       records: pagedZones,
-      page: safeZonePage,
+      page: safeZonePage + 1,
       totalPages: zonePages,
-      onPrev: () =>
-        setZonePage((p) => {
-          const max = zonePages - 1
-          const current = Math.min(Math.max(0, p), max)
-
-          return Math.max(0, current - 1)
-        }),
-      onNext: () =>
-        setZonePage((p) => {
-          const max = zonePages - 1
-          const current = Math.min(Math.max(0, p), max)
-
-          return Math.min(max, current + 1)
-        }),
-      selectedId: selectedZoneId,
-      onSelect: toggleZone
+      onPrev: () => setZonePage((p) => Math.max(0, p - 1)),
+      onNext: () => setZonePage((p) => Math.min(zonePages - 1, p + 1))
     },
-    bins: {
-      records: filteredBins,
-      pageSize: PAGE_SIZE
-    },
+    bins: displayBins,
     search: {
       text: searchText,
       setText: setSearchTextWithPageReset
