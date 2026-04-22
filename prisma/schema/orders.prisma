@@ -26,26 +26,11 @@
 //   → stock.prisma (Lot, SerialNumber)
 //   → parties.prisma (BusinessParty)
 //   → iam.prisma (User)
+//   → logs.prisma (UserActivityEntry)
+//   → logs.prisma (OrderAssignment)
+//   → logs.prisma (OrderExecutionActivity)
 // =============================================================================
 
-// Tracks which user is currently responsible for executing an order.
-// One row per (orderType, orderId, userId) — a user can be assigned to multiple orders.
-model OrderAssignment {
-  id         String    @id @default(uuid())
-  orderId    String
-  orderType  OrderType
-  userId     String
-  assignedAt DateTime  @default(now())
-  releasedAt DateTime?
-  notes      String?
-
-  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userActivities UserActivityEntry[] @relation("OrderAssignmentActivities")
-
-  @@unique([orderType, orderId, userId])
-  @@index([userId, assignedAt])
-  @@index([orderType, orderId])
-}
 
 // =============================================================================
 // Purchase Orders — inbound stock from suppliers
@@ -75,7 +60,6 @@ model PurchaseOrder {
 
   warehouse     Warehouse      @relation(fields: [warehouseId], references: [id])
   businessParty BusinessParty? @relation("SupplierPurchaseOrders", fields: [businessPartyId], references: [id])
-  assignedTo    User?          @relation("PurchaseOrderAssignedTo", fields: [assignedToId], references: [id])
 
   parentOrder PurchaseOrder?  @relation("PurchaseOrderHierarchy", fields: [parentOrderId], references: [id])
   childOrders PurchaseOrder[] @relation("PurchaseOrderHierarchy")

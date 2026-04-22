@@ -50,7 +50,8 @@ model Warehouse {
   binOperationEntries BinOperationEntry[]
   itemLedger          ItemLedgerEntry[]
   uaeEntries          UserActivityEntry[]
-
+  orderAssignments    OrderAssignment[]
+  orderExecutionActivities OrderExecutionActivity[]
   // Config
   alertRules    AlertRule[]
   serialConfigs SerialNumberConfig[]

@@ -30,21 +30,20 @@
 model UserActivityEntry {
   id                String     @id @default(uuid())
   userId            String
-  actionType        String     // e.g. "LINE_HANDLED", "BIN_BLOCKED", "USER_CREATED"
-  entityType        String     // e.g. "PurchaseOrder", "Bin", "User"
+  actionType        String // e.g. "LINE_HANDLED", "BIN_BLOCKED", "USER_CREATED"
+  entityType        String // e.g. "PurchaseOrder", "Bin", "User"
   entityId          String
-  metadata          Json?      // Action-specific payload — structure defined per actionType
+  metadata          Json? // Action-specific payload — structure defined per actionType
   warehouseId       String?
   orderId           String?
   orderType         OrderType?
   ipAddress         String?
-  notes             String?    // Human-readable freeform — NOT for structured data
+  notes             String? // Human-readable freeform — NOT for structured data
   orderAssignmentId String?
   createdAt         DateTime   @default(now())
 
-  user            User             @relation(fields: [userId], references: [id])
-  warehouse       Warehouse?       @relation(fields: [warehouseId], references: [id])
-  orderAssignment OrderAssignment? @relation("OrderAssignmentActivities", fields: [orderAssignmentId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
 
   // Reverse relations — each order type links its UAE
   boes BinOperationEntry[]
@@ -81,8 +80,8 @@ model BinOperationEntry {
   boxId               String?
   notes               String?
   reasonCode          String?
-  reversedByEntryId   String?          // Points to the compensating BOE if this was reversed
-  reversesEntryId     String?          // Points to the original BOE this entry reverses
+  reversedByEntryId   String? // Points to the compensating BOE if this was reversed
+  reversesEntryId     String? // Points to the original BOE this entry reverses
   userActivityEntryId String?
   createdAt           DateTime         @default(now())
 
@@ -119,7 +118,7 @@ model ItemLedgerEntry {
   orderId             String?
   orderType           OrderType?
   boeId               String?
-  reference           String?                  // Human-readable order reference snapshot
+  reference           String? // Human-readable order reference snapshot
   externalDocumentRef String?
   performedByUserId   String?
   reasonCode          String?
@@ -135,3 +134,74 @@ model ItemLedgerEntry {
   @@index([lotId])
   @@index([serialNumberId])
 }
+
+// Layer 4 — ORDER ASSIGNMENT SESSION.
+// Represents the current execution session for one user on one order.
+// This is a parent session record, not a full event-history table.
+// It stores the current assignment status, key lifecycle timestamps,
+// and acts as the container for execution activities performed during the session.
+// The unique constraint prevents duplicate assignment sessions for the same
+// (orderType, orderId, userId) combination.
+model OrderAssignment {
+  id               String                    @id @default(uuid())
+  orderId          String
+  orderType        OrderType
+  status           AssignmentLifecycle
+  warehouseId      String
+  userId           String
+
+  // Key session timestamps.
+  // These represent important lifecycle milestones on the parent session record.
+  // They are not intended to be a full pause/resume event history.
+  assignedAt       DateTime                  @default(now())
+  startedAt        DateTime?
+  pausedAt         DateTime?
+  releasedAt       DateTime?
+  completedAt      DateTime?
+  cancelledAt      DateTime?
+  timedOutAt       DateTime?
+
+  notes            String?
+  isActive         Boolean                   @default(true)
+
+  user             User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  warehouse        Warehouse                 @relation(fields: [warehouseId], references: [id])
+  activities       OrderExecutionActivity[]  @relation("ActivitiesPerformedInSession")
+
+  @@unique([orderType, orderId, userId])
+  @@index([userId, assignedAt])
+  @@index([orderType, orderId])
+  @@index([warehouseId, assignedAt])
+  @@index([status, assignedAt])
+}
+
+// Layer 5 — ORDER EXECUTION ACTIVITY.
+// Stores meaningful business execution actions performed within an order assignment.
+// This is the readable execution trail for warehouse work such as picking,
+// receiving, checking, packing, skipping, or resolving exceptions.
+// It records actor, order context, optional line context, warehouse context,
+// and timestamp. It does not replace stock movement entries or current-state
+// order line fields.
+model OrderExecutionActivity {
+  id                String              @id @default(uuid())
+  orderAssignmentId String
+  userId            String
+  warehouseId       String
+  activityType      ExecutionActivity
+  orderId           String
+  orderType         OrderType
+  orderLineRefId    String?
+  notes             String?
+  createdAt         DateTime            @default(now())
+
+  orderAssignment   OrderAssignment     @relation("ActivitiesPerformedInSession", fields: [orderAssignmentId], references: [id], onDelete: Cascade)
+  user              User                @relation(fields: [userId], references: [id])
+  warehouse         Warehouse           @relation(fields: [warehouseId], references: [id])
+
+  @@index([orderAssignmentId, createdAt])
+  @@index([orderType, orderId, createdAt])
+  @@index([userId, createdAt])
+  @@index([warehouseId, createdAt])
+  @@index([activityType, createdAt])
+}
+

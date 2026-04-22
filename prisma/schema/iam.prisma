@@ -12,51 +12,50 @@
 // =============================================================================
 
 model User {
-  id                String   @id @default(uuid())
-  email             String?  @unique
+  id                String    @id @default(uuid())
+  email             String?   @unique
   passwordHash      String?
-  badgeNumber       String   @unique
+  badgeNumber       String    @unique
   pinHash           String?
   firstName         String
   lastName          String
   fullName          String
   role              Role
   loginType         LoginType
-  isActive          Boolean  @default(true)
+  isActive          Boolean   @default(true)
   deletedAt         DateTime?
-  createdAt         DateTime @default(now())
+  createdAt         DateTime  @default(now())
   lastLoginDeviceId String?
-  isLoggedIn        Boolean  @default(false)
+  isLoggedIn        Boolean   @default(false)
 
   // Auth
-  lastLoginDevice      Device?               @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
-  refreshTokens        RefreshToken[]
+  lastLoginDevice Device?        @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
+  refreshTokens   RefreshToken[]
 
   // Assignments
   warehouseAssignments WarehouseAssignment[]
 
   // Activity
-  userActivityEntries  UserActivityEntry[]
-  binOperationEntries  BinOperationEntry[]
-  notifications        Notification[]
-  orderAssignments     OrderAssignment[]
-
-  // Orders — user as creator / assignee
-  purchaseOrdersAssigned PurchaseOrder[] @relation("PurchaseOrderAssignedTo")
+  userActivityEntries      UserActivityEntry[]
+  binOperationEntries      BinOperationEntry[]
+  notifications            Notification[]
+  
+  orderAssignments         OrderAssignment[]
 
   // Devices this user has been seen on
   usedByDevices Device[] @relation("DeviceLastUser")
 
   // Warehouses this user created
-  createdWarehouses Warehouse[] @relation("WarehouseCreatedBy")
+  createdWarehouses        Warehouse[]              @relation("WarehouseCreatedBy")
+  orderExecutionActivities OrderExecutionActivity[]
 }
 
 model Device {
   id           String     @id @default(uuid())
-  name         String     @unique  // e.g. "Zone A Terminal 1"
-  code         String     @unique  // Scanned or typed to register
+  name         String     @unique // e.g. "Zone A Terminal 1"
+  code         String     @unique // Scanned or typed to register
   warehouseId  String?
-  zoneId       String?    @unique  // One device per zone — enforced by unique constraint
+  zoneId       String?    @unique // One device per zone — enforced by unique constraint
   authorized   Boolean    @default(false)
   isActive     Boolean    @default(true)
   type         DeviceType @default(FLOOR)
@@ -70,7 +69,7 @@ model Device {
   lastUser  User?      @relation("DeviceLastUser", fields: [lastUserId], references: [id])
 
   // Sessions issued on this device
-  loggedInByUsers      User[]         @relation("UserLastDevice")
+  loggedInByUsers User[] @relation("UserLastDevice")
 
   // Stock items currently in transit on this device
   transitBinStockItems BinStockItem[] @relation("TransitBinStockItems")
@@ -79,7 +78,7 @@ model Device {
 model RefreshToken {
   id          String    @id @default(uuid())
   userId      String
-  tokenHash   String    @unique  // Raw token is never stored — only bcrypt hash
+  tokenHash   String    @unique // Raw token is never stored — only bcrypt hash
   deviceLabel String
   deviceId    String?
   expiresAt   DateTime
@@ -93,11 +92,11 @@ model RefreshToken {
 // WM receives (userId, warehouseId, zoneId=null) — covers all zones in the warehouse.
 // WW receives (userId, warehouseId, zoneId=X) per zone — one row per zone.
 model WarehouseAssignment {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   userId      String
   warehouseId String
-  zoneId      String?   // null = warehouse-wide (WM scope)
-  createdAt   DateTime  @default(now())
+  zoneId      String? // null = warehouse-wide (WM scope)
+  createdAt   DateTime @default(now())
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)

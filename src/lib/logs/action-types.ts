@@ -1,3 +1,7 @@
+/**
+ * The action types for the UserActivityEntry model.
+ * @todo Split this into multiple files for each domain.
+ */
 export const LOG_ACTION_TYPES = {
   LOGIN: 'LOGIN',
   LOGIN_FAILED: 'LOGIN_FAILED',

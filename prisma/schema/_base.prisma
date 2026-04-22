@@ -30,9 +30,9 @@ enum Role {
 }
 
 enum LoginType {
-  CREDENTIAL  // Email + password — office side
-  BADGE_PIN   // Badge number + 4-digit PIN — floor side
-  BOTH        // Either method — managers who work both sides
+  CREDENTIAL // Email + password — office side
+  BADGE_PIN // Badge number + 4-digit PIN — floor side
+  BOTH // Either method — managers who work both sides
 }
 
 enum LoginMode {
@@ -52,26 +52,26 @@ enum DeviceType {
 // -----------------------------------------------------------------------------
 
 enum WarehouseStatus {
-  ACTIVE    // Fully operational
-  INACTIVE  // Visible but locked — no new orders released
-  ARCHIVED  // Read-only — terminal state
+  ACTIVE // Fully operational
+  INACTIVE // Visible but locked — no new orders released
+  ARCHIVED // Read-only — terminal state
 }
 
 enum ZoneType {
-  GENERAL    // Standard storage — all operations permitted
-  COLD       // Temperature-controlled — COLD-flagged items only
-  HAZMAT     // Hazardous materials — restricted access
+  GENERAL // Standard storage — all operations permitted
+  COLD // Temperature-controlled — COLD-flagged items only
+  HAZMAT // Hazardous materials — restricted access
   QUARANTINE // Hold area — no outbound until WM clears
-  STAGING    // Temporary pre-ship — items must leave before order closes
-  RETURNS    // Inbound returns — receive-only, triggers return order flow
+  STAGING // Temporary pre-ship — items must leave before order closes
+  RETURNS // Inbound returns — receive-only, triggers return order flow
 }
 
 enum BinType {
-  GENERAL    // All operations: putaway, pick, move, count
-  RECEIVING  // Inbound staging — receive only
-  OUTGOING   // Pre-ship staging — pick and ship only
+  GENERAL // All operations: putaway, pick, move, count
+  RECEIVING // Inbound staging — receive only
+  OUTGOING // Pre-ship staging — pick and ship only
   QUARANTINE // No picks — WM release only
-  STAGING    // Temporary — flagged if items linger past threshold
+  STAGING // Temporary — flagged if items linger past threshold
 }
 
 // -----------------------------------------------------------------------------
@@ -86,10 +86,10 @@ enum BinItemStatus {
 }
 
 enum ItemTrackingMode {
-  NONE   // Commodity items — quantity only
-  LOT    // Batch-traceable or regulated goods
+  NONE // Commodity items — quantity only
+  LOT // Batch-traceable or regulated goods
   SERIAL // High-value assets — one record per physical unit
-  FIFO   // First-in first-out — stamped at receive time
+  FIFO // First-in first-out — stamped at receive time
 }
 
 enum LotStatus {
@@ -194,11 +194,34 @@ enum FiscalInventoryEventType {
   TRANSFER_OUT
 }
 
-// -----------------------------------------------------------------------------
-// Party enums
-// -----------------------------------------------------------------------------
+enum AssignmentLifecycle {
+  ASSIGNED
+  STARTED
+  PAUSED
+  RESUMED
+  COMPLETED
+  RELEASED
+  CANCELLED
+  TIMED_OUT
+}
 
-enum BusinessPartyType {
+enum ExecutionActivity {
+  LINE_PICKED
+  LINE_PARTIALLY_PICKED
+  LINE_RECEIVED
+  LINE_CHECKED
+  LINE_PACKED
+  LINE_BOXED
+  LINE_SKIPPED
+  EXCEPTION_RAISED
+  EXCEPTION_RESOLVED
+  LINE_REVERSED
+}
+  // -----------------------------------------------------------------------------
+  // Party enums
+  // -----------------------------------------------------------------------------
+
+  enum BusinessPartyType {
   CUSTOMER
   SUPPLIER
   CARRIER
