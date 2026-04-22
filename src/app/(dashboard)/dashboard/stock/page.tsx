@@ -1,6 +1,6 @@
 'use client'
-import { DashboardStockPageView } from '@/components/dashboard/stock/DashboardStockPageView'
+import { DashboardStockPage } from '@/components/dashboard/stock/dashboard-stock-page'
 
 export default function StockPage() {
-  return <DashboardStockPageView />
+  return <DashboardStockPage  />
 }

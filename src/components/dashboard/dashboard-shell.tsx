@@ -5,7 +5,7 @@ import { AppErrorDialog } from '@/components/shared/AppErrorDialog'
 import PageWrapper from '@/components/shared/PageWrapper'
 import DashboardFooter from './dashboard-footer'
 import DashboardHeader from './dashboard-header'
-import DashboardSidebar from './stock/dashboard-sidebar'
+import DashboardSidebar from './dashboard-sidebar'
 
 export default function DashboardShell({ children }: { children: ReactNode }) {
   return (

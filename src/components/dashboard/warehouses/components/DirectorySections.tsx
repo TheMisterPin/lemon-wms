@@ -1,41 +1,45 @@
 import { MapPin, Warehouse } from 'lucide-react'
 
-import { COLORS } from './dashboard-theme'
+import { PaginationSelector } from '@/components/shared/PaginationSelector'
 import type { DashboardWarehouseDisplayRecord, DashboardZoneDisplayRecord } from './dashboard-types'
 
 type SectionBlockProps = {
   title: string
   action?: string
+  headerRight?: React.ReactNode
   children: React.ReactNode
 }
 
-function SectionBlock({ title, action, children }: SectionBlockProps) {
+function SectionBlock({ title, action, headerRight, children }: SectionBlockProps) {
   return (
     <section
       className="rounded-2xl"
       style={{
-        background: COLORS.cardBgSoft,
-        border: `1px solid ${COLORS.border}`
+        background: 'var(--wh-card-bg-soft)',
+        border: '1px solid var(--wh-border)'
       }}
     >
       <div
-        className="flex items-center justify-between border-b px-4 py-3 xl:px-5"
-        style={{ borderColor: COLORS.border }}
+        className="flex items-center justify-between gap-2 border-b px-4 py-3 xl:px-5"
+        style={{ borderColor: 'var(--wh-border)' }}
       >
         <div
-          className="text-sm font-semibold xl:text-base"
-          style={{ color: COLORS.textPrimary }}
+          className="min-w-0 text-sm font-semibold xl:text-base"
+          style={{ color: 'var(--wh-text-primary)' }}
         >
           {title}
         </div>
-        {action ? (
-          <div
-            className="text-[11px] xl:text-xs"
-            style={{ color: COLORS.textMuted }}
-          >
-            {action}
-          </div>
-        ) : null}
+        <div className="flex shrink-0 items-center gap-2">
+          {action ? (
+            <div
+              className="text-[11px] xl:text-xs"
+              style={{ color: 'var(--wh-text-muted)' }}
+            >
+              {action}
+            </div>
+          ) : null}
+          {headerRight}
+        </div>
       </div>
 
       <div className="space-y-3 p-4 xl:p-5">{children}</div>
@@ -56,29 +60,29 @@ function ListCard({ icon: Icon, title, subtitle, accent, metric }: ListCardProps
     <div
       className="group rounded-2xl transition-transform duration-200 hover:-translate-y-0.5"
       style={{
-        background: COLORS.cardBg,
+        background: 'var(--wh-card-bg)',
         boxShadow: '0 8px 22px rgba(0,0,0,0.24)',
-        border: `1px solid ${COLORS.border}`
+        border: '1px solid var(--wh-border)'
       }}
     >
       <div className="flex items-center justify-between gap-4 p-4 xl:p-[18px]">
         <div className="flex min-w-0 items-center gap-3">
           <div
             className="rounded-2xl p-3"
-            style={{ background: COLORS.cardBgSoft, color: accent }}
+            style={{ background: 'var(--wh-card-bg-soft)', color: accent }}
           >
             <Icon size={18} />
           </div>
           <div className="min-w-0">
             <div
               className="truncate text-[15px] font-semibold xl:text-base"
-              style={{ color: COLORS.textPrimary }}
+              style={{ color: 'var(--wh-text-primary)' }}
             >
               {title}
             </div>
             <div
               className="truncate text-[11px] xl:text-xs"
-              style={{ color: COLORS.textSecondary }}
+              style={{ color: 'var(--wh-text-secondary)' }}
             >
               {subtitle}
             </div>
@@ -88,7 +92,7 @@ function ListCard({ icon: Icon, title, subtitle, accent, metric }: ListCardProps
         <div className="flex shrink-0 items-center gap-2.5">
           <div
             className="rounded-full px-3 py-1 text-[11px] xl:text-xs"
-            style={{ background: COLORS.cardBgSoft, color: COLORS.textSecondary }}
+            style={{ background: 'var(--wh-card-bg-soft)', color: 'var(--wh-text-secondary)' }}
           >
             {metric}
           </div>
@@ -96,9 +100,9 @@ function ListCard({ icon: Icon, title, subtitle, accent, metric }: ListCardProps
           <button
             className="rounded-xl px-3 py-2 text-[11px] transition-all duration-300 opacity-100 md:translate-x-1 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 xl:text-xs"
             style={{
-              background: COLORS.actionBg,
-              border: `1px solid ${COLORS.actionBorder}`,
-              color: COLORS.actionText
+              background: 'var(--wh-action-bg)',
+              border: '1px solid var(--wh-action-border)',
+              color: 'var(--wh-action-text)'
             }}
           >
             See details
@@ -111,14 +115,65 @@ function ListCard({ icon: Icon, title, subtitle, accent, metric }: ListCardProps
 
 export function DirectorySections({
   warehouses,
-  zones
+  zones,
+  warehousesPage,
+  warehousesTotalPages,
+  onWarehousesPrev,
+  onWarehousesNext,
+  warehousesMatchCount,
+  zonesPage,
+  zonesTotalPages,
+  onZonesPrev,
+  onZonesNext,
+  zonesMatchCount
 }: {
   warehouses: DashboardWarehouseDisplayRecord[]
   zones: DashboardZoneDisplayRecord[]
+  warehousesPage?: number
+  warehousesTotalPages?: number
+  onWarehousesPrev?: () => void
+  onWarehousesNext?: () => void
+  warehousesMatchCount?: number
+  zonesPage?: number
+  zonesTotalPages?: number
+  onZonesPrev?: () => void
+  onZonesNext?: () => void
+  zonesMatchCount?: number
 }) {
+  const showWarehousePagination =
+    typeof warehousesPage === 'number' &&
+    typeof warehousesTotalPages === 'number' &&
+    onWarehousesPrev &&
+    onWarehousesNext
+  const showZonePagination =
+    typeof zonesPage === 'number' &&
+    typeof zonesTotalPages === 'number' &&
+    onZonesPrev &&
+    onZonesNext
+
+  const warehouseAction =
+    typeof warehousesMatchCount === 'number'
+      ? `${warehousesMatchCount} total`
+      : `${warehouses.length} active shown`
+  const zoneAction =
+    typeof zonesMatchCount === 'number' ? `${zonesMatchCount} total` : `${zones.length} active shown`
+
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-5">
-      <SectionBlock title="Warehouses" action={`${warehouses.length} active shown`}>
+      <SectionBlock
+        title="Warehouses"
+        action={warehouseAction}
+        headerRight={
+          showWarehousePagination ? (
+            <PaginationSelector
+              page={warehousesPage}
+              totalPages={warehousesTotalPages}
+              onPrev={onWarehousesPrev}
+              onNext={onWarehousesNext}
+            />
+          ) : null
+        }
+      >
         {warehouses.map((warehouse) => (
           <ListCard
             key={warehouse.id}
@@ -126,12 +181,25 @@ export function DirectorySections({
             title={warehouse.name}
             subtitle={warehouse.subtitle}
             metric={warehouse.metric}
-            accent={COLORS.warehouseAccent}
+            accent="var(--wh-warehouse-accent)"
           />
         ))}
       </SectionBlock>
 
-      <SectionBlock title="Zones" action={`${zones.length} active shown`}>
+      <SectionBlock
+        title="Zones"
+        action={zoneAction}
+        headerRight={
+          showZonePagination ? (
+            <PaginationSelector
+              page={zonesPage}
+              totalPages={zonesTotalPages}
+              onPrev={onZonesPrev}
+              onNext={onZonesNext}
+            />
+          ) : null
+        }
+      >
         {zones.map((zone) => (
           <ListCard
             key={zone.id}
@@ -139,7 +207,7 @@ export function DirectorySections({
             title={zone.name}
             subtitle={zone.subtitle}
             metric={zone.metric}
-            accent={COLORS.zoneAccent}
+            accent="var(--wh-zone-accent)"
           />
         ))}
       </SectionBlock>

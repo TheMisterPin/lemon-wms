@@ -13,12 +13,14 @@ import {
   ShelvingUnit,
   TabletSmartphone,
   Sun,
-  Moon
+  Moon,
+  BarChart2
 } from 'lucide-react'
 import { useTheme } from '@/components/shared/use-theme'
 
 const NAV_LINKS = [
   { label: 'Dashboard',  href: '/dashboard',            icon: LayoutDashboard },
+  { label: 'Stock',      href: '/dashboard/stock',      icon: BarChart2 },
   { label: 'Warehouses', href: '/dashboard/warehouses', icon: Warehouse },
   { label: 'Zones',      href: '/dashboard/zones',      icon: MapPin },
   { label: 'Bins',       href: '/dashboard/bins',       icon: ShelvingUnit },

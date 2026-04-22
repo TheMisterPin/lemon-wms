@@ -22,29 +22,29 @@ model Warehouse {
   id          String          @id @default(uuid())
   name        String          @unique
   address     String?
-  timezone    String?         // IANA — e.g. "America/Los_Angeles"
-  currency    String?         // ISO 4217 — e.g. "USD"
+  timezone    String? // IANA — e.g. "America/Los_Angeles"
+  currency    String? // ISO 4217 — e.g. "USD"
   status      WarehouseStatus @default(ACTIVE)
   createdById String?
   deletedAt   DateTime?
   createdAt   DateTime        @default(now())
 
-  createdBy   User?           @relation("WarehouseCreatedBy", fields: [createdById], references: [id])
+  createdBy User? @relation("WarehouseCreatedBy", fields: [createdById], references: [id])
 
   // Structure
-  zones       Zone[]
-  bins        Bin[]
+  zones Zone[]
+  bins  Bin[]
 
   // IAM reverse relations
-  assignments         WarehouseAssignment[]
-  devices             Device[]
+  assignments WarehouseAssignment[]
+  devices     Device[]
 
   // Operations
-  purchaseOrders      PurchaseOrder[]
-  salesOrders         SalesOrder[]
-  transferOrders      TransferOrder[]
-  returnOrders        ReturnOrder[]
-  adjustOrders        AdjustmentOrder[]
+  purchaseOrders PurchaseOrder[]
+  salesOrders    SalesOrder[]
+  transferOrders TransferOrder[]
+  returnOrders   ReturnOrder[]
+  adjustOrders   AdjustmentOrder[]
 
   // Logs
   binOperationEntries BinOperationEntry[]
@@ -52,9 +52,9 @@ model Warehouse {
   uaeEntries          UserActivityEntry[]
 
   // Config
-  alertRules          AlertRule[]
-  serialConfigs       SerialNumberConfig[]
-  boxes               Box[]
+  alertRules    AlertRule[]
+  serialConfigs SerialNumberConfig[]
+  boxes         Box[]
 }
 
 model Zone {
@@ -91,15 +91,15 @@ model Zone {
 }
 
 model Bin {
-  id          String   @id @default(uuid())
-  zoneId      String
-  warehouseId String
-  name        String
-  code        String   @unique // Scannable — unique across the entire system, not just per zone
-  type        BinType
-  isBlocked   Boolean  @default(false)
-  blockReason String?           // Required when isBlocked = true
-
+  id              String   @id @default(uuid())
+  zoneId          String
+  warehouseId     String
+  name            String
+  code            String   @unique // Scannable — unique across the entire system, not just per zone
+  type            BinType
+  isBlocked       Boolean  @default(false)
+  blockReason     String? // Required when isBlocked = true
+  isActive        Boolean  @default(true)
   // Soft capacity limits — warn on breach, do not hard block by default.
   // AlertRule with type BIN_CAPACITY can escalate to a hard block.
   maxWeightKg     Decimal? @db.Decimal(18, 4)

@@ -123,6 +123,28 @@
 
   --color-page-bg-from: var(--page-bg-from);
   --color-page-bg-to: var(--page-bg-to);
+
+  /* Warehouse floor view (dashboard locations) */
+  --color-wh-page-bg: var(--wh-page-bg);
+  --color-wh-card-bg: var(--wh-card-bg);
+  --color-wh-card-bg-soft: var(--wh-card-bg-soft);
+  --color-wh-border: var(--wh-border);
+  --color-wh-text-primary: var(--wh-text-primary);
+  --color-wh-text-secondary: var(--wh-text-secondary);
+  --color-wh-text-muted: var(--wh-text-muted);
+  --color-wh-status-available: var(--wh-status-available);
+  --color-wh-status-full: var(--wh-status-full);
+  --color-wh-status-blocked: var(--wh-status-blocked);
+  --color-wh-fill-low: var(--wh-fill-low);
+  --color-wh-fill-mid: var(--wh-fill-mid);
+  --color-wh-fill-high: var(--wh-fill-high);
+  --color-wh-fill-track: var(--wh-fill-track);
+  --color-wh-action-bg: var(--wh-action-bg);
+  --color-wh-action-border: var(--wh-action-border);
+  --color-wh-action-text: var(--wh-action-text);
+  --color-wh-warehouse-accent: var(--wh-warehouse-accent);
+  --color-wh-zone-accent: var(--wh-zone-accent);
+  --color-wh-bin-accent: var(--wh-bin-accent);
 }
 
 :root {
@@ -253,6 +275,28 @@
   /* Dashboard page background */
   --page-bg-from: #eef1f5;
   --page-bg-to: #e8ecf1;
+
+  /* Warehouse floor (locations dashboard) — light */
+  --wh-page-bg: #f6f8fb;
+  --wh-card-bg: #ffffff;
+  --wh-card-bg-soft: #f1f5f9;
+  --wh-border: rgba(15, 23, 42, 0.08);
+  --wh-text-primary: #0f172a;
+  --wh-text-secondary: #475569;
+  --wh-text-muted: #94a3b8;
+  --wh-status-available: #16a34a;
+  --wh-status-full: #d97706;
+  --wh-status-blocked: #dc2626;
+  --wh-fill-low: linear-gradient(90deg, #0ea5e9 0%, #22d3ee 100%);
+  --wh-fill-mid: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  --wh-fill-high: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+  --wh-fill-track: rgba(15, 23, 42, 0.08);
+  --wh-action-bg: #ffffff;
+  --wh-action-border: rgba(15, 23, 42, 0.12);
+  --wh-action-text: #0f172a;
+  --wh-warehouse-accent: #0d9488;
+  --wh-zone-accent: #2563eb;
+  --wh-bin-accent: #7c3aed;
 }
 
 .dark {
@@ -374,6 +418,28 @@
   /* Dashboard page background */
   --page-bg-from: #000511;
   --page-bg-to: #0c1019;
+
+  /* Warehouse floor (locations dashboard) — dark */
+  --wh-page-bg: #0f1115;
+  --wh-card-bg: #14171c;
+  --wh-card-bg-soft: #1a1f26;
+  --wh-border: rgba(255, 255, 255, 0.06);
+  --wh-text-primary: #e6e8eb;
+  --wh-text-secondary: #a7b0ba;
+  --wh-text-muted: #6b7480;
+  --wh-status-available: #16c784;
+  --wh-status-full: #f59e0b;
+  --wh-status-blocked: #ef4444;
+  --wh-fill-low: linear-gradient(90deg, #00d4aa 0%, #27e1c1 100%);
+  --wh-fill-mid: linear-gradient(90deg, #38bdf8 0%, #60a5fa 100%);
+  --wh-fill-high: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+  --wh-fill-track: rgba(255, 255, 255, 0.1);
+  --wh-action-bg: rgba(27, 32, 39, 0.92);
+  --wh-action-border: rgba(255, 255, 255, 0.08);
+  --wh-action-text: #d7dbe0;
+  --wh-warehouse-accent: #43c59e;
+  --wh-zone-accent: #5aa8ff;
+  --wh-bin-accent: #b88cff;
 }
 
 .glass {

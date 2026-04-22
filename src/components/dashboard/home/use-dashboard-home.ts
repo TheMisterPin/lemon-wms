@@ -1,10 +1,16 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Building2, Map as MapIcon, Package } from 'lucide-react'
+import type { DashboardInfoCardItem } from '@/components/dashboard/dashboard-info-card'
 import { dashboardApiClient } from '@/lib/axios'
+import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
 import type { DashboardOverviewCard, DashboardWarehouseDisplayRecord, DashboardZoneDisplayRecord, DashboardBinDisplayRecord } from '../warehouses/components/dashboard-types'
+
 const PAGE_SIZE = 3
+
+export type DashboardBinRecord = DashboardBinDisplayRecord
 
 interface DashboardHomePageData {
   info: {
@@ -59,9 +65,21 @@ export type DashboardSearchModel = {
 
 export type UseDashboardHomeReturn = {
   overviewCards: DashboardOverviewCard[]
-  warehouses: DashboardPagedList<DashboardWarehouseDisplayRecord>
-  zones: DashboardPagedList<DashboardZoneDisplayRecord>
-  bins: DashboardBinDisplayRecord[]
+  infoCards: DashboardInfoCardItem[]
+  warehouses: DashboardPagedList<DashboardWarehouseDisplayRecord> & {
+    selectedId: string | null
+    onSelect: (id: string) => void
+    matchCount: number
+  }
+  zones: DashboardPagedList<DashboardZoneDisplayRecord> & {
+    selectedId: string | null
+    onSelect: (id: string) => void
+    matchCount: number
+  }
+  bins: {
+    records: DashboardBinDisplayRecord[]
+    pageSize: number
+  }
   search: DashboardSearchModel
 }
 
@@ -87,6 +105,7 @@ function toWarehouseDisplayRecords(
   return records.map((warehouse) => ({
     id: warehouse.id,
     name: warehouse.name,
+    title: warehouse.name,
     subtitle: `${warehouse.id} · ${warehouse.zones} zones`,
     metric: `${warehouse.bins} bins`
   }))
@@ -98,9 +117,18 @@ function toZoneDisplayRecords(
   return records.map((zone) => ({
     id: zone.id,
     name: zone.name,
+    title: zone.name,
     subtitle: `${zone.id} · ${zone.type}`,
     metric: `${zone.bins} bins`
   }))
+}
+
+function toInfoCards(info: DashboardHomePageData['info']): DashboardInfoCardItem[] {
+  return [
+    { label: 'Warehouses', value: info.warehouses ?? 0, icon: Building2 },
+    { label: 'Zones', value: info.zones ?? 0, icon: MapIcon },
+    { label: 'Bins', value: info.bins ?? 0, icon: Package }
+  ]
 }
 
 function toBinDisplayRecords(
@@ -273,21 +301,31 @@ export function useDashboardHome(): UseDashboardHomeReturn {
 
   return {
     overviewCards: toOverviewCards(data.info),
+    infoCards: toInfoCards(data.info),
     warehouses: {
       records: pagedWarehouses,
-      page: safeWarehousePage + 1,
+      page: safeWarehousePage,
       totalPages: warehousePages,
       onPrev: () => setWarehousePage((p) => Math.max(0, p - 1)),
-      onNext: () => setWarehousePage((p) => Math.min(warehousePages - 1, p + 1))
+      onNext: () => setWarehousePage((p) => Math.min(warehousePages - 1, p + 1)),
+      selectedId: selectedWarehouseId,
+      onSelect: toggleWarehouse,
+      matchCount: filteredWarehouses.length
     },
     zones: {
       records: pagedZones,
-      page: safeZonePage + 1,
+      page: safeZonePage,
       totalPages: zonePages,
       onPrev: () => setZonePage((p) => Math.max(0, p - 1)),
-      onNext: () => setZonePage((p) => Math.min(zonePages - 1, p + 1))
+      onNext: () => setZonePage((p) => Math.min(zonePages - 1, p + 1)),
+      selectedId: selectedZoneId,
+      onSelect: toggleZone,
+      matchCount: filteredZones.length
     },
-    bins: displayBins,
+    bins: {
+      records: displayBins,
+      pageSize: DEFAULT_GENERIC_TABLE_PAGE_SIZE
+    },
     search: {
       text: searchText,
       setText: setSearchTextWithPageReset
