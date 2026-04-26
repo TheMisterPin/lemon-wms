@@ -81,6 +81,18 @@ pnpm dev
 
 Open: `http://localhost:3000`
 
+### Seeded demo access
+
+After running `pnpm seed:all` (or `docker compose up --build`), you can sign in with these seeded credentials:
+
+- **Office login:** [`/login`](http://localhost:3000/login)
+  - Email: `owner@lemon-wms.local`
+  - Password: `owner1234`
+- **Warehouse/floor login:** [`/floor`](http://localhost:3000/floor)
+  - Device name/code: `DEMO`
+  - Badge number: `USR-0000`
+  - PIN: `1234`
+
 
 ### Option B) Run with Docker Compose (app + PostgreSQL + seed)
 ```bash
