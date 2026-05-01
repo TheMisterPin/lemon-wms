@@ -108,7 +108,7 @@ async function createPurchaseOrder(
         supplierNameSnapshot: supplier.name,
         createdById,
         notes: notes ?? null,
-        expectedDate: expectedDate ?? null,
+        expectedDeliveryDate: expectedDate ?? null,
         lines: {
           createMany: {
             data: lineCreates.map(line => ({

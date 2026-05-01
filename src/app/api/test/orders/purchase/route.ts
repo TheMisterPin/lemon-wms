@@ -10,7 +10,19 @@ export async function GET() {
       warehouseId: true,
       businessPartyId: true,
       lines: true,
-      receiptLines: true
+      receipts: {
+        select: {
+          id: true,
+          status: true,
+          totalProcessedQuantity: true,
+          lines: {
+            select: {
+              id: true,
+              quantity: true
+            }
+          }
+        }
+      }
     }
   })
 
