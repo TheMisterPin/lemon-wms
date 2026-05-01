@@ -84,7 +84,7 @@ model PurchaseOrderLine {
   
   uom              String
   notes            String?
-
+  orderedQuantity  Decimal @db.Decimal(18, 4)
   purchaseOrder PurchaseOrder              @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   unitOfMeasure UnitOfMeasure              @relation(fields: [uom], references: [id])
   receiptLines  PurchaseOrderReceiptLine[]
