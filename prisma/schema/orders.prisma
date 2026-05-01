@@ -31,7 +31,6 @@
 //   → logs.prisma (OrderExecutionActivity)
 // =============================================================================
 
-
 // =============================================================================
 // Purchase Orders — inbound stock from suppliers
 // =============================================================================
@@ -46,43 +45,43 @@ model PurchaseOrder {
   priority             OrderPriority @default(NORMAL)
   warehouseId          String
   businessPartyId      String?
-  supplierNameSnapshot String? // Denormalized — preserves name if party is later renamed
+  supplierNameSnapshot String?
   notes                String?
-  expectedDate         DateTime?
-  parentOrderId        String? // Set on /2 split child — points to the MASTER
-  receivingSequence    Int? // For FIFO: day-scoped sequence within warehouse
+
   createdById          String
   confirmedById        String?
-  assignedToId         String?
   confirmedAt          DateTime?
+  expectedDeliveryDate DateTime?
+  actualDeliveryDate   DateTime?
+  executionStartedAt   DateTime?
+  executionCompletedAt DateTime?
   deletedAt            DateTime?
-  createdAt            DateTime      @default(now())
+  createdAt            DateTime  @default(now())
+
+  totalReceivedQuantity Decimal @default(0) @db.Decimal(18, 4)
+  totalOpenQuantity     Decimal @default(0) @db.Decimal(18, 4)
+  completedLines        Int     @default(0)
+  openLines             Int     @default(0)
+  totalLines            Int     @default(0)
 
   warehouse     Warehouse      @relation(fields: [warehouseId], references: [id])
   businessParty BusinessParty? @relation("SupplierPurchaseOrders", fields: [businessPartyId], references: [id])
 
-  parentOrder PurchaseOrder?  @relation("PurchaseOrderHierarchy", fields: [parentOrderId], references: [id])
-  childOrders PurchaseOrder[] @relation("PurchaseOrderHierarchy")
-
-  lines        PurchaseOrderLine[]
-  receiptLines PurchaseOrderReceiptLine[] @relation("ReceiptOrderLines")
+  lines    PurchaseOrderLine[]
+  receipts PurchaseOrderReceipt[]
 
   @@index([warehouseId, status])
   @@index([businessPartyId])
-  @@index([parentOrderId])
   @@index([status])
-  @@index([assignedToId])
 }
 
-// One line per item expected on the purchase order.
-// orderedQuantity is what was ordered. Actual received quantities live in PurchaseOrderReceiptLine.
 model PurchaseOrderLine {
   id               String  @id @default(uuid())
   purchaseOrderId  String
   lineSequence     Int
   itemId           String
   itemNameSnapshot String
-  orderedQuantity  Decimal @db.Decimal(18, 4)
+  
   uom              String
   notes            String?
 
@@ -91,31 +90,72 @@ model PurchaseOrderLine {
   receiptLines  PurchaseOrderReceiptLine[]
 
   @@unique([purchaseOrderId, lineSequence])
-  @@index([itemId])
   @@index([purchaseOrderId])
+  @@index([itemId])
 }
 
-// The actual received quantities per line — multiple receipt lines can exist per master line
-// (split receipts, corrections). receivedQuantity can be less than orderedQuantity (short).
-// correctionGroupId links a correction to the original receipt line it corrects.
-model PurchaseOrderReceiptLine {
-  id                String    @id @default(uuid())
-  receiptOrderId    String
-  masterLineId      String
-  receivedQuantity  Decimal   @db.Decimal(18, 4)
-  correctionGroupId String?
-  correctedAt       DateTime?
-  notes             String?
-  stockItemId       String?
+model PurchaseOrderReceipt {
+  id                   String        @id @default(uuid())
+  reference            String        @unique
+  purchaseOrderId      String
+  status               ReceiptStatus @default(OPEN)
+  warehouseId          String
+  businessPartyId      String?
+  supplierNameSnapshot String?
+  notes                String?
+
+  receivingSequence Int?
+  createdById       String
+  startedById       String?
+  completedById     String?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  deletedAt         DateTime?
   createdAt         DateTime  @default(now())
 
-  receiptOrder PurchaseOrder     @relation("ReceiptOrderLines", fields: [receiptOrderId], references: [id], onDelete: Cascade)
-  masterLine   PurchaseOrderLine @relation(fields: [masterLineId], references: [id], onDelete: Cascade)
-  stockItem    BinStockItem?      @relation("BinStockItemPurchaseOrderReceiptLines", fields: [stockItemId], references: [id])
-  @@index([receiptOrderId])
-  @@index([masterLineId])
-  @@index([correctionGroupId])
-  @@index([stockItemId])
+  totalProcessedQuantity Decimal @default(0) @db.Decimal(18, 4)
+  totalAcceptedQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  totalRejectedQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  totalQuarantinedQty    Decimal @default(0) @db.Decimal(18, 4)
+
+  purchaseOrder PurchaseOrder  @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  warehouse     Warehouse      @relation(fields: [warehouseId], references: [id])
+  businessParty BusinessParty? @relation("SupplierPurchaseOrdersReceipts", fields: [businessPartyId], references: [id])
+
+  lines PurchaseOrderReceiptLine[]
+
+  @@index([purchaseOrderId])
+  @@index([warehouseId, status])
+  @@index([businessPartyId])
+  @@index([status])
+}
+
+model PurchaseOrderReceiptLine {
+  id                     String @id @default(uuid())
+  purchaseOrderReceiptId String
+  purchaseOrderLineId    String
+
+  quantity         Decimal        @db.Decimal(18, 4)
+  orderedQuantity Decimal        @db.Decimal(18, 4)
+  
+  disposition      ReceiptOutcome @default(ACCEPTED)
+  notes            String?
+
+  orderExecutionActivityId String?
+  correctionOfLineId       String?
+  createdAt                DateTime @default(now())
+
+  receiptLine       PurchaseOrderReceipt       @relation(fields: [purchaseOrderReceiptId], references: [id], onDelete: Cascade)
+  purchaseOrderLine PurchaseOrderLine          @relation(fields: [purchaseOrderLineId], references: [id], onDelete: Cascade)
+  correctedLine     PurchaseOrderReceiptLine?  @relation("ReceiptLineCorrections", fields: [correctionOfLineId], references: [id])
+  correctionLines   PurchaseOrderReceiptLine[] @relation("ReceiptLineCorrections")
+
+  stockItems BinStockItem[] @relation("BinStockItemPurchaseOrderReceiptLines")
+
+  @@index([purchaseOrderReceiptId])
+  @@index([purchaseOrderLineId])
+  @@index([disposition])
+  @@index([correctionOfLineId])
 }
 
 // =============================================================================

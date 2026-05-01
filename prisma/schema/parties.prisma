@@ -31,15 +31,16 @@ model BusinessParty {
   contacts  Address[]
 
   // Orders referencing this party
-  supplierItems  Item[]          @relation("SupplierItems")
-  purchaseOrders PurchaseOrder[] @relation("SupplierPurchaseOrders")
-  salesOrders    SalesOrder[]    @relation("CustomerSalesOrders")
+  supplierItems         Item[]                 @relation("SupplierItems")
+  purchaseOrders        PurchaseOrder[]        @relation("SupplierPurchaseOrders")
+  purchaseOrderReceipts PurchaseOrderReceipt[] @relation("SupplierPurchaseOrdersReceipts")
+  salesOrders           SalesOrder[]           @relation("CustomerSalesOrders")
 }
 
 // Individual contact within a business party.
 // A party can have multiple contacts; one is flagged as primary.
 model ContactPerson {
-  id              String        @id @default(uuid())
+  id              String   @id @default(uuid())
   businessPartyId String
   firstName       String
   lastName        String
@@ -48,9 +49,9 @@ model ContactPerson {
   email           String?
   phone           String?
   mobile          String?
-  isPrimary       Boolean       @default(false)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  isPrimary       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   businessParty BusinessParty @relation(fields: [businessPartyId], references: [id], onDelete: Cascade)
 
@@ -63,7 +64,7 @@ model Address {
   id              String      @id @default(uuid())
   businessPartyId String
   type            AddressType
-  label           String?     // Optional human label — e.g. "Main Dock"
+  label           String? // Optional human label — e.g. "Main Dock"
   streetLine1     String
   streetLine2     String?
   city            String

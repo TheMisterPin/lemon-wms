@@ -41,6 +41,7 @@ model Warehouse {
 
   // Operations
   purchaseOrders PurchaseOrder[]
+  purchaseOrderReceipts PurchaseOrderReceipt[]
   salesOrders    SalesOrder[]
   transferOrders TransferOrder[]
   returnOrders   ReturnOrder[]

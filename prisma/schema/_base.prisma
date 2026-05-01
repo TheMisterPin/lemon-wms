@@ -146,6 +146,25 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum ReceiptStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  COMPLETED_WITH_PROBLEMS
+  CANCELLED
+}
+
+enum ReceiptOutcome {
+  ACCEPTED
+  DAMAGED
+  EXPIRED
+  REJECTED
+  QUARANTINED
+  QUALITY_ISSUE
+  CORRECTION
+  OTHER
+}
+
 enum OrderPriority {
   NORMAL
   URGENT
@@ -217,11 +236,12 @@ enum ExecutionActivity {
   EXCEPTION_RESOLVED
   LINE_REVERSED
 }
-  // -----------------------------------------------------------------------------
-  // Party enums
-  // -----------------------------------------------------------------------------
 
-  enum BusinessPartyType {
+// -----------------------------------------------------------------------------
+// Party enums
+// -----------------------------------------------------------------------------
+
+enum BusinessPartyType {
   CUSTOMER
   SUPPLIER
   CARRIER
