@@ -31,7 +31,8 @@ graphify-input-src-tmp/
 .qwen
 .github
 .vscode
-
+.claude
+.codex
 # debug
 npm-debug.log*
 yarn-debug.log*
