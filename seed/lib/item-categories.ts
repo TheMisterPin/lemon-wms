@@ -1,6 +1,4 @@
-// prisma/seed/categories.ts
-// 50 parent categories × 5 subcategories = 250 subcategories + 50 parents = 300 total records
-// Run via: prisma.$transaction([...upserts]) inside your main seed function
+// Seed only active MVP category families.
 
 import { type PrismaClient } from '@/generated/prisma'
 
@@ -9,17 +7,17 @@ import { type PrismaClient } from '@/generated/prisma'
 // ---------------------------------------------------------------------------
 
 interface SubCategory {
-  code: string;
-  name: string;
-  handlingFlags?: string[];
+  code: string
+  name: string
+  handlingFlags?: string[]
 }
 
 interface ParentCategory {
-  code: string;
-  name: string;
-  description: string;
-  handlingFlags?: string[];
-  children: SubCategory[];
+  code: string
+  name: string
+  description: string
+  handlingFlags?: string[]
+  children: SubCategory[]
 }
 
 const categories: ParentCategory[] = [
@@ -85,32 +83,6 @@ const categories: ParentCategory[] = [
       { code: 'SHLV', name: 'Shelving' },
       { code: 'CBNT', name: 'Cabinets' },
       { code: 'TABL', name: 'Tables' }
-    ]
-  },
-  {
-    code: 'BVCL',
-    name: 'Beverages Cold',
-    description: 'Refrigerated and cold-chain beverages',
-    handlingFlags: ['COLD', 'PERISHABLE'],
-    children: [
-      { code: 'JUIC', name: 'Juices', handlingFlags: ['COLD', 'PERISHABLE'] },
-      { code: 'DARY', name: 'Dairy Drinks', handlingFlags: ['COLD', 'PERISHABLE'] },
-      { code: 'ENRG', name: 'Energy Drinks' },
-      { code: 'WATR', name: 'Water' },
-      { code: 'SMTH', name: 'Smoothies', handlingFlags: ['COLD', 'PERISHABLE'] }
-    ]
-  },
-  {
-    code: 'FRZN',
-    name: 'Frozen Foods',
-    description: 'Deep-frozen food products requiring cold-chain storage',
-    handlingFlags: ['COLD', 'PERISHABLE'],
-    children: [
-      { code: 'MEAT', name: 'Meat', handlingFlags: ['COLD', 'PERISHABLE'] },
-      { code: 'VGTB', name: 'Vegetables', handlingFlags: ['COLD', 'PERISHABLE'] },
-      { code: 'RDML', name: 'Ready Meals', handlingFlags: ['COLD', 'PERISHABLE'] },
-      { code: 'ICRM', name: 'Ice Cream', handlingFlags: ['COLD', 'PERISHABLE'] },
-      { code: 'SFOD', name: 'Seafood', handlingFlags: ['COLD', 'PERISHABLE'] }
     ]
   }
 ]

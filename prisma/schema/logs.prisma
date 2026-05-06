@@ -212,4 +212,20 @@ model OrderExecutionActivity {
   @@index([warehouseId, createdAt])
   @@index([activityType, createdAt])
 }
+// Daily bin-level aggregates for dashboards (distinct from immutable BOEs).
+// Snapshot `date` is stored at 00:00:00 UTC for the calendar day.
+model BinHistory {
+  id               String   @id @default(uuid())
+  binId            String
+  date             DateTime
+  quantityOnHand   Decimal  @db.Decimal(18, 4)
+  quantityBlocked  Decimal  @db.Decimal(18, 4)
+  quantityReserved Decimal  @db.Decimal(18, 4)
+  createdAt        DateTime @default(now())
 
+  bin Bin @relation(fields: [binId], references: [id])
+
+  @@unique([binId, date])
+  @@index([binId, date])
+  @@index([date])
+}

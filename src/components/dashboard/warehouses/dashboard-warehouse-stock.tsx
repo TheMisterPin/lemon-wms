@@ -86,11 +86,11 @@ export function DashboardWarehouseStockView({ data }: DashboardWarehouseStockVie
       <div className="mx-auto max-w-7xl space-y-5">
         <div>
           <div className="text-sm" style={{ color: 'var(--wh-text-muted, #94a3b8)' }}>
-            <Link href="/dashboard/warehouses" className="hover:underline">
+            <Link href="/dashboard/locations/warehouses" className="hover:underline">
               Warehouses
             </Link>
             <span className="mx-2">/</span>
-            <Link href={`/dashboard/warehouses/${data.warehouseId}`} className="hover:underline">
+            <Link href={`/dashboard/locations/warehouses/${data.warehouseId}`} className="hover:underline">
               Overview
             </Link>
             <span className="mx-2">/</span>

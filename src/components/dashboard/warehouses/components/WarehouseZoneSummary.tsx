@@ -29,7 +29,7 @@ export function WarehouseZoneSummary({ zones, maxZones = 3 }: WarehouseZoneSumma
         {visible.map((zone) => (
           <a
             key={zone.id}
-            href={`/dashboard/zones/${zone.id}`}
+            href={`/dashboard/locations/zones/${zone.id}`}
             className="block"
             style={{ textDecoration: 'none' }}
           >

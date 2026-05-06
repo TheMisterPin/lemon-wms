@@ -1,4 +1,10 @@
-import { BinItemStatus, BinType, Prisma, type PrismaClient } from '@/generated/prisma'
+import {
+  BinItemStatus,
+  BinType,
+  Prisma,
+  ZoneType,
+  type PrismaClient
+} from '@/generated/prisma'
 
 const MAX_UNIQUE_ITEMS_PER_BIN = 12
 
@@ -137,6 +143,42 @@ function getDesiredRowCount(binType: BinType, itemsCount: number): number {
     return randomInt(2, Math.min(6, maxRows))
   }
 }
+
+type ItemSeed = {
+  id: string
+  uom: string
+  name: string
+  sku: string
+  categoryId: string | null
+  categoryRootCode: string | null
+  isFood: boolean
+  isFrozen: boolean
+}
+
+function isFoodRoot(code: string | null): boolean {
+  return code === 'FDBV' || code === 'BVCL' || code === 'FRZN'
+}
+
+function isFrozenCategoryCode(code: string | null): boolean {
+  if (code === null) {
+    return false
+  }
+
+  return ['MEAT', 'VGTB', 'RDML', 'ICRM', 'SFOD'].includes(code)
+}
+
+function isItemAllowedInZone(item: ItemSeed, zoneType: ZoneType): boolean {
+  if (item.isFrozen) {
+    return zoneType === ZoneType.COLD
+  }
+
+  if (item.isFood) {
+    return zoneType === ZoneType.COLD
+  }
+
+  return zoneType !== ZoneType.COLD
+}
+
 export async function seedBinStockItems(prisma: PrismaClient) {
   const [bins, items] = await Promise.all([
     prisma.bin.findMany({
@@ -145,12 +187,29 @@ export async function seedBinStockItems(prisma: PrismaClient) {
         id: true,
         warehouseId: true,
         maxCapacity: true,
-        type: true
+        type: true,
+        zone: {
+          select: {
+            type: true
+          }
+        }
       },
       orderBy: { id: 'asc' }
     }),
     prisma.item.findMany({
-      select: { id: true, uom: true, name: true, sku: true },
+      select: {
+        id: true,
+        uom: true,
+        name: true,
+        sku: true,
+        categoryId: true,
+        category: {
+          select: {
+            code: true,
+            parentCode: true
+          }
+        }
+      },
       orderBy: { id: 'asc' }
     })
   ])
@@ -166,6 +225,21 @@ export async function seedBinStockItems(prisma: PrismaClient) {
   >()
   let globalRecordIndex = 1
 
+  const mappedItems: ItemSeed[] = items.map((item) => {
+    const categoryRootCode = item.category?.parentCode ?? item.category?.code ?? null
+
+    return {
+      id: item.id,
+      uom: item.uom,
+      name: item.name,
+      sku: item.sku,
+      categoryId: item.categoryId,
+      categoryRootCode,
+      isFood: isFoodRoot(categoryRootCode),
+      isFrozen: categoryRootCode === 'FRZN' || isFrozenCategoryCode(item.categoryId)
+    }
+  })
+
   for (const [binIndex, bin] of bins.entries()) {
     const maxCapacity = bin.maxCapacity?.toNumber() ?? 0
 
@@ -180,23 +254,49 @@ export async function seedBinStockItems(prisma: PrismaClient) {
       continue
     }
 
-    const desiredRowCount = getDesiredRowCount(bin.type, items.length)
+    const zoneType = bin.zone?.type ?? ZoneType.GENERAL
+    const zoneEligibleItems = mappedItems.filter((item) => isItemAllowedInZone(item, zoneType))
+
+    if (zoneEligibleItems.length === 0) {
+      continue
+    }
+
+    const eligibleItems = (() => {
+      if (bin.type === BinType.STAGING) {
+        return zoneEligibleItems
+      }
+
+      const roots = [...new Set(zoneEligibleItems.map((item) => item.categoryRootCode).filter((code) => code !== null))]
+      if (roots.length === 0) {
+        return zoneEligibleItems
+      }
+
+      const selectedRoot = roots[binIndex % roots.length]
+
+      return zoneEligibleItems.filter((item) => item.categoryRootCode === selectedRoot)
+    })()
+
+    if (eligibleItems.length === 0) {
+      continue
+    }
+
+    const desiredRowCount = getDesiredRowCount(bin.type, eligibleItems.length)
     const usedItemIndexes = new Set<number>()
-    let itemCursor = (binIndex * 37) % items.length
+    let itemCursor = (binIndex * 37) % eligibleItems.length
     let remainingCapacity = targetQuantity
 
     for (
       let slot = 0;
-      slot < desiredRowCount && remainingCapacity > 0 && usedItemIndexes.size < items.length;
+      slot < desiredRowCount && remainingCapacity > 0 && usedItemIndexes.size < eligibleItems.length;
       slot += 1
     ) {
       while (usedItemIndexes.has(itemCursor)) {
-        itemCursor = (itemCursor + 1) % items.length
+        itemCursor = (itemCursor + 1) % eligibleItems.length
       }
 
       usedItemIndexes.add(itemCursor)
-      const item = items[itemCursor]
-      itemCursor = (itemCursor + 17) % items.length
+      const item = eligibleItems[itemCursor]
+      itemCursor = (itemCursor + 17) % eligibleItems.length
 
       const status = getStatusForBinType(bin.type)
 

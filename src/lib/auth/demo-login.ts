@@ -8,6 +8,7 @@ import {
 } from '@/lib/auth/session'
 import { DomainError } from '@/lib/errors'
 import { AUTH_LOG_METHODS, createUserActivityEntry, LOG_ACTION_TYPES } from '@/lib/logs'
+import { syncTodaysBinHistorySnapshotsAfterLogin } from '@/lib/logs/bin-history/bin-history-helpers'
 
 type DemoLoginParams = {
   role: Role
@@ -71,6 +72,8 @@ export async function demoLogin(
       notes: 'Demo mode instant login'
     })
   ])
+
+  await syncTodaysBinHistorySnapshotsAfterLogin(prisma)
 
   return {
     accessToken,

@@ -72,12 +72,12 @@ export function DashboardZoneOverviewView({ data }: DashboardZoneOverviewViewPro
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="text-sm" style={{ color: 'var(--wh-text-muted, #94a3b8)' }}>
-              <Link href="/dashboard/warehouses" className="hover:underline">
+              <Link href="/dashboard/locations/warehouses" className="hover:underline">
                 Warehouses
               </Link>
               <span className="mx-2">/</span>
               <Link
-                href={`/dashboard/warehouses/${data.zone.warehouseId}`}
+                href={`/dashboard/locations/warehouses/${data.zone.warehouseId}`}
                 className="hover:underline"
               >
                 {data.zone.warehouseName}

@@ -16,6 +16,7 @@ import {
   createUserActivityEntry,
   LOG_ACTION_TYPES
 } from '@/lib/logs'
+import { syncTodaysBinHistorySnapshotsAfterLogin } from '@/lib/logs/bin-history/bin-history-helpers'
 
 type FloorLoginParams = {
   deviceCode: string
@@ -156,6 +157,8 @@ export async function floorLogin(
       }
     })
   ])
+
+  await syncTodaysBinHistorySnapshotsAfterLogin(prisma)
 
   return {
     accessToken,

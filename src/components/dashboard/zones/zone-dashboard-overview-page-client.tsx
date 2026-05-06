@@ -69,7 +69,7 @@ export function ZoneDashboardOverviewPageClient({ zoneId }: { zoneId: string }) 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard/zones')}
+                onClick={() => router.push('/dashboard/locations/zones')}
                 className="rounded-xl px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
                 style={{
                   background: 'var(--wh-action-bg)',
@@ -80,7 +80,7 @@ export function ZoneDashboardOverviewPageClient({ zoneId }: { zoneId: string }) 
                 All zones
               </button>
               <Link
-                href="/dashboard/warehouses"
+                href="/dashboard/locations/warehouses"
                 className="rounded-xl px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
                 style={{
                   border: '1px solid var(--wh-border)',

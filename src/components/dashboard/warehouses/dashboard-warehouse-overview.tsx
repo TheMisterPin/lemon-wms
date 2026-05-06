@@ -167,7 +167,7 @@ export function DashboardWarehouseOverviewView({
             progress={item.label === 'Warehouse fill' ? fillPct : 0}
             href={
               item.label === 'Stock on hand'
-                ? `/dashboard/warehouses/${data.warehouse.id}/stock`
+                ? `/dashboard/locations/warehouses/${data.warehouse.id}/stock`
                 : null
             }
           />

@@ -15,6 +15,7 @@ import {
   createUserActivityEntry,
   LOG_ACTION_TYPES
 } from '@/lib/logs'
+import { syncTodaysBinHistorySnapshotsAfterLogin } from '@/lib/logs/bin-history/bin-history-helpers'
 
 type CredentialLoginParams = {
   email: string
@@ -110,6 +111,8 @@ export async function credentialLogin(
       }
     })
   ])
+
+  await syncTodaysBinHistorySnapshotsAfterLogin(prisma)
 
   return {
     accessToken,

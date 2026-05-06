@@ -5,8 +5,14 @@ import { seedBusinessParties } from './business-parties'
 import { seedCategories } from './item-categories'
 import { seedItems } from './items'
 import { seedPurchaseOrders } from './purchase-orders'
+import { seedBinHistory } from './seed-bin-history'
+import { seedBinOperations } from './seed-bin-operations'
 import { seedBinStockItems } from './seed-bin-stock-items'
 import { seedDemoDevice } from './seed-devices'
+import { seedOrderAssignments } from './seed-order-assignments'
+import { seedSalesOrders } from './seed-sales-order'
+import { seedTransferOrders } from './seed-transfer-orders'
+import { seedUserActivities } from './seed-user-activities'
 import { seedUnitsOfMeasure } from './unit-of-measures'
 import { seedUsers } from './users'
 import { seedWarehouses } from './warehouses'
@@ -22,6 +28,10 @@ export async function seedDB(prisma: PrismaClient) {
 
   await prisma.userActivityEntry.deleteMany()
   console.warn('Cleared activities.')
+  await prisma.orderExecutionActivity.deleteMany()
+  console.warn('Cleared order execution activities.')
+  await prisma.orderAssignment.deleteMany()
+  console.warn('Cleared order assignments.')
   await prisma.purchaseOrderLine.deleteMany()
   console.warn('Cleared purchase order lines.')
   await prisma.salesOrderLine.deleteMany()
@@ -34,6 +44,8 @@ export async function seedDB(prisma: PrismaClient) {
   console.warn('Cleared adjustment orders.')
   await prisma.binOperationEntry.deleteMany()
   console.warn('Cleared bin operation entries.')
+  await prisma.binHistory.deleteMany()
+  console.warn('Cleared bin history snapshots.')
   await prisma.transferOrderLine.deleteMany()
   console.warn('Cleared transfer order lines.')
   await prisma.transferOrder.deleteMany()
@@ -102,8 +114,8 @@ export async function seedDB(prisma: PrismaClient) {
   console.warn(`Seeded ${users.count} users.\n`)
 
   console.warn('Seeding demo device...')
-  await seedDemoDevice(prisma)
-  console.warn('Seeded demo device.\n')
+  const devices = await seedDemoDevice(prisma)
+  console.warn(`Seeded ${devices.count} devices.\n`)
 
   console.warn('Seeding suppliers and customers...')
   const businessParties = await seedBusinessParties(prisma)
@@ -121,9 +133,33 @@ export async function seedDB(prisma: PrismaClient) {
   const binStockItems = await seedBinStockItems(prisma)
   console.warn(`Seeded ${binStockItems.count} bin stock items.\n`)
 
+  console.warn('Seeding bin operations (movement log)...')
+  const binOperations = await seedBinOperations(prisma)
+  console.warn(`Seeded ${binOperations.count} bin operation entries.\n`)
+
+  console.warn('Seeding bin daily history snapshots...')
+  const binHistory = await seedBinHistory(prisma)
+  console.warn(`Seeded ${binHistory.count} bin history snapshot rows.\n`)
+
   console.warn('Seeding purchase orders...')
   const purchaseOrders = await seedPurchaseOrders(prisma)
   console.warn(`Seeded ${purchaseOrders.count} purchase orders.\n`)
+
+  console.warn('Seeding sales orders...')
+  const salesOrders = await seedSalesOrders(prisma)
+  console.warn(`Seeded ${salesOrders.count} sales orders and updated ${salesOrders.reservedUpdates} stock rows as reserved.\n`)
+
+  console.warn('Seeding transfer orders...')
+  const transferOrders = await seedTransferOrders(prisma)
+  console.warn(`Seeded ${transferOrders.count} transfer orders and updated ${transferOrders.reservedUpdates} stock rows as reserved.\n`)
+
+  console.warn('Seeding order assignments...')
+  const orderAssignments = await seedOrderAssignments(prisma)
+  console.warn(`Seeded ${orderAssignments.assignmentsCount} order assignments and ${orderAssignments.userActivitiesCount} assignment activities.\n`)
+
+  console.warn('Seeding auth user activities...')
+  const userActivities = await seedUserActivities(prisma)
+  console.warn(`Seeded ${userActivities.count} auth user activities.\n`)
 
   return {
     unitsOfMeasureSeeded: unitsOfMeasure.count,
@@ -131,7 +167,14 @@ export async function seedDB(prisma: PrismaClient) {
     zonesSeeded: zones.count,
     binsSeeded: bins.count,
     binStockItemsSeeded: binStockItems.count,
+    binOperationsSeeded: binOperations.count,
+    binHistorySnapshotsSeeded: binHistory.count,
     purchaseOrdersSeeded: purchaseOrders.count,
+    salesOrdersSeeded: salesOrders.count,
+    transferOrdersSeeded: transferOrders.count,
+    orderAssignmentsSeeded: orderAssignments.assignmentsCount,
+    assignmentActivitiesSeeded: orderAssignments.userActivitiesCount,
+    userActivitiesSeeded: userActivities.count,
     usersSeeded: users.count,
     businessPartiesSeeded: businessParties.partiesCount,
     itemCategoriesSeeded: itemCategories.parentCount + itemCategories.childCount,

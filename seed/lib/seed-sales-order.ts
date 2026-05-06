@@ -1,0 +1,184 @@
+import {
+  BinItemStatus,
+  OrderStatus,
+  Prisma,
+  type PrismaClient
+} from '@/generated/prisma'
+
+const SALES_ORDER_COUNT = 30
+const UPDATE_BATCH_SIZE = 100
+
+function pickStatus(index: number): OrderStatus {
+  const cycle: OrderStatus[] = [
+    OrderStatus.RELEASED,
+    OrderStatus.EXECUTING,
+    OrderStatus.PAUSED,
+    OrderStatus.RELEASED,
+    OrderStatus.RELEASED
+  ]
+
+  return cycle[index % cycle.length]
+}
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+type MutableStock = {
+  id: string
+  warehouseId: string
+  binId: string
+  itemId: string
+  itemName: string
+  uom: string
+  quantityAvailable: number
+  quantityReserved: number
+}
+
+export async function seedSalesOrders(prisma: PrismaClient) {
+  const [customers, users, stockRows] = await Promise.all([
+    prisma.businessParty.findMany({
+      where: { type: 'CUSTOMER', isActive: true },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, name: true }
+    }),
+    prisma.user.findMany({
+      where: {
+        isActive: true,
+        role: { in: ['OWNER', 'OFFICE_MANAGER', 'OFFICE_WORKER'] }
+      },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true }
+    }),
+    prisma.binStockItem.findMany({
+      where: {
+        quantityAvailable: { gt: 0 },
+        status: 'AVAILABLE',
+        bin: { deletedAt: null }
+      },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        warehouseId: true,
+        binId: true,
+        itemId: true,
+        name: true,
+        uom: true,
+        quantityAvailable: true,
+        quantityReserved: true
+      }
+    })
+  ])
+
+  if (customers.length === 0 || users.length === 0 || stockRows.length === 0) {
+    return { count: 0, reservedUpdates: 0 }
+  }
+
+  const mutableStock: MutableStock[] = stockRows.map((row) => ({
+    id: row.id,
+    warehouseId: row.warehouseId,
+    binId: row.binId,
+    itemId: row.itemId,
+    itemName: row.name,
+    uom: row.uom,
+    quantityAvailable: Number(row.quantityAvailable),
+    quantityReserved: Number(row.quantityReserved)
+  }))
+
+  let created = 0
+
+  for (let index = 0; index < SALES_ORDER_COUNT; index += 1) {
+    const availableForOrder = mutableStock.filter((row) => row.quantityAvailable > 0)
+    if (availableForOrder.length === 0) {
+      break
+    }
+
+    const sourceRow = availableForOrder[index % availableForOrder.length]
+    const warehouseId = sourceRow.warehouseId
+    const warehousePool = mutableStock.filter(
+      (row) => row.warehouseId === warehouseId && row.quantityAvailable > 0
+    )
+
+    if (warehousePool.length === 0) {
+      continue
+    }
+
+    const lineCount = Math.min(warehousePool.length, randomInt(2, 5))
+    const start = (index * 7) % warehousePool.length
+    const selected: MutableStock[] = []
+
+    for (let offset = 0; offset < warehousePool.length && selected.length < lineCount; offset += 1) {
+      const row = warehousePool[(start + offset) % warehousePool.length]
+      if (selected.some((s) => s.id === row.id)) {
+        continue
+      }
+      selected.push(row)
+    }
+
+    if (selected.length === 0) {
+      continue
+    }
+
+    const customer = customers[index % customers.length]
+    const createdBy = users[index % users.length]
+
+    const lines: Prisma.SalesOrderLineUncheckedCreateWithoutSalesOrderInput[] = selected.map((stock) => {
+      const reserveQty = Math.min(stock.quantityAvailable, randomInt(1, Math.min(6, stock.quantityAvailable)))
+
+      stock.quantityAvailable -= reserveQty
+      stock.quantityReserved += reserveQty
+
+      return {
+        itemId: stock.itemId,
+        itemNameSnapshot: stock.itemName,
+        originBinId: stock.binId,
+        baseQuantity: new Prisma.Decimal(reserveQty),
+        handledQuantity: new Prisma.Decimal(0),
+        isShort: false,
+        uom: stock.uom
+      }
+    })
+
+    await prisma.salesOrder.create({
+      data: {
+        reference: `SO-SEED-${String(index + 1).padStart(4, '0')}`,
+        status: pickStatus(index),
+        warehouseId,
+        businessPartyId: customer.id,
+        customerName: customer.name,
+        createdById: createdBy.id,
+        lines: { create: lines }
+      }
+    })
+
+    created += 1
+  }
+
+  const updates = mutableStock
+    .map((row) => ({
+      id: row.id,
+      quantityAvailable: row.quantityAvailable,
+      quantityReserved: row.quantityReserved,
+      status: row.quantityReserved > 0 ? BinItemStatus.RESERVED : BinItemStatus.AVAILABLE
+    }))
+    .filter((row) => row.quantityReserved > 0)
+
+  for (let i = 0; i < updates.length; i += UPDATE_BATCH_SIZE) {
+    const batch = updates.slice(i, i + UPDATE_BATCH_SIZE)
+
+    await Promise.all(
+      batch.map((row) =>
+        prisma.binStockItem.update({
+          where: { id: row.id },
+          data: {
+            quantityAvailable: new Prisma.Decimal(row.quantityAvailable),
+            quantityReserved: new Prisma.Decimal(row.quantityReserved),
+            status: row.status
+          }
+        })
+      )
+    )
+  }
+
+  return { count: created, reservedUpdates: updates.length }
+}

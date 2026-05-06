@@ -207,7 +207,7 @@ export function DirectorySections({
             subtitle={warehouse.subtitle}
             metric={warehouse.metric}
             accent="var(--wh-warehouse-accent)"
-            detailsHref={`/dashboard/warehouses/${warehouse.id}`}
+            detailsHref={`/dashboard/locations/warehouses/${warehouse.id}`}
           />
         ))}
       </SectionBlock>
@@ -234,6 +234,7 @@ export function DirectorySections({
             subtitle={zone.subtitle}
             metric={zone.metric}
             accent="var(--wh-zone-accent)"
+            detailsHref={`/dashboard/locations/zones/${zone.id}`}
           />
         ))}
       </SectionBlock>

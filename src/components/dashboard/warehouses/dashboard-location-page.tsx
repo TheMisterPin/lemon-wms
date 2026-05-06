@@ -1,7 +1,10 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 
+import { DASHBOARD_NAV_GROUPS, isRouteActive } from '@/components/dashboard/dashboard-navigation'
 import { useDashboardHome } from '@/components/dashboard/home/use-dashboard-home'
 
 import { BinGrid } from './components/BinGrid'
@@ -75,6 +78,83 @@ export function DashboardLocationsPageView() {
   return (
     <main className="min-h-screen" style={{ background: 'var(--wh-page-bg)' }}>
       <div className="mx-auto max-w-7xl space-y-4 p-4 xl:space-y-5 xl:p-6">
+        <section
+          className="rounded-2xl"
+          style={{
+            background: 'var(--wh-card-bg-soft)',
+            border: '1px solid var(--wh-border)'
+          }}
+        >
+          <div className="border-b px-4 py-3 xl:px-5" style={{ borderColor: 'var(--wh-border)' }}>
+            <h2 className="text-sm font-semibold xl:text-base" style={{ color: 'var(--wh-text-primary)' }}>
+              Dashboard navigation
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2 xl:p-5">
+            {DASHBOARD_NAV_GROUPS.map((group) => {
+              const links = group.links ?? []
+
+              if (group.href && links.length === 0) {
+                const active = isRouteActive('/dashboard', group.href)
+
+                return (
+                  <Link
+                    key={group.label}
+                    href={group.href}
+                    className={[
+                      'rounded-xl border px-4 py-3 text-sm font-medium transition-opacity hover:opacity-90',
+                      active ? 'opacity-100' : 'opacity-95'
+                    ].join(' ')}
+                    style={{
+                      background: 'var(--wh-card-bg)',
+                      borderColor: 'var(--wh-border)',
+                      color: 'var(--wh-text-primary)'
+                    }}
+                  >
+                    {group.label}
+                  </Link>
+                )
+              }
+
+              return (
+                <details
+                  key={group.label}
+                  className="group/nav-card rounded-xl border"
+                  style={{
+                    background: 'var(--wh-card-bg)',
+                    borderColor: 'var(--wh-border)'
+                  }}
+                >
+                  <summary
+                    className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium [&::-webkit-details-marker]:hidden"
+                    style={{ color: 'var(--wh-text-primary)' }}
+                  >
+                    <span>{group.label}</span>
+                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-open/nav-card:rotate-180" />
+                  </summary>
+                  <div className="grid grid-rows-[0fr] transition-all duration-200 ease-out group-open/nav-card:grid-rows-[1fr]">
+                    <div className="space-y-2 overflow-hidden px-4 pb-4">
+                      {links.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="block rounded-lg border px-3 py-2 text-sm transition-opacity hover:opacity-90"
+                          style={{
+                            background: 'var(--wh-card-bg-soft)',
+                            borderColor: 'var(--wh-border)',
+                            color: 'var(--wh-text-secondary)'
+                          }}
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </details>
+              )
+            })}
+          </div>
+        </section>
         <OverviewCards overview={overviewCards} />
         <DirectorySections
           warehouses={warehouses.records}
@@ -93,7 +173,6 @@ export function DashboardLocationsPageView() {
         <BinGrid bins={bins.records} pageSize={bins.pageSize} onViewContents={openContents} />
       </div>
       <BinContentsModal binId={contentsBinId} open={contentsOpen} onOpenChange={onContentsOpenChange} />
-
     </main>
   )
 }

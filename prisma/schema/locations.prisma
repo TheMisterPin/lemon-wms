@@ -123,6 +123,9 @@ model Bin {
   binStockItems BinStockItem[]
   boxes         Box[]
 
+  // Dashboard snapshots — see BinHistory model in logs.prisma
+  binHistory BinHistory[]
+
   // Transfer order source/destination
   toTransfers   TransferOrder[] @relation("TransferToBin")
   fromTransfers TransferOrder[] @relation("TransferFromBin")

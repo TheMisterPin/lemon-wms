@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 import {
   WarehouseOverviewButton,
@@ -117,7 +118,13 @@ export function ZoneBinsSection({ bins }: ZoneBinsSectionProps) {
         <WarehouseOverviewChartPanel>
           <div className="grid grid-cols-1 gap-3">
             {previewBins.map((b) => (
-              <ZoneBinStockCard key={b.binId} bin={b} />
+              <Link
+                key={b.binId}
+                href={`/dashboard/locations/bins/${b.binId}`}
+                className="block transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wh-border)]"
+              >
+                <ZoneBinStockCard bin={b} />
+              </Link>
             ))}
           </div>
         </WarehouseOverviewChartPanel>
@@ -138,7 +145,13 @@ export function ZoneBinsSection({ bins }: ZoneBinsSectionProps) {
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {bins.map((b) => (
-                <ZoneBinStockCard key={`sheet-${b.binId}`} bin={b} />
+                <Link
+                  key={`sheet-${b.binId}`}
+                  href={`/dashboard/locations/bins/${b.binId}`}
+                  className="block transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wh-border)]"
+                >
+                  <ZoneBinStockCard bin={b} />
+                </Link>
               ))}
             </div>
           </div>

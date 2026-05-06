@@ -91,7 +91,7 @@ export function WarehouseStockZonesTable({ zones }: WarehouseStockZonesTableProp
                 <td className="px-4 py-3 text-right tabular-nums font-medium">{zone.fillPercent}%</td>
                 <td className="px-4 py-3 text-center">
                   <Link
-                    href={`/dashboard/zones/${zone.zoneId}`}
+                    href={`/dashboard/locations/zones/${zone.zoneId}`}
                     className="inline-flex rounded-xl px-3 py-1.5 text-xs font-medium transition hover:opacity-90"
                     style={{
                       background: 'transparent',

@@ -1,6 +1,6 @@
 import 'dotenv/config'
-import prisma from '../src/lib/prisma'
 import { seedWarehouses } from './lib/warehouses'
+import prisma from '../src/lib/prisma'
 
 async function runSeedWarehouses() {
   console.warn('Seeding warehouses...\n')
