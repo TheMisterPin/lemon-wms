@@ -1,4 +1,5 @@
 import {
+  BinItemStatus,
   OrderStatus,
   Prisma,
   type PrismaClient
@@ -147,7 +148,7 @@ export async function seedTransferOrders(prisma: PrismaClient) {
       id: row.id,
       quantityAvailable: row.quantityAvailable,
       quantityReserved: row.quantityReserved,
-      status: row.quantityReserved > 0 ? 'RESERVED' : 'AVAILABLE'
+      status: row.quantityReserved > 0 ? BinItemStatus.RESERVED : BinItemStatus.AVAILABLE
     }))
     .filter((row) => row.quantityReserved > 0)
 
