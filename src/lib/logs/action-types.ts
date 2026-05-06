@@ -64,7 +64,8 @@ export type LogActionType = (typeof LOG_ACTION_TYPES)[keyof typeof LOG_ACTION_TY
 
 export const AUTH_LOG_METHODS = {
   CREDENTIAL: 'CREDENTIAL',
-  BADGE_PIN: 'BADGE_PIN'
+  BADGE_PIN: 'BADGE_PIN',
+  DEMO: 'DEMO'
 } as const
 
 export const AUTH_LOG_FAILURE_REASONS = {

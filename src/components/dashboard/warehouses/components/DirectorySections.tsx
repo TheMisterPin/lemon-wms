@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { MapPin, Warehouse } from 'lucide-react'
 
 import { PaginationSelector } from '@/components/shared/PaginationSelector'
@@ -53,9 +54,26 @@ type ListCardProps = {
   subtitle: string
   accent: string
   metric: string
+  detailsHref?: string
 }
 
-function ListCard({ icon: Icon, title, subtitle, accent, metric }: ListCardProps) {
+function ListCard({
+  icon: Icon,
+  title,
+  subtitle,
+  accent,
+  metric,
+  detailsHref
+}: ListCardProps) {
+  const ctaClassName =
+    'rounded-xl px-3 py-2 text-[11px] transition-all duration-300 xl:text-xs '
+    + 'opacity-100 md:translate-x-1 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100'
+  const ctaStyle = {
+    background: 'var(--wh-action-bg)',
+    border: '1px solid var(--wh-action-border)',
+    color: 'var(--wh-action-text)'
+  } as const
+
   return (
     <div
       className="group rounded-2xl transition-transform duration-200 hover:-translate-y-0.5"
@@ -97,16 +115,23 @@ function ListCard({ icon: Icon, title, subtitle, accent, metric }: ListCardProps
             {metric}
           </div>
 
-          <button
-            className="rounded-xl px-3 py-2 text-[11px] transition-all duration-300 opacity-100 md:translate-x-1 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100 xl:text-xs"
-            style={{
-              background: 'var(--wh-action-bg)',
-              border: '1px solid var(--wh-action-border)',
-              color: 'var(--wh-action-text)'
-            }}
-          >
-            See details
-          </button>
+          {detailsHref ? (
+            <Link
+              href={detailsHref}
+              className={`inline-flex items-center justify-center font-medium ${ctaClassName}`}
+              style={ctaStyle}
+            >
+              See details
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className={`font-medium ${ctaClassName}`}
+              style={ctaStyle}
+            >
+              See details
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -182,6 +207,7 @@ export function DirectorySections({
             subtitle={warehouse.subtitle}
             metric={warehouse.metric}
             accent="var(--wh-warehouse-accent)"
+            detailsHref={`/dashboard/warehouses/${warehouse.id}`}
           />
         ))}
       </SectionBlock>

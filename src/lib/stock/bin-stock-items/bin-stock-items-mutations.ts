@@ -1,6 +1,6 @@
 import { Prisma } from '@/generated/prisma'
 
-import { updateBinCapacity } from '@/lib/locations/bins/bins-mutations'
+import { getZoneFromBin, updateBinCapacity } from '@/lib/locations'
 import { createBinOperationsFromItem } from '@/lib/logs/bin-operation-entries/create-from-item'
 import { updateBinCapacityBy } from '@/lib/stock/stock-mutations'
 import type { AddItemsToBinArgs, UnloadItemsFromTrolleyArgs } from '@/types/stock'
@@ -27,10 +27,13 @@ async function removeItemsFromBin(args: RemoveItemsFromBinArgs) {
       throw new Error('Insufficient quantity in source bin stock item')
     }
 
+    const { id: sourceZoneId } = await getZoneFromBin(tx, source.binId)
+
     const boe = await tx.binOperationEntry.create({
       data: {
         userId,
         warehouseId,
+        zoneId: sourceZoneId,
         type: 'ADJUST',
         fromBinId: source.binId,
         toBinId: null,
@@ -72,10 +75,13 @@ async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
       throw new Error('Insufficient quantity in source bin stock item')
     }
 
+    const { id: sourceZoneId } = await getZoneFromBin(tx, source.binId)
+
     const transferLoadBoe = await tx.binOperationEntry.create({
       data: {
         userId,
         warehouseId,
+        zoneId: sourceZoneId,
         type: 'TRANSFER_LOAD',
         fromBinId: source.binId,
         toBinId: null,
@@ -151,6 +157,8 @@ async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
       throw new Error('Destination bin not found')
     }
 
+    const { id: destinationZoneId } = await getZoneFromBin(tx, toBinId)
+
     const results: Array<{ boeId: string; transitBinStockItemId: string; unloadedQuantity: number }> = []
 
     for (const selection of selections) {
@@ -187,6 +195,7 @@ async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
         data: {
           userId,
           warehouseId,
+          zoneId: destinationZoneId,
           type: 'TRANSFER_UNLOAD',
           fromBinId: transitItem.binId,
           toBinId,

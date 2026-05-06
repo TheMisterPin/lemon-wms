@@ -1,14 +1,26 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import { useDashboardHome } from '@/components/dashboard/home/use-dashboard-home'
+
 import { BinGrid } from './components/BinGrid'
 import { DirectorySections } from './components/DirectorySections'
 import { OverviewCards } from './components/OverviewCards'
+import { DashboardLocationsPageSkeleton } from './dashboard-location-page-skeleton'
 import { BinContentsModal } from '../features/bins/bin-contents-modal'
 
-export  function DashboardLocationsPageView() {
-  const { overviewCards, warehouses, zones, bins } = useDashboardHome()
+/** Locations overview at `/dashboard` — aggregates only; drill down via `/dashboard/warehouses/[id]`. */
+export function DashboardLocationsPageView() {
+  const {
+    isLoading,
+    error,
+    refetch,
+    overviewCards,
+    warehouses,
+    zones,
+    bins
+  } = useDashboardHome()
   const [contentsBinId, setContentsBinId] = useState<string | null>(null)
   const [contentsOpen, setContentsOpen] = useState(false)
 
@@ -23,6 +35,42 @@ export  function DashboardLocationsPageView() {
       setContentsBinId(null)
     }
   }, [])
+
+  if (isLoading) {
+    return <DashboardLocationsPageSkeleton />
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen" style={{ background: 'var(--wh-page-bg)' }}>
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-4 p-6 xl:p-10">
+          <div
+            className="w-full max-w-lg rounded-2xl px-6 py-10 text-center"
+            style={{
+              background: 'var(--wh-card-bg-soft)',
+              border: '1px solid var(--wh-border)'
+            }}
+          >
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--wh-text-primary)' }}>
+              {error}
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="mt-6 rounded-xl px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
+              style={{
+                background: 'var(--wh-action-bg)',
+                border: '1px solid var(--wh-action-border)',
+                color: 'var(--wh-action-text)'
+              }}
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen" style={{ background: 'var(--wh-page-bg)' }}>

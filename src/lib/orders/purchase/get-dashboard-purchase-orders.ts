@@ -46,20 +46,20 @@ async function getDashboardPurchaseOrders(prisma: PrismaClient): Promise<Dashboa
           name: true
         }
       },
-      lines: true,
       receipts: {
         select: {
           id: true,
           lines: {
             select: {
               id: true,
+              itemId: true,
+              itemNameSnapshot: true,
+              uom: true,
               quantity: true,
               orderedQuantity: true
             }
           }
-        }
-      }
-    },
+        } } },
     orderBy: { createdAt: 'desc' }
   })
 
@@ -71,15 +71,15 @@ async function getDashboardPurchaseOrders(prisma: PrismaClient): Promise<Dashboa
     warehouseId: order.warehouseId,
     createdAt: order.createdAt,
     businessPartyId: order.businessParty?.name ?? null,
-    lineCount: order.lines.length,
-    lines: order.lines.map(line => ({
+    lineCount: order.receipts.reduce((acc, receipt) => acc + receipt.lines.length, 0),
+    lines: order.receipts.flatMap(receipt => receipt.lines.map(line => ({
       id: line.id,
       itemId: line.itemId,
-      itemName: line.itemNameSnapshot,
+      itemName: line.itemNameSnapshot ?? '',
       uom: line.uom,
       baseQuantity: line.orderedQuantity.toNumber(),
-      handledQuantity: order.receipts.reduce((acc, receipt) => acc + receipt.lines.reduce((acc, line) => acc + line.quantity.toNumber(), 0), 0)
-    }))
+      handledQuantity: line.quantity.toNumber()
+    })))
   }))
 
   return mappedOrders

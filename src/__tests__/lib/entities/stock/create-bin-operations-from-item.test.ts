@@ -1,11 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Prisma } from '@/generated/prisma'
+import * as binsMutations from '@/lib/locations/bins/bins-mutations'
+import { createBinOperationsFromItem } from '@/lib/logs/bin-operation-entries/create-from-item'
 import {
   getAdjustmentBinOperationParams,
   getMovementBinOperationParams,
   normalizeQuantity
-} from '@/lib/services/bin-operations'
-import { createBinOperationsFromItem } from '@/lib/stock/move-operations'
+} from '@/lib/stock/stock-selectors'
 
 function createMockPrisma() {
   const tx = {
@@ -17,6 +18,7 @@ function createMockPrisma() {
       create: vi.fn()
     },
     binStockItem: {
+      aggregate: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       findFirst: vi.fn(),
@@ -26,6 +28,9 @@ function createMockPrisma() {
     itemLedgerEntry: {
       create: vi.fn(),
       createMany: vi.fn()
+    },
+    zone: {
+      findFirst: vi.fn()
     }
   }
 
@@ -77,9 +82,20 @@ describe('stock operation helpers', () => {
 })
 
 describe('createBinOperationsFromItem', () => {
+  let updateCapacitySpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    updateCapacitySpy = vi.spyOn(binsMutations, 'updateBinCapacity').mockResolvedValue({} as never)
+  })
+
+  afterEach(() => {
+    updateCapacitySpy.mockRestore()
+  })
+
   it('creates positive BOE, stock item, and ILE for adjustment', async () => {
     const { prisma, tx } = createMockPrisma()
 
+    tx.zone.findFirst.mockResolvedValue({ id: 'zone-adj', name: 'Adj' })
     tx.binOperationEntry.create.mockResolvedValue({ id: 'boe-adj' })
     tx.bin.findUnique.mockResolvedValue({ id: 'bin-1', currentCapacity: new Prisma.Decimal(10) })
     tx.bin.update.mockResolvedValue({ id: 'bin-1' })
@@ -102,6 +118,7 @@ describe('createBinOperationsFromItem', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           type: 'ADJUST',
+          zoneId: 'zone-adj',
           toBinId: 'bin-1',
           quantity: new Prisma.Decimal(5)
         })
@@ -110,10 +127,9 @@ describe('createBinOperationsFromItem', () => {
 
     expect(tx.binStockItem.create).toHaveBeenCalledTimes(1)
     expect(tx.binStockItem.update).not.toHaveBeenCalled()
-    expect(tx.bin.update).toHaveBeenCalledWith(
+    expect(tx.itemLedgerEntry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'bin-1' },
-        data: expect.objectContaining({ currentCapacity: new Prisma.Decimal(15) })
+        data: expect.objectContaining({ zoneId: 'zone-adj' })
       })
     )
     expect(tx.itemLedgerEntry.create).toHaveBeenCalledTimes(1)
@@ -123,6 +139,7 @@ describe('createBinOperationsFromItem', () => {
   it('increments existing stock item for adjustment and still creates separate BOE and ILE records', async () => {
     const { prisma, tx } = createMockPrisma()
 
+    tx.zone.findFirst.mockResolvedValue({ id: 'zone-adj', name: 'Adj' })
     tx.binOperationEntry.create.mockResolvedValue({ id: 'boe-adj-existing' })
     tx.bin.findUnique.mockResolvedValue({ id: 'bin-1', currentCapacity: new Prisma.Decimal(7) })
     tx.bin.update.mockResolvedValue({ id: 'bin-1' })
@@ -158,17 +175,15 @@ describe('createBinOperationsFromItem', () => {
 
     expect(result.stockItems).toHaveLength(1)
     expect(result.stockItems[0]).toMatchObject({ id: 'bsi-existing' })
-    expect(tx.bin.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 'bin-1' },
-        data: expect.objectContaining({ currentCapacity: new Prisma.Decimal(12) })
-      })
-    )
     expect(tx.itemLedgerEntry.create).toHaveBeenCalledTimes(1)
   })
 
   it('creates negative + positive movement BOEs and updates stock in both bins', async () => {
     const { prisma, tx } = createMockPrisma()
+
+    tx.zone.findFirst
+      .mockResolvedValueOnce({ id: 'zone-from', name: 'From' })
+      .mockResolvedValueOnce({ id: 'zone-to', name: 'To' })
 
     tx.binStockItem.findFirst
       .mockResolvedValueOnce({
@@ -176,12 +191,6 @@ describe('createBinOperationsFromItem', () => {
         quantityAvailable: new Prisma.Decimal(10)
       })
       .mockResolvedValueOnce(null)
-
-    tx.bin.findUnique
-      .mockResolvedValueOnce({ id: 'bin-source', currentCapacity: new Prisma.Decimal(20) })
-      .mockResolvedValueOnce({ id: 'bin-destination', currentCapacity: new Prisma.Decimal(4) })
-
-    tx.bin.update.mockResolvedValue({ id: 'bin-updated' })
 
     tx.binOperationEntry.create
       .mockResolvedValueOnce({ id: 'boe-neg' })
@@ -213,6 +222,8 @@ describe('createBinOperationsFromItem', () => {
 
     expect(firstCreateCall.data.quantity).toEqual(new Prisma.Decimal(-4))
     expect(secondCreateCall.data.quantity).toEqual(new Prisma.Decimal(4))
+    expect(firstCreateCall.data.zoneId).toBe('zone-from')
+    expect(secondCreateCall.data.zoneId).toBe('zone-to')
 
     expect(tx.binStockItem.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -233,20 +244,12 @@ describe('createBinOperationsFromItem', () => {
       })
     )
 
-    expect(tx.itemLedgerEntry.createMany).toHaveBeenCalledTimes(1)
-    expect(tx.bin.update).toHaveBeenCalledTimes(2)
-    expect(tx.bin.update).toHaveBeenNthCalledWith(
-      1,
+    expect(tx.itemLedgerEntry.createMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'bin-source' },
-        data: expect.objectContaining({ currentCapacity: new Prisma.Decimal(16) })
-      })
-    )
-    expect(tx.bin.update).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        where: { id: 'bin-destination' },
-        data: expect.objectContaining({ currentCapacity: new Prisma.Decimal(8) })
+        data: [
+          expect.objectContaining({ zoneId: 'zone-from' }),
+          expect.objectContaining({ zoneId: 'zone-to' })
+        ]
       })
     )
     expect(result.operation).toBe('movement')

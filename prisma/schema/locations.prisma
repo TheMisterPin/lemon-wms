@@ -82,7 +82,11 @@ model Zone {
   createdAt DateTime  @default(now())
 
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
-
+  zoneExecutionActivities OrderExecutionActivity[]
+  userActivityEntries UserActivityEntry[]
+  binOperationEntries BinOperationEntry[]
+  itemLedgerEntries ItemLedgerEntry[]
+  orderAssignments OrderAssignment[]
   bins        Bin[]
   assignments WarehouseAssignment[]
 

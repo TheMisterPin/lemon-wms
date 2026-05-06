@@ -1,5 +1,5 @@
-import { DashboardLocationsPageView } from '@/components/dashboard/warehouses/dashboard-location-page'
+import { DashboardWarehouseHomePageView } from '@/components/dashboard/warehouses/dashboard-warehouse-home-page'
 
-export default function WarehouseDashboardPage() {
-  return <DashboardLocationsPageView />
+export default function WarehouseHomePage() {
+  return <DashboardWarehouseHomePageView />
 }

@@ -9,6 +9,7 @@ type CreateUserActivityEntryParams = {
   entityType: string
   entityId: string
   warehouseId?: string
+  zoneId?: string
   orderId?: string
   orderType?: OrderType
   metadata?: Prisma.InputJsonValue
@@ -24,6 +25,7 @@ export async function createUserActivityEntry(params: CreateUserActivityEntryPar
     entityType,
     entityId,
     warehouseId,
+    zoneId,
     orderId,
     orderType,
     metadata,
@@ -38,6 +40,7 @@ export async function createUserActivityEntry(params: CreateUserActivityEntryPar
       entityType,
       entityId,
       warehouseId,
+      zoneId,
       orderId,
       orderType,
       metadata,

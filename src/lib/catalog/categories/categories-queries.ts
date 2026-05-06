@@ -24,6 +24,30 @@ async function getCategories(prisma: PrismaClient) {
   return prisma.itemCategory.findMany()
 }
 
+async function getCategoriesTree(prisma: PrismaClient) {
+  const tree = await prisma.itemCategory.findMany({
+    select: {
+      id: true,
+      code: true,
+      name: true,
+      description: true,
+      children: {
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          description: true
+        }
+      }
+    }
+  })
+
+  return tree.map(category => ({
+    ...category,
+    children: category.children?.map(child => ({ ...child })) ?? []
+  }))
+}
+
 async function getCategory(prisma: PrismaClient, id: string) {
   return prisma.itemCategory.findUnique({ where: { id } })
 }

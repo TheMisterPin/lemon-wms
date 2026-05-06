@@ -78,6 +78,7 @@ export async function floorLogin(
       entityType: 'USER',
       entityId: user.id,
       warehouseId: device.warehouseId ?? undefined,
+      zoneId: device.zoneId ?? undefined,
       ipAddress,
       metadata: {
         method: AUTH_LOG_METHODS.BADGE_PIN,
@@ -105,6 +106,7 @@ export async function floorLogin(
       entityType: 'USER',
       entityId: user.id,
       warehouseId: device.warehouseId ?? undefined,
+      zoneId: device.zoneId ?? undefined,
       ipAddress,
       metadata: {
         method: AUTH_LOG_METHODS.BADGE_PIN,
@@ -147,6 +149,7 @@ export async function floorLogin(
       entityType: 'USER',
       entityId: user.id,
       warehouseId: device.warehouseId ?? undefined,
+      zoneId: device.zoneId ?? undefined,
       ipAddress,
       metadata: {
         method: AUTH_LOG_METHODS.BADGE_PIN

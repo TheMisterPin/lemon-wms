@@ -75,24 +75,7 @@ model PurchaseOrder {
   @@index([status])
 }
 
-model PurchaseOrderLine {
-  id               String  @id @default(uuid())
-  purchaseOrderId  String
-  lineSequence     Int
-  itemId           String
-  itemNameSnapshot String
-  
-  uom              String
-  notes            String?
-  orderedQuantity  Decimal @db.Decimal(18, 4)
-  purchaseOrder PurchaseOrder              @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
-  unitOfMeasure UnitOfMeasure              @relation(fields: [uom], references: [id])
-  receiptLines  PurchaseOrderReceiptLine[]
 
-  @@unique([purchaseOrderId, lineSequence])
-  @@index([purchaseOrderId])
-  @@index([itemId])
-}
 
 model PurchaseOrderReceipt {
   id                   String        @id @default(uuid())
@@ -100,11 +83,10 @@ model PurchaseOrderReceipt {
   purchaseOrderId      String
   status               ReceiptStatus @default(OPEN)
   warehouseId          String
-  businessPartyId      String?
   supplierNameSnapshot String?
   notes                String?
 
-  receivingSequence Int?
+  receivingSequence Int @default(0)
   createdById       String
   startedById       String?
   completedById     String?
@@ -120,24 +102,42 @@ model PurchaseOrderReceipt {
 
   purchaseOrder PurchaseOrder  @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   warehouse     Warehouse      @relation(fields: [warehouseId], references: [id])
-  businessParty BusinessParty? @relation("SupplierPurchaseOrdersReceipts", fields: [businessPartyId], references: [id])
 
   lines PurchaseOrderReceiptLine[]
 
   @@index([purchaseOrderId])
   @@index([warehouseId, status])
-  @@index([businessPartyId])
   @@index([status])
 }
 
+model PurchaseOrderLine {
+  id               String  @id @default(uuid())
+  purchaseOrderId  String
+  lineSequence     Int @default(0)
+  itemId           String
+  itemNameSnapshot String
+  
+  uom              String
+  notes            String?
+  orderedQuantity  Decimal @db.Decimal(18, 4)
+  purchaseOrder PurchaseOrder              @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  unitOfMeasure UnitOfMeasure              @relation(fields: [uom], references: [id])
+  receiptLines  PurchaseOrderReceiptLine[]
+
+  @@unique([purchaseOrderId, lineSequence])
+  @@index([purchaseOrderId])
+  @@index([itemId])
+}
 model PurchaseOrderReceiptLine {
   id                     String @id @default(uuid())
   purchaseOrderReceiptId String
   purchaseOrderLineId    String
 
-  quantity         Decimal        @db.Decimal(18, 4)
+  quantity         Decimal       @db.Decimal(18, 4)@default(0)
   orderedQuantity Decimal        @db.Decimal(18, 4)
-  
+  uom              String
+  itemId           String
+  itemNameSnapshot String
   disposition      ReceiptOutcome @default(ACCEPTED)
   notes            String?
 

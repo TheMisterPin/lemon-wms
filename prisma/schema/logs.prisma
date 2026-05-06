@@ -35,6 +35,7 @@ model UserActivityEntry {
   entityId          String
   metadata          Json? // Action-specific payload — structure defined per actionType
   warehouseId       String?
+  zoneId            String?
   orderId           String?
   orderType         OrderType?
   ipAddress         String?
@@ -44,7 +45,7 @@ model UserActivityEntry {
 
   user      User       @relation(fields: [userId], references: [id])
   warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
-
+  zone      Zone?      @relation(fields: [zoneId], references: [id])
   // Reverse relations — each order type links its UAE
   boes BinOperationEntry[]
 
@@ -66,6 +67,7 @@ model BinOperationEntry {
   id                  String           @id @default(uuid())
   userId              String
   warehouseId         String
+  zoneId              String
   type                BinOperationType
   fromBinId           String?
   toBinId             String?
@@ -87,6 +89,7 @@ model BinOperationEntry {
 
   user              User               @relation(fields: [userId], references: [id])
   warehouse         Warehouse          @relation(fields: [warehouseId], references: [id])
+  zone              Zone?              @relation(fields: [zoneId], references: [id])
   unitOfMeasure     UnitOfMeasure      @relation(fields: [uom], references: [id])
   userActivityEntry UserActivityEntry? @relation(fields: [userActivityEntryId], references: [id])
 
@@ -110,6 +113,7 @@ model ItemLedgerEntry {
   id                  Int                      @id @default(autoincrement())
   warehouseId         String
   warItemId           String
+  zoneId              String
   uom                 String
   eventType           FiscalInventoryEventType
   quantityDelta       Decimal                  @db.Decimal(18, 4) // Positive = stock in, Negative = stock out
@@ -127,7 +131,7 @@ model ItemLedgerEntry {
   boe           BinOperationEntry? @relation(fields: [boeId], references: [id])
   unitOfMeasure UnitOfMeasure      @relation(fields: [uom], references: [id])
   warehouse     Warehouse          @relation(fields: [warehouseId], references: [id])
-
+  zone              Zone              @relation(fields: [zoneId], references: [id])
   @@index([warehouseId, warItemId, createdAt])
   @@index([warehouseId, eventType, createdAt])
   @@index([orderType, orderId])
@@ -148,6 +152,7 @@ model OrderAssignment {
   orderType        OrderType
   status           AssignmentLifecycle
   warehouseId      String
+  zoneId           String?
   userId           String
 
   // Key session timestamps.
@@ -167,7 +172,7 @@ model OrderAssignment {
   user             User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   warehouse        Warehouse                 @relation(fields: [warehouseId], references: [id])
   activities       OrderExecutionActivity[]  @relation("ActivitiesPerformedInSession")
-
+  zone             Zone?                     @relation(fields: [zoneId], references: [id])
   @@unique([orderType, orderId, userId])
   @@index([userId, assignedAt])
   @@index([orderType, orderId])
@@ -187,6 +192,7 @@ model OrderExecutionActivity {
   orderAssignmentId String
   userId            String
   warehouseId       String
+    zoneId            String
   activityType      ExecutionActivity
   orderId           String
   orderType         OrderType
@@ -197,6 +203,8 @@ model OrderExecutionActivity {
   orderAssignment   OrderAssignment     @relation("ActivitiesPerformedInSession", fields: [orderAssignmentId], references: [id], onDelete: Cascade)
   user              User                @relation(fields: [userId], references: [id])
   warehouse         Warehouse           @relation(fields: [warehouseId], references: [id])
+  zone              Zone                @relation(fields: [zoneId], references: [id])
+
 
   @@index([orderAssignmentId, createdAt])
   @@index([orderType, orderId, createdAt])

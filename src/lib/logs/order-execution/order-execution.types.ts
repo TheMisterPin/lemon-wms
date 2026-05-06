@@ -45,6 +45,7 @@ export type OrderAssignmentDetailDTO = {
   timedOutAt: Date | null
   isActive: boolean
   notes: string | null
+  zoneId: string | null
 }
 
 /** Aggregated workload snapshot for capacity / supervisor dashboards (optional fields filled by callers). */
@@ -84,6 +85,7 @@ export type OrderExecutionActivityListItemDTO = {
   orderType: OrderType
   orderLineRefId: string | null
   warehouseId: string
+  zoneId: string
   warehouseName?: string
   userId: string
   userFullName?: string
@@ -98,6 +100,7 @@ export type OrderExecutionActivityDetailDTO = {
   orderId: string
   orderType: OrderType
   orderLineRefId: string | null
+  zoneId: string
   activityType: ExecutionActivity
   notes: string | null
   createdAt: Date

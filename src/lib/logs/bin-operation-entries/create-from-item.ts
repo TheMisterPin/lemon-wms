@@ -1,5 +1,5 @@
 import { Prisma } from '@/generated/prisma'
-import { updateBinCapacity } from '@/lib/locations'
+import { getZoneFromBin, updateBinCapacity } from '@/lib/locations'
 import { decrementOrDeleteStockItem, findAvailableStockItem, getAdjustmentBinOperationParams, getMovementBinOperationParams, mapAdjustmentLedgerEvent, mapMovementLedgerEvent, resolveOperationType, upsertAvailableStockItem } from '@/lib/stock'
 import type { CreateBinOperationsFromItemArgs } from '@/types/stock'
 
@@ -31,10 +31,13 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
         serialNumberId
       })
 
+      const { id: adjustmentZoneId } = await getZoneFromBin(tx, adjustment.binId)
+
       const positiveEntry = await tx.binOperationEntry.create({
         data: {
           userId,
           warehouseId,
+          zoneId: adjustmentZoneId,
           type: resolveOperationType('adjustment'),
           fromBinId: null,
           toBinId: adjustment.binId,
@@ -68,6 +71,7 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
       await tx.itemLedgerEntry.create({
         data: {
           warehouseId,
+          zoneId: adjustmentZoneId,
           warItemId: adjustment.warItemId,
           lotId: adjustment.lotId,
           serialNumberId: adjustment.serialNumberId,
@@ -108,10 +112,14 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
       throw new Error('Insufficient quantity in source bin stock item')
     }
 
+    const fromZone = await getZoneFromBin(tx, movement.fromBinId)
+    const toZone = await getZoneFromBin(tx, movement.toBinId)
+
     const negativeEntry = await tx.binOperationEntry.create({
       data: {
         userId,
         warehouseId,
+        zoneId: fromZone.id,
         type: resolveOperationType('movement'),
         fromBinId: movement.fromBinId,
         toBinId: movement.toBinId,
@@ -131,6 +139,7 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
       data: {
         userId,
         warehouseId,
+        zoneId: toZone.id,
         type: resolveOperationType('movement'),
         fromBinId: movement.fromBinId,
         toBinId: movement.toBinId,
@@ -173,6 +182,7 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
       data: [
         {
           warehouseId,
+          zoneId: fromZone.id,
           warItemId: movement.warItemId,
           lotId: movement.lotId,
           serialNumberId: movement.serialNumberId,
@@ -187,6 +197,7 @@ export async function createBinOperationsFromItem(args: CreateBinOperationsFromI
         },
         {
           warehouseId,
+          zoneId: toZone.id,
           warItemId: movement.warItemId,
           lotId: movement.lotId,
           serialNumberId: movement.serialNumberId,

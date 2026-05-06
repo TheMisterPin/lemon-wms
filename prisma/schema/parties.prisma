@@ -33,7 +33,6 @@ model BusinessParty {
   // Orders referencing this party
   supplierItems         Item[]                 @relation("SupplierItems")
   purchaseOrders        PurchaseOrder[]        @relation("SupplierPurchaseOrders")
-  purchaseOrderReceipts PurchaseOrderReceipt[] @relation("SupplierPurchaseOrdersReceipts")
   salesOrders           SalesOrder[]           @relation("CustomerSalesOrders")
 }
 

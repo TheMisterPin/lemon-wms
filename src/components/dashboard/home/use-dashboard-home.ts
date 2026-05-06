@@ -64,6 +64,9 @@ export type DashboardSearchModel = {
 }
 
 export type UseDashboardHomeReturn = {
+  isLoading: boolean
+  error: string | null
+  refetch: () => void
   overviewCards: DashboardOverviewCard[]
   infoCards: DashboardInfoCardItem[]
   warehouses: DashboardPagedList<DashboardWarehouseDisplayRecord> & {
@@ -81,6 +84,27 @@ export type UseDashboardHomeReturn = {
     pageSize: number
   }
   search: DashboardSearchModel
+}
+
+type DashboardHomeFetchResult =
+  | { ok: true; data: DashboardHomePageData }
+  | { ok: false; error: string }
+
+async function fetchDashboardHomePageData(): Promise<DashboardHomeFetchResult> {
+  try {
+    const response =
+      await dashboardApiClient.get<ApiResponse<DashboardHomePageData>>('/dashboard/home')
+
+    if (response.success && response.data) {
+      return { ok: true, data: response.data }
+    }
+
+    return { ok: false, error: 'Could not load dashboard data.' }
+  } catch (fetchError) {
+    console.error('[useDashboardHome] Failed to fetch:', fetchError)
+
+    return { ok: false, error: 'Could not load dashboard data. Please try again.' }
+  }
 }
 
 function paginate<T>(items: T[], page: number): T[] {
@@ -153,29 +177,48 @@ export function useDashboardHome(): UseDashboardHomeReturn {
     bins: []
   })
 
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   const [warehousePage, setWarehousePage] = useState(0)
   const [zonePage, setZonePage] = useState(0)
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string | null>(null)
   const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null)
   const [searchText, setSearchText] = useState('')
 
+  const refetch = useCallback(() => {
+    void (async () => {
+      setIsLoading(true)
+      setError(null)
+      const result = await fetchDashboardHomePageData()
+      if (result.ok) {
+        setData(result.data)
+      } else {
+        setError(result.error)
+      }
+      setIsLoading(false)
+    })()
+  }, [])
+
   useEffect(() => {
     let cancelled = false
 
-    async function fetchData() {
-      try {
-        const response =
-          await dashboardApiClient.get<ApiResponse<DashboardHomePageData>>('/dashboard/home')
-
-        if (!cancelled && response.success && response.data) {
-          setData(response.data)
-        }
-      } catch (error) {
-        console.error('[useDashboardHome] Failed to fetch:', error)
+    async function run() {
+      setIsLoading(true)
+      setError(null)
+      const result = await fetchDashboardHomePageData()
+      if (cancelled) {
+        return
       }
+      if (result.ok) {
+        setData(result.data)
+      } else {
+        setError(result.error)
+      }
+      setIsLoading(false)
     }
 
-    void fetchData()
+    void run()
 
     return () => {
       cancelled = true
@@ -300,6 +343,9 @@ export function useDashboardHome(): UseDashboardHomeReturn {
   }, [selectedZoneId, zonesById])
 
   return {
+    isLoading,
+    error,
+    refetch,
     overviewCards: toOverviewCards(data.info),
     infoCards: toInfoCards(data.info),
     warehouses: {

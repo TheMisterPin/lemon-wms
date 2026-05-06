@@ -51,6 +51,7 @@ export const orderAssignmentDetailSelect = {
   timedOutAt: true,
   isActive: true,
   notes: true,
+  zoneId: true,
   warehouse: { select: { id: true, name: true } },
   user: { select: { id: true, fullName: true, badgeNumber: true } }
 } as const
@@ -62,6 +63,7 @@ export const orderExecutionActivityListSelect = {
   orderType: true,
   orderLineRefId: true,
   warehouseId: true,
+  zoneId: true,
   userId: true,
   activityType: true,
   notes: true,
@@ -75,6 +77,7 @@ export const orderExecutionActivityDetailSelect = {
   orderAssignmentId: true,
   userId: true,
   warehouseId: true,
+  zoneId: true,
   orderId: true,
   orderType: true,
   orderLineRefId: true,
@@ -147,7 +150,8 @@ export function mapOrderAssignmentToDetailDTO(row: OrderAssignmentDetailRow): Or
     cancelledAt: row.cancelledAt,
     timedOutAt: row.timedOutAt,
     isActive: row.isActive,
-    notes: row.notes
+    notes: row.notes,
+    zoneId: row.zoneId
   }
 }
 
@@ -159,6 +163,7 @@ export function mapOrderExecutionActivityToListItemDTO(row: OrderExecutionActivi
     orderType: row.orderType,
     orderLineRefId: row.orderLineRefId,
     warehouseId: row.warehouseId,
+    zoneId: row.zoneId,
     warehouseName: row.warehouse.name,
     userId: row.userId,
     userFullName: row.user.fullName,
@@ -175,6 +180,7 @@ export function mapOrderExecutionActivityToDetailDTO(row: OrderExecutionActivity
     orderId: row.orderId,
     orderType: row.orderType,
     orderLineRefId: row.orderLineRefId,
+    zoneId: row.zoneId,
     activityType: row.activityType,
     notes: row.notes,
     createdAt: row.createdAt,

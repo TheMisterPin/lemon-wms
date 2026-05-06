@@ -1,7 +1,8 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Prisma } from '@/generated/prisma'
-
-import { getTrolleyItems, loadItemsToTrolley, unloadItemsFromTrolley } from '@/lib/stock/move-operations'
+import * as binsMutations from '@/lib/locations/bins/bins-mutations'
+import { loadItemsToTrolley, unloadItemsFromTrolley } from '@/lib/stock/bin-stock-items/bin-stock-items-mutations'
+import { getTrolleyItems } from '@/lib/stock/bin-stock-items/bin-stock-items-queries'
 
 function createMockPrisma() {
   const tx = {
@@ -20,6 +21,9 @@ function createMockPrisma() {
       update: vi.fn(),
       delete: vi.fn(),
       findMany: vi.fn()
+    },
+    zone: {
+      findFirst: vi.fn().mockResolvedValue({ id: 'zone-1', name: 'Zone 1' })
     }
   }
 
@@ -34,6 +38,16 @@ function createMockPrisma() {
 }
 
 describe('move-operations transit flow', () => {
+  let updateCapacitySpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    updateCapacitySpy = vi.spyOn(binsMutations, 'updateBinCapacity').mockResolvedValue({} as never)
+  })
+
+  afterEach(() => {
+    updateCapacitySpy.mockRestore()
+  })
+
   it('loads to trolley in origin bin with TRANSFER_LOAD and IN_TRANSIT flags', async () => {
     const { prisma, tx } = createMockPrisma()
 
@@ -65,6 +79,7 @@ describe('move-operations transit flow', () => {
     expect(tx.binOperationEntry.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          zoneId: 'zone-1',
           type: 'TRANSFER_LOAD',
           fromBinId: 'bin-origin',
           toBinId: null,
@@ -150,6 +165,7 @@ describe('move-operations transit flow', () => {
     expect(tx.binOperationEntry.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          zoneId: 'zone-1',
           type: 'TRANSFER_UNLOAD',
           fromBinId: 'bin-origin',
           toBinId: 'bin-destination',

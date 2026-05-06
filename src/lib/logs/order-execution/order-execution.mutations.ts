@@ -96,11 +96,21 @@ async function createExecutionActivityInTx(
   input: OrderAssignmentActivityInput,
   activityType: ExecutionActivity
 ): Promise<OrderExecutionActivityListRow> {
+  const zoneId = a.zoneId
+  if (!zoneId) {
+    throw new DomainError(
+      'Order assignment is missing zone context required for execution activities.',
+      'INVALID_STATE',
+      400
+    )
+  }
+
   return tx.orderExecutionActivity.create({
     data: {
       orderAssignmentId: a.id,
       userId: input.userId,
       warehouseId: a.warehouseId,
+      zoneId,
       orderId: a.orderId,
       orderType: a.orderType,
       orderLineRefId: input.orderLineRefId,
