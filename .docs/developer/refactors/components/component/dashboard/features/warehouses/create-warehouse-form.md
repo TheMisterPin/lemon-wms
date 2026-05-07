@@ -7,7 +7,7 @@ isCorrectCase: true
 ## Inventory (Phase 18)
 
 Component name:
-CreateWarehouseForm (default export pattern — verify in source)
+CreateWarehouseForm (`export default function CreateWarehouseForm`)
 
 Current file path:
 `src/components/dashboard/features/warehouses/create-warehouse-form.tsx`

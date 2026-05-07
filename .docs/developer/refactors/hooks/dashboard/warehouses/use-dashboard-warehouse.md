@@ -17,11 +17,11 @@ Used by:
 - src/components/dashboard/features/zones/create-zone-form.tsx
 - src/components/dashboard/zones/DashboardZonesPageView.tsx
 Owns fetching: Yes - current source issues dashboard data requests.
-Owns mutations: Yes - POST client mutation, createWarehouse, createZone, createBin, delete.
+Owns mutations: Yes - POST client mutations for createWarehouse, createZone, and createBin.
 Owns loading state: Yes.
 Owns error state: Yes.
 Owns DTO transformation: Yes - maps or derives page-ready data in the current file.
-Exposes actions: POST client mutation, createWarehouse, createZone, createBin, delete, refresh
+Exposes actions: createWarehouse, createZone, createBin, refresh
 
 ## Inputs
 
@@ -34,11 +34,9 @@ Current return/context shape is derived from the existing source, not a new cont
 
 ## Actions
 
-- POST client mutation
 - createWarehouse
 - createZone
 - createBin
-- delete
 - refresh
 
 ## Dependencies

@@ -76,7 +76,7 @@ Dependencies:
 Props: No named Props type detected; see hook responsibility doc.
 Internal state: React useState, React useEffect lifecycle, React useMemo derived data, React useCallback actions/loaders, URL search params via useSearchParams
 API calls: dashboardApiClient HTTP calls
-Mutation calls: POST client mutation, createWarehouse, createZone, createBin, delete
+Mutation calls: POST client mutations for createWarehouse, createZone, and createBin
 Main UI blocks: T, WarehouseFormValues, DashboardWarehouseContextValue, Warehouse, ZoneApiRecord, BinApiRecord, ApiPayload, DashboardHomePayload, SelectOption, ZoneTableRow, BinTableRow, DashboardWarehouseContext.Provider
 Declared child components inside the file: ApiPayload, ZoneApiRecord, BinApiRecord, DashboardHomePayload, DashboardWarehouseContextValue, DashboardWarehouseContext, extractMutationError, DashboardWarehouseProvider, useDashboardWarehouse
 Repeated styling: None observed.
