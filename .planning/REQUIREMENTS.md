@@ -7,10 +7,10 @@
 
 ### Documentation baseline
 
-- [ ] **CFR-01**: Developer can open `.docs/developer/refactors/components` and find a current inventory entry for every component, provider, page-level view, and meaningful declared child component in the selected scope before code movement begins.
-- [ ] **CFR-02**: Developer can open `.docs/developer/refactors/hooks` and find a current responsibility entry for every hook, provider, and context that is part of the selected component refactor scope.
-- [ ] **CFR-03**: Existing refactor markdown frontmatter, metadata, and useful notes are preserved while missing inventory fields are appended or updated from current source files.
-- [ ] **CFR-04**: Summary documents exist for component inventory and old-path to target-path mapping so later phases can continue without relying on chat context.
+- [x] **CFR-01**: Developer can open `.docs/developer/refactors/components` and find a current inventory entry for every component, provider, page-level view, and meaningful declared child component in the selected scope before code movement begins.
+- [x] **CFR-02**: Developer can open `.docs/developer/refactors/hooks` and find a current responsibility entry for every hook, provider, and context that is part of the selected component refactor scope.
+- [x] **CFR-03**: Existing refactor markdown frontmatter, metadata, and useful notes are preserved while missing inventory fields are appended or updated from current source files.
+- [x] **CFR-04**: Summary documents exist for component inventory and old-path to target-path mapping so later phases can continue without relying on chat context.
 
 ### Classification and ownership
 
@@ -104,10 +104,10 @@ Delivered in phases 1-10 (see `.planning/MILESTONES.md`). Requirement IDs BP-, P
 
 | Requirement | Phase | Status |
 | --- | --- | --- |
-| CFR-01 | Phase 18 | Pending |
-| CFR-02 | Phase 18 | Pending |
-| CFR-03 | Phase 18 | Pending |
-| CFR-04 | Phase 18 | Pending |
+| CFR-01 | Phase 18 | Complete |
+| CFR-02 | Phase 18 | Complete |
+| CFR-03 | Phase 18 | Complete |
+| CFR-04 | Phase 18 | Complete |
 | CFR-05 | Phase 19 | Pending |
 | CFR-06 | Phase 19 | Pending |
 | CFR-07 | Phase 19 | Pending |

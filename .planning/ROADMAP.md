@@ -34,6 +34,20 @@
 **UI hint:** no  
 **Depends on:** -
 
+**Plans:** 10 plans
+
+Plans:
+- [x] 18-01-PLAN.md — Build selected source-to-doc coverage audit.
+- [x] 18-02-PLAN.md — Inventory central dashboard warehouse provider and hook docs.
+- [x] 18-03-PLAN.md — Inventory bin and stock hook responsibility docs.
+- [x] 18-04-PLAN.md — Inventory warehouse/location page-level docs.
+- [x] 18-05-PLAN.md — Inventory warehouse child component docs group A.
+- [x] 18-06-PLAN.md — Inventory remaining warehouse child and type-only docs.
+- [x] 18-07-PLAN.md — Inventory bins and zones component docs.
+- [x] 18-08-PLAN.md — Inventory stock component docs.
+- [x] 18-09-PLAN.md — Inventory selected feature form and modal docs.
+- [x] 18-10-PLAN.md — Write inventory summaries, refactor map, and verification record.
+
 ---
 
 ## Phase 19: Classification and ownership
