@@ -12,8 +12,8 @@ import type { WarehouseOverviewIconProps } from '@/components/dashboard/warehous
 import { warehouseOverviewIcons } from '@/components/dashboard/warehouses/components/warehouse-overview-icons'
 import {
   warehouseOverviewToneStyles
-} from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
-import type { WarehouseOverviewTone } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
+import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 import { WarehouseStockAvailabilityBarChart } from '@/components/dashboard/warehouses/components/WarehouseStockAvailabilityBarChart'
 import { WarehouseStockItemsTable } from '@/components/dashboard/warehouses/components/WarehouseStockItemsTable'
 import { WarehouseStockSummary } from '@/components/dashboard/warehouses/components/WarehouseStockSummary'

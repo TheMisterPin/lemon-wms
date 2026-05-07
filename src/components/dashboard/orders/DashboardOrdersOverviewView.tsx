@@ -13,7 +13,7 @@ import {
   WarehouseOverviewStatusPill,
   warehouseOverviewToneStyles,
   type WarehouseOverviewTone
-} from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
 import type { OrderAttentionCard, OrderSummaryRow } from '@/types/orders-dashboard.types'

@@ -8,8 +8,8 @@
 import {
   WarehouseOverviewShellSection,
   WarehouseOverviewStatusPill
-} from './warehouse-overview-primitives'
-import type { WarehouseOverviewTone } from './warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
+import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseActivityRow } from './warehouse-overview-types'
 
 function activityTone(status: WarehouseActivityRow['status']): WarehouseOverviewTone {

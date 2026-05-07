@@ -14,7 +14,7 @@ import {
   WarehouseOverviewStatusPill,
   warehouseOverviewToneStyles,
   type WarehouseOverviewTone
-} from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
 import type { DeviceDetailDashboardDTO } from '@/types/device-detail-dashboard.types'
 

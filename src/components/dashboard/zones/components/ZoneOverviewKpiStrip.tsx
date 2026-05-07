@@ -6,8 +6,8 @@
 
 
 import { warehouseOverviewIcons } from '@/components/dashboard/warehouses/components/warehouse-overview-icons'
-import { warehouseOverviewToneStyles } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
-import type { WarehouseOverviewTone } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+import { warehouseOverviewToneStyles } from '@/components/primitives/warehouse-overview-primitives'
+import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 import type { ZoneOverviewDashboardMetrics } from '@/types/zone-overview-dashboard.types'
 
 function ZoneOverviewBinsKpi({ metrics }: { metrics: ZoneOverviewDashboardMetrics }) {

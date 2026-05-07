@@ -14,9 +14,9 @@ import {
   WarehouseOverviewShellSection,
   WarehouseOverviewStatusPill,
   warehouseOverviewToneStyles
-} from './warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseOverviewIconProps } from './warehouse-overview-icons'
-import type { WarehouseOverviewTone } from './warehouse-overview-primitives'
+import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseOrderTypeRow } from './warehouse-overview-types'
 
 const orderTabMap = {

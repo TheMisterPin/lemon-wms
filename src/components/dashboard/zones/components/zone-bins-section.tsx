@@ -13,8 +13,8 @@ import {
   WarehouseOverviewChartPanel,
   WarehouseOverviewShellSection,
   WarehouseOverviewStatusPill
-} from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
-import type { WarehouseOverviewTone } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
+import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 import {
   Sheet,
   SheetContent,

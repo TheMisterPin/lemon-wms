@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 
 import { useUsersDashboard } from '@/components/dashboard/users/use-users-dashboard'
-import { WarehouseOverviewShellSection } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
 import { Skeleton } from '@/components/ui/skeleton'
 
 function formatTs(value?: string): string {

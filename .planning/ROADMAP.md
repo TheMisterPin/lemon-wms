@@ -159,6 +159,12 @@ Plans:
 **UI hint:** yes  
 **Depends on:** Phase 21
 
+**Plans:** 1 plan (more to be added)
+
+Plans:
+
+- [x] 22-01-PLAN.md — Move `warehouse-overview-primitives` to `src/components/primitives/` (P21-001 / CFR-18); rewire imports; sync refactor docs.
+
 ---
 
 ## Phase 23: Verification and pattern lock-in

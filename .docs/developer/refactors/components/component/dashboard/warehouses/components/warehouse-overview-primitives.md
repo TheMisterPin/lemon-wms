@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/warehouse-overview-primitives.tsx
+source: src/components/primitives/warehouse-overview-primitives.tsx
 type: component
 isCorrectCase: true
 ---
@@ -12,7 +12,7 @@ Component name:
 Warehouse overview primitives module
 
 Current file path:
-`src/components/dashboard/warehouses/components/warehouse-overview-primitives.tsx`
+`src/components/primitives/warehouse-overview-primitives.tsx`
 
 Current responsibility:
 Buttons, shell sections, chart panel wrapper, status pills, tone style map.
@@ -144,7 +144,7 @@ Provide a shared, dashboard-neutral **visual shell** for warehouse-toned KPI sur
 
 ### Source module
 
-`src/components/dashboard/warehouses/components/warehouse-overview-primitives.tsx`
+`src/components/primitives/warehouse-overview-primitives.tsx`
 
 ### Consumers
 

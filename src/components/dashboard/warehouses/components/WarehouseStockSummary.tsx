@@ -12,7 +12,7 @@ import {
   WarehouseOverviewChartPanel,
   WarehouseOverviewShellSection,
   warehouseOverviewRechartsTooltipProps
-} from './warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseStockCategoryRow } from './warehouse-overview-types'
 
 type WarehouseStockAvailBarProps = {

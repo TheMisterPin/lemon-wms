@@ -9,7 +9,7 @@ import type { WarehouseStockDashboardItemRow } from '@/types/warehouse-stock-das
 import {
   WarehouseOverviewButton,
   WarehouseOverviewShellSection
-} from './warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 
 type WarehouseStockItemsTableProps = {
   items: WarehouseStockDashboardItemRow[]

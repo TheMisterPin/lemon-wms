@@ -11,7 +11,7 @@ import type { WarehouseStockDashboardZoneRow } from '@/types/warehouse-stock-das
 import {
   WarehouseOverviewButton,
   WarehouseOverviewShellSection
-} from './warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 
 type WarehouseStockZonesTableProps = {
   zones: WarehouseStockDashboardZoneRow[]

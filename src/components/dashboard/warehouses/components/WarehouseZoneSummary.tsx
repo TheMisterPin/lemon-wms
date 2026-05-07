@@ -8,7 +8,7 @@
 import {
   WarehouseOverviewButton,
   WarehouseOverviewShellSection
-} from './warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 
 import type { WarehouseZoneSummaryRow } from './warehouse-overview-types'
 

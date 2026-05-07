@@ -26,7 +26,7 @@ import {
   WarehouseOverviewStatusPill,
   warehouseOverviewToneStyles,
   type WarehouseOverviewTone
-} from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseActivityRow } from '@/components/dashboard/warehouses/components/warehouse-overview-types'
 import {
   Sheet,

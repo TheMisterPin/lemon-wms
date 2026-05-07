@@ -13,13 +13,13 @@ import {
   WarehouseOverviewButton,
   WarehouseOverviewStatusPill,
   warehouseOverviewToneStyles
-} from './components/warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 import { WarehouseActivitySummary } from './components/WarehouseActivitySummary'
 import { WarehouseOrderWorkload } from './components/WarehouseOrderWorkload'
 import { WarehouseStockSummary } from './components/WarehouseStockSummary'
 import { WarehouseZoneSummary } from './components/WarehouseZoneSummary'
 import type { WarehouseOverviewIconProps } from './components/warehouse-overview-icons'
-import type { WarehouseOverviewTone } from './components/warehouse-overview-primitives'
+import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 
 type KpiRenderable = WarehouseOverviewDashboardKpiRow & {
   icon: ComponentType<WarehouseOverviewIconProps>

@@ -11,7 +11,7 @@ import {
   WarehouseOverviewChartPanel,
   WarehouseOverviewShellSection,
   warehouseOverviewRechartsTooltipProps
-} from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+} from '@/components/primitives/warehouse-overview-primitives'
 import type { ZoneOverviewFillBucketRow } from '@/types/zone-overview-dashboard.types'
 
 const FILL_BUCKET_COLORS = ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444']

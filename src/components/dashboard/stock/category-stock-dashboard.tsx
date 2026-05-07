@@ -7,7 +7,7 @@
 
 import Link from 'next/link'
 
-import { WarehouseOverviewShellSection } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
 import type { CategoryStockDashboardDTO } from '@/types/category-stock-dashboard.types'
 
 export function CategoryStockDashboard({ data }: { data: CategoryStockDashboardDTO }) {

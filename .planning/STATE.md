@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Component Folder Restructuring
-status: phase-21-complete
+status: phase-22-in-progress
 last_updated: "2026-05-07T23:59:00.000Z"
-last_activity: 2026-05-07 - Phase 21 executed — primitive extraction docs + VERIFICATION passed
+last_activity: 2026-05-07 - Phase 22 started — 22-01 primitive move (P21-001)
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 34
-  completed_plans: 34
+  total_plans: 35
+  completed_plans: 35
   percent: 67
 ---
 
@@ -21,17 +21,17 @@ See: `.planning/PROJECT.md`
 
 **Core value:** Office users can create, release, and track supplier purchase orders; warehouse users can see operational orders by status, start execution, and pause.
 
-**Current focus:** Milestone v1.2 - Component Folder Restructuring; Phase 22 first locations slice next.
+**Current focus:** Milestone v1.2 - Component Folder Restructuring; Phase 22 in progress (hook/DTO/features waves remaining).
 
 ## Current Position
 
 Phase: 22 of 23 - First locations slice
 
-Plan: —
+Plan: 22-01 complete; additional Phase 22 plans TBD (`$gsd-plan-phase 22`)
 
-Status: Phase 21 complete — see `21-VERIFICATION.md`
+Status: Phase 22 in progress — see `22-01-SUMMARY.md`
 
-Last activity: 2026-05-07 - Phase 21 primitive extraction planning executed (docs-only)
+Last activity: 2026-05-07 - Moved `warehouse-overview-primitives` to `src/components/primitives/`
 
 Progress: [██████░░░░] 67%
 

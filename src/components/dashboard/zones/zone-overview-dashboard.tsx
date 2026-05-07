@@ -7,7 +7,7 @@
 
 import Link from 'next/link'
 
-import { WarehouseOverviewStatusPill } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+import { WarehouseOverviewStatusPill } from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseActivityRow } from '@/components/dashboard/warehouses/components/warehouse-overview-types'
 import type { WarehouseStockCategoryRow } from '@/components/dashboard/warehouses/components/warehouse-overview-types'
 import { WarehouseActivitySummary } from '@/components/dashboard/warehouses/components/WarehouseActivitySummary'

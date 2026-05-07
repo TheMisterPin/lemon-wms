@@ -11,7 +11,7 @@ import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { WarehouseOverviewShellSection } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
 import type { UserActivityRow, UserDetailDashboardDTO } from '@/types/user-detail-dashboard.types'
 
 function formatTs(value?: string): string {

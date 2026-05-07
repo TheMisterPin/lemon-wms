@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { WarehouseOverviewShellSection } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
 import type { ItemDetailDashboardDTO } from '@/types/item-detail-dashboard.types'
 import { format } from 'date-fns'
 

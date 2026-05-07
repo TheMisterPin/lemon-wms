@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 import { format } from 'date-fns'
 
-import { WarehouseOverviewShellSection } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'
+import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
 import type { InventoryHealthDashboardDTO } from '@/types/inventory-health-dashboard.types'
 
 function formatTs(value: string): string {
