@@ -49,6 +49,52 @@ Risk level: medium
 
 Record the split or keep grouped decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Skeleton mirrors stock dashboard KPI/chart/table placeholders using local shimmer blocks.
+
+UI-only state:
+- N/A.
+
+Data fetching logic:
+- N/A.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- N/A.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- Shared shimmer wrappers — evaluate duplication vs warehouse skeletons in Phase 22.
+
+Types/interfaces declared inline:
+- N/A.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Nested skeleton components | Single module | `src/components/features/stock/components/*` per dismount | Split-or-keep grouping resolved during Phase 21/22 (**retained render**/**feature**) | medium |
+| Potential generic shimmer | Duplicated across stock/warehouse skeletons | **deferred** Phase 21 primitive decision | Avoid premature extraction | medium |
+
+### New Files Needed
+
+See **Dismounted Components** — files created only after grouping decision.
+
+### Notes
+
+**Phase 21** chooses whether to split shimmer/KPI skeletons into primitives vs keep feature-scoped cluster.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

@@ -84,6 +84,54 @@ Risk level: high
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Warehouse command-center layout from `WarehouseOverviewDashboardData`: KPI grid, workload vs stock columns, zone summary + activity columns, optional `<main>` wrapper when `variant === 'page'`.
+
+UI-only state:
+- N/A — derives KPI list via pure helpers.
+
+Data fetching logic:
+- N/A inside this view — parent/page client supplies DTO (assembled using dashboard warehouse home data / dedicated loaders — see canonical hook Logic Mapping).
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- `mergeWarehouseOverviewKpis`, `parseWarehouseFillPercent`, icon maps merge KPI metadata.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A — assumes validated DTO from upstream.
+
+Reusable utility logic:
+- KPI merge + fill parsing suitable for `src/lib/transformers/locations/*`.
+
+Types/interfaces declared inline:
+- `KpiRenderable` alias and icon map typing slated to DTO modules per dismount rows.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| DTO preparation / API bridging | Upstream route or data helper | **`hook`** / **`transformers`** paths documented in `.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md` | Keeps this file presentational | medium |
+| KPI merge + fill parsing | Inline helpers | `src/lib/transformers/locations/*` per dismount | Share with warehouse stock overview variants (**transformer**) | medium |
+| KPI card + icon constants | Nested components/constants | `src/components/features/locations/pages/*` | Split prior to feature folder move | high |
+| Layout composition | `DashboardWarehouseOverviewView` JSX | **retained render** in target feature page | Orchestrates children | medium |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+Coordinate KPI helper extraction with `dashboard-warehouse-stock` to avoid duplicate merge maps in Phase 22.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

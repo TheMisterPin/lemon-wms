@@ -79,6 +79,53 @@ Risk level: medium
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Paginated bin grid tiles with fill visualization and “view contents” affordance.
+
+UI-only state:
+- Pagination UI state if handled internally (confirm in Phase 22).
+
+Data fetching logic:
+- N/A — props-driven grid data.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- `getBinStatus`, `getFillBarStyle` map bin records to presentation.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- Status/fill style helpers — candidate **`transformer`** modules if reused beyond grid.
+
+Types/interfaces declared inline:
+- N/A — relies on imported bin record types.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Status/fill helpers | Inline | `src/lib/transformers/locations/*` if deduped | Pure mapping (**transformer**) | medium |
+| Tile/card UI children | Nested in file | `src/components/features/locations/components/*` | Split multi-component (**feature**) | medium |
+| Pagination wiring | Grid composition | **retained render** or co-locate with grid feature module | UX coupling | low |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+Phase 21 may evaluate whether pagination chrome becomes a primitive — **deferred**.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

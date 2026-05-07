@@ -84,6 +84,54 @@ Risk level: high
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Warehouse stock analytics view from `WarehouseStockDashboardData`: breadcrumbs, KPI strip, category mix chart, zones/items tables, availability chart.
+
+UI-only state:
+- N/A — mapping via `mergeStockKpis`.
+
+Data fetching logic:
+- N/A — data supplied via props from upstream loader/hook.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- `mergeStockKpis`, KPI icon maps analogous to overview page.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A at this layer.
+
+Reusable utility logic:
+- KPI merge/icon maps align with overview patterns — consolidate in Phase 22 when extracting transformers.
+
+Types/interfaces declared inline:
+- `StockKpiRenderable` + icon manifest slated to DTO/feature modules.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Upstream stock dashboard assembly | Page client / data hook | Hook + transformers (`use-dashboard-warehouse` ecosystem / future stock-specific loaders) — cross-check route owners in Phase 22 | Separation of fetch vs render (**hook**/ **transformer**) | high |
+| KPI merge helpers | Inline | `src/lib/transformers/locations/merge-stock-kpis.ts` | Transformer (**transformer**) | medium |
+| Stock KPI card subtree | Nested component | `src/components/features/locations/pages/*` | Multi-component split | high |
+| Shell/layout JSX | View component | **retained render** post-split | Composition only | medium |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+Hook/doc parity: ensure stock dashboard DTO producers stay aligned with warehouse provider filtering rules documented in canonical warehouse hook.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

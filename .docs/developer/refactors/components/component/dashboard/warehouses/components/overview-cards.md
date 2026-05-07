@@ -79,6 +79,52 @@ Risk level: medium
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Three-up overview metrics cards driven by `DashboardOverviewCard[]`.
+
+UI-only state:
+- N/A.
+
+Data fetching logic:
+- N/A.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- Card props consumed directly — minimal mapping.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- N/A.
+
+Types/interfaces declared inline:
+- Uses dashboard overview card types from shared modules.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| `StatCard` implementation | Local nested component | `src/components/features/locations/components/stat-card.tsx` | Split reusable card (**feature**, Phase 21 primitive candidate) | medium |
+| Card grid composition | `OverviewCards` | **retained render** in feature component | Layout orchestration | low |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+**Phase 21:** `StatCard` may graduate to `components/primitives` if approval proves domain-neutral styling.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

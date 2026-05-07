@@ -48,3 +48,18 @@ Risk level: medium
 ### Decision
 
 Record the move decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
+
+## Logic Mapping
+
+**Type-only module:** move definitions per refactor map — consumers switch imports during Phase 22.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Primary artifact | Current dashboard/misc path | `src/components/features/...` or `src/types/dto/locations/...` per Classification | Phase 22 move (**feature** / **types**) | low |
+
+### Notes
+
+Classification rows remain authoritative — Phase 20 captures linkage only.
+

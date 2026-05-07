@@ -116,6 +116,12 @@ Risk level: high
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+**Canonical hook responsibility + full Logic Mapping:** `.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md` — treat that file as source of truth for Phase 22 split (`types/api`, `types/dto`, `lib/transformers/locations`, hook `actions`, **`src/lib/api/extract-mutation-error.ts`**, provider scaffolding). This generated doc mirrors inventory/classification only; do not contradict the canonical movement table.
+
+**CFR-13:** Duplicate `extractMutationError` evidence documented in canonical hook Notes (`src/components/dashboard/devices/use-dashboard-devices.tsx`).
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |
@@ -127,4 +133,4 @@ Record the split decision as planned ownership only. Phase 19 does not move sour
 | `ZoneApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/zone-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `BinApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/bin-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `DashboardHomePayload` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/dashboard-home-payload.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `extractMutationError` | `src/lib/transformers/locations/mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `extractMutationError` | `src/lib/api/extract-mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | Phase 20 (CFR-13): shared utility — consolidate with devices hook; not under `lib/transformers`. |

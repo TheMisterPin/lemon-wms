@@ -30,6 +30,8 @@ Risk level: medium
 
 Record the route/layout integration as a keep decision. Phase 19 does not rewrite routes, move providers, or alter app behavior.
 
+**Phase 20:** Detailed provider responsibilities, `/dashboard/home` split, and mutation-error utility path are documented under **Logic Mapping** in `.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md` (canonical). Keep this row as integration context only — defer movement tables to that hook doc.
+
 ## Phase 19 Source To Target Classification Map
 
 | source path | current doc path | classification | action | target folder | target file name | risk | multi-component | split-plan present | notes |
@@ -98,7 +100,8 @@ These route rows document current route coupling only. Phase 19 does not rewrite
 
 ## Deferred Decisions
 
-- Logic movement tables belong to Phase 20.
+- Logic movement tables belong to Phase 20 — **complete for warehouse/locations/stock selected scope** (see per-doc `## Logic Mapping`); outstanding slices follow same pattern when added.
+- CFR-13 / Phase 20: Duplicate Axios mutation parsers (`extractMutationError`) in `use-dashboard-warehouse.tsx` and `use-dashboard-devices.tsx` consolidate into **`src/lib/api/extract-mutation-error.ts`** at Phase 22 (**utility** tier, not `lib/transformers`). See `.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md` and `.docs/developer/refactors/components/hook/dashboard/devices/use-dashboard-devices.md`.
 - Primitive and shared styling approvals belong to Phase 21.
 - Target folder creation, source movement, and import rewrites belong to Phase 22.
 - Delete/replace cleanup requires Phase 23 usage/import/replacement verification.

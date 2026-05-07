@@ -78,3 +78,50 @@ Risk level: high
 ### Decision
 
 Record the move decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
+
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Zone cards/list region inside warehouse overview composition.
+
+UI-only state:
+- Confirm during Phase 22 source read whether any local toggles exist.
+
+Data fetching logic:
+- N/A — consumes props from parent overview view.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- Any formatting helpers inline or imported — consolidate only if duplication emerges in Phase 22.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- Potential small formatters — **deferred** until duplication proven.
+
+Types/interfaces declared inline:
+- Primarily imported overview DTO types — follow `warehouse-overview-types` relocation plan.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Component body | `WarehouseZoneSummary.tsx` | `src/components/features/locations/components/warehouse-zone-summary.tsx` | Planned **move** per Classification | high |
+| Coupled imports (overview primitives/types) | Current graph | Explicit feature imports post-move | Phase 19 high-risk coupling | high |
+| Inner helpers (if split later) | TBD | **deferred** | Avoid speculative extraction | medium |
+
+### New Files Needed
+
+None beyond planned feature component path until usage audit completes.
+
+### Notes
+
+Record import/usage searches before removing legacy paths in Phase 22.

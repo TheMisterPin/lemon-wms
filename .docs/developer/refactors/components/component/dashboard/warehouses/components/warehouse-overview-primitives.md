@@ -79,6 +79,52 @@ Risk level: high
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior. Primitive extraction is candidate-only and requires Phase 21 approval.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Shared warehouse dashboard primitives: buttons, shell sections, chart panels, status pills, tone style maps.
+
+UI-only state:
+- Prefer none — presentational exports.
+
+Data fetching logic:
+- N/A.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- Tone/style maps map statuses to classes — borderline presentation tokens.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- Tooltip props helper for recharts — thin adapter.
+
+Types/interfaces declared inline:
+- Local prop types for primitives — migrate with components.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Each exported primitive | Single module today | `src/components/primitives/*` per dismount rows | Approved generic reuse (**deferred** Phase 21) | high |
+| Tone maps / tooltip adapters | Module-level constants | Collocate with primitive or `src/lib/**` if proven domain-neutral | Decision deferred pending Phase 21 verdict | medium |
+
+### New Files Needed
+
+See **Dismounted Components** — instantiate only after Phase 21 primitive approval.
+
+### Notes
+
+**Phase 21 gate:** Do **not** treat these exports as approved primitives until `_primitive-extraction-plan.md` signs off — Phase 20 records intent only.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

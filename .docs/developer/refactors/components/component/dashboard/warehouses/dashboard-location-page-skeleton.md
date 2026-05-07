@@ -79,6 +79,52 @@ Risk level: medium
 
 Record the split or keep grouped decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Locations page skeleton shared by warehouse home + locations dashboard views.
+
+UI-only state:
+- N/A.
+
+Data fetching logic:
+- N/A.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- N/A.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- Potential overlap with warehouse overview skeleton shimmer — consolidate only with measured duplication.
+
+Types/interfaces declared inline:
+- Minimal props on `SectionShell` only.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Nested skeleton exports | Clustered module | `src/components/features/locations/components/*` per dismount | Split-or-keep grouping (**feature**) | medium |
+| Generic shimmer/stat shells | Duplicated patterns | **deferred** Phase 21 | Await primitive approval | medium |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+Reuse across two route shells — prove usage before promoting any piece to `components/primitives`.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

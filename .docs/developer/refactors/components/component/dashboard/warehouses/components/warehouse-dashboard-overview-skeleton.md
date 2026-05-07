@@ -79,6 +79,52 @@ Risk level: medium
 
 Record the split or keep grouped decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Warehouse overview loading skeleton with header, KPI tiles, multi-column placeholders.
+
+UI-only state:
+- N/A.
+
+Data fetching logic:
+- N/A.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- N/A.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- Local shimmer helper may overlap other locations skeletons — dedupe in Phase 22 if identical.
+
+Types/interfaces declared inline:
+- N/A.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Nested skeleton exports | Module cluster | `src/components/features/locations/components/*` per dismount | Maintain parity with real overview layout (**feature**) | medium |
+| Shared shimmer | Possibly duplicated | **deferred** pending Phase 21 primitive decision | Document overlap only | medium |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+Grouping vs splitting aligns with `dashboard-location-page-skeleton` — track reuse evidence together.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

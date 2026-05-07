@@ -77,6 +77,54 @@ Risk level: high
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Large bin detail dashboard layout: header, KPI row, recharts sections, tables, bin-contents sheet driven by props.
+
+UI-only state:
+- Sheet visibility / local toggles for preview UX (see source).
+
+Data fetching logic:
+- N/A — parent supplies `BinDetailDashboardDTO` via props.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- Helpers map DTO slices to chart series, KPI labels, activity tones, fill-percent parsing — several slated for extraction (see Dismounted Components).
+
+Validation logic:
+- N/A beyond formatting guardrails in helpers.
+
+Error handling logic:
+- N/A — surfaced by parent route/hook if needed.
+
+Reusable utility logic:
+- `humanizeEnumLabel`, `parseFillPercentValue`, `stockStatusTone`, `toWarehouseActivityRows`, `activityEventTone`, and related chart mappers.
+
+Types/interfaces declared inline:
+- N/A — relies on `@/types/bin-detail-dashboard.types` and props typing.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Helper pure functions / enum formatting | Inline helpers in this file | `src/lib/transformers/locations/*` (see dismount names) | Shared across locations dashboards (CFR-10 **transformer**) | medium |
+| `BinOperationsEventList` and chart/table subcomponents | Declared inside file | `src/components/features/locations/pages/*` or `components/*` per split plan | Split multi-component file before move (CFR-10 **retained render** → future **feature**) | high |
+| Sheet / drawer interaction state | `useState` in dashboard | **retained render** in feature page | Pure UI concern | low |
+| Recharts layout tokens repeated across sections | JSX class patterns | **deferred** Phase 21 primitive candidate | Await primitive approval | medium |
+
+### New Files Needed
+
+See **Dismounted Components** — Phase 22 creates matching modules; paths documented there.
+
+### Notes
+
+Chart wrappers and card shells resemble primitives but remain **deferred** until Phase 21 approval — document only.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

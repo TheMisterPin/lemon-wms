@@ -80,3 +80,52 @@ Risk level: medium
 ### Decision
 
 Record the move decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
+
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- N/A — hook module only.
+
+UI-only state:
+- Loading/error flags plus cached data refs per hook implementation.
+
+Data fetching logic:
+- Primary responsibility — HTTP reads via `dashboardApiClient` as documented in Inventory.
+
+Mutation logic:
+- Document per hook (`None` for listed dashboard hooks unless source changes).
+
+Data transformation logic:
+- Maps API envelopes to page-ready DTOs — expand rows when transforms grow beyond inline parsing.
+
+Validation logic:
+- N/A unless hook validates params client-side.
+
+Error handling logic:
+- Maps failed responses to `error` string/state consistent with existing hook contract.
+
+Reusable utility logic:
+- **Special:** `use-dashboard-stock` module-level `fetchStockDashboardData` — retain colocated with hook unless duplication emerges elsewhere (Phase 22 reassessment).
+
+Types/interfaces declared inline:
+- Lift to `src/types/api/stock` / `src/types/dto/stock` when hooks stabilize.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Hook implementation | Current component-adjacent path | Planned `src/hooks/dashboard/{locations|stock}/...` per Classification | Phase 22 move (**hook**) | medium |
+| API wiring | Hook body | Optional `src/types/api/...` for payloads | Contract clarity (**types/api**) | low |
+| Page-ready DTO shaping | Hook return | `src/types/dto/...` + **`transformer`** helpers when non-trivial | Separation (**types/dto**/ **transformer**) | medium |
+| `fetchStockDashboardData` helper | `use-dashboard-stock` module | **Retained** adjacent to hook until duplication proven | RESEARCH Q5 default | low |
+
+### New Files Needed
+
+Deferred to Phase 22 — only documentation here.
+
+### Notes
+
+Canonical Logic Mapping: `.docs/developer/refactors/hooks/dashboard/stock/use-item-detail-dashboard.md`.
+

@@ -54,6 +54,52 @@ Risk level: medium
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Zone overview bins grid/cards with availability visuals.
+
+UI-only state:
+- Possible hover/selection local state — verify in Phase 22.
+
+Data fetching logic:
+- N/A — props-driven.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- `statusTone` helper bridges statuses to UI classes — may overlap other tone maps.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- Tone helper might merge with warehouse tone utilities — dedupe when extracting.
+
+Types/interfaces declared inline:
+- Props typed via zone overview types.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| `ZoneBinStockCard` / bars | Nested components | `src/components/features/locations/components/*` per dismount | Explicit split before move | medium |
+| `statusTone` | Inline helper | `src/components/features/locations/components/status-tone.tsx` (or transformer if logic-heavy) | Prevent drift across zone components | medium |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+Align availability bars with `warehouse-stock-summary` / `WarehouseStockAvailabilityBarChart` DTO contracts in Phase 22.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

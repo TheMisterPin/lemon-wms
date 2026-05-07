@@ -56,6 +56,54 @@ Risk level: high
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Modal/dialog shell with table listing bin contents; composes `TableShell` and column definitions.
+
+UI-only state:
+- Open/loading/error UI tied to dialog lifecycle and fetch outcome.
+
+Data fetching logic:
+- GET bin contents via `dashboardApiClient` when modal opens (see source path).
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- `quantityForBinItemStatus`, `toContentTableRows`, column builders map API rows to table presentation.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- Loading/error branches around fetch — retain UX messaging when splitting.
+
+Reusable utility logic:
+- Quantity + row-mapping helpers suitable for `src/lib/transformers/locations/*`.
+
+Types/interfaces declared inline:
+- N/A beyond table row helpers — types sourced from configs/API shapes per source.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Client fetch for bin contents | Effect inside modal | Future **`hook`** (`src/hooks/dashboard/locations/*`) or co-located data hook | Keeps feature component render-focused (CFR-09) | high |
+| Row/column mapping helpers | Inside modal module | `src/lib/transformers/locations/*` per dismount rows | Reusable mapping (CFR-10 **transformer**) | medium |
+| `ContentLine` / column config | Nested components | `src/components/features/locations/components/*` | Split multi-component file before move | medium |
+| Dialog shell / TableShell wiring | Modal JSX | **retained render** in feature component | shadcn/dialog composition stays local | low |
+
+### New Files Needed
+
+See **Dismounted Components** for Phase 22 paths.
+
+### Notes
+
+Evaluation checkbox “Fetches data: no” is inconsistent with inventory — Phase 22 treats fetch ownership explicitly when extracting hook logic.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

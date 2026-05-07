@@ -98,6 +98,20 @@ Plans:
 **UI hint:** no  
 **Depends on:** Phase 19
 
+**Plans:** 9 plans
+
+Plans:
+
+- [x] 20-01-PLAN.md — Scaffold `_logic-mapping-summary.md`, depth rule, CFR-10 taxonomy, verification gates (documentation-only).
+- [x] 20-02-PLAN.md — Warehouse provider/hook cluster: implementation-ready Logic Mapping, `actions` target, `extractMutationError` → `src/lib/api/extract-mutation-error.ts`, refactor-map cross-link (CFR-11–CFR-13).
+- [x] 20-03-PLAN.md — Full Logic Mapping for nine high-risk split/split-or-grouped/multi-component pages (bins, stock, warehouse overview/stock, zone overview, primitives, zone summary).
+- [x] 20-04-PLAN.md — Full Logic Mapping for remaining split rows (warehouse child splits, stock skeleton, zone KPI/bins sections).
+- [x] 20-05-PLAN.md — Full Logic Mapping for move + multi-component batch A (forms, stock dashboards, warehouse panels).
+- [x] 20-06-PLAN.md — Full Logic Mapping for move + multi-component batch B (tables, zone chart, zones page view, create-warehouse-form keep/move).
+- [x] 20-07-PLAN.md — Canonical + generated hook docs for bin overview and stock hooks (CFR-11, CFR-12).
+- [x] 20-08-PLAN.md — Concise Logic Mapping for eight low-touch move-only page shells and clients.
+- [x] 20-09-PLAN.md — Concise misc docs, devices hook CFR-13 cross-reference, summary/refactor-map/roadmap consistency sweep.
+
 ---
 
 ## Phase 21: Primitive and styling plan

@@ -76,6 +76,54 @@ Risk level: high
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Global stock dashboard layout: KPI cards, pie/bar charts, skeleton gate, error branch.
+
+UI-only state:
+- Warehouse filter wiring and UI toggles as recorded in Phase 18 inventory.
+
+Data fetching logic:
+- **`useDashboardStock`** owns requests and loading/error.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- Icon rotation memo, chart constants, `categoryHref` helper bridge routing concerns.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- Surfaced via hook output — component chooses rendering branch.
+
+Reusable utility logic:
+- `chartColors`, `rechartsTooltip`, `categoryIcons`, `categoryHref` candidates for modules.
+
+Types/interfaces declared inline:
+- N/A — relies on hook-provided `StockDashboardCategoryRow` / `StockDashboardData`.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Stock dashboard fetch/state | `useDashboardStock` | `src/hooks/dashboard/stock/use-dashboard-stock.tsx` (planned) | hook-owned async (**hook**) | medium |
+| Chart helper constants/components | Inside page file | `src/components/features/stock/pages/*` per dismount | Split large multi-component page | high |
+| `categoryHref` URL builder | Inline helper | `src/lib/transformers/stock/category-href.ts` | Shared routing helper (**transformer**/utility boundary) | medium |
+| Page orchestration JSX | Component | **retained render** after child extraction | Keeps page composition readable | medium |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+Consider aligning chart helper extraction with `category-stock-page-client` shared modules where duplicates exist — Phase 22 proves duplication before merging.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |

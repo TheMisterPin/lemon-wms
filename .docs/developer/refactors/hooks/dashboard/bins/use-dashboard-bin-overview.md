@@ -41,6 +41,52 @@ Current return/context shape is derived from the existing source, not a new cont
 - D-05/D-07/D-09 apply: frontmatter preserved, current responsibilities documented, no source movement or behavior change.
 - Phase 19/20 follow-up: classify target ownership, decide whether callbacks should be grouped under actions, and move reusable DTO transformation only after the documentation baseline is accepted.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- N/A — hook module.
+
+UI-only state:
+- Loading/error + cached query results per hook pattern.
+
+Data fetching logic:
+- Owns GET sequencing documented in Inventory/API sections.
+
+Mutation logic:
+- Per hook (mostly none for bin overview + listed stock readers).
+
+Data transformation logic:
+- Parses `ApiResponse` envelopes into typed DTOs for consumers.
+
+Validation logic:
+- Parameter guards only as implemented in source.
+
+Error handling logic:
+- Surfaces API failures via hook `error` channel.
+
+Reusable utility logic:
+- Extract pure helpers to **`transformer`** modules only after duplication proof.
+
+Types/interfaces declared inline:
+- Promote to shared **`types/api`** / **`types/dto`** when exported beyond hook.
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| Hook body | Current source path | Target hook folder from Classification | Phase 22 relocation (**hook**) | medium |
+| API payload typing | Inline | `src/types/api/...` | Wire vs UI separation | low |
+| Response→DTO mapping | Hook | `src/lib/transformers/...` when logic grows | Keeps hook thin (**transformer**) | medium |
+
+### New Files Needed
+
+None until Phase 22 execution — record planned modules here only via Classification.
+
+### Notes
+
+Bin overview hook stays single-consumer focused; align DTO boundaries with `bin-overview-dashboard` Logic Mapping.
 ## Classification
 
 Classification: hook

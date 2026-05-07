@@ -79,6 +79,53 @@ Risk level: medium
 
 Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
 
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+- Two-column directory sections for warehouses and zones with pagination + links.
+
+UI-only state:
+- Pagination controls state if local.
+
+Data fetching logic:
+- N/A.
+
+Mutation logic:
+- N/A.
+
+Data transformation logic:
+- Row rendering maps display records — mostly presentational.
+
+Validation logic:
+- N/A.
+
+Error handling logic:
+- N/A.
+
+Reusable utility logic:
+- N/A beyond small render helpers inside children.
+
+Types/interfaces declared inline:
+- Uses shared dashboard display records (`dashboard-types` relocation plan).
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+| --- | --- | --- | --- | --- |
+| `SectionBlock` / list rows | Nested components | `src/components/features/locations/components/*` | Split before move | medium |
+| Pagination UX | Parent assembly | **retained render** within feature component | Keeps coupling explicit | low |
+| Display typing imports | Component | `src/types/dto/locations/*` when types move | Align with refactor map (**types/dto**) | medium |
+
+### New Files Needed
+
+See **Dismounted Components**.
+
+### Notes
+
+`SectionBlock`/`ListCard` reuse may intersect Phase 21 primitive review — document only.
+
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |
