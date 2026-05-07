@@ -14,10 +14,10 @@
 
 ### Classification and ownership
 
-- [ ] **CFR-05**: Each documented component is classified as one of `shadcn/base`, `primitive`, `feature-component`, `feature-page`, `route-file`, `hook`, `utility`, `type-only`, or `delete/replace`.
-- [ ] **CFR-06**: Each classification records reason, target folder, target file name, keep/move/split/delete decision, risk level, and whether the file contains multiple declared components.
-- [ ] **CFR-07**: Target ownership is documented for `src/components/ui`, `src/components/primitives`, `src/components/features/[domain]`, `src/hooks`, `src/types/api`, `src/types/dto`, `src/types/components`, `src/lib/transformers`, and shared styling files.
-- [ ] **CFR-08**: Components marked for splitting include a dismounted component plan that records the new code path, new documentation path, and reason for each extracted component.
+- [x] **CFR-05**: Each documented component is classified as one of `shadcn/base`, `primitive`, `feature-component`, `feature-page`, `route-file`, `hook`, `utility`, `type-only`, or `delete/replace`.
+- [x] **CFR-06**: Each classification records reason, target folder, target file name, keep/move/split/delete decision, risk level, and whether the file contains multiple declared components.
+- [x] **CFR-07**: Target ownership is documented for `src/components/ui`, `src/components/primitives`, `src/components/features/[domain]`, `src/hooks`, `src/types/api`, `src/types/dto`, `src/types/components`, `src/lib/transformers`, and shared styling files.
+- [x] **CFR-08**: Components marked for splitting include a dismounted component plan that records the new code path, new documentation path, and reason for each extracted component.
 
 ### Logic mapping and data boundaries
 
@@ -108,10 +108,10 @@ Delivered in phases 1-10 (see `.planning/MILESTONES.md`). Requirement IDs BP-, P
 | CFR-02 | Phase 18 | Complete |
 | CFR-03 | Phase 18 | Complete |
 | CFR-04 | Phase 18 | Complete |
-| CFR-05 | Phase 19 | Pending |
-| CFR-06 | Phase 19 | Pending |
-| CFR-07 | Phase 19 | Pending |
-| CFR-08 | Phase 19 | Pending |
+| CFR-05 | Phase 19 | Complete |
+| CFR-06 | Phase 19 | Complete |
+| CFR-07 | Phase 19 | Complete |
+| CFR-08 | Phase 19 | Complete |
 | CFR-09 | Phase 20 | Pending |
 | CFR-10 | Phase 20 | Pending |
 | CFR-11 | Phase 20 | Pending |

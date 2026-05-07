@@ -66,6 +66,20 @@ Plans:
 **UI hint:** no  
 **Depends on:** Phase 18
 
+**Plans:** 10 plans
+
+Plans:
+- [x] 19-01-PLAN.md — Create classification summary scaffold and target ownership map.
+- [x] 19-02-PLAN.md — Classify locations hook and provider docs.
+- [x] 19-03-PLAN.md — Classify warehouse/location page-level docs.
+- [x] 19-04-PLAN.md — Classify warehouse child/type docs group A.
+- [x] 19-05-PLAN.md — Classify warehouse stock child and skeleton docs.
+- [x] 19-06-PLAN.md — Classify bin dashboard, modal, and form docs.
+- [x] 19-07-PLAN.md — Classify zone component and overview docs.
+- [x] 19-08-PLAN.md — Classify stock dashboard component docs.
+- [x] 19-09-PLAN.md — Classify stock hook docs.
+- [x] 19-10-PLAN.md — Finalize summaries, map, and validation gates.
+
 ---
 
 ## Phase 20: Logic mapping and hook decisions
