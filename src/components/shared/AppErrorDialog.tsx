@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/shared/app-error-dialog.md
+ */
+
 
 import { ErrorModal } from '@/components/shared/ErrorModal'
 import { useErrorDialog } from '@/components/shared/use-error-dialog'

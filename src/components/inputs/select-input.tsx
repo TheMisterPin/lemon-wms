@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/inputs/select-input.md
+ */
+
 import {
   Field,
   FieldDescription,

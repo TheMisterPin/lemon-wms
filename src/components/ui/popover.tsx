@@ -1,4 +1,9 @@
 "use client"
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/popover.md
+ */
+
 
 import * as React from "react"
 import { Popover as PopoverPrimitive } from "radix-ui"

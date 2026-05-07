@@ -1,4 +1,9 @@
 "use client"
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/tooltip.md
+ */
+
 
 import * as React from "react"
 import { Tooltip as TooltipPrimitive } from "radix-ui"

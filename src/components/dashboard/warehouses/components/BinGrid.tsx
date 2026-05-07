@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/bin-grid.md
+ */
+
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from 'react'
 import { PackageOpen } from 'lucide-react'

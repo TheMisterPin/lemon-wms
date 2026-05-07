@@ -36,27 +36,29 @@ model Warehouse {
   bins  Bin[]
 
   // IAM reverse relations
-  assignments WarehouseAssignment[]
-  devices     Device[]
+  assignments    WarehouseAssignment[]
+  devices        Device[]
+  deviceSessions DeviceSession[]
+  trolleys       Trolley[]
 
   // Operations
-  purchaseOrders PurchaseOrder[]
+  purchaseOrders        PurchaseOrder[]
   purchaseOrderReceipts PurchaseOrderReceipt[]
-  salesOrders    SalesOrder[]
-  transferOrders TransferOrder[]
-  returnOrders   ReturnOrder[]
-  adjustOrders   AdjustmentOrder[]
+  salesOrders           SalesOrder[]
+  transferOrders        TransferOrder[]
+  returnOrders          ReturnOrder[]
+  adjustOrders          AdjustmentOrder[]
 
   // Logs
-  binOperationEntries BinOperationEntry[]
-  itemLedger          ItemLedgerEntry[]
-  uaeEntries          UserActivityEntry[]
-  orderAssignments    OrderAssignment[]
+  binOperationEntries      BinOperationEntry[]
+  itemLedger               ItemLedgerEntry[]
+  uaeEntries               UserActivityEntry[]
+  orderAssignments         OrderAssignment[]
   orderExecutionActivities OrderExecutionActivity[]
   // Config
-  alertRules    AlertRule[]
-  serialConfigs SerialNumberConfig[]
-  boxes         Box[]
+  alertRules               AlertRule[]
+  serialConfigs            SerialNumberConfig[]
+  boxes                    Box[]
 }
 
 model Zone {
@@ -81,17 +83,17 @@ model Zone {
   deletedAt DateTime?
   createdAt DateTime  @default(now())
 
-  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouse               Warehouse                @relation(fields: [warehouseId], references: [id])
   zoneExecutionActivities OrderExecutionActivity[]
-  userActivityEntries UserActivityEntry[]
-  binOperationEntries BinOperationEntry[]
-  itemLedgerEntries ItemLedgerEntry[]
-  orderAssignments OrderAssignment[]
-  bins        Bin[]
-  assignments WarehouseAssignment[]
+  userActivityEntries     UserActivityEntry[]
+  binOperationEntries     BinOperationEntry[]
+  itemLedgerEntries       ItemLedgerEntry[]
+  orderAssignments        OrderAssignment[]
+  bins                    Bin[]
+  assignments             WarehouseAssignment[]
+  deviceSessions          DeviceSession[]
 
-  // One device per zone — enforced by unique constraint on Device.zoneId
-  device Device?
+  devices Device[]
 
   @@unique([warehouseId, name])
 }

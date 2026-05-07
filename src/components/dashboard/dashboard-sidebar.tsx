@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/dashboard-sidebar.md
+ */
+
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'

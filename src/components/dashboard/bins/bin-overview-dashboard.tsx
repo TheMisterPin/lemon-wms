@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/bins/bin-overview-dashboard.md
+ */
+
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'

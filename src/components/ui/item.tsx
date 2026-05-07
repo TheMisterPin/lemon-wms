@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/item.md
+ */
+
 import * as React from 'react'
 
 import { cva, type VariantProps } from 'class-variance-authority'

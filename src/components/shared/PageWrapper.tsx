@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/shared/page-wrapper.md
+ */
+
 import type { ReactNode } from 'react'
 
 interface PageWrapperProps {

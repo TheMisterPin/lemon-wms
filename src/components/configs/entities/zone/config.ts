@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/configs/entities/zone/config.md
+ */
+
 import type { Zone, ZoneFormValues } from '@/lib/locations'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/auth/floor-login-form.md
+ */
+
 
 import { useRef } from 'react'
 

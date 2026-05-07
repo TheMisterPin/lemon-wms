@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/skeleton.md
+ */
+
 import { cn } from "@/lib/utils"
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {

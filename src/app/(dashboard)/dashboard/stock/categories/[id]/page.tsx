@@ -1,6 +1,11 @@
-'use client'
-import { DashboardStockPage } from '@/components/dashboard/stock/dashboard-stock-page'
+import { CategoryStockPageClient } from '@/components/dashboard/stock/category-stock-page-client'
 
-export default function StockPage() {
-  return <DashboardStockPage />
+type PageProps = {
+  params: Promise<{ id: string }>
+}
+
+export default async function StockCategoryDetailPage({ params }: PageProps) {
+  const { id } = await params
+
+  return <CategoryStockPageClient categoryId={id} />
 }

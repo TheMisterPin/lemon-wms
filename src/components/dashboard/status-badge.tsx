@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/status-badge.md
+ */
+
 import { cn } from '@/lib/utils'
 
 type StatusVariant =

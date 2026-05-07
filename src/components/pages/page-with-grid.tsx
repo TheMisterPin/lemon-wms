@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/pages/page-with-grid.md
+ */
+
 
 import type { ReactNode } from 'react'
 

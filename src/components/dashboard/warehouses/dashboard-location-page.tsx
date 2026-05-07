@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/dashboard-location-page.md
+ */
+
 
 import Link from 'next/link'
 import { useCallback, useState } from 'react'

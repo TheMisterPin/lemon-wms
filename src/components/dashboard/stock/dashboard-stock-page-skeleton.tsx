@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/stock/dashboard-stock-page-skeleton.md
+ */
+
 import type { ReactNode } from 'react'
 
 import { Skeleton } from '@/components/ui/skeleton'

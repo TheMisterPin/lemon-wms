@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/bins/dashboard-bins-page-view.md
+ */
+
 
 import { useCallback, useState } from 'react'
 import { Box } from 'lucide-react'

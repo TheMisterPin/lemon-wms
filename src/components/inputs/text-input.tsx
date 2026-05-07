@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/inputs/text-input.md
+ */
+
 import {
   Field,
   FieldDescription,

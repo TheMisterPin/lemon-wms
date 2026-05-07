@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/inputs/index.md
+ */
+
 export * from './checkbox-input'
 export * from './dynamic-form-field'
 export * from './form-date-input'

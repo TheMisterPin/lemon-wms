@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/configs/entities/bin/bin-directory-table.md
+ */
+
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
 /** Shared shape for bin directory tables (office + floor home, dashboard bins grid). */

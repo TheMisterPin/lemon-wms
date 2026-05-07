@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/inputs/form-date-input.md
+ */
+
 import * as React from 'react'
 import { CalendarIcon } from 'lucide-react'
 

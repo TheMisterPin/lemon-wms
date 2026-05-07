@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/dashboard/warehouses/components/warehouse-overview-types.md
+ */
+
 export type WarehouseStockCategoryRow = {
   label: string
   totalOnHand: number

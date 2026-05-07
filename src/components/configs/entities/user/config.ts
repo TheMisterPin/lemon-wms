@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/configs/entities/user/config.md
+ */
+
 import type { User, UserFormValues } from '@/lib/iam'
 import type { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'

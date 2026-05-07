@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/metric-card.md
+ */
+
 import { cn } from '@/lib/utils'
 
 interface MetricCardProps {

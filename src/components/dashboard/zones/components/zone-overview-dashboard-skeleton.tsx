@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/zones/components/zone-overview-dashboard-skeleton.md
+ */
+
 
 export function ZoneOverviewDashboardSkeleton() {
   return (

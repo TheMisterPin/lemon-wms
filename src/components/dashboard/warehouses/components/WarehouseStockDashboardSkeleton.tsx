@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-stock-dashboard-skeleton.md
+ */
+
 
 export function WarehouseStockDashboardSkeleton() {
   return (

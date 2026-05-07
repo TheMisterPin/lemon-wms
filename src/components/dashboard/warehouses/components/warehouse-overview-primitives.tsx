@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-overview-primitives.md
+ */
+
 
 import type { MouseEventHandler, ReactNode } from 'react'
 

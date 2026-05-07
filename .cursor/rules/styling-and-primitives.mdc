@@ -1,0 +1,117 @@
+---
+description: Rules for styling consistency, design tokens, primitives, and skeleton placement.
+globs:
+  - "src/components/**/*.{ts,tsx}"
+  - "src/styles/**/*.css"
+  - "src/app/**/*.css"
+alwaysApply: false
+---
+
+# Styling and Primitive Rules
+
+Use this rule when extracting styling, creating primitives, or cleaning repeated UI structure.
+
+## Styling Goal
+
+Keep the Lemon WMS UI consistent, matte, reusable, and predictable.
+
+Do not restyle the app during structural refactors unless the task explicitly asks for a visual change.
+
+## Styling Rules
+
+- Preserve existing visual design during refactors.
+- Extract repeated styling into primitives or reusable CSS classes.
+- Keep one-off layout tweaks local.
+- Avoid massive unreadable `className` strings when the pattern repeats.
+- Use design tokens for repeated spacing, border, radius, typography, and muted text.
+- Use `shadcn/ui` as the base component layer.
+- Keep color accents intentional and data-driven.
+
+## Design Token Areas
+
+Prefer central styling for repeated design choices:
+
+```txt
+src/styles/tokens.css
+src/styles/component-classes.css
+```
+
+Example token categories:
+
+```css
+:root {
+  --dashboard-card-radius: 0.75rem;
+  --dashboard-card-border: hsl(var(--border));
+  --dashboard-section-gap: 1rem;
+  --dashboard-muted-text: hsl(var(--muted-foreground));
+}
+```
+
+## Reusable Classes
+
+Create reusable classes only for repeated patterns.
+
+Good candidates:
+
+- dashboard cards
+- dashboard sections
+- table shells
+- modal shells
+- form rows
+- KPI card grids
+- chart panels
+
+Do not create a CSS class for a one-off style.
+
+## Primitive Extraction Rule
+
+Extract a primitive when a UI pattern appears in multiple places and has the same structural purpose.
+
+Good primitive candidates:
+
+- repeated KPI card layout
+- repeated dashboard section wrapper
+- repeated modal shell
+- repeated details table
+- repeated chart panel
+- repeated empty/loading/error state
+- repeated filter toolbar
+
+Bad primitive candidates:
+
+- one-off layout
+- domain-specific business panel
+- component that needs API knowledge
+- component that hides mutations
+- component that becomes a giant config object
+
+## Skeleton Rules
+
+Feature-specific skeletons:
+
+- keep near the component they represent
+- colocate when the skeleton only makes sense for that component
+
+Generic skeletons:
+
+- place in primitives
+- use for project-wide reusable loading patterns
+
+## Primitive Responsibility
+
+A primitive may:
+
+- compose `shadcn/ui`
+- apply Lemon WMS styling
+- provide reusable layout
+- expose typed props
+- render generic states
+
+A primitive must not:
+
+- fetch data
+- mutate data
+- import feature hooks
+- know API response shapes
+- know domain business rules
+- hide feature-specific behavior

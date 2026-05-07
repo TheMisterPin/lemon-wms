@@ -1,0 +1,179 @@
+---
+description: Rules for Lemon WMS component architecture, folder placement, and responsibilities.
+globs:
+  - "src/components/**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Component Architecture Rules
+
+Use this rule when creating, moving, or refactoring components.
+
+## Component Layers
+
+The frontend component hierarchy should follow this direction:
+
+```txt
+app route
+-> hook
+-> feature page component
+-> feature components
+-> primitives
+-> shadcn/ui
+```
+
+## `components/ui`
+
+Reserved for `shadcn/ui` base components.
+
+Rules:
+
+- Do not put feature components here.
+- Do not put business logic here.
+- Do not put API calls here.
+- Do not put domain-specific components here.
+- Treat this folder as the base UI dependency layer.
+
+## `components/primitives`
+
+Primitives are Lemon WMS reusable UI building blocks.
+
+They may wrap `shadcn/ui` components and apply project styling.
+
+Good primitive examples:
+
+- `DashboardPageShell`
+- `DashboardSection`
+- `SectionHeader`
+- `KpiCard`
+- `KpiCardGrid`
+- `MetricCard`
+- `DetailsTable`
+- `UniversalModal`
+- `FormModal`
+- `DetailsModal`
+- `UniversalForm`
+- `FormTextInput`
+- `FormDateInput`
+- `FormSelectInput`
+- `DonutChart`
+- `LineChartCard`
+- `EmptyState`
+- `LoadingState`
+- `ErrorState`
+- `ActionToolbar`
+- `FilterBar`
+
+Primitive rules:
+
+- Must be reusable across domains.
+- Must have typed props.
+- Must use `shadcn/ui` as the base layer where possible.
+- Must contain project styling only.
+- Must not fetch data.
+- Must not mutate data.
+- Must not import feature hooks.
+- Must not know API response shapes.
+- Must not contain domain-specific business rules.
+- Must not become a giant abstraction that hides business logic.
+
+## `components/features`
+
+Feature components are domain-specific.
+
+Examples:
+
+```txt
+components/features/locations/components/create-zone-form.tsx
+components/features/locations/components/bin-details-modal.tsx
+components/features/stock/components/bin-stock-table.tsx
+components/features/orders/components/order-progress-card.tsx
+```
+
+Feature component rules:
+
+- May know domain language.
+- May receive domain DTOs.
+- May compose primitives.
+- May receive callbacks like `onSubmit`, `onRefresh`, `onOpenDetails`.
+- Must not fetch data directly.
+- Must not call API clients directly.
+- Must not define API payload types internally.
+- Must not define large helper functions inline.
+- Must not declare unrelated child components inline.
+
+## Feature Page Components
+
+Page-level render components live under:
+
+```txt
+components/features/[domain]/pages
+```
+
+Examples:
+
+```txt
+components/features/locations/pages/dashboard-warehouse-overview.tsx
+components/features/stock/pages/warehouse-stock-overview.tsx
+```
+
+Feature page rules:
+
+- Receive hook output as props.
+- Assemble feature components.
+- Handle page-level conditional rendering.
+- Do not fetch data directly.
+- Do not mutate data directly.
+- Do not call API clients.
+- Do not define raw API payload types.
+- Do not contain route-specific framework logic unless required.
+
+## Component Props Rule
+
+If a component has more than one prop, define a named props type.
+
+Good:
+
+```ts
+type BinDetailsModalProps = {
+  bin: BinDetailsDto | null
+  isOpen: boolean
+  onClose: () => void
+}
+```
+
+Bad:
+
+```tsx
+function BinDetailsModal({
+  bin,
+  isOpen,
+  onClose
+}: {
+  bin: BinDetailsDto | null
+  isOpen: boolean
+  onClose: () => void
+}) {}
+```
+
+Inline props are only acceptable for tiny single-prop wrappers.
+
+## Component Responsibility Rule
+
+Components should usually contain only:
+
+- render logic
+- conditional UI logic
+- local UI-only state
+- event handler wiring
+- component composition
+
+Components should not contain:
+
+- API calls
+- mutations
+- business workflows
+- API response type definitions
+- non-trivial data transformation
+- reusable utility logic
+- hidden domain rules

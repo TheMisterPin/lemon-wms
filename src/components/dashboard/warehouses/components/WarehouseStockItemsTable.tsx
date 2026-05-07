@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-stock-items-table.md
+ */
+
 
 import type { WarehouseStockDashboardItemRow } from '@/types/warehouse-stock-dashboard.types'
 import {

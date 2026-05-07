@@ -1,4 +1,9 @@
 "use client"
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/select.md
+ */
+
 
 import * as React from "react"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"

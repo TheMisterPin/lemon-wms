@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/universal-button.md
+ */
+
 import React from 'react'
 import { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'

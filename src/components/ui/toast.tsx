@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/toast.md
+ */
+
 import * as React from 'react'
 
 export interface ToastProps {

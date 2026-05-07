@@ -1,0 +1,88 @@
+---
+description: Core rules for safe component refactors in Lemon WMS.
+globs:
+  - "src/**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Component Refactor Core Rules
+
+These rules apply to all Lemon WMS frontend refactors.
+
+## Primary Goal
+
+Refactor the frontend in small, reviewable steps while preserving existing behavior.
+
+The goal is not to redesign the app. The goal is to make the structure clearer, safer, more reusable, and easier for developers and agents to modify.
+
+## Do
+
+- Preserve existing behavior.
+- Move code in small, reviewable steps.
+- Prefer named types over inline object types.
+- Use existing `shadcn/ui` components as the base layer.
+- Extract repeated styling into primitives or reusable CSS classes.
+- Extract repeated data mapping into transformers.
+- Keep components render-focused.
+- Keep hooks responsible for API interaction and state.
+- Keep route files thin.
+- Make coupling visible at the page level.
+- Use domain-based folders.
+- Keep skeletons near the component they represent when they are feature-specific.
+- Keep generic skeletons in primitives.
+
+## Do Not
+
+- Do not introduce a new state management library.
+- Do not rewrite visual design unless needed for structure.
+- Do not change API contracts unless explicitly required.
+- Do not put API calls inside components.
+- Do not put mutations inside components.
+- Do not define API response types inside component files.
+- Do not create giant generic components that hide business logic.
+- Do not move everything into primitives.
+- Do not make primitives domain-aware.
+- Do not create barrel files unless the import ergonomics clearly improve.
+- Do not refactor unrelated business logic while moving files.
+- Do not delete components until all usages are verified.
+
+## Refactor Discipline
+
+Before changing code:
+
+1. Identify the smallest safe vertical slice.
+2. Check current imports and usages.
+3. Move only the code required for the slice.
+4. Preserve existing behavior and visual output.
+5. Fix imports immediately.
+6. Run typecheck/lint when available.
+7. Update the relevant refactor documentation if docs exist for this slice.
+
+## Behavior Preservation Rule
+
+During structural refactors, do not change:
+
+- API routes.
+- API response contracts.
+- DTO meanings.
+- User-facing behavior.
+- Visual design.
+- Business rules.
+- Validation rules.
+- Mutation semantics.
+
+Only change those when the task explicitly requests it.
+
+## Reviewability Rule
+
+Prefer multiple small moves over one massive rewrite.
+
+A good refactor step should be easy to review in isolation:
+
+- one component split
+- one hook extraction
+- one primitive extraction
+- one route thinning
+- one transformer extraction
+
+Avoid large “cleanup everything” patches.

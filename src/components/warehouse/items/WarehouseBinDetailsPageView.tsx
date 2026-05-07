@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/warehouse/items/warehouse-bin-details-page-view.md
+ */
+
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'

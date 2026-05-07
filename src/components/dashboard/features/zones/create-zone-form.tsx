@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/features/zones/create-zone-form.md
+ */
+
 
 import { useState } from 'react'
 

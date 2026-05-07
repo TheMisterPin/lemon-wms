@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/hook/warehouse/orders/use-purchase-orders.md
+ */
+
 
 import { useCallback, useMemo, useState } from 'react'
 import axios from 'axios'

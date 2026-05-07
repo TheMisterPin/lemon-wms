@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/features/warehouses/create-warehouse-form.md
+ */
+
 
 import { useState } from 'react'
 

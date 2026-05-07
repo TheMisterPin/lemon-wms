@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-stock-zones-table.md
+ */
+
 
 import Link from 'next/link'
 

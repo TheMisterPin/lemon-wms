@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/hook/dashboard/devices/use-dashboard-devices.md
+ */
+
 
 import {
   createContext,

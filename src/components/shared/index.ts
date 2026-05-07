@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/shared/index.md
+ */
+
 export * from './AuthProvider'
 export * from './AppErrorDialog'
 export * from './bin-selector-dialog'

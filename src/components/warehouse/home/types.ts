@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/warehouse/home/types.md
+ */
+
 import type { BinDirectoryRow } from '@/components/configs/entities/bin/bin-directory-table'
 import type { DashboardInfoCardItem } from '@/components/dashboard/dashboard-info-card'
 import type { DashboardRecordListItem } from '@/components/dashboard/dashboard-record-list-section'

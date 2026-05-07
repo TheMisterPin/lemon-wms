@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/home/dashboard-home-page-view.md
+ */
+
 // 'use client'
 
 // import { useCallback, useState } from 'react'

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/shared/scan-input.md
+ */
+
 
 import { useRef, type KeyboardEvent } from 'react'
 

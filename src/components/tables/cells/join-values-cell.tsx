@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/tables/cells/join-values-cell.md
+ */
+
 
 import type { DataColumnConfig } from '@/types/components/table/column.types'
 

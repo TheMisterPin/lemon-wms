@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/dashboard-record-list-section.md
+ */
+
 import { useMemo } from 'react'
 import { Search, type LucideIcon } from 'lucide-react'
 import {

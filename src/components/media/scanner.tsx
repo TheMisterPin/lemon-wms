@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/media/scanner.md
+ */
+
 /* eslint-disable react-hooks/exhaustive-deps */
 
 'use client'

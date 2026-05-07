@@ -1,4 +1,9 @@
 "use client"
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/drawer.md
+ */
+
 
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"

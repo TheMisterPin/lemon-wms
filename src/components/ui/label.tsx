@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/label.md
+ */
+
 
 import * as React from 'react'
 

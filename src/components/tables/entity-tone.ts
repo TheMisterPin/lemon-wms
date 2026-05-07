@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/tables/entity-tone.md
+ */
+
 import type { EntityTone } from '@/types/components/table/generic-table.types'
 
 export function getEntityTone(tone?: EntityTone) {

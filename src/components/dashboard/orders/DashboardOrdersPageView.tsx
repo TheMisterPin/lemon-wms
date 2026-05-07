@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/orders/dashboard-orders-page-view.md
+ */
+
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'

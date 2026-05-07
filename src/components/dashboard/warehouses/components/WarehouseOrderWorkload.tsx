@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-order-workload.md
+ */
+
 
 import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'

@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/tables/index.md
+ */
+
 export * from './checkbox-table'
 export * from './entity-tone'
 export * from './generic-table'

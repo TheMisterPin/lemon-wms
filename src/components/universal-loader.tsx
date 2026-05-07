@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/universal-loader.md
+ */
+
 import {
   Item,
   ItemContent,

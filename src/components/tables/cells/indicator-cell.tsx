@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/tables/cells/indicator-cell.md
+ */
+
 
 import { cn } from '@/lib/utils'
 import {

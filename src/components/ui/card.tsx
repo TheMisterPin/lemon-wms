@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/card.md
+ */
+
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'

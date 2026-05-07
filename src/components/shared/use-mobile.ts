@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/hook/shared/use-mobile.md
+ */
+
 import * as React from 'react'
 
 const MOBILE_BREAKPOINT = 768

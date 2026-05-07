@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/dashboard-warehouse-overview.md
+ */
+
 
 import type { ComponentType } from 'react'
 

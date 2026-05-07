@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/tables/cells/index.md
+ */
+
 export { BooleanCell } from './boolean-cell'
 export { CellRenderer } from './cell-renderer'
 export { DateCell } from './date-cell'

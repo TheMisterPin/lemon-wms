@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-overview-icons.md
+ */
+
 
 import type { ComponentProps, ComponentType } from 'react'
 

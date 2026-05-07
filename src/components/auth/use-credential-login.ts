@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/hook/auth/use-credential-login.md
+ */
+
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'

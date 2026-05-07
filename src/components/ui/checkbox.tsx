@@ -1,4 +1,9 @@
 "use client"
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/checkbox.md
+ */
+
 
 import * as React from "react"
 import { CheckIcon } from "lucide-react"

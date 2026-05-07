@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/shared/bin-selector-dialog.md
+ */
+
 import {
   Dialog,
   DialogContent,

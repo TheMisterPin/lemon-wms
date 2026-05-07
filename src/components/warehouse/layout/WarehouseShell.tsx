@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/warehouse/layout/warehouse-shell.md
+ */
+
 
 import { useState } from 'react'
 import type { ReactNode } from 'react'

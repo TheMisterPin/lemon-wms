@@ -1,0 +1,206 @@
+---
+description: Documentation-driven workflow for component and hook refactors.
+globs:
+  - ".docs/developer/refactors/**/*.md"
+  - "src/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Refactor Documentation Workflow
+
+Use this rule when working on component or hook refactors that have documentation under `.docs/developer/refactors`.
+
+## Source of Truth
+
+The refactor documentation is the source of truth between phases.
+
+Existing documentation folders:
+
+```txt
+.docs/developer/refactors/components
+.docs/developer/refactors/hooks
+```
+
+Before each phase:
+
+1. Read the relevant existing markdown files.
+2. Preserve existing frontmatter and metadata.
+3. Update the document instead of replacing useful content.
+4. Use the current file state, not chat memory, as the continuation point.
+
+## Required Documentation Behavior
+
+Every refactor phase must leave the relevant markdown files more complete than it found them.
+
+If a component, hook, provider, or page is moved, split, renamed, or dismounted:
+
+1. Create or update the matching markdown document.
+2. Keep the document in the same refactor documentation folder.
+3. Link the new document back to the original component/hook when useful.
+4. Update old path, new path, status, and risk.
+
+## Component Documentation Template
+
+Each component document should track:
+
+```txt
+Component name:
+Current file path:
+Current responsibility:
+Dependencies:
+  - Components:
+  - Hooks:
+  - Types:
+  - Utils:
+Props:
+Internal state:
+API calls:
+Mutation calls:
+Main UI blocks:
+Declared child components inside the file:
+Repeated styling:
+Repeated logic:
+Recommended destination:
+Refactor priority:
+```
+
+## Classification Section
+
+Each component document should include:
+
+```md
+## Classification
+
+Classification:
+Reason:
+Target folder:
+Target file name:
+Keep / Move / Split / Delete:
+Risk level: low | medium | high
+
+### Evaluation
+
+- Duplicates shadcn/ui:
+- Project-wide reusable:
+- Domain-specific:
+- Fetches data:
+- Mutates data:
+- Contains reusable transformation logic:
+- Defines types inline:
+- Contains repeated styling:
+- Contains multiple components:
+- Still needed:
+
+### Decision
+
+```
+
+## Logic Mapping Section
+
+Each relevant component document should include:
+
+```md
+## Logic Mapping
+
+### Logic Found
+
+Render logic:
+UI-only state:
+Data fetching logic:
+Mutation logic:
+Data transformation logic:
+Validation logic:
+Error handling logic:
+Reusable utility logic:
+Types/interfaces declared inline:
+
+### Logic Movement Plan
+
+| Logic | Current location | Target location | Reason | Risk |
+|---|---|---|---|---|
+
+### New Files Needed
+
+| File | Purpose |
+|---|---|
+
+### Notes
+
+```
+
+## Hook Documentation Template
+
+Each hook document should track:
+
+```md
+## Hook Responsibility
+
+Current source:
+Target hook file:
+Used by:
+Owns fetching:
+Owns mutations:
+Owns loading state:
+Owns error state:
+Owns DTO transformation:
+Exposes actions:
+
+## Inputs
+
+## Returned DTO
+
+## Actions
+
+## Dependencies
+
+## Refactor Notes
+```
+
+## Refactor Status Section
+
+At the end of each code move, update the related document with:
+
+```md
+## Refactor Status
+
+Status: planned | in-progress | moved | split | replaced | deleted
+Old path:
+New path:
+Related files:
+Imports updated:
+Typecheck status:
+Notes:
+```
+
+## Dismounting Rule
+
+When extracting a component out of a file that currently contains multiple components:
+
+1. Create the new component file.
+2. Create a matching markdown document in:
+
+```txt
+.docs/developer/refactors/components
+```
+
+3. Link it back to the original component document.
+4. Update the original component document with:
+
+```md
+## Dismounted Components
+
+| Component | New code path | New documentation path | Reason |
+|---|---|---|
+```
+
+## Phase Completion Rule
+
+No refactor phase is complete unless:
+
+- code state and documentation state agree
+- old and new paths are recorded
+- moved/split files have matching docs
+- unresolved risks are written down
+- typecheck/lint status is recorded when available
+
+Documentation and code move together. Otherwise the next agent run inherits a crime scene.

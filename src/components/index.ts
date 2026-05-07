@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/index.md
+ */
+
 export * from './auth'
 export * from './dashboard'
 export * from './dynamic-form'

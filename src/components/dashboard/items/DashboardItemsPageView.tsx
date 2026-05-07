@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/items/dashboard-items-page-view.md
+ */
+
 
 import { MapPin, Warehouse } from 'lucide-react'
 import { DashboardHomeSearchBar } from '@/components/dashboard/dashboard-home-search-bar'

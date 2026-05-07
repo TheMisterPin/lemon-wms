@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/tables/cells/progress-cell.md
+ */
+
 
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'

@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/configs/entities/warehouse/config.md
+ */
+
 import { Warehouse, WarehouseFormValues } from '@/lib/locations'
 import { FactboxSectionConfig } from '@/types/components/factbox/generic-factbox.types'
 import { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'

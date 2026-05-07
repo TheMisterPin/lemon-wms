@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/configs/entities/bin/bin-table-actions.md
+ */
+
 
 import { Package } from 'lucide-react'
 

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/features/bins/create-bin-form.md
+ */
+
 
 import { useState } from 'react'
 

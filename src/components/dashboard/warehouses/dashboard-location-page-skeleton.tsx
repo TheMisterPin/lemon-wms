@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/dashboard-location-page-skeleton.md
+ */
+
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 

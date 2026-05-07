@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/warehouse/orders/warehouse-orders-page-view.md
+ */
+
 
 import { useEffect, useMemo } from 'react'
 import { ClipboardList, Pause, Play } from 'lucide-react'

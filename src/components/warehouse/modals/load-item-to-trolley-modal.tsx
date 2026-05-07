@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/warehouse/modals/load-item-to-trolley-modal.md
+ */
+
 
 import { Loader2 } from 'lucide-react'
 

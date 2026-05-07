@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/textarea.md
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

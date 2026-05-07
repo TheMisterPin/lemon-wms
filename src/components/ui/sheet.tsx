@@ -1,4 +1,9 @@
 "use client"
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/sheet.md
+ */
+
 
 import * as React from "react"
 import { XIcon } from "lucide-react"

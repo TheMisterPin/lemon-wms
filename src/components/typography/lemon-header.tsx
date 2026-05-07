@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/typography/lemon-header.md
+ */
+
 import React from 'react'
 
 export default function LemonHeader() {

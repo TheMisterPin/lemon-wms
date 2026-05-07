@@ -1,4 +1,5 @@
 export * from './devices-queries'
+export * from './devices-dashboard-queries'
 export * from './devices-mutations'
 export * from './session'
 export * from './devices-schemas'

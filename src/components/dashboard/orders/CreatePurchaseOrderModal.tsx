@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/orders/create-purchase-order-modal.md
+ */
+
 
 import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'

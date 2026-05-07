@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/directory-sections.md
+ */
+
 import Link from 'next/link'
 import { MapPin, Warehouse } from 'lucide-react'
 

@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/dashboard/index.md
+ */
+
 export * from './dashboard-footer'
 export * from './dashboard-header'
 export * from './dashboard-info-card'

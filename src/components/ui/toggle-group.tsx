@@ -1,4 +1,9 @@
 "use client"
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/toggle-group.md
+ */
+
 
 import * as React from "react"
 import { type VariantProps } from "class-variance-authority"

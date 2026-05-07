@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/factbox/generic-factbox.md
+ */
+
 
 import { FieldValues } from 'react-hook-form'
 

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/tables/cells/cell-renderer.md
+ */
+
 
 import { isDataColumn, resolveColumnStyleClassNames } from '@/lib/utils/table'
 import type { ColumnConfig } from '@/types/components/table/column.types'

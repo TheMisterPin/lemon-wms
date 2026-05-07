@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/auth/credential-login-form.md
+ */
+
 
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 

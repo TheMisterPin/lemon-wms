@@ -29,21 +29,23 @@ model User {
   isLoggedIn        Boolean   @default(false)
 
   // Auth
-  lastLoginDevice Device?        @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
+  lastLoginDevice Device?         @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
   refreshTokens   RefreshToken[]
+  deviceSessions  DeviceSession[]
 
   // Assignments
   warehouseAssignments WarehouseAssignment[]
 
   // Activity
-  userActivityEntries      UserActivityEntry[]
-  binOperationEntries      BinOperationEntry[]
-  notifications            Notification[]
-  
-  orderAssignments         OrderAssignment[]
+  userActivityEntries UserActivityEntry[]
+  binOperationEntries BinOperationEntry[]
+  notifications       Notification[]
+
+  orderAssignments OrderAssignment[]
 
   // Devices this user has been seen on
-  usedByDevices Device[] @relation("DeviceLastUser")
+  usedByDevices  Device[]  @relation("DeviceLastUser")
+  activeTrolleys Trolley[] @relation("TrolleyCurrentUser")
 
   // Warehouses this user created
   createdWarehouses        Warehouse[]              @relation("WarehouseCreatedBy")
@@ -51,41 +53,134 @@ model User {
 }
 
 model Device {
-  id           String     @id @default(uuid())
-  name         String     @unique // e.g. "Zone A Terminal 1"
-  code         String     @unique // Scanned or typed to register
-  warehouseId  String?
-  zoneId       String?    @unique // One device per zone — enforced by unique constraint
-  authorized   Boolean    @default(false)
-  isActive     Boolean    @default(true)
-  type         DeviceType @default(FLOOR)
-  registeredAt DateTime   @default(now())
-  lastSeenAt   DateTime?
-  loginMode    LoginMode  @default(PIN)
-  lastUserId   String?
+  id                  String                    @id @default(uuid())
+  name                String                    @unique // e.g. "Zone A Terminal 1"
+  code                String                    @unique // Scanned or typed to register
+  warehouseId         String?
+  zoneId              String?
+  authorized          Boolean                   @default(false)
+  authorizationStatus DeviceAuthorizationStatus @default(PENDING)
+  isActive            Boolean                   @default(true)
+  type                DeviceType                @default(FLOOR)
+  subType             DeviceSubType             @default(TERMINAL)
+  onlineStatus        DeviceOnlineStatus        @default(OFFLINE)
+  syncStatus          DeviceSyncStatus          @default(SYNCED)
+  registeredAt        DateTime                  @default(now())
+  lastSeenAt          DateTime?
+  lastHeartbeatAt     DateTime?
+  lastErrorAt         DateTime?
+  errorCount          Int                       @default(0)
+  loginMode           LoginMode                 @default(PIN)
+  lastUserId          String?
+  updatedAt           DateTime                  @updatedAt
 
   warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
   zone      Zone?      @relation(fields: [zoneId], references: [id])
   lastUser  User?      @relation("DeviceLastUser", fields: [lastUserId], references: [id])
 
   // Sessions issued on this device
-  loggedInByUsers User[] @relation("UserLastDevice")
+  loggedInByUsers          User[]                   @relation("UserLastDevice")
+  refreshTokens            RefreshToken[]
+  deviceSessions           DeviceSession[]
+  syncEvents               DeviceSyncEvent[]
+  trolley                  Trolley?                 @relation("TrolleyDevice")
+  userActivityEntries      UserActivityEntry[]      @relation("DeviceActivityEntries")
+  binOperationEntries      BinOperationEntry[]      @relation("DeviceBinOperations")
+  orderAssignments         OrderAssignment[]        @relation("DeviceOrderAssignments")
+  orderExecutionActivities OrderExecutionActivity[] @relation("DeviceExecutionActivities")
 
   // Stock items currently in transit on this device
   transitBinStockItems BinStockItem[] @relation("TransitBinStockItems")
 }
 
 model RefreshToken {
-  id          String    @id @default(uuid())
-  userId      String
-  tokenHash   String    @unique // Raw token is never stored — only bcrypt hash
-  deviceLabel String
-  deviceId    String?
-  expiresAt   DateTime
-  revokedAt   DateTime? // Set on logout or forced revocation — not deleted
-  createdAt   DateTime  @default(now())
+  id              String    @id @default(uuid())
+  userId          String
+  tokenHash       String    @unique // Raw token is never stored — only bcrypt hash
+  deviceLabel     String
+  deviceId        String?
+  deviceSessionId String?
+  expiresAt       DateTime
+  revokedAt       DateTime? // Set on logout or forced revocation — not deleted
+  createdAt       DateTime  @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device        Device?        @relation(fields: [deviceId], references: [id])
+  deviceSession DeviceSession? @relation(fields: [deviceSessionId], references: [id])
+}
+
+model DeviceSession {
+  id           String              @id @default(uuid())
+  userId       String
+  deviceId     String
+  warehouseId  String?
+  zoneId       String?
+  status       DeviceSessionStatus @default(ACTIVE)
+  loginAt      DateTime            @default(now())
+  lastActiveAt DateTime?
+  logoutAt     DateTime?
+  endedReason  String?
+  metadata     Json?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device        Device         @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  warehouse     Warehouse?     @relation(fields: [warehouseId], references: [id])
+  zone          Zone?          @relation(fields: [zoneId], references: [id])
+  refreshTokens RefreshToken[]
+
+  @@index([userId, loginAt])
+  @@index([deviceId, loginAt])
+  @@index([warehouseId, loginAt])
+  @@index([status, loginAt])
+}
+
+model Trolley {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  name            String
+  warehouseId     String
+  currentDeviceId String?   @unique
+  currentUserId   String?
+  isActive        Boolean   @default(true)
+  lastSeenAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  warehouse     Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  currentDevice Device?   @relation("TrolleyDevice", fields: [currentDeviceId], references: [id])
+  currentUser   User?     @relation("TrolleyCurrentUser", fields: [currentUserId], references: [id])
+
+  transitBinStockItems     BinStockItem[]           @relation("TransitTrolleyStockItems")
+  userActivityEntries      UserActivityEntry[]      @relation("TrolleyActivityEntries")
+  binOperationEntries      BinOperationEntry[]      @relation("TrolleyBinOperations")
+  orderAssignments         OrderAssignment[]        @relation("TrolleyOrderAssignments")
+  orderExecutionActivities OrderExecutionActivity[] @relation("TrolleyExecutionActivities")
+  syncEvents               DeviceSyncEvent[]
+
+  @@index([warehouseId, isActive])
+  @@index([currentUserId])
+}
+
+model DeviceSyncEvent {
+  id           String          @id @default(uuid())
+  deviceId     String
+  trolleyId    String?
+  eventType    String
+  status       SyncEventStatus @default(PENDING)
+  payload      Json?
+  errorMessage String?
+  retryCount   Int             @default(0)
+  createdAt    DateTime        @default(now())
+  syncedAt     DateTime?
+  updatedAt    DateTime        @updatedAt
+
+  device  Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  trolley Trolley? @relation(fields: [trolleyId], references: [id], onDelete: SetNull)
+
+  @@index([deviceId, status, createdAt])
+  @@index([trolleyId, status, createdAt])
 }
 
 // Scopes a user to a warehouse and optionally a zone.

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/tables/checkbox-table.md
+ */
+
 
 import * as React from 'react'
 

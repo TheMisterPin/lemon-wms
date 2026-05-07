@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/dashboard-shell.md
+ */
+
 import type { ReactNode } from 'react'
 
 import { AppErrorDialog } from '@/components/shared/AppErrorDialog'

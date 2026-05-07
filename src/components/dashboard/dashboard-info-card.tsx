@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/dashboard-info-card.md
+ */
+
 import type { LucideIcon } from 'lucide-react'
 
 export interface DashboardInfoCardItem {

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/zones/zone-overview-dashboard.md
+ */
+
 
 import Link from 'next/link'
 

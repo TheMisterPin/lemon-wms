@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/dashboard/dashboard-navigation.md
+ */
+
 import {
   BarChart2,
   ClipboardList,
@@ -85,6 +90,7 @@ export const DASHBOARD_ROUTE_METADATA: DashboardRouteMetadata[] = [
     label: 'Orders',
     icon: ClipboardList,
     children: [
+      { label: 'Overview', segment: 'orders' },
       { label: 'Purchase Orders', segment: 'orders/purchase' }
     ]
   },
@@ -92,7 +98,9 @@ export const DASHBOARD_ROUTE_METADATA: DashboardRouteMetadata[] = [
     label: 'Stock',
     icon: BarChart2,
     children: [
-      { label: 'Overview', segment: 'stock' }
+      { label: 'Overview', segment: 'stock' },
+      { label: 'Categories', segment: 'stock/categories' },
+      { label: 'Health', segment: 'stock/health' }
     ]
   },
   {

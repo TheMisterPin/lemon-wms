@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/inputs/dynamic-form-field.md
+ */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 

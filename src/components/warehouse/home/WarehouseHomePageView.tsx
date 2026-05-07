@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/warehouse/home/warehouse-home-page-view.md
+ */
+
 
 import { useRouter } from 'next/navigation'
 

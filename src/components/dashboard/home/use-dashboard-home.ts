@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/hook/dashboard/home/use-dashboard-home.md
+ */
+
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Building2, Map as MapIcon, Package } from 'lucide-react'

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/zones/components/zone-overview-kpi-strip.md
+ */
+
 
 import { warehouseOverviewIcons } from '@/components/dashboard/warehouses/components/warehouse-overview-icons'
 import { warehouseOverviewToneStyles } from '@/components/dashboard/warehouses/components/warehouse-overview-primitives'

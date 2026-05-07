@@ -1,5 +1,11 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/stock/dashboard-stock-page.md
+ */
 
+
+import Link from 'next/link'
 import type { ComponentType, ReactNode } from 'react'
 import { useMemo } from 'react'
 import { Armchair, Loader2, Package, Pill, Shirt, Utensils } from 'lucide-react'
@@ -107,6 +113,14 @@ type CategoryChartDatum = StockDashboardCategoryRow & {
   Icon: ComponentType<{ size?: number }>
 }
 
+function categoryHref(categoryKey: string): string {
+  if (categoryKey === '__none__') {
+    return '/dashboard/stock/categories'
+  }
+
+  return `/dashboard/stock/categories/${encodeURIComponent(categoryKey)}`
+}
+
 export function DashboardStockPage() {
   const { isLoading, error, refetch, data } = useDashboardStock()
 
@@ -209,34 +223,35 @@ export function DashboardStockPage() {
               const Icon = d.Icon
 
               return (
-                <Card
-                  key={d.key}
-                  className="border"
-                  style={{
-                    background: `linear-gradient(135deg, ${d.color}22, ${d.color}aa)`,
-                    borderColor: 'var(--wh-border)'
-                  }}
-                >
-                  <CardContent className="space-y-3 p-5">
-                    <div
-                      className="flex items-center gap-2 text-sm opacity-90"
-                      style={{ color: 'var(--wh-text-primary)' }}
-                    >
-                      <Icon size={18} /> {d.label}
-                    </div>
-                    <div>
-                      <div className="text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
-                        Total On Hand
+                <Link key={d.key} href={categoryHref(d.key)} className="block transition-opacity hover:opacity-90">
+                  <Card
+                    className="border"
+                    style={{
+                      background: `linear-gradient(135deg, ${d.color}22, ${d.color}aa)`,
+                      borderColor: 'var(--wh-border)'
+                    }}
+                  >
+                    <CardContent className="space-y-3 p-5">
+                      <div
+                        className="flex items-center gap-2 text-sm opacity-90"
+                        style={{ color: 'var(--wh-text-primary)' }}
+                      >
+                        <Icon size={18} /> {d.label}
                       </div>
-                      <div className="text-3xl font-bold">{d.totalOnHand.toLocaleString()}</div>
-                    </div>
-                    <div className="mt-2 flex justify-between text-xs">
-                      <span style={{ color: 'var(--wh-status-available)' }}>● {d.totalAvailable}</span>
-                      <span style={{ color: 'var(--wh-status-full)' }}>● {d.totalReserved}</span>
-                      <span style={{ color: 'var(--wh-status-blocked)' }}>● {d.totalBlocked}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <div>
+                        <div className="text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
+                          Total On Hand
+                        </div>
+                        <div className="text-3xl font-bold">{d.totalOnHand.toLocaleString()}</div>
+                      </div>
+                      <div className="mt-2 flex justify-between text-xs">
+                        <span style={{ color: 'var(--wh-status-available)' }}>● {d.totalAvailable}</span>
+                        <span style={{ color: 'var(--wh-status-full)' }}>● {d.totalReserved}</span>
+                        <span style={{ color: 'var(--wh-status-blocked)' }}>● {d.totalBlocked}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               )
             })}
           </div>
@@ -247,7 +262,7 @@ export function DashboardStockPage() {
               action={`${totalOnHandReported.toLocaleString()} units total`}
             >
               <StockChartPanel>
-                <div className="flex h-[300px]">
+                <div className="flex h-75">
                   <div className="flex w-1/3 flex-col justify-center space-y-3 pr-3">
                     {categoriesForCharts.map((d) => {
                       const pct =
@@ -306,7 +321,7 @@ export function DashboardStockPage() {
 
             <StockSection title="Stock breakdown" action="By status">
               <StockChartPanel>
-                <div className="h-[300px]">
+                <div className="h-75">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={categoriesForCharts}

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dynamic-form.md
+ */
+
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FieldValues, Resolver, useForm } from 'react-hook-form'

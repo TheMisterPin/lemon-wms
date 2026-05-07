@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/shared/pagination-selector.md
+ */
+
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 

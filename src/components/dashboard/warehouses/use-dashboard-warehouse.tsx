@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/hook/dashboard/warehouses/use-dashboard-warehouse.md
+ */
+
 
 import {
   createContext,

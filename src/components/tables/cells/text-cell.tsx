@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/tables/cells/text-cell.md
+ */
+
 
 import { cn } from '@/lib/utils'
 import { EMPTY_DISPLAY_VALUE } from '@/lib/utils/get-value-by-path'

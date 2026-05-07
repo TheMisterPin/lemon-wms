@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/dashboard-home-search-bar.md
+ */
+
 
 import { Search } from 'lucide-react'
 

@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/nav-secondary.md
+ */
+
 
 import * as React from 'react'
 import { type Icon } from '@tabler/icons-react'

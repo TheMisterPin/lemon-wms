@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/hook/shared/use-error-dialog.md
+ */
+
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
 

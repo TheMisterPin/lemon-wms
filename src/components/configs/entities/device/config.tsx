@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/configs/entities/device/config.md
+ */
+
 import type { AuthorizeDeviceFormValues } from '@/lib/iam/devices/devices-schemas'
 import type { GenericFormConfig, SelectOption } from '@/types/components/form/generic-form.types'
 import type { ColumnConfig } from '@/types/components/table/column.types'

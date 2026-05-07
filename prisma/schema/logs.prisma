@@ -36,6 +36,8 @@ model UserActivityEntry {
   metadata          Json? // Action-specific payload — structure defined per actionType
   warehouseId       String?
   zoneId            String?
+  deviceId          String?
+  trolleyId         String?
   orderId           String?
   orderType         OrderType?
   ipAddress         String?
@@ -43,11 +45,13 @@ model UserActivityEntry {
   orderAssignmentId String?
   createdAt         DateTime   @default(now())
 
-  user      User       @relation(fields: [userId], references: [id])
-  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
-  zone      Zone?      @relation(fields: [zoneId], references: [id])
+  user      User                @relation(fields: [userId], references: [id])
+  warehouse Warehouse?          @relation(fields: [warehouseId], references: [id])
+  zone      Zone?               @relation(fields: [zoneId], references: [id])
+  device    Device?             @relation("DeviceActivityEntries", fields: [deviceId], references: [id])
+  trolley   Trolley?            @relation("TrolleyActivityEntries", fields: [trolleyId], references: [id])
   // Reverse relations — each order type links its UAE
-  boes BinOperationEntry[]
+  boes      BinOperationEntry[]
 
   @@index([userId, actionType, entityType, entityId])
   @@index([orderId, orderType])
@@ -68,6 +72,8 @@ model BinOperationEntry {
   userId              String
   warehouseId         String
   zoneId              String
+  deviceId            String?
+  trolleyId           String?
   type                BinOperationType
   fromBinId           String?
   toBinId             String?
@@ -90,6 +96,8 @@ model BinOperationEntry {
   user              User               @relation(fields: [userId], references: [id])
   warehouse         Warehouse          @relation(fields: [warehouseId], references: [id])
   zone              Zone?              @relation(fields: [zoneId], references: [id])
+  device            Device?            @relation("DeviceBinOperations", fields: [deviceId], references: [id])
+  trolley           Trolley?           @relation("TrolleyBinOperations", fields: [trolleyId], references: [id])
   unitOfMeasure     UnitOfMeasure      @relation(fields: [uom], references: [id])
   userActivityEntry UserActivityEntry? @relation(fields: [userActivityEntryId], references: [id])
 
@@ -131,7 +139,8 @@ model ItemLedgerEntry {
   boe           BinOperationEntry? @relation(fields: [boeId], references: [id])
   unitOfMeasure UnitOfMeasure      @relation(fields: [uom], references: [id])
   warehouse     Warehouse          @relation(fields: [warehouseId], references: [id])
-  zone              Zone              @relation(fields: [zoneId], references: [id])
+  zone          Zone               @relation(fields: [zoneId], references: [id])
+
   @@index([warehouseId, warItemId, createdAt])
   @@index([warehouseId, eventType, createdAt])
   @@index([orderType, orderId])
@@ -147,32 +156,37 @@ model ItemLedgerEntry {
 // The unique constraint prevents duplicate assignment sessions for the same
 // (orderType, orderId, userId) combination.
 model OrderAssignment {
-  id               String                    @id @default(uuid())
-  orderId          String
-  orderType        OrderType
-  status           AssignmentLifecycle
-  warehouseId      String
-  zoneId           String?
-  userId           String
+  id          String              @id @default(uuid())
+  orderId     String
+  orderType   OrderType
+  status      AssignmentLifecycle
+  warehouseId String
+  zoneId      String?
+  userId      String
+  deviceId    String?
+  trolleyId   String?
 
   // Key session timestamps.
   // These represent important lifecycle milestones on the parent session record.
   // They are not intended to be a full pause/resume event history.
-  assignedAt       DateTime                  @default(now())
-  startedAt        DateTime?
-  pausedAt         DateTime?
-  releasedAt       DateTime?
-  completedAt      DateTime?
-  cancelledAt      DateTime?
-  timedOutAt       DateTime?
+  assignedAt  DateTime  @default(now())
+  startedAt   DateTime?
+  pausedAt    DateTime?
+  releasedAt  DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+  timedOutAt  DateTime?
 
-  notes            String?
-  isActive         Boolean                   @default(true)
+  notes    String?
+  isActive Boolean @default(true)
 
-  user             User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  warehouse        Warehouse                 @relation(fields: [warehouseId], references: [id])
-  activities       OrderExecutionActivity[]  @relation("ActivitiesPerformedInSession")
-  zone             Zone?                     @relation(fields: [zoneId], references: [id])
+  user       User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  warehouse  Warehouse                @relation(fields: [warehouseId], references: [id])
+  activities OrderExecutionActivity[] @relation("ActivitiesPerformedInSession")
+  zone       Zone?                    @relation(fields: [zoneId], references: [id])
+  device     Device?                  @relation("DeviceOrderAssignments", fields: [deviceId], references: [id])
+  trolley    Trolley?                 @relation("TrolleyOrderAssignments", fields: [trolleyId], references: [id])
+
   @@unique([orderType, orderId, userId])
   @@index([userId, assignedAt])
   @@index([orderType, orderId])
@@ -188,23 +202,26 @@ model OrderAssignment {
 // and timestamp. It does not replace stock movement entries or current-state
 // order line fields.
 model OrderExecutionActivity {
-  id                String              @id @default(uuid())
+  id                String            @id @default(uuid())
   orderAssignmentId String
   userId            String
   warehouseId       String
-    zoneId            String
+  zoneId            String
+  deviceId          String?
+  trolleyId         String?
   activityType      ExecutionActivity
   orderId           String
   orderType         OrderType
   orderLineRefId    String?
   notes             String?
-  createdAt         DateTime            @default(now())
+  createdAt         DateTime          @default(now())
 
-  orderAssignment   OrderAssignment     @relation("ActivitiesPerformedInSession", fields: [orderAssignmentId], references: [id], onDelete: Cascade)
-  user              User                @relation(fields: [userId], references: [id])
-  warehouse         Warehouse           @relation(fields: [warehouseId], references: [id])
-  zone              Zone                @relation(fields: [zoneId], references: [id])
-
+  orderAssignment OrderAssignment @relation("ActivitiesPerformedInSession", fields: [orderAssignmentId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id])
+  warehouse       Warehouse       @relation(fields: [warehouseId], references: [id])
+  zone            Zone            @relation(fields: [zoneId], references: [id])
+  device          Device?         @relation("DeviceExecutionActivities", fields: [deviceId], references: [id])
+  trolley         Trolley?        @relation("TrolleyExecutionActivities", fields: [trolleyId], references: [id])
 
   @@index([orderAssignmentId, createdAt])
   @@index([orderType, orderId, createdAt])
@@ -212,6 +229,7 @@ model OrderExecutionActivity {
   @@index([warehouseId, createdAt])
   @@index([activityType, createdAt])
 }
+
 // Daily bin-level aggregates for dashboards (distinct from immutable BOEs).
 // Snapshot `date` is stored at 00:00:00 UTC for the calendar day.
 model BinHistory {

@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/tables/data-table.md
+ */
+
 /* eslint-disable react-hooks/incompatible-library */
 'use client'
 

@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/overview-cards.md
+ */
+
 import { Archive, Building2, Map } from 'lucide-react'
 
 import type { DashboardOverviewCard } from './dashboard-types'

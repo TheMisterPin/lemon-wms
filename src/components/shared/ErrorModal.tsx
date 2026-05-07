@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/shared/error-modal.md
+ */
+
 
 import { useEffect, useRef } from 'react'
 

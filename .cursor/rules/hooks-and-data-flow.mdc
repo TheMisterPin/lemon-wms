@@ -1,0 +1,181 @@
+---
+description: Rules for hooks, data fetching, DTO mapping, and page-level dependency injection.
+globs:
+  - "src/hooks/**/*.{ts,tsx}"
+  - "src/app/**/*.{ts,tsx}"
+  - "src/components/features/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Hooks and Data Flow Rules
+
+Use this rule when working with hooks, route files, page components, data fetching, mutations, or DTO mapping.
+
+## Data Flow
+
+Preferred flow:
+
+```txt
+app/page.tsx
+-> useDomainHook()
+-> FeaturePageComponent
+-> FeatureComponents
+-> Primitives
+```
+
+This makes coupling visible and intentional.
+
+## Route Files
+
+Route files under `app/` should stay thin.
+
+A route file should usually:
+
+- import the relevant hook
+- call the hook
+- render the page component
+- pass hook output into the page component
+
+Example:
+
+```tsx
+'use client'
+
+import { DashboardWarehouseOverviewPage } from '@/components/features/locations/pages/dashboard-warehouse-overview'
+import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
+
+export default function Page() {
+  const dashboard = useDashboardWarehouse()
+
+  return <DashboardWarehouseOverviewPage {...dashboard} />
+}
+```
+
+Route files should not:
+
+- contain large JSX trees
+- call API clients directly
+- contain transformation logic
+- own mutation logic
+- define API response types
+- hide dependencies through unnecessary providers
+
+## Hook Responsibilities
+
+Hooks are the frontend logic distribution layer.
+
+Hooks may:
+
+- fetch data
+- call mutations
+- manage loading state
+- manage error state
+- manage refresh state
+- read search params when needed
+- transform API payloads into page-ready DTOs
+- expose actions required by components
+- prepare select options, table rows, chart data, and KPI DTOs
+
+Hooks should not:
+
+- return raw API responses unless explicitly required
+- contain large JSX blocks
+- own visual layout
+- duplicate transformer logic across files
+- hide too many unrelated responsibilities in one hook
+
+## Hook Return Shape
+
+A hook should return a stable page-ready object.
+
+Good pattern:
+
+```ts
+type UseDashboardWarehouseResult = {
+  warehouses: WarehouseSummaryDto[]
+  zones: ZoneTableRowDto[]
+  bins: BinTableRowDto[]
+  warehouseOptions: SelectOptionDto[]
+  zoneOptions: SelectOptionDto[]
+  warehouseIdFilter: string | null
+  isLoading: boolean
+  error: string | null
+  actions: {
+    createWarehouse: (values: CreateWarehouseInput) => Promise<void>
+    createZone: (values: CreateZoneInput) => Promise<void>
+    createBin: (values: CreateBinInput) => Promise<void>
+    refresh: () => void
+  }
+}
+```
+
+Group callbacks under `actions` when a hook exposes more than two callbacks.
+
+## Context Provider Rule
+
+Do not keep context just because it already exists.
+
+Use context only when multiple distant branches need shared state without prop drilling.
+
+If the state is only used by one page tree, prefer:
+
+```txt
+app/page.tsx -> useHook() -> PageComponent props
+```
+
+over:
+
+```txt
+Provider -> Context -> useContext -> hidden dependency
+```
+
+## API Types
+
+API response types should not live inside components.
+
+Place API payload types under a dedicated type area, for example:
+
+```txt
+src/types/api
+```
+
+Example:
+
+```ts
+export type DashboardHomePayload = {
+  warehouses: WarehouseApiRecord[]
+  zones: ZoneApiRecord[]
+  bins: BinApiRecord[]
+}
+```
+
+## DTO Types
+
+Component-ready transformed types should live under a DTO type area, for example:
+
+```txt
+src/types/dto
+```
+
+DTOs should represent what the UI needs, not the raw API/database shape.
+
+## Transformers
+
+Reusable or non-trivial transformation logic belongs in transformer files.
+
+Target area:
+
+```txt
+src/lib/transformers/[domain]
+```
+
+Transformer responsibilities:
+
+- convert API records into UI DTOs
+- normalize nullable fields
+- format labels
+- prepare select options
+- prepare chart data
+- prepare KPI card DTOs
+
+Components should not know raw API shapes when a DTO can represent the page state cleanly.

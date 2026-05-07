@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/bins/bin-dashboard-overview-page-client.md
+ */
+
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'

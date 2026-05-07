@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/ui/spinner.md
+ */
+
 import { Loader2Icon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'

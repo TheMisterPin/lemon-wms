@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/features/bins/bin-contents-modal.md
+ */
+
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 

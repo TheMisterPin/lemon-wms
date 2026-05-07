@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/misc/dashboard/warehouses/components/dashboard-types.md
+ */
+
 export type DashboardOverviewCard = {
   label: 'Warehouses' | 'Zones' | 'Bins'
   value: number

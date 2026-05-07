@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/hook/dashboard/stock/use-dashboard-stock.md
+ */
+
 
 import { useCallback, useEffect, useState } from 'react'
 

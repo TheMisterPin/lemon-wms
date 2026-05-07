@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/media/badge-creation.md
+ */
+
 
 import { useState } from 'react'
 import Image from 'next/image'

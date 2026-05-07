@@ -40,6 +40,7 @@ model BinStockItem {
   uom                       String
   status                    BinItemStatus              @default(AVAILABLE)
   transitDeviceId           String? // Set during IN_TRANSIT operations
+  transitTrolleyId          String?
   expiryDate                DateTime? // For perishables — drives expiry alert
   name                      String // Snapshot of item name at time of stock creation
   sku                       String // Snapshot of item SKU at time of stock creation
@@ -52,18 +53,20 @@ model BinStockItem {
   boxId                     String?
   purchaseOrderReceiptLines PurchaseOrderReceiptLine[] @relation("BinStockItemPurchaseOrderReceiptLines")
 
-  bin           Bin           @relation(fields: [binId], references: [id])
-  item          Item          @relation(fields: [itemId], references: [id])
-  lot           Lot?          @relation(fields: [lotId], references: [id])
-  serialNumber  SerialNumber? @relation(fields: [serialNumberId], references: [id])
-  unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
-  transitDevice Device?       @relation("TransitBinStockItems", fields: [transitDeviceId], references: [id])
-  boxLines      BoxLine[]
+  bin            Bin           @relation(fields: [binId], references: [id])
+  item           Item          @relation(fields: [itemId], references: [id])
+  lot            Lot?          @relation(fields: [lotId], references: [id])
+  serialNumber   SerialNumber? @relation(fields: [serialNumberId], references: [id])
+  unitOfMeasure  UnitOfMeasure @relation(fields: [uom], references: [id])
+  transitDevice  Device?       @relation("TransitBinStockItems", fields: [transitDeviceId], references: [id])
+  transitTrolley Trolley?      @relation("TransitTrolleyStockItems", fields: [transitTrolleyId], references: [id])
+  boxLines       BoxLine[]
 
-  @@unique([binId, itemId, lotId, serialNumberId, status, transitDeviceId])
+  @@unique([binId, itemId, lotId, serialNumberId, status, transitDeviceId, transitTrolleyId])
   @@index([warehouseId, itemId])
   @@index([binId, itemId])
   @@index([status])
+  @@index([transitTrolleyId])
 }
 
 // A physical batch of items received together. Created at receive time.

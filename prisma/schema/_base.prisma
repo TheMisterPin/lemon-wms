@@ -40,11 +40,49 @@ enum LoginMode {
   AUTOMATIC
 }
 
+enum DeviceAuthorizationStatus {
+  PENDING
+  AUTHORIZED
+  REJECTED
+}
+
+enum DeviceOnlineStatus {
+  ACTIVE
+  IDLE
+  OFFLINE
+}
+
+enum DeviceSyncStatus {
+  SYNCED
+  PENDING
+  FAILED
+}
+
 enum DeviceType {
   FLOOR
   HANDHELD
   PC
   TABLET
+}
+
+enum DeviceSubType {
+  TERMINAL
+  HANDHELD_SCANNER
+  TROLLEY
+}
+
+enum DeviceSessionStatus {
+  ACTIVE
+  LOGGED_OUT
+  EXPIRED
+  REVOKED
+}
+
+enum SyncEventStatus {
+  PENDING
+  PROCESSING
+  SYNCED
+  FAILED
 }
 
 // -----------------------------------------------------------------------------

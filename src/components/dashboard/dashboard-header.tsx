@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/dashboard-header.md
+ */
+
 
 import Link from 'next/link'
 import LemonHeader from '../typography/lemon-header'

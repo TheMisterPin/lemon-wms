@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/dashboard-footer.md
+ */
+
 
 import { useRouter } from 'next/navigation'
 import { LogOut, UserCircle } from 'lucide-react'

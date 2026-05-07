@@ -1,3 +1,8 @@
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/section-cards.md
+ */
+
 import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 
 import { Badge } from '@/components/ui/badge'

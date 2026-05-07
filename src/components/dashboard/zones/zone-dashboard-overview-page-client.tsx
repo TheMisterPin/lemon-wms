@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/dashboard/zones/zone-dashboard-overview-page-client.md
+ */
+
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'

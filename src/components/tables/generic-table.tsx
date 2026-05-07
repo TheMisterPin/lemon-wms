@@ -1,4 +1,9 @@
 'use client'
+/**
+ * @generated-doc-link
+ * @doc .docs/developer/refactors/components/component/tables/generic-table.md
+ */
+
 
 import { TableShell } from '@/components/tables/table-shell'
 import { useTableShellController } from '@/components/tables/use-table-shell-controller'
