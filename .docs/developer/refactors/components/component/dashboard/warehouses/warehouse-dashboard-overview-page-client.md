@@ -52,3 +52,29 @@ TBD Phase 19 — route should stay thin per `hooks-and-data-flow.mdc`.
 
 Refactor priority:
 medium
+
+## Classification
+
+Classification: feature-page
+Reason: Client wrapper for warehouse overview page.
+Target folder: `src/components/features/locations/pages`
+Target file name: `warehouse-dashboard-overview-page-client.tsx`
+Keep / Move / Split / Delete: move
+Risk level: low
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: no
+- Mutates data: no
+- Contains reusable transformation logic: no
+- Defines types inline: no
+- Contains repeated styling: no
+- Contains multiple components: no
+- Still needed: yes
+
+### Decision
+
+Record the move decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.

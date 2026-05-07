@@ -63,3 +63,29 @@ Refactor priority: Normal baseline inventory priority.
 - Canonical hook responsibility doc: `.docs/developer/refactors/hooks/dashboard/bins/use-dashboard-bin-overview.md`.
 - CFR-02: selected hook responsibility is documented under .docs/developer/refactors/hooks.
 - D-05/D-07/D-09/D-10: metadata preserved, inventory current, no source movement or behavior change.
+
+## Classification
+
+Classification: hook
+Reason: Owns bin overview fetching, loading, and error state for the page client.
+Target folder: `src/hooks/dashboard/locations`
+Target file name: `use-dashboard-bin-overview.ts`
+Keep / Move / Split / Delete: move
+Risk level: medium
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: yes
+- Mutates data: no
+- Contains reusable transformation logic: no
+- Defines types inline: yes
+- Contains repeated styling: no
+- Contains multiple components: no
+- Still needed: yes
+
+### Decision
+
+Record the move decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.

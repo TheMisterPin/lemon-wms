@@ -40,3 +40,29 @@ Current return/context shape is derived from the existing source, not a new cont
 - Provider/context status: No provider context ownership observed in this hook.
 - D-05/D-07/D-09 apply: frontmatter preserved, current responsibilities documented, no source movement or behavior change.
 - Phase 19/20 follow-up: classify target ownership, decide whether callbacks should be grouped under actions, and move reusable DTO transformation only after the documentation baseline is accepted.
+
+## Classification
+
+Classification: hook
+Reason: Stock hook owns fetching/loading/error for category stock dashboard.
+Target folder: `src/hooks/dashboard/stock`
+Target file name: `use-category-stock-dashboard.ts`
+Keep / Move / Split / Delete: move
+Risk level: medium
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: yes
+- Mutates data: no
+- Contains reusable transformation logic: no
+- Defines types inline: yes
+- Contains repeated styling: no
+- Contains multiple components: yes
+- Still needed: yes
+
+### Decision
+
+Record the move decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.

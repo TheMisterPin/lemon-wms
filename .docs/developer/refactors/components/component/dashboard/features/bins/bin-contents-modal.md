@@ -29,3 +29,38 @@ TBD Phase 19
 
 Refactor priority:
 medium
+
+## Classification
+
+Classification: feature-component
+Reason: Shared locations modal with table-row mapping and helper logic used by multiple dashboard pages.
+Target folder: `src/components/features/locations/components`
+Target file name: `bin-contents-modal.tsx`
+Keep / Move / Split / Delete: split
+Risk level: high
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: no
+- Mutates data: no
+- Contains reusable transformation logic: yes
+- Defines types inline: no
+- Contains repeated styling: yes
+- Contains multiple components: yes
+- Still needed: yes
+
+### Decision
+
+Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
+
+## Dismounted Components
+
+| Component | New code path | New documentation path | Reason |
+|---|---|---|---|
+| `ContentLine` | `src/components/features/locations/components/content-line.tsx` | `.docs/developer/refactors/components/dismounted/content-line.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `quantityForBinItemStatus` | `src/lib/transformers/locations/quantity-for-bin-item-status.ts` | `.docs/developer/refactors/components/dismounted/quantity-for-bin-item-status.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `toContentTableRows` | `src/lib/transformers/locations/to-content-table-rows.ts` | `.docs/developer/refactors/components/dismounted/to-content-table-rows.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `contentColumns` | `src/components/features/locations/components/content-columns.ts` | `.docs/developer/refactors/components/dismounted/content-columns.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |

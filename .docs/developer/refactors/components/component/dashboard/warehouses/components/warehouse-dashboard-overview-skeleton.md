@@ -52,3 +52,40 @@ TBD Phase 19
 
 Refactor priority:
 medium
+
+## Classification
+
+Classification: feature-component
+Reason: Feature-specific warehouse overview skeleton cluster; generic primitive extraction is Phase 21-only.
+Target folder: `src/components/features/locations/components`
+Target file name: `warehouse-dashboard-overview-skeleton.tsx`
+Keep / Move / Split / Delete: split or keep grouped
+Risk level: medium
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: no
+- Mutates data: no
+- Contains reusable transformation logic: no
+- Defines types inline: no
+- Contains repeated styling: yes
+- Contains multiple components: yes
+- Still needed: yes
+
+### Decision
+
+Record the split or keep grouped decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
+
+## Dismounted Components
+
+| Component | New code path | New documentation path | Reason |
+|---|---|---|---|
+| `Shimmer` | `src/components/features/locations/components/shimmer.tsx` | `.docs/developer/refactors/components/dismounted/shimmer.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
+| `OverviewHeaderSkeleton` | `src/components/features/locations/components/overview-header-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/overview-header-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
+| `KpiSkeletonTile` | `src/components/features/locations/components/kpi-skeleton-tile.tsx` | `.docs/developer/refactors/components/dismounted/kpi-skeleton-tile.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
+| `SectionGridSkeleton` | `src/components/features/locations/components/section-grid-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/section-grid-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
+| `TwoColumnPanelsSkeleton` | `src/components/features/locations/components/two-column-panels-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/two-column-panels-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
+| `BottomRowSkeleton` | `src/components/features/locations/components/bottom-row-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/bottom-row-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |

@@ -57,3 +57,39 @@ TBD Phase 19 (likely `components/features/locations/...` page assembly).
 
 Refactor priority:
 high — multiple child imports and local chart/card helpers.
+
+## Classification
+
+Classification: feature-page
+Reason: Warehouse overview page view contains KPI types, icon maps, merge/parse helpers, and child KPI card.
+Target folder: `src/components/features/locations/pages`
+Target file name: `dashboard-warehouse-overview.tsx`
+Keep / Move / Split / Delete: split
+Risk level: high
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: no
+- Mutates data: no
+- Contains reusable transformation logic: yes
+- Defines types inline: yes
+- Contains repeated styling: yes
+- Contains multiple components: yes
+- Still needed: yes
+
+### Decision
+
+Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
+
+## Dismounted Components
+
+| Component | New code path | New documentation path | Reason |
+|---|---|---|---|
+| `WarehouseOverviewKpiCard` | `src/components/features/locations/pages/warehouse-overview-kpi-card.tsx` | `.docs/developer/refactors/components/dismounted/warehouse-overview-kpi-card.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `KpiRenderable` | `src/types/dto/locations/kpi-renderable.ts` | `.docs/developer/refactors/components/dismounted/kpi-renderable.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `WAREHOUSE_OVERVIEW_KPI_ICONS` | `src/components/features/locations/pages/w-a-r-e-h-o-u-s-e-o-v-e-r-v-i-e-w-k-p-i-i-c-o-n-s.ts` | `.docs/developer/refactors/components/dismounted/w-a-r-e-h-o-u-s-e-o-v-e-r-v-i-e-w-k-p-i-i-c-o-n-s.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `mergeWarehouseOverviewKpis` | `src/lib/transformers/locations/merge-warehouse-overview-kpis.ts` | `.docs/developer/refactors/components/dismounted/merge-warehouse-overview-kpis.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `parseWarehouseFillPercent` | `src/lib/transformers/locations/parse-warehouse-fill-percent.ts` | `.docs/developer/refactors/components/dismounted/parse-warehouse-fill-percent.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |

@@ -36,3 +36,29 @@ TBD Phase 19 — `components/features/...`
 
 Refactor priority:
 medium
+
+## Classification
+
+Classification: feature-component
+Reason: Locations create-warehouse form currently has no observed consumer, but delete/replace needs later usage and replacement proof.
+Target folder: `src/components/features/locations/components`
+Target file name: `create-warehouse-form.tsx`
+Keep / Move / Split / Delete: keep/move
+Risk level: medium
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: no
+- Mutates data: no
+- Contains reusable transformation logic: no
+- Defines types inline: no
+- Contains repeated styling: no
+- Contains multiple components: yes
+- Still needed: yes; delete/replace requires later usage/import/replacement proof
+
+### Decision
+
+Record the keep/move decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.

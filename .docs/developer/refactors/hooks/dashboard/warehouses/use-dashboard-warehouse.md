@@ -49,3 +49,42 @@ Current return/context shape is derived from the existing source, not a new cont
 - Provider/context status: Current DashboardWarehouseProvider wraps dashboard routes and useDashboardWarehouse has a hidden provider dependency. D-02 and D-03 require documenting this before later removal or replacement.
 - D-05/D-07/D-09 apply: frontmatter preserved, current responsibilities documented, no source movement or behavior change.
 - Phase 19/20 follow-up: classify target ownership, decide whether callbacks should be grouped under actions, and move reusable DTO transformation only after the documentation baseline is accepted.
+
+## Classification
+
+Classification: hook
+Reason: Provider/hook/API payload/DTO/transformer/mutation cluster; split later while keeping compatibility provider.
+Target folder: `src/hooks/dashboard/locations`
+Target file name: `use-dashboard-warehouse.ts`
+Keep / Move / Split / Delete: split
+Risk level: high
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: yes
+- Mutates data: yes
+- Contains reusable transformation logic: no
+- Defines types inline: yes
+- Contains repeated styling: yes
+- Contains multiple components: yes
+- Still needed: yes
+
+### Decision
+
+Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
+
+## Dismounted Components
+
+| Component | New code path | New documentation path | Reason |
+|---|---|---|---|
+| `DashboardWarehouseProvider` | `src/components/features/locations/providers/dashboard-warehouse-provider.tsx` | `.docs/developer/refactors/components/dismounted/dashboard-warehouse-provider.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `useDashboardWarehouse` | `src/hooks/dashboard/locations/use-dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/use-dashboard-warehouse.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `DashboardWarehouseContext` | `src/components/features/locations/providers/dashboard-warehouse-provider.tsx` | `.docs/developer/refactors/components/dismounted/dashboard-warehouse-context.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `ApiPayload` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/api-payload.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `ZoneApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/zone-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `BinApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/bin-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `DashboardHomePayload` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/dashboard-home-payload.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `extractMutationError` | `src/lib/transformers/locations/mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |

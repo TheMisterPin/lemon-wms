@@ -52,3 +52,38 @@ TBD Phase 19
 
 Refactor priority:
 medium
+
+## Classification
+
+Classification: feature-component
+Reason: Locations bin grid component declares child card/section components and status helpers.
+Target folder: `src/components/features/locations/components`
+Target file name: `bin-grid.tsx`
+Keep / Move / Split / Delete: split
+Risk level: medium
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: no
+- Mutates data: no
+- Contains reusable transformation logic: yes
+- Defines types inline: no
+- Contains repeated styling: yes
+- Contains multiple components: yes
+- Still needed: yes
+
+### Decision
+
+Record the split decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
+
+## Dismounted Components
+
+| Component | New code path | New documentation path | Reason |
+|---|---|---|---|
+| `BinCard` | `src/components/features/locations/components/bin-card.tsx` | `.docs/developer/refactors/components/dismounted/bin-card.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `SectionBlock` | `src/components/features/locations/components/section-block.tsx` | `.docs/developer/refactors/components/dismounted/section-block.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `getBinStatus` | `src/lib/transformers/locations/get-bin-status.ts` | `.docs/developer/refactors/components/dismounted/get-bin-status.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `getFillBarStyle` | `src/lib/transformers/locations/get-fill-bar-style.ts` | `.docs/developer/refactors/components/dismounted/get-fill-bar-style.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |

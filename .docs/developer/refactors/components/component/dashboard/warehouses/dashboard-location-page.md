@@ -63,3 +63,29 @@ TBD Phase 19 (likely feature page under `components/features/locations/pages` pe
 
 Refactor priority:
 medium — duplicates patterns with `DashboardWarehouseHomePageView`.
+
+## Classification
+
+Classification: feature-page
+Reason: Dashboard locations page view that assembles locations feature components from hook output.
+Target folder: `src/components/features/locations/pages`
+Target file name: `dashboard-location-page.tsx`
+Keep / Move / Split / Delete: move
+Risk level: medium
+
+### Evaluation
+
+- Duplicates shadcn/ui: no
+- Project-wide reusable: no
+- Domain-specific: yes
+- Fetches data: no
+- Mutates data: no
+- Contains reusable transformation logic: no
+- Defines types inline: no
+- Contains repeated styling: no
+- Contains multiple components: no
+- Still needed: yes
+
+### Decision
+
+Record the move decision as planned ownership only. Phase 19 does not move source files, create target folders, rewrite imports, delete docs, or alter behavior.
