@@ -130,3 +130,25 @@ See **Dismounted Components**.
 | Component | New code path | New documentation path | Reason |
 |---|---|---|---|
 | `StatCard` | `src/components/features/locations/components/stat-card.tsx` | `.docs/developer/refactors/components/dismounted/stat-card.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Primitive candidate specification (Phase 21 / CFR-14)
+
+### StatCard (nested implementation)
+
+**Purpose:** Compact KPI tile with icon, accent stripe, title, and formatted value inside the locations overview grid.
+
+**Reuse evidence:** `rg 'function StatCard' src` → **only** `src/components/dashboard/warehouses/components/OverviewCards.tsx` defines `StatCard`; it is not imported as a standalone component elsewhere.
+
+**Target primitive path (only if promoted later):** `src/components/primitives/dashboard-stat-card.tsx` (name tentative).
+
+**Props sketch:** `title`, `value`, `icon` (Lucide component), `accent` tone key — presentational only.
+
+**Styling / tokens:** Uses dashboard card / `--wh-*` assumptions consistent with locations overview; extraction must be class-identical (**CFR-16**).
+
+**Allowed:** Layout, typography, icon slot, accent bar styling.
+
+**Forbidden:** Data fetching, mutations, hook imports, KPI semantics beyond props supplied by parent (**CFR-15**).
+
+**Recommendation:** **defer** — no second independent feature module consumes an extractable `StatCard`; promote only after a proven second consumer or shared import path exists.
+
+**Verification command logged:** `rg -n 'function StatCard' src/components`

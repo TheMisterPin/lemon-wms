@@ -61,3 +61,8 @@ Skeleton placeholders mirror zone overview layout; grouping stays until Phase 21
 
 Classification rows remain authoritative — Phase 20 captures linkage only.
 
+## Skeleton placement (Phase 21 / CFR-17)
+
+- **Decision:** **feature-local** — single-file skeleton for zone overview; move with locations feature cluster per Classification (**not** a primitive).
+- **Rationale:** Mirrors zone overview composition; KPI strip parity is zone-specific. No cross-dashboard reuse proof for a standalone generic skeleton primitive.
+- **Phase 22:** Keep grouped; revisit only if zone and warehouse skeletons converge structurally with evidence.

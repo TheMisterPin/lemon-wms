@@ -151,6 +151,6 @@ None. The unused-looking warehouse form remains `feature-component` with `keep/m
 ## Unresolved follow-ups
 
 - Phase 20 must map exact logic movement for hook/provider, DTO, API type, utility, and transformer responsibilities.
-- Phase 21 must approve or reject primitive and shared styling candidates with reuse evidence.
+- Phase 21 must approve or reject primitive and shared styling candidates with reuse evidence — **canonical register:** `.docs/developer/refactors/_primitive-extraction-plan.md` (master table + skeleton annex).
 - Phase 22 must create target folders and move code only after Phase 20/21 decisions are complete.
 - Phase 23 must verify imports/usages before any compatibility or duplicate cleanup.

@@ -130,6 +130,16 @@ Plans:
 **UI hint:** yes  
 **Depends on:** Phase 20
 
+**Plans:** 5 plans
+
+Plans:
+
+- [x] 21-01-PLAN.md — Scaffold `_primitive-extraction-plan.md` + classification-summary cross-link (CFR-14–CFR-17 gates).
+- [x] 21-02-PLAN.md — CFR-14 specification + master row for `warehouse-overview-primitives` (P21-001).
+- [x] 21-03-PLAN.md — CFR-14 evaluations for `OverviewCards` / `DirectorySections` nested shells + master rows.
+- [x] 21-04-PLAN.md — CFR-17 skeleton placement for four dashboard skeleton clusters + annex table.
+- [x] 21-05-PLAN.md — Chart/chrome/icon deferrals + finalize master plan completeness + `_logic-mapping-summary.md` cross-link.
+
 ---
 
 ## Phase 22: First locations slice

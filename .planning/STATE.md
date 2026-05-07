@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Component Folder Restructuring
-status: phase-20-complete
+status: phase-21-complete
 last_updated: "2026-05-07T23:59:00.000Z"
-last_activity: 2026-05-07 - Phase 20 executed — Logic Mapping docs + VERIFICATION
+last_activity: 2026-05-07 - Phase 21 executed — primitive extraction docs + VERIFICATION passed
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 29
-  completed_plans: 29
-  percent: 50
+  completed_phases: 4
+  total_plans: 34
+  completed_plans: 34
+  percent: 67
 ---
 
 # Project State
@@ -21,19 +21,19 @@ See: `.planning/PROJECT.md`
 
 **Core value:** Office users can create, release, and track supplier purchase orders; warehouse users can see operational orders by status, start execution, and pause.
 
-**Current focus:** Milestone v1.2 - Component Folder Restructuring; Phase 21 primitive and styling plan next.
+**Current focus:** Milestone v1.2 - Component Folder Restructuring; Phase 22 first locations slice next.
 
 ## Current Position
 
-Phase: 21 of 23 - Primitive and styling plan
+Phase: 22 of 23 - First locations slice
 
-Plan: 0 (phase not planned yet)
+Plan: —
 
-Status: Phase 20 complete — see `20-VERIFICATION.md`
+Status: Phase 21 complete — see `21-VERIFICATION.md`
 
-Last activity: 2026-05-07 - Phase 20 logic mapping executed (docs-only)
+Last activity: 2026-05-07 - Phase 21 primitive extraction planning executed (docs-only)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 67%
 
 ## Performance Metrics
 

@@ -107,3 +107,17 @@ Primitive extraction for chart shells — **deferred** Phase 21.
 | `StockChartPanel` | `src/components/features/stock/pages/stock-chart-panel.tsx` | `.docs/developer/refactors/components/dismounted/stock-chart-panel.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `SubcategoryCardDatum` | `src/types/dto/stock/subcategory-card-datum.ts` | `.docs/developer/refactors/components/dismounted/subcategory-card-datum.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `StockBreakdownDatum` | `src/types/dto/stock/stock-breakdown-datum.ts` | `.docs/developer/refactors/components/dismounted/stock-breakdown-datum.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Primitive candidate specification (Phase 21 / CFR-14)
+
+### Stock chart panels (`StockChartPanel`, related Recharts shell)
+
+**Purpose:** Render stock breakdown charts with shared tooltip/color helpers declared in this module.
+
+**Relationship to `WarehouseOverviewChartPanel`:** Visual parity possible but modules carry **stock-specific** `chartColors` / `rechartsTooltip` and DTO wiring — merging into one cross-domain primitive risks **CFR-15** API-shape leakage.
+
+**Allowed:** Presentational panel chrome when props are already narrowed to strings/numbers/React nodes.
+
+**Forbidden:** Moving stock datum shaping or route-specific color semantics into `components/primitives`.
+
+**Recommendation:** **defer** — Phase 22 performs class-list diff against `WarehouseOverviewChartPanel` **before** any shared primitive; extraction **must** preserve output (**CFR-16**).

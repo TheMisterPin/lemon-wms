@@ -93,3 +93,12 @@ Record the move decision as planned ownership only. Phase 19 does not move sourc
 
 Classification rows remain authoritative — Phase 20 captures linkage only.
 
+## Primitive / utility boundary (Phase 21 / CFR-14 / CFR-15)
+
+**Artifact:** `warehouseOverviewIcons` glyph map + `WarehouseOverviewIcon*` helpers.
+
+**Assessment:** Encodes **warehouse / locations dashboard vocabulary** (which glyph applies to which semantic row). That semantic coupling disqualifies it as a **domain-neutral primitive** even though it has no network I/O.
+
+**Recommendation:** **reject** promotion to `src/components/primitives/**`. Keep **utility** / feature-adjacent ownership (`src/components/features/locations/components` per refactor map). Phase 22 moves the file without labeling it a primitive.
+
+**Forbidden as primitive:** Shipping icon lookup tables that bake domain naming/stock/order semantics into `components/primitives` — violates CFR-15 neutral-structure rule.

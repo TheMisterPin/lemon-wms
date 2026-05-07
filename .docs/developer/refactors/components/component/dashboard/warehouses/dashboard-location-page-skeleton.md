@@ -134,3 +134,10 @@ Reuse across two route shells — prove usage before promoting any piece to `com
 | `SectionShell` | `src/components/features/locations/components/section-shell.tsx` | `.docs/developer/refactors/components/dismounted/section-shell.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
 | `ListRowSkeleton` | `src/components/features/locations/components/list-row-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/list-row-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
 | `BinCardSkeleton` | `src/components/features/locations/components/bin-card-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/bin-card-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
+
+## Skeleton placement (Phase 21 / CFR-17)
+
+- **Decision:** **feature-local grouped** — reused by two route shells but still **locations**-scoped; not a cross-domain generic primitive.
+- **Rationale:** Stat/list/bin card placeholders encode locations directory UX; shimmer overlap with warehouse overview skeleton is **evidence only** until source diff proves identical (**defer** generic primitive).
+- **Related dismounted docs:** `stat-card-skeleton.md`, `section-shell.md`, `list-row-skeleton.md`, `bin-card-skeleton.md`, `shimmer.md`.
+- **Phase 22:** Move cluster with feature; optional dedupe of `Shimmer` after comparison — no redesign.

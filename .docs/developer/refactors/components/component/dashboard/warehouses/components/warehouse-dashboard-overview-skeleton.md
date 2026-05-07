@@ -135,3 +135,10 @@ Grouping vs splitting aligns with `dashboard-location-page-skeleton` — track r
 | `SectionGridSkeleton` | `src/components/features/locations/components/section-grid-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/section-grid-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
 | `TwoColumnPanelsSkeleton` | `src/components/features/locations/components/two-column-panels-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/two-column-panels-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
 | `BottomRowSkeleton` | `src/components/features/locations/components/bottom-row-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/bottom-row-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
+
+## Skeleton placement (Phase 21 / CFR-17)
+
+- **Decision:** **feature-local grouped** — keep this cluster under locations feature ownership (`src/components/features/locations/components/*` per dismount table).
+- **Rationale:** Mirrors warehouse overview layout; copy/stagger timings are overview-specific. Generic KPI/shimmer primitives **not approved** here (**defer**) pending byte comparison with `dashboard-location-page-skeleton` and stock skeleton `Shimmer` variants.
+- **Related dismounted docs:** `.docs/developer/refactors/components/dismounted/shimmer.md`, `overview-header-skeleton.md`, `kpi-skeleton-tile.md`, etc.
+- **Phase 22:** Split inner files only for readability; **CFR-16** prohibits visual drift.

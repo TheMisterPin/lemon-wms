@@ -41,6 +41,12 @@ Use `_classification-summary.md` rows to choose depth:
 
 ---
 
+## Phase 21 primitive register
+
+Canonical **approve / defer / reject** decisions (CFR-14–CFR-17): `.docs/developer/refactors/_primitive-extraction-plan.md`. Phase 22 uses this register after Logic Mapping when promoting UI to `src/components/primitives`.
+
+---
+
 ## Hook docs (CFR-11, CFR-12)
 
 Canonical hook docs under `.docs/developer/refactors/hooks/` must record:

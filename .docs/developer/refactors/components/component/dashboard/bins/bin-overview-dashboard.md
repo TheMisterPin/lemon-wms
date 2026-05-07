@@ -135,3 +135,15 @@ Chart wrappers and card shells resemble primitives but remain **deferred** until
 | `stockStatusTone` | `src/lib/transformers/locations/stock-status-tone.ts` | `.docs/developer/refactors/components/dismounted/stock-status-tone.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `toWarehouseActivityRows` | `src/lib/transformers/locations/to-warehouse-activity-rows.ts` | `.docs/developer/refactors/components/dismounted/to-warehouse-activity-rows.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `activityEventTone` | `src/lib/transformers/locations/activity-event-tone.ts` | `.docs/developer/refactors/components/dismounted/activity-event-tone.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Primitive candidate specification (Phase 21 / CFR-14)
+
+### Recharts / KPI card shells
+
+**Purpose:** Bin detail dashboard reuses `warehouse-overview-primitives` imports for tonal/button/chart consistency alongside bin-specific KPI tiles.
+
+**Evidence:** Shared styling tokens vs bin-specific metrics — reuse is **visual**, not a standalone neutral primitive module.
+
+**Recommendation:** **defer** consolidating chart wrappers with stock or warehouse primitives until Phase 22 proves identical shells **without** merging bin/order/stock domains into one mega-component (**CFR-15** out-of-scope mega-primitives).
+
+**CFR-16:** Any future extraction copies classes verbatim — no redesign.

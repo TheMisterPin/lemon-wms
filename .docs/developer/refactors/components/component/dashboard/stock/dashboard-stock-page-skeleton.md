@@ -104,3 +104,10 @@ See **Dismounted Components** — files created only after grouping decision.
 | `StockChartPanelSkeleton` | `src/components/features/stock/components/stock-chart-panel-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/stock-chart-panel-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
 | `StockSectionSkeleton` | `src/components/features/stock/components/stock-section-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/stock-section-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
 | `SubcategoryTableSkeleton` | `src/components/features/stock/components/subcategory-table-skeleton.tsx` | `.docs/developer/refactors/components/dismounted/subcategory-table-skeleton.md` | Record grouped skeleton/component decision now; split only if Phase 21/22 confirms reuse or readability need. |
+
+## Skeleton placement (Phase 21 / CFR-17)
+
+- **Decision:** **feature-local grouped** — stock dashboard skeleton cluster stays under `src/components/features/stock/components/*`.
+- **Rationale:** Layout mirrors stock KPI/chart/table composition; duplicates locations shimmer **pattern** but lives in separate feature slice — **defer** shared primitive until `locations` vs `stock` `Shimmer` implementations are compared byte-for-byte (**Phase 22** hygiene).
+- **Related dismounted docs:** stock-side `shimmer.md`, `category-kpi-card-skeleton.md`, `stock-chart-panel-skeleton.md`, etc.
+- **Phase 22:** No extraction to `components/primitives` without new Phase 21-style approval row.

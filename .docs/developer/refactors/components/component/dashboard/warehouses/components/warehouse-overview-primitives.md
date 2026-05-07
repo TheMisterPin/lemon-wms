@@ -114,7 +114,7 @@ Types/interfaces declared inline:
 
 | Logic | Current location | Target location | Reason | Risk |
 | --- | --- | --- | --- | --- |
-| Each exported primitive | Single module today | `src/components/primitives/*` per dismount rows | Approved generic reuse (**deferred** Phase 21) | high |
+| Each exported primitive | Single module today | `src/components/primitives/*` per dismount rows | **Approved** Phase 21 (**P21-001**) — Phase 22 executes | high |
 | Tone maps / tooltip adapters | Module-level constants | Collocate with primitive or `src/lib/**` if proven domain-neutral | Decision deferred pending Phase 21 verdict | medium |
 
 ### New Files Needed
@@ -123,7 +123,7 @@ See **Dismounted Components** — instantiate only after Phase 21 primitive appr
 
 ### Notes
 
-**Phase 21 gate:** Do **not** treat these exports as approved primitives until `_primitive-extraction-plan.md` signs off — Phase 20 records intent only.
+**Phase 21 gate:** **Approved** — see `_primitive-extraction-plan.md` row **P21-001**; Phase 22 executes the move.
 
 ## Dismounted Components
 
@@ -135,3 +135,64 @@ See **Dismounted Components** — instantiate only after Phase 21 primitive appr
 | `WarehouseOverviewStatusPill` | `src/components/primitives/warehouse-overview-status-pill.tsx` | `.docs/developer/refactors/components/dismounted/warehouse-overview-status-pill.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `warehouseOverviewToneStyles` | `src/components/primitives/warehouse-overview-tone-styles.tsx` | `.docs/developer/refactors/components/dismounted/warehouse-overview-tone-styles.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `warehouseOverviewRechartsTooltipProps` | `src/components/primitives/warehouse-overview-recharts-tooltip-props.tsx` | `.docs/developer/refactors/components/dismounted/warehouse-overview-recharts-tooltip-props.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Primitive candidate specification (Phase 21 / CFR-14)
+
+### Purpose
+
+Provide a shared, dashboard-neutral **visual shell** for warehouse-toned KPI surfaces: buttons, section shells, chart panel wrapper, status pills, tone class maps, and the shared Recharts tooltip preset — without data loading or domain mutations.
+
+### Source module
+
+`src/components/dashboard/warehouses/components/warehouse-overview-primitives.tsx`
+
+### Consumers
+
+Verified cross-dashboard imports (inventory summary + source tree):
+
+1. `src/components/dashboard/bins/bin-overview-dashboard.tsx`
+2. `src/components/dashboard/devices/device-detail-dashboard.tsx`
+3. `src/components/dashboard/orders/DashboardOrdersOverviewView.tsx`
+4. `src/components/dashboard/orders/order-detail-dashboard.tsx`
+5. `src/components/dashboard/stock/category-stock-dashboard.tsx`
+
+### Target path (Phase 22)
+
+`src/components/primitives/warehouse-overview-primitives.tsx` (single module move first; optional splits per **Dismounted Components** table during later micro-phases — **CFR-16**: preserve JSX/class output).
+
+### Props / exports sketch
+
+- **`warehouseOverviewToneStyles`** — const map `WarehouseOverviewTone` → Tailwind-style class strings (presentation only).
+- **`WarehouseOverviewButton`** — `href`, `selected`, `disabled`, `title`, `children`, `onClick`.
+- **`WarehouseOverviewShellSection`** — titled section shell with optional pill/action slot.
+- **`WarehouseOverviewChartPanel`** — `children` wrapper for chart height/card chrome.
+- **`WarehouseOverviewStatusPill`** — label + tone-driven border/text classes.
+- **`warehouseOverviewRechartsTooltipProps`** — preset tooltip styling object for Recharts.
+
+### Styling and tokens
+
+Heavy reliance on dashboard **`--wh-*`** CSS variables and Lemon matte dashboard card shells (see `src/styles/tokens.css` / component usage). Phase 22 extraction **must** copy classes verbatim — token drift is out of scope for Phase 21–22 extraction (**CFR-16**).
+
+### Allowed responsibilities
+
+- Presentational layout, spacing, hover/disabled visual states
+- Tone/status → CSS class mapping that encodes **display** semantics only (no API shapes)
+
+### Forbidden responsibilities (**CFR-15**)
+
+- Network I/O, mutations, feature hooks, Axios/API clients
+- Imports from feature modules that embed business rules or DTO manipulation
+- Awareness of API response types beyond presentational props passed by parents
+
+### Migration usage sketch (Phase 22)
+
+Feature pages continue to own data; they **import presentational exports** from `src/components/primitives/warehouse-overview-primitives` (or split children per dismount table) and pass ready-to-render labels/URLs/boolean flags only.
+
+### Open questions
+
+- Inline prop types vs relocation to `src/types/dto` / `src/types/components` — decide during Phase 22 split to avoid circular imports; **no** semantic DTO changes.
+- Whether to physically split dismounted files in one commit or incremental waves — planner/executor choice; behavior-preserving.
+
+### Phase 21 recommendation
+
+**Approve** for Phase 22 primitive extraction: module has **no hooks or API clients** (verified imports: `react` types only). Recorded as **`P21-001`** in `.docs/developer/refactors/_primitive-extraction-plan.md`.

@@ -29,10 +29,10 @@
 
 ### Primitives and styling
 
-- [ ] **CFR-14**: Primitive candidates are documented with purpose, source components, target path, typed props, allowed responsibilities, forbidden responsibilities, and migration usage.
-- [ ] **CFR-15**: A primitive is planned only when repeated domain-neutral UI structure or styling evidence exists; primitives do not fetch data, mutate data, import feature hooks, know API response shapes, or contain domain business rules.
-- [ ] **CFR-16**: Structural refactors preserve current visual output; Tailwind class cleanup, spacing changes, color changes, layout redesign, and broad style modernization are not included.
-- [ ] **CFR-17**: Feature-specific skeletons remain near their feature components, while generic loading/error/empty states are documented as primitive candidates only when reused.
+- [x] **CFR-14**: Primitive candidates are documented with purpose, source components, target path, typed props, allowed responsibilities, forbidden responsibilities, and migration usage.
+- [x] **CFR-15**: A primitive is planned only when repeated domain-neutral UI structure or styling evidence exists; primitives do not fetch data, mutate data, import feature hooks, know API response shapes, or contain domain business rules.
+- [x] **CFR-16**: Structural refactors preserve current visual output; Tailwind class cleanup, spacing changes, color changes, layout redesign, and broad style modernization are not included.
+- [x] **CFR-17**: Feature-specific skeletons remain near their feature components, while generic loading/error/empty states are documented as primitive candidates only when reused.
 
 ### First vertical slice execution
 
@@ -117,10 +117,10 @@ Delivered in phases 1-10 (see `.planning/MILESTONES.md`). Requirement IDs BP-, P
 | CFR-11 | Phase 20 | Pending |
 | CFR-12 | Phase 20 | Pending |
 | CFR-13 | Phase 20 | Pending |
-| CFR-14 | Phase 21 | Pending |
-| CFR-15 | Phase 21 | Pending |
-| CFR-16 | Phase 21 | Pending |
-| CFR-17 | Phase 21 | Pending |
+| CFR-14 | Phase 21 | Complete |
+| CFR-15 | Phase 21 | Complete |
+| CFR-16 | Phase 21 | Complete |
+| CFR-17 | Phase 21 | Complete |
 | CFR-18 | Phase 22 | Pending |
 | CFR-19 | Phase 22 | Pending |
 | CFR-20 | Phase 22 | Pending |

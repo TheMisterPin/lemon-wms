@@ -132,3 +132,29 @@ See **Dismounted Components**.
 |---|---|---|---|
 | `SectionBlock` | `src/components/features/locations/components/section-block.tsx` | `.docs/developer/refactors/components/dismounted/section-block.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `ListCard` | `src/components/features/locations/components/list-card.tsx` | `.docs/developer/refactors/components/dismounted/list-card.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Primitive candidate specification (Phase 21 / CFR-14)
+
+### SectionBlock
+
+**Purpose:** Section chrome with title row, optional action control, optional `headerRight`, and children — used to frame directory lists.
+
+**Reuse evidence:** A **separate** component also named `SectionBlock` exists in `src/components/dashboard/warehouses/components/BinGrid.tsx` (nested helper). Implementations must be diffed before any shared primitive (**Phase 22** task — not Phase 21).
+
+**Target primitive path (if ever approved):** `src/components/primitives/dashboard-section-block.tsx` (tentative).
+
+**Allowed / forbidden:** Presentational shell only; **forbid** embedding directory-specific copy rules or pagination logic inside a primitive.
+
+**Recommendation:** **defer** — locations directory semantics + duplicate-name helper in `BinGrid.tsx` block primitive approval until structural comparison and naming de-confliction.
+
+### ListCard
+
+**Purpose:** Row/card presentation for directory entities (zones, bins, etc.) with tone/status styling.
+
+**Reuse evidence:** Used inside `DirectorySections.tsx` only (not a standalone export consumed across modules).
+
+**Target primitive path (if ever approved):** `src/components/primitives/dashboard-directory-list-card.tsx` (tentative).
+
+**Recommendation:** **defer** — single parent module; card shape likely stays **feature** (`locations`) until second consumer proves neutrality.
+
+**Cross-note (CFR-17):** Skeleton siblings documented separately; no generic skeleton primitive approved here.

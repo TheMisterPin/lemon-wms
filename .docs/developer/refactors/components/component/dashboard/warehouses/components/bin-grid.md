@@ -134,3 +134,13 @@ Phase 21 may evaluate whether pagination chrome becomes a primitive — **deferr
 | `SectionBlock` | `src/components/features/locations/components/section-block.tsx` | `.docs/developer/refactors/components/dismounted/section-block.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `getBinStatus` | `src/lib/transformers/locations/get-bin-status.ts` | `.docs/developer/refactors/components/dismounted/get-bin-status.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `getFillBarStyle` | `src/lib/transformers/locations/get-fill-bar-style.ts` | `.docs/developer/refactors/components/dismounted/get-fill-bar-style.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Primitive candidate specification (Phase 21 / CFR-14)
+
+### Pagination chrome
+
+**Purpose:** Bin grid pagination controls are composed with bin-specific counts and labels.
+
+**Reuse:** GenericTable V2 (**paused** — `.planning/REQUIREMENTS.md`) would be the natural home for shared table/grid pagination; until GTB resumes, **do not** invent a one-off `components/primitives` pagination for a single grid.
+
+**Recommendation:** **defer** — second consumer + GTB alignment required; **reject** as standalone primitive today due to single-feature coupling.
