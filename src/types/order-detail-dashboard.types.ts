@@ -1,3 +1,5 @@
+import type { AssignmentLifecycle, ReceiptOutcome } from '@/generated/prisma'
+
 import type { DashboardHeader, DashboardKpi } from '@/types/bin-detail-dashboard.types'
 
 export type OrderExecutionLineRow = {
@@ -10,7 +12,7 @@ export type OrderExecutionLineRow = {
   remainingQty: number
   uom: string
   status: 'OPEN' | 'PARTIAL' | 'COMPLETED' | 'EXCEPTION'
-  outcome?: 'ACCEPTED' | 'DAMAGED' | 'EXPIRED' | 'REJECTED' | 'QUARANTINED' | 'QUALITY_ISSUE'
+  outcome?: ReceiptOutcome
   href: string
 }
 
@@ -18,7 +20,7 @@ export type OrderAssignmentRow = {
   assignmentId: string
   userId: string
   userName: string
-  status: 'ASSIGNED' | 'STARTED' | 'PAUSED' | 'RESUMED' | 'COMPLETED' | 'CANCELLED'
+  status: AssignmentLifecycle
   startedAt?: string
   pausedAt?: string
   completedAt?: string

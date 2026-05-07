@@ -243,13 +243,48 @@ export async function getUserDetailDashboardData(
   const exceptionCount = activity.filter((entry) => entry.type === 'EXCEPTION').length
 
   const kpis: DashboardKpi[] = [
-    { label: 'Active orders', value: String(currentWork.length), tone: currentWork.length > 0 ? 'green' : 'neutral' },
-    { label: 'Completed today', value: String(completedToday.length), tone: completedToday.length > 0 ? 'green' : 'neutral' },
-    { label: 'Total completed', value: String(completedOrders.length), tone: 'neutral' },
-    { label: 'Last device', value: user.lastLoginDevice?.code ?? '—', tone: 'neutral' },
-    { label: 'Current warehouse', value: user.warehouseAssignments[0]?.warehouse?.name ?? '—', tone: 'neutral' },
-    { label: 'Exceptions handled', value: String(exceptionCount), tone: exceptionCount > 0 ? 'yellow' : 'neutral' },
-    { label: 'Avg completion time', value: avgDuration, tone: 'neutral' }
+    {
+      label: 'Active orders',
+      value: String(currentWork.length),
+      helper: 'Assignments in progress',
+      tone: currentWork.length > 0 ? 'success' : 'neutral'
+    },
+    {
+      label: 'Completed today',
+      value: String(completedToday.length),
+      helper: 'Finished assignments today',
+      tone: completedToday.length > 0 ? 'success' : 'neutral'
+    },
+    {
+      label: 'Total completed',
+      value: String(completedOrders.length),
+      helper: 'All-time completed assignments',
+      tone: 'neutral'
+    },
+    {
+      label: 'Last device',
+      value: user.lastLoginDevice?.code ?? '—',
+      helper: 'Most recent sign-in device',
+      tone: 'neutral'
+    },
+    {
+      label: 'Current warehouse',
+      value: user.warehouseAssignments[0]?.warehouse?.name ?? '—',
+      helper: 'Primary warehouse assignment',
+      tone: 'neutral'
+    },
+    {
+      label: 'Exceptions handled',
+      value: String(exceptionCount),
+      helper: 'Logged exception activities',
+      tone: exceptionCount > 0 ? 'warning' : 'neutral'
+    },
+    {
+      label: 'Avg completion time',
+      value: avgDuration,
+      helper: 'Across completed assignments',
+      tone: 'neutral'
+    }
   ]
 
   return {

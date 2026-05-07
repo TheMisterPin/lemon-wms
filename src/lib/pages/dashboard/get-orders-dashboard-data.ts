@@ -50,13 +50,48 @@ async function getOrdersDashboardData(prisma: PrismaClient): Promise<OrdersDashb
   ).length
 
   const kpis: DashboardKpi[] = [
-    { label: 'Released', value: String(released), tone: released > 0 ? 'yellow' : 'neutral' },
-    { label: 'Unassigned', value: String(unassigned), tone: unassigned > 0 ? 'yellow' : 'neutral' },
-    { label: 'Assigned', value: String(assigned), tone: assigned > 0 ? 'green' : 'neutral' },
-    { label: 'Active', value: String(executing), tone: executing > 0 ? 'green' : 'neutral' },
-    { label: 'Paused', value: String(paused), tone: paused > 0 ? 'yellow' : 'neutral' },
-    { label: 'Completed', value: String(completed), tone: completed > 0 ? 'green' : 'neutral' },
-    { label: 'Exceptions', value: String(exceptions), tone: exceptions > 0 ? 'red' : 'neutral' }
+    {
+      label: 'Released',
+      value: String(released),
+      helper: 'Orders waiting to start',
+      tone: released > 0 ? 'warning' : 'neutral'
+    },
+    {
+      label: 'Unassigned',
+      value: String(unassigned),
+      helper: 'Released orders without an assignee',
+      tone: unassigned > 0 ? 'warning' : 'neutral'
+    },
+    {
+      label: 'Assigned',
+      value: String(assigned),
+      helper: 'Released orders with an assignee',
+      tone: assigned > 0 ? 'success' : 'neutral'
+    },
+    {
+      label: 'Active',
+      value: String(executing),
+      helper: 'Orders currently executing',
+      tone: executing > 0 ? 'success' : 'neutral'
+    },
+    {
+      label: 'Paused',
+      value: String(paused),
+      helper: 'Execution paused',
+      tone: paused > 0 ? 'warning' : 'neutral'
+    },
+    {
+      label: 'Completed',
+      value: String(completed),
+      helper: 'Executed or signed off',
+      tone: completed > 0 ? 'success' : 'neutral'
+    },
+    {
+      label: 'Exceptions',
+      value: String(exceptions),
+      helper: 'Orders with execution problems',
+      tone: exceptions > 0 ? 'danger' : 'neutral'
+    }
   ]
 
   const orderTypeDistribution: OrderTypeSlice[] = [

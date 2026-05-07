@@ -13,12 +13,12 @@ Current file path:
 `src/components/dashboard/features/zones/create-zone-form.tsx`
 
 Current responsibility:
-Zone create form; **`useDashboardWarehouse().createZone`** on submit; receives `warehouseList` prop from page for selects.
+Zone create dialog form; **`warehouseList`** + **`onCreateZone`** (**Phase 22-07**) from **`DashboardZonesPage**.
 
 Mutation calls:
-`createZone`
+`onCreateZone`
 
-Hooks: **`useDashboardWarehouse`**
+Hooks: **none**
 
 Recommended destination:
 TBD Phase 19

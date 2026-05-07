@@ -15,7 +15,7 @@ isCorrectCase: true
 
 ### Mutation error parsing
 
-- Local **`extractMutationError`** parses Axios `ApiResponse` bodies into `MutationError`, mirrors warehouse hook helper behavior.
+- **`extractMutationError`** imported from `@/lib/api/extract-mutation-error` (**Phase 22-02**); parses Axios `ApiResponse` bodies into `MutationError`, shared with warehouse hook.
 
 ## Hook Responsibility (CFR-11 snapshot)
 
@@ -42,11 +42,11 @@ Owns DTO transformation: Yes — maps API records to table/options shapes inline
 
 ## Dependencies
 
-- `dashboardApiClient`, `useErrorDialog`, entity config types, shared form/select types, Axios.
+- `dashboardApiClient`, `extractMutationError` (`@/lib/api/extract-mutation-error`), `useErrorDialog`, entity config types, shared form/select types, Axios.
 
 ## Refactor Notes
 
-- Devices provider is **out-of-scope** for first locations slice unless roadmap expands — still document mutation-parser duplication for CFR-13.
+- Devices provider is **out-of-scope** for first locations slice unless roadmap expands — mutation parser consolidated with warehouse (**Phase 22-02**, CFR-13).
 
 ## Logic Mapping
 
@@ -74,7 +74,7 @@ Error handling logic:
 - `extractMutationError` + `reportError` dialog integration.
 
 Reusable utility logic:
-- **`extractMutationError`** duplicates warehouse/devices implementations — **Phase 22 dedupe**.
+- **`extractMutationError`** — **`src/lib/api/extract-mutation-error.ts`** (**Phase 22-02** ✅); shared with warehouse hook.
 
 Types/interfaces declared inline:
 - `ApiPayload`, `DeviceApiRecord`, `WarehouseApiRecord`, `ZoneApiRecord`, context interface — future **`types/api`** modules.
@@ -85,19 +85,19 @@ Types/interfaces declared inline:
 | --- | --- | --- | --- | --- |
 | Async + mutations | Provider module | Planned `src/hooks/dashboard/devices/...` | Hook ownership (**hook**) | medium |
 | Inline API records | Same file | `src/types/api/devices/...` | Contract isolation (**types/api**) | medium |
-| `extractMutationError` | Duplicated with warehouse | **`src/lib/api/extract-mutation-error.ts`** | CFR-13 **utility** tier (not `lib/transformers`) — align with `.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md` |
+| `extractMutationError` | `@/lib/api/extract-mutation-error` | **`src/lib/api/extract-mutation-error.ts`** | CFR-13 **utility** tier (not `lib/transformers`) — **Phase 22-02** ✅ |
 | Context wiring | Provider component | Feature provider path Phase 22 | Compatibility migration | medium |
 
 ### Notes
 
-**CFR-13:** The warehouse canonical hook documents the same consolidation narrative — maintain single utility filename (`extract-mutation-error.ts`) across docs before Phase 22 implements it.
+**CFR-13:** Consolidated in **`src/lib/api/extract-mutation-error.ts`** (**Phase 22-02**) — warehouse canonical hook doc (`.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md`) is the integration narrative.
 
 ## Classification
 
 Classification: hook (provider cluster)  
-Reason: Dashboard devices provider mixes fetch, mutations, inline API typings, and mutation-error parsing — split during Phase 22 when devices slice is scheduled.  
+Reason: Dashboard devices provider mixes fetch, mutations, and inline API typings — mutation errors use shared **`extractMutationError`** (**Phase 22-02**); further hook split when devices slice is scheduled.  
 Target folder: `src/hooks/dashboard/devices` (proposed)  
-Risk level: medium — mutation-parser duplication is the immediate documentation signal.
+Risk level: medium — inline API typings remain the next split signal after CFR-13 consolidation.
 
 ### Decision
 

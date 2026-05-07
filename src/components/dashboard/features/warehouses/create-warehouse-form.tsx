@@ -4,13 +4,11 @@
  * @doc .docs/developer/refactors/components/component/dashboard/features/warehouses/create-warehouse-form.md
  */
 
-
 import { useState } from 'react'
 
 import { CirclePlus } from 'lucide-react'
 import { z } from 'zod'
 import { warehouseFormConfig } from '@/components/configs/entities/warehouse/config'
-import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import DynamicForm from '@/components/dynamic-form'
 import { Button } from '@/components/ui/button'
 import {
@@ -58,16 +56,19 @@ const createWarehouseFormSchema = warehouseFormSchema.pick({
   name: true
 }) satisfies z.ZodType<CreateWarehouseFormValues>
 
-export default function CreateWarehouseForm() {
+type CreateWarehouseFormProps = {
+  onCreateWarehouse: (values: CreateWarehouseFormValues) => Promise<void>
+}
+
+export default function CreateWarehouseForm({ onCreateWarehouse }: CreateWarehouseFormProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
-  const { createWarehouse } = useDashboardWarehouse()
 
   async function handleCreateWarehouse(values: CreateWarehouseFormValues) {
     setCreateError(null)
 
     try {
-      await createWarehouse(values)
+      await onCreateWarehouse(values)
       setIsOpen(false)
     } catch (submissionError) {
       setCreateError(

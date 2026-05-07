@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/use-dashboard-warehouse.tsx
+source: src/hooks/dashboard/locations/use-dashboard-warehouse.tsx
 type: hook-responsibility
 isCorrectCase: true
 cross_link_generated: .docs/developer/refactors/components/hook/dashboard/warehouses/use-dashboard-warehouse.md
@@ -7,21 +7,18 @@ cross_link_generated: .docs/developer/refactors/components/hook/dashboard/wareho
 
 ## Hook Responsibility
 
-Current source: `src/components/dashboard/warehouses/use-dashboard-warehouse.tsx`
-Target hook file: `src/hooks/dashboard/locations/use-dashboard-warehouse.ts` (planned Phase 22 — folder not created in Phase 20)
+Current source: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx`
+Target hook file: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` (**Phase 22-03** — implemented; extension `.tsx` retained for JSX in provider)
 Used by:
 - src/app/(dashboard)/layout.tsx
-- src/components/dashboard/bins/DashboardBinsPageView.tsx
-- src/components/dashboard/features/bins/create-bin-form.tsx
-- src/components/dashboard/features/warehouses/create-warehouse-form.tsx
-- src/components/dashboard/features/zones/create-zone-form.tsx
-- src/components/dashboard/zones/DashboardZonesPageView.tsx
+- src/components/features/locations/pages/dashboard-bins-page.tsx
+- src/components/features/locations/pages/dashboard-zones-page.tsx
 Owns fetching: Yes - current source issues dashboard data requests.
 Owns mutations: Yes - POST client mutations for createWarehouse, createZone, and createBin.
 Owns loading state: Yes.
 Owns error state: Yes.
-Owns DTO transformation: Yes - maps or derives page-ready data in the current file.
-Exposes actions: **Current:** flat callbacks `createWarehouse`, `createZone`, `createBin`, `refresh` on context. **Target (Phase 22, D-20-09):** nested `actions` object on hook/context value with the same four operations for consumers that accept grouped callbacks (CFR-12).
+Owns DTO transformation: Partial — **`src/lib/transformers/locations/dashboard-home.ts`** maps `/dashboard/home` wire lists (**Phase 22-05**); **`useMemo`** pipelines remain in-hook for options/table rows.
+Exposes actions: Flat **`createWarehouse`**, **`createZone`**, **`createBin`**, **`refresh`** plus nested **`actions`** object with the same four (**Phase 22-06**, CFR-11/12 dual surface).
 
 ## Inputs
 
@@ -34,9 +31,9 @@ Current return/context shape is derived from the existing source, not a new cont
 
 ## Actions
 
-**Interim (current source):** `createWarehouse`, `createZone`, `createBin`, `refresh` as separate context fields.
+**Interim:** `createWarehouse`, `createZone`, `createBin`, `refresh` as separate context fields.
 
-**Target shape (Phase 22 documentation contract):** `actions: { createWarehouse, createZone, createBin, refresh }` alongside page-ready DTO fields — implement only when hook extraction lands; keep consumer behavior identical.
+**Phase 22-06:** `actions: { createWarehouse, createZone, createBin, refresh }` — same function references as the flat fields (**CFR-11** dual surface).
 
 ## Provider / context decision
 
@@ -45,7 +42,7 @@ Current return/context shape is derived from the existing source, not a new cont
 ## Dependencies
 
 - Generated component-hook doc: `.docs/developer/refactors/components/hook/dashboard/warehouses/use-dashboard-warehouse.md`
-- Source dependencies: @/components/configs/entities/bin/config, @/components/configs/entities/zone/config, @/components/shared/use-error-dialog, @/types/components/form/generic-form.types, @/types, @/types/responses/basic-response, next/navigation, @/lib/axios, @/lib/locations
+- Source dependencies: **`@/types/api/locations/dashboard-home`**, **`@/lib/transformers/locations/dashboard-home`**, `@/lib/api/extract-mutation-error`, @/components/configs/entities/bin/config, @/components/configs/entities/zone/config, @/components/shared/use-error-dialog, @/types/components/form/generic-form.types, next/navigation, @/lib/axios, @/lib/locations
 
 ## Refactor Notes
 
@@ -70,44 +67,46 @@ Mutation logic:
 - POST create endpoints for warehouse, zone, bin; each triggers `refresh()` on success.
 
 Data transformation logic:
-- `useMemo` pipelines from raw API-shaped lists to `Warehouse`, `ZoneTableRow`, `BinTableRow`, denormalized display names, and select options.
+- **`src/lib/transformers/locations/dashboard-home.ts`** maps `/dashboard/home` wire lists → **`Warehouse[]` / `ZoneApiRecord[]` / `BinApiRecord[]`** (**Phase 22-05**).
+- `useMemo` pipelines from normalized lists to `ZoneTableRow`, `BinTableRow`, denormalized display names, and select options.
 
 Validation logic:
 - None in hook beyond trusting API validation responses surfaced as mutation errors.
 
 Error handling logic:
-- `extractMutationError` maps Axios/`ApiResponse` failures to `MutationError`; `useErrorDialog.reportError` shows consistent titles/sources.
+- Imports **`extractMutationError`** from `@/lib/api/extract-mutation-error.ts` (Phase 22-02); `useErrorDialog.reportError` shows consistent titles/sources.
 
 Reusable utility logic:
-- `extractMutationError` — candidate for shared module (see movement plan).
+- *(none in-module — shared mutation parser lives in `src/lib/api/extract-mutation-error.ts`.)*
 
 Types/interfaces declared inline:
-- `ZoneApiRecord`, `BinApiRecord`, `ApiPayload`, `DashboardHomePayload`, supporting row/option types tied to dashboard home payload.
+- ~~`ZoneApiRecord`, `BinApiRecord`, `ApiPayload`, `DashboardHomePayload`~~ → **`src/types/api/locations/dashboard-home.ts`** (**Phase 22-04**).
 
 ### Logic Movement Plan
 
 | Logic | Current location | Target location | Reason | Risk |
 | --- | --- | --- | --- | --- |
-| Raw `/dashboard/home` payload and API record types | Inline in `use-dashboard-warehouse.tsx` | `src/types/api/locations/` (shard filenames TBD Phase 22) | Isolate wire contract from hook implementation (D-20-04, CFR-10 **types/api**) | medium |
-| UI-ready rows, options, context data shape | `useMemo` in hook file | `src/types/dto/locations/` + `src/lib/transformers/locations/` | Stable DTO boundary across hooks and feature components (D-20-05/06, CFR-10 **types/dto** / **transformer**) | high |
-| Fetch + refresh orchestration | Hook/provider module | `src/hooks/dashboard/locations/use-dashboard-warehouse.ts` | Single async ownership (CFR-09 **hook**) | high |
-| Mutation calls + refresh coupling | Flat context actions | Hook-owned **`actions`** namespace (Phase 22) | Satisfies D-20-09/D-20-10 when exposing multiple callbacks (CFR-11/12 **hook**) | medium |
-| Mutation error parsing helper | Inline `extractMutationError` | `src/lib/api/extract-mutation-error.ts` | Shared **utility** tier — not transformer mapping (CFR-13); duplicates `extractMutationError` in `src/components/dashboard/devices/use-dashboard-devices.tsx` | medium |
+| Raw `/dashboard/home` payload and API record types | ~~Inline~~ | **`src/types/api/locations/dashboard-home.ts`** | Isolate wire contract (**Phase 22-04**) | medium |
+| Wire-list normalization into hook state shapes | ~~Inline in `loadData`~~ | **`src/lib/transformers/locations/dashboard-home.ts`** | Pure **`lib/transformers`** ownership (**Phase 22-05**) | medium |
+| Fetch + refresh orchestration | Hook/provider module | `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` | Single async ownership (**CFR-09 hook**) — **Phase 22-03** ✅ | high |
+| UI-ready rows, options, context data shape | `useMemo` in hook file | `src/types/dto/locations/` + remaining transformers | Future DTO files (**not** landed Phase 22) | high |
+| Mutation calls + refresh coupling | Flat fields + **`actions`** | Hook-owned (**Phase 22-06** ✅) | D-20-09 grouped callbacks (**CFR-11/12**) | medium |
+| Mutation error parsing helper | ~~Inline~~ → **`extractMutationError` imported** | `src/lib/api/extract-mutation-error.ts` | Shared **utility** (CFR-13); **Phase 22-02** consolidated warehouse + devices implementations | done |
 | Provider shell / context typing | Same file today | Future `src/components/features/locations/providers/dashboard-warehouse-provider.tsx` | Compatibility until consumers migrate (D-20-08 **retained render**/feature wiring) | high |
 
 ### New Files Needed
 
 | File | Purpose |
 | --- | --- |
-| `src/types/api/locations/*` | Dashboard home payload + API records |
+| `src/types/api/locations/dashboard-home.ts` | Dashboard home envelope **`ApiPayload`**, **`DashboardHomePayload`**, **`ZoneApiRecord`**, **`BinApiRecord`** (**Phase 22-04** ✅) |
 | `src/types/dto/locations/*` | Table rows, options, KPI-ready shapes consumed by feature components |
-| `src/lib/transformers/locations/*` | Normalize API lists → DTOs |
-| `src/lib/api/extract-mutation-error.ts` | Shared mutation error parsing |
-| `src/hooks/dashboard/locations/use-dashboard-warehouse.ts` | Hook implementation extracted from current component path |
+| `src/lib/transformers/locations/dashboard-home.ts` | Normalize `/dashboard/home` wire lists (**Phase 22-05** ✅) |
+| `src/lib/api/extract-mutation-error.ts` | Shared mutation error parsing (**Phase 22-02** ✅) |
+| `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` | Hook + provider implementation (**Phase 22-03** ✅; `.tsx` for JSX) |
 
 ### Notes
 
-- **CFR-13 evidence:** Duplicate `extractMutationError` in `src/components/dashboard/devices/use-dashboard-devices.tsx` — consolidate with warehouse hook during Phase 22 utility extraction.
+- **CFR-13:** ~~Duplicate `extractMutationError`~~ **Resolved Phase 22-02** — shared `src/lib/api/extract-mutation-error.ts` used by warehouse hook and `src/components/dashboard/devices/use-dashboard-devices.tsx`.
 - **Compatibility checklist:** Preserve URL `warehouseId` filtering semantics, mutation success refresh behavior, and error dialog metadata (`dashboard/warehouses/create`, `dashboard/zones/create`, `dashboard/bins/create`). Re-run consumer inventory from **Used by** before deleting compatibility provider exports.
 
 ## Classification
@@ -115,7 +114,7 @@ Types/interfaces declared inline:
 Classification: hook
 Reason: Provider/hook/API payload/DTO/transformer/mutation cluster; split later while keeping compatibility provider.
 Target folder: `src/hooks/dashboard/locations`
-Target file name: `use-dashboard-warehouse.ts`
+Target file name: `use-dashboard-warehouse.tsx`
 Keep / Move / Split / Delete: split
 Risk level: high
 
@@ -141,10 +140,10 @@ Record the split decision as planned ownership only. Phase 19 does not move sour
 | Component | New code path | New documentation path | Reason |
 |---|---|---|---|
 | `DashboardWarehouseProvider` | `src/components/features/locations/providers/dashboard-warehouse-provider.tsx` | `.docs/developer/refactors/components/dismounted/dashboard-warehouse-provider.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `useDashboardWarehouse` | `src/hooks/dashboard/locations/use-dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/use-dashboard-warehouse.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `useDashboardWarehouse` | `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` | `.docs/developer/refactors/components/dismounted/use-dashboard-warehouse.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `DashboardWarehouseContext` | `src/components/features/locations/providers/dashboard-warehouse-provider.tsx` | `.docs/developer/refactors/components/dismounted/dashboard-warehouse-context.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `ApiPayload` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/api-payload.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `ZoneApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/zone-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `BinApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/bin-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `DashboardHomePayload` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/dashboard-home-payload.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `extractMutationError` | `src/lib/api/extract-mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | Phase 20 (CFR-13): shared **utility** tier — not `lib/transformers`; consolidate with devices hook duplicate. |
+| `ApiPayload` | `src/types/api/locations/dashboard-home.ts` | `.docs/developer/refactors/components/dismounted/api-payload.md` | Wire envelope helper (**Phase 22-04**) |
+| `ZoneApiRecord` | `src/types/api/locations/dashboard-home.ts` | `.docs/developer/refactors/components/dismounted/zone-api-record.md` | Typed alongside **`DashboardHomePayload`** (**Phase 22-04**) |
+| `BinApiRecord` | `src/types/api/locations/dashboard-home.ts` | `.docs/developer/refactors/components/dismounted/bin-api-record.md` | Typed alongside **`DashboardHomePayload`** (**Phase 22-04**) |
+| `DashboardHomePayload` | `src/types/api/locations/dashboard-home.ts` | `.docs/developer/refactors/components/dismounted/dashboard-home-payload.md` | Inner **`data`** shape for **`GET /dashboard/home`** (**Phase 22-04**) |
+| `extractMutationError` | `src/lib/api/extract-mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | **Phase 22-02** ✅ CFR-13 **utility** tier — not `lib/transformers`; shared by warehouse hook + devices hook. |

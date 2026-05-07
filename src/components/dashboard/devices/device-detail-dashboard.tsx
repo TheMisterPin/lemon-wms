@@ -49,17 +49,7 @@ function authStatusTone(status: string): WarehouseOverviewTone {
 }
 
 function kpiTone(tone: DashboardKpi['tone']): WarehouseOverviewTone {
-  if (tone === 'green') {
-    return 'success'
-  }
-  if (tone === 'yellow') {
-    return 'warning'
-  }
-  if (tone === 'red') {
-    return 'danger'
-  }
-
-  return 'neutral'
+  return tone
 }
 
 function formatTs(iso: string): string {

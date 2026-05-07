@@ -42,7 +42,7 @@ Example:
 'use client'
 
 import { DashboardWarehouseOverviewPage } from '@/components/features/locations/pages/dashboard-warehouse-overview'
-import { useDashboardWarehouse } from '@/hooks/dashboard/use-dashboard-warehouse'
+import { useDashboardWarehouse } from '@/hooks/dashboard/locations/use-dashboard-warehouse'
 
 export default function Page() {
   const dashboard = useDashboardWarehouse()

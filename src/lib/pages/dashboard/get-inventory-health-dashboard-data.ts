@@ -306,13 +306,48 @@ export async function getInventoryHealthDashboardData(
   }))
 
   const kpis: DashboardKpi[] = [
-    { label: 'Low stock SKUs', value: String(issueDistribution.find((slice) => slice.type === 'LOW_STOCK')?.count ?? 0), tone: 'yellow' },
-    { label: 'Overstock SKUs', value: String(issueDistribution.find((slice) => slice.type === 'OVERSTOCK')?.count ?? 0), tone: 'neutral' },
-    { label: 'Blocked stock', value: String(issueDistribution.find((slice) => slice.type === 'BLOCKED')?.count ?? 0), tone: 'red' },
-    { label: 'Quarantine stock', value: String(issueDistribution.find((slice) => slice.type === 'QUARANTINE')?.count ?? 0), tone: 'red' },
-    { label: 'Expiring soon', value: String(issueDistribution.find((slice) => slice.type === 'EXPIRING')?.count ?? 0), tone: 'yellow' },
-    { label: 'Invalid states', value: String(issueDistribution.find((slice) => slice.type === 'INVALID_STATE')?.count ?? 0), tone: 'red' },
-    { label: 'Orphaned records', value: '0', tone: 'neutral' }
+    {
+      label: 'Low stock SKUs',
+      value: String(issueDistribution.find((slice) => slice.type === 'LOW_STOCK')?.count ?? 0),
+      helper: 'Below minimum quantity',
+      tone: 'warning'
+    },
+    {
+      label: 'Overstock SKUs',
+      value: String(issueDistribution.find((slice) => slice.type === 'OVERSTOCK')?.count ?? 0),
+      helper: 'Excess inventory signals',
+      tone: 'neutral'
+    },
+    {
+      label: 'Blocked stock',
+      value: String(issueDistribution.find((slice) => slice.type === 'BLOCKED')?.count ?? 0),
+      helper: 'Unavailable on-hand units',
+      tone: 'danger'
+    },
+    {
+      label: 'Quarantine stock',
+      value: String(issueDistribution.find((slice) => slice.type === 'QUARANTINE')?.count ?? 0),
+      helper: 'Held for quality review',
+      tone: 'danger'
+    },
+    {
+      label: 'Expiring soon',
+      value: String(issueDistribution.find((slice) => slice.type === 'EXPIRING')?.count ?? 0),
+      helper: 'Lots nearing expiry',
+      tone: 'warning'
+    },
+    {
+      label: 'Invalid states',
+      value: String(issueDistribution.find((slice) => slice.type === 'INVALID_STATE')?.count ?? 0),
+      helper: 'Data consistency issues',
+      tone: 'danger'
+    },
+    {
+      label: 'Orphaned records',
+      value: '0',
+      helper: 'Reserved for future detection',
+      tone: 'neutral'
+    }
   ]
 
   return {

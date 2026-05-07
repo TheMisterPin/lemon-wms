@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Component Folder Restructuring
-status: phase-22-in-progress
-last_updated: "2026-05-07T23:59:00.000Z"
-last_activity: 2026-05-07 - Phase 22 started — 22-01 primitive move (P21-001)
+status: phase-23-complete
+last_updated: "2026-05-08T16:15:00.000Z"
+last_activity: 2026-05-08 - Phase 23 verification + pattern lock-in (VERIFICATION, PATTERN, vitest/docs sync)
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 35
-  completed_plans: 35
-  percent: 67
+  completed_phases: 6
+  total_plans: 45
+  completed_plans: 45
+  percent: 100
 ---
 
 # Project State
@@ -21,19 +21,19 @@ See: `.planning/PROJECT.md`
 
 **Core value:** Office users can create, release, and track supplier purchase orders; warehouse users can see operational orders by status, start execution, and pause.
 
-**Current focus:** Milestone v1.2 - Component Folder Restructuring; Phase 22 in progress (hook/DTO/features waves remaining).
+**Current focus:** Milestone **v1.2** roadmap phases **18–23** complete per `.planning/ROADMAP.md`; follow-on work is **outside** this roadmap (e.g. repo-wide **`tsc`** cleanup, **`types/dto`** extraction, **`DashboardHomePageView`** dead file decision).
 
 ## Current Position
 
-Phase: 22 of 23 - First locations slice
+Phase: 23 of 23 - Verification and pattern lock-in
 
-Plan: 22-01 complete; additional Phase 22 plans TBD (`$gsd-plan-phase 22`)
+Plan: **23-01..23-03** executed — see **`23-VERIFICATION.md`**, **`23-PATTERN-CARRY-FORWARD.md`**, **`23-*-SUMMARY.md`**
 
-Status: Phase 22 in progress — see `22-01-SUMMARY.md`
+Status: Phase **23** complete — Phase **22** slice documented and smoke-tested in CI scope (**vitest** subset); full **`tsc`** still red outside slice.
 
-Last activity: 2026-05-07 - Moved `warehouse-overview-primitives` to `src/components/primitives/`
+Last activity: 2026-05-08 — Phase **23** plan+execute: verification record, pattern doc, dashboard page test + docs alignment
 
-Progress: [██████░░░░] 67%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 

@@ -27,17 +27,7 @@ function formatTs(value: string): string {
 }
 
 function kpiTone(tone: DashboardKpi['tone']): WarehouseOverviewTone {
-  if (tone === 'green') {
-    return 'success'
-  }
-  if (tone === 'yellow') {
-    return 'warning'
-  }
-  if (tone === 'red') {
-    return 'danger'
-  }
-
-  return 'neutral'
+  return tone
 }
 
 function lineTone(status: string): WarehouseOverviewTone {

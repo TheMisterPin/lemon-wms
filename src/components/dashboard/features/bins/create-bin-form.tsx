@@ -4,13 +4,11 @@
  * @doc .docs/developer/refactors/components/component/dashboard/features/bins/create-bin-form.md
  */
 
-
 import { useState } from 'react'
 
 import { CirclePlus } from 'lucide-react'
 
 import { createBinFormConfig } from '@/components/configs/entities/bin/config'
-import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import DynamicForm from '@/components/dynamic-form'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,12 +25,12 @@ import type { SelectOption } from '@/types/components/form/generic-form.types'
 
 type CreateBinFormProps = {
   zonesList: SelectOption[]
+  onCreateBin: (values: BinFormValues) => Promise<void>
 }
 
-export default function CreateBinForm({ zonesList }: CreateBinFormProps) {
+export default function CreateBinForm({ zonesList, onCreateBin }: CreateBinFormProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
-  const { createBin } = useDashboardWarehouse()
 
   const formConfig = createBinFormConfig(zonesList)
 
@@ -40,7 +38,7 @@ export default function CreateBinForm({ zonesList }: CreateBinFormProps) {
     setCreateError(null)
 
     try {
-      await createBin(values)
+      await onCreateBin(values)
       setIsOpen(false)
     } catch (submissionError) {
       setCreateError(

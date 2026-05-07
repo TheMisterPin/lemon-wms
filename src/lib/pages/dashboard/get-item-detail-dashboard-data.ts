@@ -325,13 +325,48 @@ export async function getItemDetailDashboardData(
   }).length
 
   const kpis: DashboardKpi[] = [
-    { label: 'Total on hand', value: String(Math.round(totalOnHand)), tone: 'neutral' },
-    { label: 'Available', value: String(Math.round(available)), tone: 'green' },
-    { label: 'Reserved', value: String(Math.round(reserved)), tone: reserved > 0 ? 'yellow' : 'neutral' },
-    { label: 'Blocked', value: String(Math.round(blocked)), tone: blocked > 0 ? 'red' : 'neutral' },
-    { label: 'Warehouses', value: String(stockByWarehouse.length), tone: 'neutral' },
-    { label: 'Bins', value: String(stockByBin.length), tone: 'neutral' },
-    { label: 'Open orders', value: String(orderRows.filter((row) => row.status !== 'EXECUTED' && row.status !== 'SIGNED_OFF').length), tone: 'yellow' }
+    {
+      label: 'Total on hand',
+      value: String(Math.round(totalOnHand)),
+      helper: 'Available + reserved + blocked',
+      tone: 'neutral'
+    },
+    {
+      label: 'Available',
+      value: String(Math.round(available)),
+      helper: 'Ready to allocate',
+      tone: 'success'
+    },
+    {
+      label: 'Reserved',
+      value: String(Math.round(reserved)),
+      helper: 'Committed to orders',
+      tone: reserved > 0 ? 'warning' : 'neutral'
+    },
+    {
+      label: 'Blocked',
+      value: String(Math.round(blocked)),
+      helper: 'Not available',
+      tone: blocked > 0 ? 'danger' : 'neutral'
+    },
+    {
+      label: 'Warehouses',
+      value: String(stockByWarehouse.length),
+      helper: 'Warehouses holding stock',
+      tone: 'neutral'
+    },
+    {
+      label: 'Bins',
+      value: String(stockByBin.length),
+      helper: 'Bins containing this SKU',
+      tone: 'neutral'
+    },
+    {
+      label: 'Open orders',
+      value: String(orderRows.filter((row) => row.status !== 'EXECUTED' && row.status !== 'SIGNED_OFF').length),
+      helper: 'Non-terminal order lines',
+      tone: 'warning'
+    }
   ]
 
   const handlingFlags = item.category?.handlingFlags && typeof item.category.handlingFlags === 'object'

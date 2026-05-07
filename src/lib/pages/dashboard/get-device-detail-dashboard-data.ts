@@ -186,31 +186,42 @@ async function getDeviceDetailDashboardData(
     {
       label: 'Status',
       value: device.onlineStatus,
-      tone: device.onlineStatus === 'ACTIVE' ? 'green' : device.onlineStatus === 'IDLE' ? 'yellow' : 'red'
+      helper: 'Heartbeat / connectivity',
+      tone: device.onlineStatus === 'ACTIVE' ? 'success' : device.onlineStatus === 'IDLE' ? 'warning' : 'danger'
     },
     {
       label: 'Authorization',
       value: device.authorizationStatus,
-      tone: device.authorizationStatus === 'AUTHORIZED' ? 'green' : device.authorizationStatus === 'PENDING' ? 'yellow' : 'red'
+      helper: 'Office approval state',
+      tone:
+        device.authorizationStatus === 'AUTHORIZED'
+          ? 'success'
+          : device.authorizationStatus === 'PENDING'
+            ? 'warning'
+            : 'danger'
     },
     {
       label: 'Active Jobs',
       value: String(device.orderAssignments.length),
-      tone: device.orderAssignments.length > 0 ? 'green' : 'neutral'
+      helper: 'Open order assignments',
+      tone: device.orderAssignments.length > 0 ? 'success' : 'neutral'
     },
     {
       label: 'Error Count',
       value: String(device.errorCount),
-      tone: device.errorCount > 0 ? 'red' : 'neutral'
+      helper: 'Recorded device errors',
+      tone: device.errorCount > 0 ? 'danger' : 'neutral'
     },
     {
       label: 'Total Sessions',
       value: String(device._count.deviceSessions),
+      helper: 'Historical sign-ins',
       tone: 'neutral'
     },
     {
       label: 'Activity Entries',
       value: String(device._count.userActivityEntries),
+      helper: 'Logged user actions',
       tone: 'neutral'
     }
   ]

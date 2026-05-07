@@ -192,11 +192,36 @@ export async function getUsersDashboardData(
   }))
 
   const kpis: DashboardKpi[] = [
-    { label: 'Active', value: String(userRows.filter((user) => user.status === 'ACTIVE').length), tone: 'green' },
-    { label: 'Idle', value: String(userRows.filter((user) => user.status === 'IDLE').length), tone: 'yellow' },
-    { label: 'Logged out', value: String(userRows.filter((user) => user.status === 'LOGGED_OUT').length), tone: 'neutral' },
-    { label: 'Assigned', value: String(userRows.filter((user) => Boolean(user.activeOrderLabel)).length), tone: 'green' },
-    { label: 'In exception flow', value: String(userRows.filter((user) => user.status === 'IN_EXCEPTION').length), tone: 'red' }
+    {
+      label: 'Active',
+      value: String(userRows.filter((user) => user.status === 'ACTIVE').length),
+      helper: 'Operators currently signed in',
+      tone: 'success'
+    },
+    {
+      label: 'Idle',
+      value: String(userRows.filter((user) => user.status === 'IDLE').length),
+      helper: 'Signed in but not active',
+      tone: 'warning'
+    },
+    {
+      label: 'Logged out',
+      value: String(userRows.filter((user) => user.status === 'LOGGED_OUT').length),
+      helper: 'No active session',
+      tone: 'neutral'
+    },
+    {
+      label: 'Assigned',
+      value: String(userRows.filter((user) => Boolean(user.activeOrderLabel)).length),
+      helper: 'Operators with live order work',
+      tone: 'success'
+    },
+    {
+      label: 'In exception flow',
+      value: String(userRows.filter((user) => user.status === 'IN_EXCEPTION').length),
+      helper: 'Operators handling exceptions',
+      tone: 'danger'
+    }
   ]
 
   return {

@@ -13,25 +13,23 @@ Current file path:
 `src/components/dashboard/bins/DashboardBinsPageView.tsx`
 
 Current responsibility:
-Bins list page using `PageWithGrid`; consumes **`useDashboardWarehouse()`** for `bins`, `zoneOptions`, loading/error (D-03). Embeds `CreateBinForm`, `BinContentsModal`, row action opens contents modal.
+Bins list page using `PageWithGrid`; **prop-driven** — receives **`bins`**, loading/error, and **`headerActions`** (**Phase 22-07**/**CFR-21**). Owns only **`BinContentsModal`** UI state. Page container **`DashboardBinsPage`** (`src/components/features/locations/pages/dashboard-bins-page.tsx`) calls **`useDashboardWarehouse`** and passes **`CreateBinForm`** wired with **`onCreateBin`** (**Phase 23** verified).
 
 Dependencies:
-  - Components: `PageWithGrid`, entity bin config columns, `CreateBinForm`, `BinContentsModal`
-  - Hooks: **`useDashboardWarehouse`**
-  - Types: `ZoneTableRow` / bin row types via config
-  - Utils: `lucide-react` `Box`
+  - Components: `PageWithGrid`, entity bin config columns, **`headerActions`** slot (typically **`CreateBinForm`**), `BinContentsModal`
+  - Hooks: **none** (data supplied via props)
+  - Types: `BinTableRow`, `ReactNode` for header slot
 
 Props:
-(none)
+`DashboardBinsPageViewProps` — **`bins`**, **`isLoading`**, **`error`**, **`headerActions`**
 
 Internal state:
 Modal open/bin id state
 
-API calls:
-(none in component — provider/hook owns fetches)
-
 Mutation calls:
-(none — forms own mutations via context)
+(none — parent passes **`onCreateBin`** into header form)
+
+Hooks: **none**
 
 Main UI blocks:
 `PageWithGrid` + `BinContentsModal`

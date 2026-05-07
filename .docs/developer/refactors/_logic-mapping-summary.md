@@ -31,7 +31,7 @@ Use `_classification-summary.md` rows to choose depth:
 
 | Kind | Meaning | Warehouse slice examples (planned paths only) |
 | --- | --- | --- |
-| **hook** | Fetching, mutations, loading/error/refetch, page-ready state | `src/hooks/dashboard/locations/use-dashboard-warehouse.ts` |
+| **hook** | Fetching, mutations, loading/error/refetch, page-ready state | `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` |
 | **transformer** | API payload → UI DTO mapping / normalization (not mutation-error parsing) | `src/lib/transformers/locations/*` |
 | **types/api** | Raw response/request shapes from routes | `src/types/api/locations/*` |
 | **types/dto** | UI-ready records passed across hooks and feature components | `src/types/dto/locations/*` |
@@ -61,7 +61,7 @@ Generated docs under `.docs/developer/refactors/components/hook/` must stay cons
 
 ## Mutation error parsing (CFR-13)
 
-Duplicate **`extractMutationError`** implementations exist (e.g. `src/components/dashboard/warehouses/use-dashboard-warehouse.tsx` and `src/components/dashboard/devices/use-dashboard-devices.tsx`). Phase 22 should consolidate to a shared **`src/lib/api/extract-mutation-error.ts`** (utility tier — **not** under `lib/transformers`). Movement tables must say **utility**, not transformer.
+Shared **`extractMutationError`** lives at **`src/lib/api/extract-mutation-error.ts`** (**Phase 22-02**). **`src/hooks/dashboard/locations/use-dashboard-warehouse.tsx`** and **`src/components/dashboard/devices/use-dashboard-devices.tsx`** import it — duplicate inline parsers removed (utility tier — **not** `lib/transformers`).
 
 ---
 

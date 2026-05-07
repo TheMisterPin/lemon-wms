@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/dashboard/warehouses/use-dashboard-warehouse.md
  */
 
-
 import {
   createContext,
   useCallback,
@@ -15,74 +14,25 @@ import {
 } from 'react'
 import type { ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { AxiosError } from 'axios'
 
 import type { BinTableRow } from '@/components/configs/entities/bin/config'
 import type { ZoneTableRow } from '@/components/configs/entities/zone/config'
 import { useErrorDialog } from '@/components/shared/use-error-dialog'
+import { extractMutationError } from '@/lib/api/extract-mutation-error'
 import { dashboardApiClient } from '@/lib/axios'
 import type { BinFormValues, Warehouse, WarehouseFormValues, ZoneFormValues } from '@/lib/locations'
-import { MutationError } from '@/types'
+import {
+  mapWireBinsToBinApiRecords,
+  mapWireWarehousesToDomainWarehouses,
+  mapWireZonesToZoneApiRecords
+} from '@/lib/transformers/locations/dashboard-home'
+import type {
+  ApiPayload,
+  BinApiRecord,
+  DashboardHomePayload,
+  ZoneApiRecord
+} from '@/types/api/locations/dashboard-home'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
-import type { ApiResponse } from '@/types/responses/basic-response'
-
-type ApiPayload<T> = { success: boolean; data: T }
-
-type ZoneApiRecord = {
-  id: string
-  warehouseId: string
-  name: string
-  type: string
-  isActive: boolean
-  createdAt: string
-  deletedAt: string | null
-}
-
-type BinApiRecord = {
-  id: string
-  zoneId: string
-  warehouseId: string
-  name: string
-  code: string
-  type: string
-  isBlocked: boolean
-  createdAt: string
-  deletedAt: string | null
-  maxCapacity: number | null
-  currentCapacity: number | null
-  filledPercentage: number | null
-  itemsInBin: number
-}
-
-type DashboardHomePayload = {
-  warehouses: {
-    id: string
-    name: string
-  }[]
-  zones: {
-    id: string
-    warehouseId: string
-    name: string
-    type: string
-    isActive: boolean
-  }[]
-  bins: {
-    id: string
-    warehouseId: string
-    zoneId: string
-    name: string
-    code: string
-    type: string
-    isBlocked: boolean
-    blockReason: string | null
-    active: boolean
-    maxCapacity: number | null
-    currentCapacity: number | null
-    filledPercentage: number | null
-    itemsInBin: number
-    createdAt: string
-  }[]
-}
 
 interface DashboardWarehouseContextValue {
   warehouses: Warehouse[]
@@ -97,27 +47,15 @@ interface DashboardWarehouseContextValue {
   createZone: (values: ZoneFormValues) => Promise<void>
   createBin: (values: BinFormValues) => Promise<void>
   refresh: () => void
+  actions: {
+    createWarehouse: (values: Pick<WarehouseFormValues, 'name'>) => Promise<void>
+    createZone: (values: ZoneFormValues) => Promise<void>
+    createBin: (values: BinFormValues) => Promise<void>
+    refresh: () => void
+  }
 }
 
 const DashboardWarehouseContext = createContext<DashboardWarehouseContextValue | null>(null)
-
-function extractMutationError(err: unknown): MutationError {
-  if (err instanceof AxiosError && err.response?.data) {
-    const body = err.response.data as ApiResponse<null>
-
-    return {
-      message: body.message ?? 'An unexpected error occurred.',
-      code: body.error?.code,
-      details: body.error?.details
-    }
-  }
-
-  if (err instanceof Error) {
-    return { message: err.message }
-  }
-
-  return { message: 'An unexpected error occurred.' }
-}
 
 export function DashboardWarehouseProvider({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams()
@@ -158,44 +96,11 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
           ? payload.bins
           : []
 
-        setRawWarehouses(
-          warehouses.map((w) => ({
-            ...w,
-            status: 'ACTIVE',
-            timezone: 'UTC',
-            currency: 'USD',
-            address: '',
-            createdById: null,
-            createdAt: new Date(),
-            deletedAt: null
-          }))
-        )
+        setRawWarehouses(mapWireWarehousesToDomainWarehouses(warehouses))
 
-        const mappedZones: ZoneApiRecord[] = zones.map((zone) => ({
-          id: zone.id,
-          warehouseId: zone.warehouseId,
-          name: zone.name,
-          type: zone.type,
-          isActive: zone.isActive,
-          createdAt: new Date().toISOString(),
-          deletedAt: null
-        }))
+        const mappedZones = mapWireZonesToZoneApiRecords(zones)
 
-        const mappedBins: BinApiRecord[] = bins.map((bin) => ({
-          id: bin.id,
-          warehouseId: bin.warehouseId,
-          zoneId: bin.zoneId,
-          name: bin.name,
-          code: bin.code,
-          type: bin.type,
-          isBlocked: bin.isBlocked,
-          createdAt: bin.createdAt,
-          deletedAt: null,
-          maxCapacity: bin.maxCapacity,
-          currentCapacity: bin.currentCapacity,
-          filledPercentage: bin.filledPercentage,
-          itemsInBin: bin.itemsInBin
-        }))
+        const mappedBins = mapWireBinsToBinApiRecords(bins)
 
         setRawZones(
           warehouseIdFilter
@@ -338,7 +243,13 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
       createWarehouse,
       createZone,
       createBin,
-      refresh
+      refresh,
+      actions: {
+        createWarehouse,
+        createZone,
+        createBin,
+        refresh
+      }
     }),
     [
       rawWarehouses,

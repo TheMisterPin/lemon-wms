@@ -13,16 +13,15 @@ Current file path:
 `src/components/dashboard/zones/DashboardZonesPageView.tsx`
 
 Current responsibility:
-Zones list page via `PageWithGrid`. Consumes **`useDashboardWarehouse()`** for `zones`, `warehouseOptions`, loading/error (D-03). Header hosts `CreateZoneForm`.
+Zones list page via `PageWithGrid`; **prop-driven** — **`zones`**, loading/error, **`headerActions`** (**Phase 22-07**). Container **`DashboardZonesPage`** wires **`CreateZoneForm`** with **`onCreateZone`** (**Phase 23** verified).
 
 Dependencies:
-  - Components: `PageWithGrid`, zone table columns, `CreateZoneForm`
-  - Hooks: **`useDashboardWarehouse`**
-  - Types: `ZoneTableRow`
-  - Utils: `lucide-react`
+  - Components: `PageWithGrid`, zone table columns, **`headerActions`** slot
+  - Hooks: **none**
+  - Types: `ZoneTableRow`, `ReactNode`
 
 Props:
-(none)
+`DashboardZonesPageViewProps` — **`zones`**, **`isLoading`**, **`error`**, **`headerActions`**
 
 Internal state:
 (none)
@@ -31,7 +30,9 @@ API calls:
 (none in file)
 
 Mutation calls:
-(none)
+(none — parent passes **`onCreateZone`** into header form)
+
+Hooks: **none**
 
 Main UI blocks:
 `PageWithGrid`

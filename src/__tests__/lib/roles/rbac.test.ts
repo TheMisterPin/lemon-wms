@@ -9,7 +9,7 @@ import {
   canMessageByRole,
   canOfficeManagerAssignRole,
   RbacPermission
-} from '@/lib/roles'
+} from '@/lib/iam/roles'
 
 describe('can', () => {
   it('Owner has every permission', () => {

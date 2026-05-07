@@ -4,13 +4,11 @@
  * @doc .docs/developer/refactors/components/component/dashboard/features/zones/create-zone-form.md
  */
 
-
 import { useState } from 'react'
 
 import { CirclePlus } from 'lucide-react'
 
 import { createZoneFormConfig } from '@/components/configs/entities/zone/config'
-import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import DynamicForm from '@/components/dynamic-form'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,12 +25,12 @@ import type { SelectOption } from '@/types/components/form/generic-form.types'
 
 type CreateZoneFormProps = {
   warehouseList: SelectOption[]
+  onCreateZone: (values: ZoneFormValues) => Promise<void>
 }
 
-export default function CreateZoneForm({ warehouseList }: CreateZoneFormProps) {
+export default function CreateZoneForm({ warehouseList, onCreateZone }: CreateZoneFormProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
-  const { createZone } = useDashboardWarehouse()
 
   const formConfig = createZoneFormConfig(warehouseList)
 
@@ -40,7 +38,7 @@ export default function CreateZoneForm({ warehouseList }: CreateZoneFormProps) {
     setCreateError(null)
 
     try {
-      await createZone(values)
+      await onCreateZone(values)
       setIsOpen(false)
     } catch (submissionError) {
       setCreateError(

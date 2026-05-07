@@ -4,19 +4,28 @@
  * @doc .docs/developer/refactors/components/component/dashboard/bins/dashboard-bins-page-view.md
  */
 
-
 import { useCallback, useState } from 'react'
+import type { ReactNode } from 'react'
 import { Box } from 'lucide-react'
 
 import { viewBinContentsRowAction } from '@/components/configs/entities/bin/bin-table-actions'
-import { binTableColumns } from '@/components/configs/entities/bin/config'
+import { binTableColumns, type BinTableRow } from '@/components/configs/entities/bin/config'
 import { BinContentsModal } from '@/components/dashboard/features/bins/bin-contents-modal'
-import CreateBinForm from '@/components/dashboard/features/bins/create-bin-form'
-import { useDashboardWarehouse } from '@/components/dashboard/warehouses/use-dashboard-warehouse'
 import PageWithGrid from '@/components/pages/page-with-grid'
 
-export function DashboardBinsPageView() {
-  const { bins, zoneOptions, isLoading, error } = useDashboardWarehouse()
+type DashboardBinsPageViewProps = {
+  bins: BinTableRow[]
+  isLoading: boolean
+  error: string | null
+  headerActions: ReactNode
+}
+
+export function DashboardBinsPageView({
+  bins,
+  isLoading,
+  error,
+  headerActions
+}: DashboardBinsPageViewProps) {
   const [contentsBinId, setContentsBinId] = useState<string | null>(null)
   const [contentsOpen, setContentsOpen] = useState(false)
 
@@ -38,7 +47,7 @@ export function DashboardBinsPageView() {
         title="Bins"
         titleIcon={Box}
         entityTone="bin"
-        headerActions={<CreateBinForm zonesList={zoneOptions} />}
+        headerActions={headerActions}
         isLoading={isLoading}
         error={error}
         tableData={{ columns: binTableColumns, records: bins }}

@@ -13,12 +13,12 @@ Current file path:
 `src/components/dashboard/features/bins/create-bin-form.tsx`
 
 Current responsibility:
-Bin create form; **`useDashboardWarehouse().createBin`**; receives `zonesList` for select.
+Bin create dialog form; receives **`zonesList`** + **`onCreateBin`** (**Phase 22-07**/**CFR-21**) — parent passes **`actions.createBin`** from **`DashboardBinsPage**.
 
 Mutation calls:
-`createBin`
+`onCreateBin`
 
-Hooks: **`useDashboardWarehouse`**
+Hooks: **none**
 
 Recommended destination:
 TBD Phase 19

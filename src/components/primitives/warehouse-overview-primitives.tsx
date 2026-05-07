@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-overview-primitives.md
  */
 
-
 import type { MouseEventHandler, ReactNode } from 'react'
 
 export const warehouseOverviewToneStyles = {

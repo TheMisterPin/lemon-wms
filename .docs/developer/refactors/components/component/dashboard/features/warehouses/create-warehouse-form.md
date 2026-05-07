@@ -13,17 +13,16 @@ Current file path:
 `src/components/dashboard/features/warehouses/create-warehouse-form.tsx`
 
 Current responsibility:
-Header/dialog-style creator using Generic Form config; calls **`useDashboardWarehouse().createWarehouse(values)`** on submit (D-03).
+Header/dialog-style creator using Generic Form config; calls **`onCreateWarehouse(values)`** on submit (**Phase 22-07**) — **required prop** (no hook inside module).
 
 Mutation calls:
-`createWarehouse` from dashboard warehouse context (POST via provider implementation).
+parent-supplied **`onCreateWarehouse`**
 
 Dependencies:
-  - Hooks: **`useDashboardWarehouse`**
   - Validation: `warehouseFormSchema` pick for create
 
 Props:
-(see default export props for trigger/slot pattern)
+**`onCreateWarehouse`** (**required**); **no default consumers** in-tree yet (**Phase 23** inventory note).
 
 Main UI blocks:
 Generic form submit surface

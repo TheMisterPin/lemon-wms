@@ -159,11 +159,20 @@ Plans:
 **UI hint:** yes  
 **Depends on:** Phase 21
 
-**Plans:** 1 plan (more to be added)
+**Plans:** 8 plans
+
+**Wave notes:** Waves **4–5** (**CFR-19**) extract wire types + transformers for **`use-dashboard-warehouse`**. Wave **6** (**CFR-11/12**) adds **`actions`** namespace. Waves **7–8** (**CFR-21/22**) prop-only views/forms + thin **`locations/bins|zones`** routes.
 
 Plans:
 
 - [x] 22-01-PLAN.md — Move `warehouse-overview-primitives` to `src/components/primitives/` (P21-001 / CFR-18); rewire imports; sync refactor docs.
+- [x] 22-02-PLAN.md — CFR-13: shared `extractMutationError` at `src/lib/api/extract-mutation-error.ts`; warehouse + devices hooks import it.
+- [x] 22-03-PLAN.md — Move `use-dashboard-warehouse.tsx` to `src/hooks/dashboard/locations/`; rewire imports; sync docs (**CFR-18–20**).
+- [x] 22-04-PLAN.md — **Wave 4 / CFR-19:** `src/types/api/locations/dashboard-home.ts`; hook imports wire types; fix **`ApiPayload`** typing (**depends:** 22-03).
+- [x] 22-05-PLAN.md — **Wave 5 / CFR-19:** `src/lib/transformers/locations/dashboard-home.ts`; hook delegates normalization (**depends:** 22-04).
+- [x] 22-06-PLAN.md — **Wave 6 / CFR-11–12:** `actions` object on warehouse context + optional form alignment (**depends:** 22-05).
+- [x] 22-07-PLAN.md — **Wave 7 / CFR-21:** prop-only bins/zones views + create forms; **`features/locations/pages`** containers (**depends:** 22-06).
+- [x] 22-08-PLAN.md — **Wave 8 / CFR-22:** thin `bins`/`zones` **`page.tsx`** imports containers (**depends:** 22-07).
 
 ---
 
@@ -182,6 +191,14 @@ Plans:
 
 **UI hint:** no  
 **Depends on:** Phase 22
+
+**Plans:** 3 plans
+
+Plans:
+
+- [x] 23-01-PLAN.md — **`23-VERIFICATION.md`**: Phase 22 slice doc matrix, stale-import greps, eslint/tsc/vitest outcomes, manual smoke checklist (**CFR-23**, **CFR-24**, **CFR-25** inputs).
+- [x] 23-02-PLAN.md — **`23-PATTERN-CARRY-FORWARD.md`**: repeatable layering + residual risks (**CFR-25**, **CFR-26**).
+- [x] 23-03-PLAN.md — Fix **`domain-page-components`** vitest imports; sync bins/zones/forms docs + **`_inventory-summary`** (**CFR-23**).
 
 ---
 

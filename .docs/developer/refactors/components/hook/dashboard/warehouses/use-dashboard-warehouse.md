@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/use-dashboard-warehouse.tsx
+source: src/hooks/dashboard/locations/use-dashboard-warehouse.tsx
 type: hook
 isCorrectCase: true
 ---
@@ -19,17 +19,16 @@ isCorrectCase: true
 
 ### Direct `useDashboardWarehouse` consumers (verified D-03)
 
-- `src/components/dashboard/bins/DashboardBinsPageView.tsx`
-- `src/components/dashboard/zones/DashboardZonesPageView.tsx`
-- `src/components/dashboard/features/warehouses/create-warehouse-form.tsx`
-- `src/components/dashboard/features/zones/create-zone-form.tsx`
-- `src/components/dashboard/features/bins/create-bin-form.tsx`
+- `src/components/features/locations/pages/dashboard-bins-page.tsx`
+- `src/components/features/locations/pages/dashboard-zones-page.tsx`
+
+**(Forms)** consume mutations via **`onCreate*`** props from page containers (**Phase 22-07**) — no direct hook import.
 
 ### Context shape (`DashboardWarehouseContextValue`)
 
 - **Data:** `warehouses` (`Warehouse[]`), `zones` (`ZoneTableRow[]` with `warehouseName` denormalized), `bins` (`BinTableRow[]` with `zoneName` / `warehouseName`), `warehouseOptions`, `zoneOptions`, `warehouseIdFilter` (`string | null`).
 - **Status:** `isLoading`, `error` (string | null).
-- **Actions:** `createWarehouse`, `createZone`, `createBin`, `refresh`.
+- **Actions:** flat `createWarehouse`, `createZone`, `createBin`, `refresh` plus **`actions`** object mirroring the same four (**Phase 22-06**).
 
 ### Fetching
 
@@ -48,16 +47,16 @@ isCorrectCase: true
 
 ### Mutation error handling
 
-- **`extractMutationError`:** Parses `AxiosError` + `ApiResponse` body for `MutationError`; falls back to generic message.
+- **`extractMutationError`:** Imported from `@/lib/api/extract-mutation-error` (**Phase 22-02**); parses `AxiosError` + `ApiResponse` body for `MutationError`; falls back to generic message.
 - **User-facing:** `useErrorDialog` `reportError` with titles/sources `dashboard/warehouses/create`, `dashboard/zones/create`, `dashboard/bins/create`; rethrows `Error` with message after reporting.
 
 ### Dependencies (imports)
 
-- `dashboardApiClient`, `useErrorDialog`, entity config types (`BinTableRow`, `ZoneTableRow`), `Warehouse` / form value types from `@/lib/locations`, `SelectOption`, `ApiResponse`, `MutationError`.
+- `dashboardApiClient`, `extractMutationError` (`@/lib/api/extract-mutation-error`), `useErrorDialog`, entity config types (`BinTableRow`, `ZoneTableRow`), `Warehouse` / form value types from `@/lib/locations`, `SelectOption`.
 
 ### Internal helpers (meaningful)
 
-- `extractMutationError`, inline API record types (`ZoneApiRecord`, `BinApiRecord`, `DashboardHomePayload`), `ApiPayload<T>`.
+- Inline API record types (`ZoneApiRecord`, `BinApiRecord`, `DashboardHomePayload`), `ApiPayload<T>`.
 
 ### Canonical hook doc
 
@@ -66,7 +65,7 @@ isCorrectCase: true
 ## Phase 18 Inventory
 
 Component name: Use Dashboard Warehouse generated hook/provider doc
-Current file path: `src/components/dashboard/warehouses/use-dashboard-warehouse.tsx`
+Current file path: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx`
 Current responsibility: Current hook + provider for Use Dashboard Warehouse. It owns the runtime data/state responsibilities recorded below; extraction or relocation is deferred to Phase 19/20.
 Dependencies:
   - Components: @/components/configs/entities/bin/config, @/components/configs/entities/zone/config, @/components/shared/use-error-dialog, @/types/components/form/generic-form.types
@@ -78,7 +77,7 @@ Internal state: React useState, React useEffect lifecycle, React useMemo derived
 API calls: dashboardApiClient HTTP calls
 Mutation calls: POST client mutations for createWarehouse, createZone, and createBin
 Main UI blocks: T, WarehouseFormValues, DashboardWarehouseContextValue, Warehouse, ZoneApiRecord, BinApiRecord, ApiPayload, DashboardHomePayload, SelectOption, ZoneTableRow, BinTableRow, DashboardWarehouseContext.Provider
-Declared child components inside the file: ApiPayload, ZoneApiRecord, BinApiRecord, DashboardHomePayload, DashboardWarehouseContextValue, DashboardWarehouseContext, extractMutationError, DashboardWarehouseProvider, useDashboardWarehouse
+Declared child components inside the file: ApiPayload, ZoneApiRecord, BinApiRecord, DashboardHomePayload, DashboardWarehouseContextValue, DashboardWarehouseContext, DashboardWarehouseProvider, useDashboardWarehouse
 Repeated styling: None observed.
 Repeated logic: .map(, .filter(, useMemo(
 Recommended destination: TBD Phase 19/20; hook responsibility documented before any source movement.
@@ -95,7 +94,7 @@ Refactor priority: High for first-slice planning because it participates in prov
 Classification: hook
 Reason: Provider/hook/API payload/DTO/transformer/mutation cluster; split later while keeping compatibility provider.
 Target folder: `src/hooks/dashboard/locations`
-Target file name: `use-dashboard-warehouse.ts`
+Target file name: `use-dashboard-warehouse.tsx`
 Keep / Move / Split / Delete: split
 Risk level: high
 
@@ -120,17 +119,17 @@ Record the split decision as planned ownership only. Phase 19 does not move sour
 
 **Canonical hook responsibility + full Logic Mapping:** `.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md` — treat that file as source of truth for Phase 22 split (`types/api`, `types/dto`, `lib/transformers/locations`, hook `actions`, **`src/lib/api/extract-mutation-error.ts`**, provider scaffolding). This generated doc mirrors inventory/classification only; do not contradict the canonical movement table.
 
-**CFR-13:** Duplicate `extractMutationError` evidence documented in canonical hook Notes (`src/components/dashboard/devices/use-dashboard-devices.tsx`).
+**CFR-13:** Shared **`extractMutationError`** (**Phase 22-02**) — see `@/lib/api/extract-mutation-error.ts` and devices hook consumer path above.
 
 ## Dismounted Components
 
 | Component | New code path | New documentation path | Reason |
 |---|---|---|---|
 | `DashboardWarehouseProvider` | `src/components/features/locations/providers/dashboard-warehouse-provider.tsx` | `.docs/developer/refactors/components/dismounted/dashboard-warehouse-provider.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `useDashboardWarehouse` | `src/hooks/dashboard/locations/use-dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/use-dashboard-warehouse.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+| `useDashboardWarehouse` | `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` | `.docs/developer/refactors/components/dismounted/use-dashboard-warehouse.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `DashboardWarehouseContext` | `src/components/features/locations/providers/dashboard-warehouse-provider.tsx` | `.docs/developer/refactors/components/dismounted/dashboard-warehouse-context.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `ApiPayload` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/api-payload.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `ZoneApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/zone-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `BinApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/bin-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `DashboardHomePayload` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/dashboard-home-payload.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
-| `extractMutationError` | `src/lib/api/extract-mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | Phase 20 (CFR-13): shared utility — consolidate with devices hook; not under `lib/transformers`. |
+| `extractMutationError` | `src/lib/api/extract-mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | **Phase 22-02** ✅ shared utility (CFR-13); devices hook consumes same module — not under `lib/transformers`. |

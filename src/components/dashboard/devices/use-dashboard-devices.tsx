@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/dashboard/devices/use-dashboard-devices.md
  */
 
-
 import {
   createContext,
   useCallback,
@@ -14,14 +13,12 @@ import {
   useState
 } from 'react'
 import type { ReactNode } from 'react'
-import { AxiosError } from 'axios'
 
 import type { DeviceTableRow } from '@/components/configs/entities/device/config'
 import { useErrorDialog } from '@/components/shared/use-error-dialog'
+import { extractMutationError } from '@/lib/api/extract-mutation-error'
 import { dashboardApiClient } from '@/lib/axios'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
-import type { MutationError } from '@/types/errors'
-import type { ApiResponse } from '@/types/responses/basic-response'
 
 type ApiPayload<T> = { success: boolean; data: T }
 
@@ -60,24 +57,6 @@ interface DashboardDevicesContextValue {
 }
 
 const DashboardDevicesContext = createContext<DashboardDevicesContextValue | null>(null)
-
-function extractMutationError(err: unknown): MutationError {
-  if (err instanceof AxiosError && err.response?.data) {
-    const body = err.response.data as ApiResponse<null>
-
-    return {
-      message: body.message ?? 'An unexpected error occurred.',
-      code: body.error?.code,
-      details: body.error?.details
-    }
-  }
-
-  if (err instanceof Error) {
-    return { message: err.message }
-  }
-
-  return { message: 'An unexpected error occurred.' }
-}
 
 export function DashboardDevicesProvider({ children }: { children: ReactNode }) {
   const [rawDevices, setRawDevices] = useState<DeviceApiRecord[]>([])

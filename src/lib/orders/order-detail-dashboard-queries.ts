@@ -37,6 +37,20 @@ function itemHref(itemId: string): string {
   return `/dashboard/stock/items/${itemId}`
 }
 
+async function loadSkuByItemId(prisma: PrismaClient, itemIds: string[]): Promise<Map<string, string>> {
+  const unique = [...new Set(itemIds)]
+  if (unique.length === 0) {
+    return new Map()
+  }
+
+  const rows = await prisma.item.findMany({
+    where: { id: { in: unique }, deletedAt: null },
+    select: { id: true, sku: true }
+  })
+
+  return new Map(rows.map((row) => [row.id, row.sku]))
+}
+
 async function getPurchaseOrderDetail(prisma: PrismaClient, orderId: string): Promise<{
   header: OrderDetailHeaderSource
   lines: OrderExecutionLineRow[]
@@ -60,7 +74,6 @@ async function getPurchaseOrderDetail(prisma: PrismaClient, orderId: string): Pr
           itemNameSnapshot: true,
           orderedQuantity: true,
           uom: true,
-          item: { select: { sku: true } },
           receiptLines: { select: { quantity: true, disposition: true } }
         }
       }
@@ -71,6 +84,8 @@ async function getPurchaseOrderDetail(prisma: PrismaClient, orderId: string): Pr
     throw new DomainError('Order not found.', 'NOT_FOUND', 404)
   }
 
+  const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
+
   const lines: OrderExecutionLineRow[] = order.lines.map((line) => {
     const expectedQty = toQty(line.orderedQuantity)
     const processedQty = line.receiptLines.reduce((sum, row) => sum + toQty(row.quantity), 0)
@@ -80,7 +95,7 @@ async function getPurchaseOrderDetail(prisma: PrismaClient, orderId: string): Pr
     return {
       lineId: line.id,
       itemId: line.itemId,
-      sku: line.item.sku,
+      sku: skuMap.get(line.itemId) ?? '—',
       name: line.itemNameSnapshot,
       expectedQty,
       processedQty,
@@ -121,7 +136,7 @@ type CommonLine = {
   handledQuantity: DecimalLike
   isShort: boolean
   uom: string
-  item: { sku: string }
+  sku: string
 }
 
 function mapCommonLines(lines: CommonLine[], keyer: (index: number) => string): {
@@ -137,7 +152,7 @@ function mapCommonLines(lines: CommonLine[], keyer: (index: number) => string): 
     return {
       lineId: keyer(index),
       itemId: line.itemId,
-      sku: line.item.sku,
+      sku: line.sku,
       name: line.itemNameSnapshot,
       expectedQty,
       processedQty,
@@ -173,8 +188,7 @@ async function getSalesOrderDetail(prisma: PrismaClient, orderId: string) {
           baseQuantity: true,
           handledQuantity: true,
           isShort: true,
-          uom: true,
-          item: { select: { sku: true } }
+          uom: true
         }
       }
     }
@@ -184,7 +198,12 @@ async function getSalesOrderDetail(prisma: PrismaClient, orderId: string) {
     throw new DomainError('Order not found.', 'NOT_FOUND', 404)
   }
 
-  const lineStats = mapCommonLines(order.lines, (index) => order.lines[index].id)
+  const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
+  const linesWithSku = order.lines.map((line) => ({
+    ...line,
+    sku: skuMap.get(line.itemId) ?? '—'
+  }))
+  const lineStats = mapCommonLines(linesWithSku, (index) => order.lines[index].id)
   const completedCount = lineStats.lines.filter((line) => line.status === 'COMPLETED').length
 
   return {
@@ -220,8 +239,7 @@ async function getTransferOrderDetail(prisma: PrismaClient, orderId: string) {
           baseQuantity: true,
           handledQuantity: true,
           isShort: true,
-          uom: true,
-          item: { select: { sku: true } }
+          uom: true
         }
       }
     }
@@ -231,7 +249,12 @@ async function getTransferOrderDetail(prisma: PrismaClient, orderId: string) {
     throw new DomainError('Order not found.', 'NOT_FOUND', 404)
   }
 
-  const lineStats = mapCommonLines(order.lines, (index) => order.lines[index].id)
+  const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
+  const linesWithSku = order.lines.map((line) => ({
+    ...line,
+    sku: skuMap.get(line.itemId) ?? '—'
+  }))
+  const lineStats = mapCommonLines(linesWithSku, (index) => order.lines[index].id)
   const completedCount = lineStats.lines.filter((line) => line.status === 'COMPLETED').length
 
   return {
@@ -267,8 +290,7 @@ async function getReturnOrderDetail(prisma: PrismaClient, orderId: string) {
           baseQuantity: true,
           handledQuantity: true,
           isShort: true,
-          uom: true,
-          item: { select: { sku: true } }
+          uom: true
         }
       }
     }
@@ -278,7 +300,12 @@ async function getReturnOrderDetail(prisma: PrismaClient, orderId: string) {
     throw new DomainError('Order not found.', 'NOT_FOUND', 404)
   }
 
-  const lineStats = mapCommonLines(order.lines, (index) => order.lines[index].id)
+  const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
+  const linesWithSku = order.lines.map((line) => ({
+    ...line,
+    sku: skuMap.get(line.itemId) ?? '—'
+  }))
+  const lineStats = mapCommonLines(linesWithSku, (index) => order.lines[index].id)
   const completedCount = lineStats.lines.filter((line) => line.status === 'COMPLETED').length
 
   return {
@@ -315,8 +342,7 @@ async function getAdjustmentOrderDetail(prisma: PrismaClient, orderId: string) {
           baseQuantity: true,
           handledQuantity: true,
           isShort: true,
-          uom: true,
-          item: { select: { sku: true } }
+          uom: true
         }
       }
     }
@@ -326,7 +352,17 @@ async function getAdjustmentOrderDetail(prisma: PrismaClient, orderId: string) {
     throw new DomainError('Order not found.', 'NOT_FOUND', 404)
   }
 
-  const lineStats = mapCommonLines(order.lines, (index) => {
+  const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
+  const linesWithSku = order.lines.map((line) => ({
+    itemId: line.itemId,
+    itemNameSnapshot: line.itemNameSnapshot,
+    baseQuantity: line.baseQuantity,
+    handledQuantity: line.handledQuantity,
+    isShort: line.isShort,
+    uom: line.uom,
+    sku: skuMap.get(line.itemId) ?? '—'
+  }))
+  const lineStats = mapCommonLines(linesWithSku, (index) => {
     const line = order.lines[index]
 
     return `${line.adjustmentOrderId}:${line.sequence}`

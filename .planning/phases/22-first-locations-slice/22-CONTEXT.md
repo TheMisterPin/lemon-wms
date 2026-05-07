@@ -1,7 +1,7 @@
 # Phase 22: First locations slice — Context
 
 **Gathered:** 2026-05-07  
-**Status:** Execution started (22-01 complete)  
+**Status:** Waves **22-04..22-08** executed — **`types/api`**, **`lib/transformers`**, **`actions`**, CFR-21/22 bins+zones; **`types/dto`** extraction deferred per Logic Mapping.
 **GSD route:** `$gsd-next` → discuss Phase 22 → this context bundled without interactive gray-area menu (same pattern as Phase 21).
 
 <domain>

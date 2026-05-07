@@ -172,14 +172,54 @@ export async function getOrderDetailDashboardData(
     : '—'
 
   const kpis: DashboardKpi[] = [
-    { label: 'Total lines', value: String(totalLines), tone: 'neutral' },
-    { label: 'Completed lines', value: String(completedLines), tone: completedLines > 0 ? 'green' : 'neutral' },
-    { label: 'Remaining lines', value: String(Math.max(0, remainingLines)), tone: remainingLines > 0 ? 'yellow' : 'green' },
-    { label: 'Expected qty', value: String(Math.round(detail.expectedTotal)), tone: 'neutral' },
-    { label: 'Processed qty', value: String(Math.round(detail.processedTotal)), tone: detail.processedTotal > 0 ? 'green' : 'neutral' },
-    { label: 'Rejected qty', value: String(Math.round(rejectedQuantity)), tone: rejectedQuantity > 0 ? 'red' : 'neutral' },
-    { label: 'Exceptions', value: String(exceptions), tone: exceptions > 0 ? 'red' : 'neutral' },
-    { label: 'Avg duration', value: avgDuration, tone: 'neutral' }
+    {
+      label: 'Total lines',
+      value: String(totalLines),
+      helper: 'Lines on this order',
+      tone: 'neutral'
+    },
+    {
+      label: 'Completed lines',
+      value: String(completedLines),
+      helper: 'Fully processed lines',
+      tone: completedLines > 0 ? 'success' : 'neutral'
+    },
+    {
+      label: 'Remaining lines',
+      value: String(Math.max(0, remainingLines)),
+      helper: 'Lines still open or partial',
+      tone: remainingLines > 0 ? 'warning' : 'success'
+    },
+    {
+      label: 'Expected qty',
+      value: String(Math.round(detail.expectedTotal)),
+      helper: 'Total ordered quantity',
+      tone: 'neutral'
+    },
+    {
+      label: 'Processed qty',
+      value: String(Math.round(detail.processedTotal)),
+      helper: 'Quantity moved so far',
+      tone: detail.processedTotal > 0 ? 'success' : 'neutral'
+    },
+    {
+      label: 'Rejected qty',
+      value: String(Math.round(rejectedQuantity)),
+      helper: 'Rejected or exception quantity',
+      tone: rejectedQuantity > 0 ? 'danger' : 'neutral'
+    },
+    {
+      label: 'Exceptions',
+      value: String(exceptions),
+      helper: 'Lines in exception',
+      tone: exceptions > 0 ? 'danger' : 'neutral'
+    },
+    {
+      label: 'Avg duration',
+      value: avgDuration,
+      helper: 'Across completed assignments',
+      tone: 'neutral'
+    }
   ]
 
   return {
