@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Component Folder Restructuring
-status: phase-18-complete
-last_updated: "2026-05-07T18:48:00.000Z"
-last_activity: 2026-05-07 - Phase 18 inventory baseline completed
+status: phase-19-complete
+last_updated: "2026-05-07T21:35:00.000Z"
+last_activity: 2026-05-07 - Phase 19 classification and ownership completed
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 10
-  completed_plans: 10
-  percent: 17
+  completed_phases: 2
+  total_plans: 20
+  completed_plans: 20
+  percent: 33
 ---
 
 # Project State
@@ -21,19 +21,19 @@ See: `.planning/PROJECT.md`
 
 **Core value:** Office users can create, release, and track supplier purchase orders; warehouse users can see operational orders by status, start execution, and pause.
 
-**Current focus:** Milestone v1.2 - Component Folder Restructuring; Phase 19 classification and ownership next.
+**Current focus:** Milestone v1.2 - Component Folder Restructuring; Phase 20 logic mapping and hook decisions next.
 
 ## Current Position
 
-Phase: 18 of 23 - Inventory baseline
+Phase: 19 of 23 - Classification and ownership
 
 Plan: 10 of 10 complete
 
-Status: Phase 18 complete
+Status: Phase 19 complete
 
-Last activity: 2026-05-07 - Phase 18 inventory baseline completed
+Last activity: 2026-05-07 - Phase 19 classification and ownership completed
 
-Progress: [██░░░░░░░░] 17%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [██░░░░░░░░] 17%
 - v1.2 component restructuring is documentation-driven: `.docs/developer/refactors/components` and `.docs/developer/refactors/hooks` must be updated before and during code moves.
 - Structural component moves must preserve UI behavior and visual design; no opportunistic restyling.
 - Roadmap phases 18-23 cover inventory, classification, logic mapping, primitive planning, first locations slice execution, and verification/pattern lock-in.
+- Phase 19 classified 52 selected refactor rows, recorded target ownership, action, risk, and future-only dismounted component plans without changing `src/**`.
 
 ### Pending Todos
 
