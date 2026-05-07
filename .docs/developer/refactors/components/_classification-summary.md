@@ -41,7 +41,7 @@ Each selected doc includes: `Classification`, `Reason`, `Target folder`, `Target
 ## Coverage Matrix
 
 | # | Source path | Current doc path | Classification | Action | Future target path | Risk | Multi-component | Split plan |
-|---|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|
 | 1 | `src/app/(dashboard)/layout.tsx` | `.docs/developer/refactors/components/_refactor-map.md` | route-file | keep | `src/app/(dashboard)/layout.tsx` | medium | no | n/a |
 | 2 | `src/components/dashboard/bins/bin-dashboard-overview-page-client.tsx` | `.docs/developer/refactors/components/component/dashboard/bins/bin-dashboard-overview-page-client.md` | feature-page | move | `src/components/features/locations/pages/bin-dashboard-overview-page-client.tsx` | low | no | n/a |
 | 3 | `src/components/dashboard/bins/bin-overview-dashboard.tsx` | `.docs/developer/refactors/components/component/dashboard/bins/bin-overview-dashboard.md` | feature-page | split | `src/components/features/locations/pages/bin-overview-dashboard.tsx` | high | yes | yes |
