@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
 import { Loader2, LogOut, ShoppingCart } from 'lucide-react'
 
-import NumericKeypad from '@/components/shared/NumericKeypad'
+import NumericKeypad from '@/components/shared/numeric-keypad'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {

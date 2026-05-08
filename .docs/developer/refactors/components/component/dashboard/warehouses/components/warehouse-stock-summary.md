@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseStockSummary.tsx
+source: src/components/dashboard/warehouses/components/warehouse-stock-summary.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseStockSummary
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseStockSummary.tsx`
+`src/components/dashboard/warehouses/components/warehouse-stock-summary.tsx`
 
 Current responsibility:
 Donut/summary for stock categories on overview.
@@ -130,3 +130,13 @@ Cross-link availability visuals with `warehouse-stock-availability-bar-chart.md`
 | Component | New code path | New documentation path | Reason |
 |---|---|---|---|
 | `WarehouseStockAvailBar` | `src/components/features/locations/components/warehouse-stock-avail-bar.tsx` | `.docs/developer/refactors/components/dismounted/warehouse-stock-avail-bar.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Refactor Status
+
+Status: in-progress
+Old path: `src/components/dashboard/warehouses/components/warehouse-stock-summary.tsx`
+New path: current batch keeps path; donut layout moved to `src/components/primitives/dashboard/dashboard-breakdowns.tsx`
+Related files: `src/components/primitives/dashboard/dashboard-breakdowns.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed
+Notes: Summary now uses `DashboardDonutBreakdown` and passes parent-category rows only.

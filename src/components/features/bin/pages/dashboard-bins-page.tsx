@@ -1,7 +1,7 @@
 'use client'
 
-import { DashboardBinsPageView } from '@/components/dashboard/bins/DashboardBinsPageView'
-import CreateBinForm from '@/components/dashboard/features/bins/create-bin-form'
+import { DashboardBinsPageView } from '@/components/dashboard/bins/dashboard-bins-page-view'
+import CreateBinForm from '@/components/features/bin/components/create-bin-form'
 import { useDashboardWarehouse } from '@/hooks/dashboard/locations/use-dashboard-warehouse'
 
 export function DashboardBinsPage() {

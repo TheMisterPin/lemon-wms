@@ -10,12 +10,12 @@ import Link from 'next/link'
 import { WarehouseOverviewStatusPill } from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseActivityRow } from '@/components/dashboard/warehouses/components/warehouse-overview-types'
 import type { WarehouseStockCategoryRow } from '@/components/dashboard/warehouses/components/warehouse-overview-types'
-import { WarehouseActivitySummary } from '@/components/dashboard/warehouses/components/WarehouseActivitySummary'
-import { WarehouseStockSummary } from '@/components/dashboard/warehouses/components/WarehouseStockSummary'
+import { WarehouseActivitySummary } from '@/components/dashboard/warehouses/components/warehouse-activity-summary'
+import { WarehouseStockSummary } from '@/components/dashboard/warehouses/components/warehouse-stock-summary'
 
 import { ZoneBinsSection } from '@/components/dashboard/zones/components/zone-bins-section'
-import { ZoneFillDistributionBarChart } from '@/components/dashboard/zones/components/ZoneFillDistributionBarChart'
-import { ZoneOverviewKpiStrip } from '@/components/dashboard/zones/components/ZoneOverviewKpiStrip'
+import { ZoneFillDistributionBarChart } from '@/components/dashboard/zones/components/zone-fill-distribution-bar-chart'
+import { ZoneOverviewKpiStrip } from '@/components/dashboard/zones/components/zone-overview-kpi-strip'
 import type { ZoneOverviewDashboardData } from '@/types/zone-overview-dashboard.types'
 
 function zoneStatusPillTone(

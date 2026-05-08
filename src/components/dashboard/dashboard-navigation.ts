@@ -7,7 +7,6 @@ import {
   BarChart2,
   ClipboardList,
   LayoutDashboard,
-  Package,
   Users,
   Warehouse
 } from 'lucide-react'
@@ -74,24 +73,14 @@ export const DASHBOARD_ROUTE_METADATA: DashboardRouteMetadata[] = [
     label: 'Locations',
     icon: Warehouse,
     children: [
-      { label: 'Warehouses', segment: 'locations/warehouses' },
-      { label: 'Zones', segment: 'locations/zones' },
-      { label: 'Bins', segment: 'locations/bins' }
-    ]
-  },
-  {
-    label: 'Catalog',
-    icon: Package,
-    children: [
-      { label: 'Items', segment: 'catalog/items' }
+      { label: 'Warehouses', segment: 'locations/warehouses' }
     ]
   },
   {
     label: 'Orders',
     icon: ClipboardList,
     children: [
-      { label: 'Overview', segment: 'orders' },
-      { label: 'Purchase Orders', segment: 'orders/purchase' }
+      { label: 'Overview', segment: 'orders' }
     ]
   },
   {

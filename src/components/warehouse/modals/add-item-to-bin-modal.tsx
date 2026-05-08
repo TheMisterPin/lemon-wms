@@ -7,7 +7,7 @@
 
 import { Loader2, PackagePlus, Search, X } from 'lucide-react'
 
-import NumericKeypad from '@/components/shared/NumericKeypad'
+import NumericKeypad from '@/components/shared/numeric-keypad'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

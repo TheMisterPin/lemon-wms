@@ -134,3 +134,13 @@ Consider aligning chart helper extraction with `category-stock-page-client` shar
 | `StockSection` | `src/components/features/stock/pages/stock-section.tsx` | `.docs/developer/refactors/components/dismounted/stock-section.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `StockChartPanel` | `src/components/features/stock/pages/stock-chart-panel.tsx` | `.docs/developer/refactors/components/dismounted/stock-chart-panel.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `categoryHref` | `src/lib/transformers/stock/category-href.ts` | `.docs/developer/refactors/components/dismounted/category-href.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Refactor Status
+
+Status: in-progress
+Old path: `src/components/dashboard/stock/dashboard-stock-page.tsx`
+New path: current batch keeps path; shared render pieces moved to `src/components/primitives/dashboard/*`
+Related files: `src/components/primitives/dashboard/dashboard-kpis.tsx`, `src/components/primitives/dashboard/dashboard-breakdowns.tsx`, `src/components/primitives/dashboard/dashboard-section.tsx`, `src/components/primitives/dashboard/dashboard-page-shell.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed
+Notes: Stock page now consumes standardized KPI, item-total, donut, status-breakdown, section, chart-panel, and page-shell primitives.

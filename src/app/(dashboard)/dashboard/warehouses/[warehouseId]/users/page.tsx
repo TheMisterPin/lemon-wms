@@ -1,4 +1,4 @@
-import { DashboardUsersPageView } from '@/components/dashboard/users/DashboardUsersPageView'
+import { DashboardUsersPageView } from '@/components/dashboard/users/dashboard-users-page-view'
 
 type PageProps = {
   params: Promise<{ warehouseId: string }>

@@ -4,10 +4,11 @@
  * @doc .docs/developer/refactors/components/component/dashboard/orders/dashboard-orders-overview-view.md
  */
 
-
+import { useMemo } from 'react'
 import Link from 'next/link'
 
 import { useOrdersDashboard } from '@/components/dashboard/orders/use-orders-dashboard'
+import { DashboardDataTable } from '@/components/primitives/dashboard'
 import {
   WarehouseOverviewShellSection,
   WarehouseOverviewStatusPill,
@@ -16,7 +17,16 @@ import {
 } from '@/components/primitives/warehouse-overview-primitives'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
-import type { OrderAttentionCard, OrderSummaryRow } from '@/types/orders-dashboard.types'
+import type { ColumnConfig } from '@/types/components/table/generic-table.types'
+import type { OrderAttentionCard, OrderSummaryRow, WarehouseWorkloadRow } from '@/types/orders-dashboard.types'
+
+type WarehouseWorkloadTableRow = WarehouseWorkloadRow & {
+  id: string
+}
+
+type OrderOverviewTableRow = OrderSummaryRow & {
+  id: string
+}
 
 function humanizeEnum(value: string): string {
   return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (ch) => ch.toUpperCase())
@@ -132,70 +142,120 @@ function AttentionCard({ card }: { card: OrderAttentionCard }) {
   )
 }
 
-function OrderRow({ row }: { row: OrderSummaryRow }) {
-  return (
-    <tr className="border-t" style={{ borderColor: 'var(--wh-border)' }}>
-      <td className="py-2 pr-4">
-        <Link
-          href={row.href}
-          className="font-medium hover:underline"
-          style={{ color: 'var(--wh-text-primary)' }}
-        >
-          {row.orderLabel}
-        </Link>
-      </td>
-      <td className="py-2 pr-4" style={{ color: 'var(--wh-text-secondary)' }}>
-        {humanizeEnum(row.type)}
-      </td>
-      <td className="py-2 pr-4" style={{ color: 'var(--wh-text-secondary)' }}>
-        {row.warehouseName}
-      </td>
-      <td className="py-2 pr-4">
-        <WarehouseOverviewStatusPill tone={statusTone(row.status)}>
-          {humanizeEnum(row.status)}
-        </WarehouseOverviewStatusPill>
-      </td>
-      <td className="py-2 pr-4">
-        <div className="flex items-center gap-2">
-          <div
-            className="h-1.5 w-20 overflow-hidden rounded-full"
-            style={{ background: 'var(--wh-border)' }}
-          >
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${row.progressPercent}%`,
-                background: 'var(--wh-status-available)'
-              }}
-            />
-          </div>
-          <span className="text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
-            {row.progressPercent}%
-          </span>
-        </div>
-      </td>
-      <td className="py-2 pr-4 text-sm" style={{ color: 'var(--wh-text-secondary)' }}>
-        {row.assignedUserName ?? '—'}
-      </td>
-      <td className="py-2 pr-4 text-sm" style={{ color: 'var(--wh-text-secondary)' }}>
-        {formatTs(row.startedAt)}
-      </td>
-      <td className="py-2 pr-4 text-sm" style={{ color: 'var(--wh-text-secondary)' }}>
-        {formatTs(row.lastActivityAt)}
-      </td>
-      <td className="py-2">
-        <Link href={row.href} className="text-xs hover:underline" style={{ color: 'var(--wh-text-secondary)' }}>
-          View
-        </Link>
-      </td>
-    </tr>
-  )
-}
-
 export function DashboardOrdersOverviewView() {
   const { data, isLoading, error, refetch } = useOrdersDashboard()
 
   const agingBuckets = data ? buildAgingBuckets(data.orders) : []
+  const warehouseRows = useMemo(
+    (): WarehouseWorkloadTableRow[] =>
+      data?.warehouseWorkload.map((row) => ({ ...row, id: row.warehouseId })) ?? [],
+    [data?.warehouseWorkload]
+  )
+  const orderRows = useMemo(
+    (): OrderOverviewTableRow[] =>
+      data?.orders.map((row) => ({ ...row, id: row.orderId })) ?? [],
+    [data?.orders]
+  )
+  const warehouseColumns = useMemo(
+    (): ColumnConfig<WarehouseWorkloadTableRow>[] => [
+      {
+        label: 'Warehouse',
+        cell: (row) => (
+          <Link
+            href={row.href}
+            className="font-medium hover:underline"
+            style={{ color: 'var(--wh-text-primary)' }}
+          >
+            {row.warehouseName}
+          </Link>
+        ),
+        sortable: false
+      },
+      { label: 'Active', accessor: 'active', type: 'number' },
+      { label: 'Released', accessor: 'released', type: 'number' },
+      { label: 'Completed', accessor: 'completedToday', type: 'number' },
+      {
+        label: 'Exceptions',
+        cell: (row) => (
+          <span
+            style={{
+              color: row.exceptions > 0
+                ? 'var(--wh-status-blocked)'
+                : 'var(--wh-text-secondary)'
+            }}
+          >
+            {row.exceptions}
+          </span>
+        ),
+        sortable: false
+      }
+    ],
+    []
+  )
+  const orderColumns = useMemo(
+    (): ColumnConfig<OrderOverviewTableRow>[] => [
+      {
+        label: 'Order',
+        cell: (row) => (
+          <Link
+            href={row.href}
+            className="font-medium hover:underline"
+            style={{ color: 'var(--wh-text-primary)' }}
+          >
+            {row.orderLabel}
+          </Link>
+        ),
+        sortable: false
+      },
+      { label: 'Type', cell: (row) => humanizeEnum(row.type), sortable: false },
+      { label: 'Warehouse', accessor: 'warehouseName', type: 'text' },
+      {
+        label: 'Status',
+        cell: (row) => (
+          <WarehouseOverviewStatusPill tone={statusTone(row.status)}>
+            {humanizeEnum(row.status)}
+          </WarehouseOverviewStatusPill>
+        ),
+        sortable: false
+      },
+      {
+        label: 'Progress',
+        cell: (row) => (
+          <div className="flex items-center gap-2">
+            <div
+              className="h-1.5 w-20 overflow-hidden rounded-full"
+              style={{ background: 'var(--wh-border)' }}
+            >
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${row.progressPercent}%`,
+                  background: 'var(--wh-status-available)'
+                }}
+              />
+            </div>
+            <span className="text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
+              {row.progressPercent}%
+            </span>
+          </div>
+        ),
+        sortable: false
+      },
+      { label: 'Assigned', cell: (row) => row.assignedUserName ?? '—', sortable: false },
+      { label: 'Started At', cell: (row) => formatTs(row.startedAt), sortable: false },
+      { label: 'Last Activity', cell: (row) => formatTs(row.lastActivityAt), sortable: false },
+      {
+        label: '',
+        cell: (row) => (
+          <Link href={row.href} className="text-xs hover:underline" style={{ color: 'var(--wh-text-secondary)' }}>
+            View
+          </Link>
+        ),
+        sortable: false
+      }
+    ],
+    []
+  )
 
   if (isLoading) {
     return (
@@ -435,51 +495,12 @@ export function DashboardOrdersOverviewView() {
         {/* Warehouse Workload */}
         {data.warehouseWorkload.length > 0 ? (
           <WarehouseOverviewShellSection title="Warehouse Workload">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr style={{ color: 'var(--wh-text-secondary)' }}>
-                    <th className="pb-2 text-left font-medium">Warehouse</th>
-                    <th className="pb-2 text-left font-medium">Active</th>
-                    <th className="pb-2 text-left font-medium">Released</th>
-                    <th className="pb-2 text-left font-medium">Completed</th>
-                    <th className="pb-2 text-left font-medium">Exceptions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.warehouseWorkload.map((row) => (
-                    <tr
-                      key={row.warehouseId}
-                      className="border-t"
-                      style={{ borderColor: 'var(--wh-border)' }}
-                    >
-                      <td className="py-2 pr-4">
-                        <Link
-                          href={row.href}
-                          className="font-medium hover:underline"
-                          style={{ color: 'var(--wh-text-primary)' }}
-                        >
-                          {row.warehouseName}
-                        </Link>
-                      </td>
-                      <td className="py-2 pr-4" style={{ color: 'var(--wh-text-secondary)' }}>{row.active}</td>
-                      <td className="py-2 pr-4" style={{ color: 'var(--wh-text-secondary)' }}>{row.released}</td>
-                      <td className="py-2 pr-4" style={{ color: 'var(--wh-text-secondary)' }}>{row.completedToday}</td>
-                      <td
-                        className="py-2"
-                        style={{
-                          color: row.exceptions > 0
-                            ? 'var(--wh-status-blocked)'
-                            : 'var(--wh-text-secondary)'
-                        }}
-                      >
-                        {row.exceptions}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DashboardDataTable
+              columns={warehouseColumns}
+              records={warehouseRows}
+              emptyMessage="No warehouse workload found."
+              search={false}
+            />
           </WarehouseOverviewShellSection>
         ) : null}
 
@@ -490,28 +511,12 @@ export function DashboardOrdersOverviewView() {
               No orders found.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr style={{ color: 'var(--wh-text-secondary)' }}>
-                    <th className="pb-2 text-left font-medium">Order</th>
-                    <th className="pb-2 text-left font-medium">Type</th>
-                    <th className="pb-2 text-left font-medium">Warehouse</th>
-                    <th className="pb-2 text-left font-medium">Status</th>
-                    <th className="pb-2 text-left font-medium">Progress</th>
-                    <th className="pb-2 text-left font-medium">Assigned</th>
-                    <th className="pb-2 text-left font-medium">Started At</th>
-                    <th className="pb-2 text-left font-medium">Last Activity</th>
-                    <th className="pb-2 text-left font-medium" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.orders.map((row) => (
-                    <OrderRow key={row.orderId} row={row} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DashboardDataTable
+              columns={orderColumns}
+              records={orderRows}
+              emptyMessage="No orders found."
+              search={false}
+            />
           )}
         </WarehouseOverviewShellSection>
       </div>

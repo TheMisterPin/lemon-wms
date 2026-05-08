@@ -1,7 +1,7 @@
 'use client'
 
-import CreateZoneForm from '@/components/dashboard/features/zones/create-zone-form'
-import { DashboardZonesPageView } from '@/components/dashboard/zones/DashboardZonesPageView'
+import { DashboardZonesPageView } from '@/components/dashboard/zones/dashboard-zones-page-view'
+import CreateZoneForm from '@/components/features/zone/components/create-zone-form'
 import { useDashboardWarehouse } from '@/hooks/dashboard/locations/use-dashboard-warehouse'
 
 export function DashboardZonesPage() {

@@ -4,24 +4,15 @@
  * @doc .docs/developer/refactors/components/component/dashboard/zones/components/zone-bins-section.md
  */
 
-
-import { useState } from 'react'
 import Link from 'next/link'
 
 import {
-  WarehouseOverviewButton,
-  WarehouseOverviewChartPanel,
-  WarehouseOverviewShellSection,
+  DashboardEntityPreviewSection
+} from '@/components/primitives/dashboard'
+import {
   WarehouseOverviewStatusPill
 } from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle
-} from '@/components/ui/sheet'
 import type { ZoneOverviewBinRow } from '@/types/zone-overview-dashboard.types'
 
 function statusTone(rowStatus: ZoneOverviewBinRow['rowStatus']): WarehouseOverviewTone {
@@ -93,75 +84,27 @@ export function ZoneBinStockCard({ bin }: ZoneBinStockCardProps) {
   )
 }
 
-const ZONE_BINS_PREVIEW_COUNT = 4
-
 type ZoneBinsSectionProps = {
   bins: ZoneOverviewBinRow[]
 }
 
 export function ZoneBinsSection({ bins }: ZoneBinsSectionProps) {
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const previewBins = bins.slice(0, ZONE_BINS_PREVIEW_COUNT)
-  const hasMore = bins.length > ZONE_BINS_PREVIEW_COUNT
-
   return (
-    <>
-      <WarehouseOverviewShellSection
-        title="Bins"
-        action={
-          hasMore ? (
-            <WarehouseOverviewButton
-              variant="secondary"
-              size="sm"
-              onClick={() => setSheetOpen(true)}
-            >
-              Show more
-            </WarehouseOverviewButton>
-          ) : null
-        }
-      >
-        <WarehouseOverviewChartPanel>
-          <div className="grid grid-cols-1 gap-3">
-            {previewBins.map((b) => (
-              <Link
-                key={b.binId}
-                href={`/dashboard/locations/bins/${b.binId}`}
-                className="block transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wh-border)]"
-              >
-                <ZoneBinStockCard bin={b} />
-              </Link>
-            ))}
-          </div>
-        </WarehouseOverviewChartPanel>
-      </WarehouseOverviewShellSection>
-
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent
-          side="right"
-          showCloseButton
-          className="flex h-full max-h-[100dvh] w-full flex-col gap-0 overflow-hidden border-[var(--wh-border)] bg-[var(--wh-page-bg)] p-0 text-[var(--wh-text-primary)] sm:max-w-2xl"
+    <DashboardEntityPreviewSection
+      title="Bins"
+      items={bins}
+      getKey={(bin) => bin.binId}
+      sheetTitle="All bins"
+      sheetDescription={`${bins.length} ${bins.length === 1 ? 'bin' : 'bins'} in this zone`}
+      emptyMessage="No bins found in this zone."
+      renderItem={(bin) => (
+        <Link
+          href={`/dashboard/locations/bins/${bin.binId}`}
+          className="block transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wh-border)]"
         >
-          <SheetHeader className="border-b border-[var(--wh-border)] px-4 py-4 text-left">
-            <SheetTitle className="text-[var(--wh-text-primary)]">All bins</SheetTitle>
-            <SheetDescription className="text-[var(--wh-text-muted)]">
-              {bins.length} {bins.length === 1 ? 'bin' : 'bins'} in this zone
-            </SheetDescription>
-          </SheetHeader>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {bins.map((b) => (
-                <Link
-                  key={`sheet-${b.binId}`}
-                  href={`/dashboard/locations/bins/${b.binId}`}
-                  className="block transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wh-border)]"
-                >
-                  <ZoneBinStockCard bin={b} />
-                </Link>
-              ))}
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-    </>
+          <ZoneBinStockCard bin={bin} />
+        </Link>
+      )}
+    />
   )
 }

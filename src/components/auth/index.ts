@@ -3,5 +3,5 @@
  * @doc .docs/developer/refactors/components/misc/auth/index.md
  */
 
-export * from './CredentialLoginForm'
-export * from './FloorLoginForm'
+export * from './credential-login-form'
+export * from './floor-login-form'

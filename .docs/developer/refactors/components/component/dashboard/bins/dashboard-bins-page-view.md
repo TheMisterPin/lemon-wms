@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/bins/DashboardBinsPageView.tsx
+source: src/components/dashboard/bins/dashboard-bins-page-view.tsx
 type: component
 isCorrectCase: false
 ---
@@ -10,7 +10,7 @@ Component name:
 DashboardBinsPageView
 
 Current file path:
-`src/components/dashboard/bins/DashboardBinsPageView.tsx`
+`src/components/dashboard/bins/dashboard-bins-page-view.tsx`
 
 Current responsibility:
 Bins list page using `PageWithGrid`; **prop-driven** — receives **`bins`**, loading/error, and **`headerActions`** (**Phase 22-07**/**CFR-21**). Owns only **`BinContentsModal`** UI state. Page container **`DashboardBinsPage`** (`src/components/features/locations/pages/dashboard-bins-page.tsx`) calls **`useDashboardWarehouse`** and passes **`CreateBinForm`** wired with **`onCreateBin`** (**Phase 23** verified).

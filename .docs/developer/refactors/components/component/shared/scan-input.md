@@ -1,5 +1,5 @@
 ---
-source: src/components/shared/ScanInput.tsx
+source: src/components/shared/scan-input.tsx
 type: component
 isCorrectCase: false
 ---

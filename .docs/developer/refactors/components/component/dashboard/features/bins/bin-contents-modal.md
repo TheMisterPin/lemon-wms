@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/features/bins/bin-contents-modal.tsx
+source: src/components/features/locations/components/bin-contents-modal.tsx
 type: component
 isCorrectCase: true
 ---
@@ -10,7 +10,7 @@ Component name:
 BinContentsModal (+ helpers `quantityForBinItemStatus`, `toContentTableRows`)
 
 Current file path:
-`src/components/dashboard/features/bins/bin-contents-modal.tsx`
+`src/components/features/locations/components/bin-contents-modal.tsx`
 
 Current responsibility:
 Dialog listing bin contents; fetches bin+lines via **`dashboardApiClient`** when opened; uses `TableShell` + column config; not a `useDashboardWarehouse` consumer but in selected feature bins scope.
@@ -112,3 +112,16 @@ Evaluation checkbox “Fetches data: no” is inconsistent with inventory — Ph
 | `quantityForBinItemStatus` | `src/lib/transformers/locations/quantity-for-bin-item-status.ts` | `.docs/developer/refactors/components/dismounted/quantity-for-bin-item-status.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `toContentTableRows` | `src/lib/transformers/locations/to-content-table-rows.ts` | `.docs/developer/refactors/components/dismounted/to-content-table-rows.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `contentColumns` | `src/components/features/locations/components/content-columns.ts` | `.docs/developer/refactors/components/dismounted/content-columns.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Refactor Status
+
+Status: split
+Old path: `src/components/dashboard/features/bins/bin-contents-modal.tsx`
+New path: `src/components/features/bin/components/bin-contents-modal.tsx`
+Related files:
+- `src/hooks/dashboard/locations/use-bin-contents.ts`
+- `src/types/dto/locations/bin-contents.ts`
+- `src/components/dashboard/bins/dashboard-bins-page-view.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed; targeted ESLint passed; full `pnpm lint` still has unrelated pre-existing repo failures.
+Notes: Client fetching and table-row DTO preparation moved out of the modal into `useBinContents`; the modal remains responsible for Dialog/TableShell rendering and table interaction state. Updated from temporary locations feature ownership to entity-aligned bin ownership.

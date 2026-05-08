@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/features/warehouses/create-warehouse-form.tsx
+source: src/components/features/locations/components/create-warehouse-form.tsx
 type: component
 isCorrectCase: true
 ---
@@ -10,7 +10,7 @@ Component name:
 CreateWarehouseForm (`export default function CreateWarehouseForm`)
 
 Current file path:
-`src/components/dashboard/features/warehouses/create-warehouse-form.tsx`
+`src/components/features/locations/components/create-warehouse-form.tsx`
 
 Current responsibility:
 Header/dialog-style creator using Generic Form config; calls **`onCreateWarehouse(values)`** on submit (**Phase 22-07**) — **required prop** (no hook inside module).
@@ -108,3 +108,13 @@ None beyond Classification target paths — physical files created in Phase 22.
 ### Notes
 
 **Keep/move** ambiguity: prove consumers before delete/replace; mutations still follow warehouse hook `actions` documentation.
+
+## Refactor Status
+
+Status: moved
+Old path: `src/components/dashboard/features/warehouses/create-warehouse-form.tsx`
+New path: `src/components/features/warehouse/components/create-warehouse-form.tsx`
+Related files: none observed
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed; targeted ESLint passed; full `pnpm lint` still has unrelated pre-existing repo failures.
+Notes: Component remains available for warehouse-owned feature use; usage search found no current runtime consumer.

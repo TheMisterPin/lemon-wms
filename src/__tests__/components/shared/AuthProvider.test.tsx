@@ -4,7 +4,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import AuthProvider from '@/components/shared/AuthProvider'
+import AuthProvider from '@/components/shared/auth-provider'
 import { useAuthStore } from '@/lib/auth/store'
 import type { AuthUser } from '@/types'
 

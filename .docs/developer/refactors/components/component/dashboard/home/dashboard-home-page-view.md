@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/home/DashboardHomePageView.tsx
+source: src/components/dashboard/home/dashboard-home-page-view.tsx
 type: component
 isCorrectCase: false
 ---

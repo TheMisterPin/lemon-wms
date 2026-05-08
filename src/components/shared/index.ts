@@ -3,11 +3,11 @@
  * @doc .docs/developer/refactors/components/misc/shared/index.md
  */
 
-export * from './AuthProvider'
-export * from './AppErrorDialog'
+export * from './auth-provider'
+export * from './app-error-dialog'
 export * from './bin-selector-dialog'
-export * from './ErrorModal'
-export * from './NumericKeypad'
-export * from './PageWrapper'
-export * from './PaginationSelector'
-export * from './ScanInput'
+export * from './error-modal'
+export * from './numeric-keypad'
+export * from './page-wrapper'
+export * from './pagination-selector'
+export * from './scan-input'

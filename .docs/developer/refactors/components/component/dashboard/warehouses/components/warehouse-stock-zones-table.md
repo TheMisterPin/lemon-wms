@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseStockZonesTable.tsx
+source: src/components/dashboard/warehouses/components/warehouse-stock-zones-table.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseStockZonesTable
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseStockZonesTable.tsx`
+`src/components/dashboard/warehouses/components/warehouse-stock-zones-table.tsx`
 
 Current responsibility:
 Zones table for warehouse stock dashboard.

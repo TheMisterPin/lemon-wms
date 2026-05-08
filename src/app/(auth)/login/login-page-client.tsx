@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Sparkles } from 'lucide-react'
 
-import CredentialLoginForm from '@/components/auth/CredentialLoginForm'
-import FloorLoginForm from '@/components/auth/FloorLoginForm'
+import CredentialLoginForm from '@/components/auth/credential-login-form'
+import FloorLoginForm from '@/components/auth/floor-login-form'
 import LemonHeader from '@/components/typography/lemon-header'
 import { Button } from '@/components/ui/button'
 import {

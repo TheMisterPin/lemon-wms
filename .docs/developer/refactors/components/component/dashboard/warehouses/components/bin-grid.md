@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/BinGrid.tsx
+source: src/components/dashboard/warehouses/components/bin-grid.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 BinGrid
 
 Current file path:
-`src/components/dashboard/warehouses/components/BinGrid.tsx`
+`src/components/dashboard/warehouses/components/bin-grid.tsx`
 
 Current responsibility:
 Paginated bin grid with fill bars and “View contents” callback; helpers `getBinStatus`, `getFillBarStyle`.

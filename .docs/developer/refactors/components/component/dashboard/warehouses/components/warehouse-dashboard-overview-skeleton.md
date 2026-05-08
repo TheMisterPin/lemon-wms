@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseDashboardOverviewSkeleton.tsx
+source: src/components/dashboard/warehouses/components/warehouse-dashboard-overview-skeleton.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseDashboardOverviewSkeleton
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseDashboardOverviewSkeleton.tsx`
+`src/components/dashboard/warehouses/components/warehouse-dashboard-overview-skeleton.tsx`
 
 Current responsibility:
 Skeleton for warehouse overview page loading state.

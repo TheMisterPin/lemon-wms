@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/features/zones/create-zone-form.tsx
+source: src/components/features/locations/components/create-zone-form.tsx
 type: component
 isCorrectCase: true
 ---
@@ -10,7 +10,7 @@ Component name:
 CreateZoneForm
 
 Current file path:
-`src/components/dashboard/features/zones/create-zone-form.tsx`
+`src/components/features/locations/components/create-zone-form.tsx`
 
 Current responsibility:
 Zone create dialog form; **`warehouseList`** + **`onCreateZone`** (**Phase 22-07**) from **`DashboardZonesPage**.
@@ -98,3 +98,14 @@ None beyond Classification target paths — physical files created in Phase 22.
 ### Notes
 
 `createZone` mutations owned by warehouse hook/provider cluster — see canonical hook Logic Mapping.
+
+## Refactor Status
+
+Status: moved
+Old path: `src/components/dashboard/features/zones/create-zone-form.tsx`
+New path: `src/components/features/zone/components/create-zone-form.tsx`
+Related files:
+- `src/components/features/zone/pages/dashboard-zones-page.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed; targeted ESLint passed; full `pnpm lint` still has unrelated pre-existing repo failures.
+Notes: Form remains prop-only and receives `onCreateZone`; no visual or mutation behavior changes. Updated from temporary locations feature ownership to entity-aligned zone ownership.

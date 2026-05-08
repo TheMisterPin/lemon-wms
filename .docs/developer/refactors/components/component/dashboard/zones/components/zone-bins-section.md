@@ -107,3 +107,13 @@ Align availability bars with `warehouse-stock-summary` / `WarehouseStockAvailabi
 | `ZoneBinStockCard` | `src/components/features/locations/components/zone-bin-stock-card.tsx` | `.docs/developer/refactors/components/dismounted/zone-bin-stock-card.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `ZoneBinAvailabilityBar` | `src/components/features/locations/components/zone-bin-availability-bar.tsx` | `.docs/developer/refactors/components/dismounted/zone-bin-availability-bar.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `statusTone` | `src/components/features/locations/components/status-tone.tsx` | `.docs/developer/refactors/components/dismounted/status-tone.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
+
+## Refactor Status
+
+Status: in-progress
+Old path: `src/components/dashboard/zones/components/zone-bins-section.tsx`
+New path: current batch keeps path; preview/sheet behavior moved to `src/components/primitives/dashboard/dashboard-preview-sections.tsx`
+Related files: `src/components/primitives/dashboard/dashboard-preview-sections.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed
+Notes: Zone bins now show 3 visible cards and use a shared show-all sheet.

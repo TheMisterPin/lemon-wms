@@ -14,10 +14,10 @@ import {
   warehouseOverviewToneStyles
 } from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
-import { WarehouseStockAvailabilityBarChart } from '@/components/dashboard/warehouses/components/WarehouseStockAvailabilityBarChart'
-import { WarehouseStockItemsTable } from '@/components/dashboard/warehouses/components/WarehouseStockItemsTable'
-import { WarehouseStockSummary } from '@/components/dashboard/warehouses/components/WarehouseStockSummary'
-import { WarehouseStockZonesTable } from '@/components/dashboard/warehouses/components/WarehouseStockZonesTable'
+import { WarehouseStockAvailabilityBarChart } from '@/components/dashboard/warehouses/components/warehouse-stock-availability-bar-chart'
+import { WarehouseStockItemsTable } from '@/components/dashboard/warehouses/components/warehouse-stock-items-table'
+import { WarehouseStockSummary } from '@/components/dashboard/warehouses/components/warehouse-stock-summary'
+import { WarehouseStockZonesTable } from '@/components/dashboard/warehouses/components/warehouse-stock-zones-table'
 import type { WarehouseStockDashboardData } from '@/types/warehouse-stock-dashboard.types'
 
 type StockKpiRenderable = WarehouseStockDashboardData['kpis'][number] & {

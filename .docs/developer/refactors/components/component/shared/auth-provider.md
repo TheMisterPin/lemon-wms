@@ -1,5 +1,5 @@
 ---
-source: src/components/shared/AuthProvider.tsx
+source: src/components/shared/auth-provider.tsx
 type: component
 isCorrectCase: false
 ---

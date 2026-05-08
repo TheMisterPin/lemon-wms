@@ -4,16 +4,15 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/dashboard-warehouse-home-page.md
  */
 
-
 import { useCallback, useState } from 'react'
 
 import { useDashboardHome } from '@/components/dashboard/home/use-dashboard-home'
+import { BinContentsModal } from '@/components/features/bin/components/bin-contents-modal'
 
-import { BinGrid } from './components/BinGrid'
-import { DirectorySections } from './components/DirectorySections'
-import { OverviewCards } from './components/OverviewCards'
+import { BinGrid } from './components/bin-grid'
+import { DirectorySections } from './components/directory-sections'
+import { OverviewCards } from './components/overview-cards'
 import { DashboardLocationsPageSkeleton } from './dashboard-location-page-skeleton'
-import { BinContentsModal } from '../features/bins/bin-contents-modal'
 
 /** Aggregate warehouses / zones / bins hub at `/dashboard/warehouses` (all locations). */
 export function DashboardWarehouseHomePageView() {

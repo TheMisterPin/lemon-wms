@@ -152,7 +152,7 @@ Verified cross-dashboard imports (inventory summary + source tree):
 
 1. `src/components/dashboard/bins/bin-overview-dashboard.tsx`
 2. `src/components/dashboard/devices/device-detail-dashboard.tsx`
-3. `src/components/dashboard/orders/DashboardOrdersOverviewView.tsx`
+3. `src/components/dashboard/orders/dashboard-orders-overview-view.tsx`
 4. `src/components/dashboard/orders/order-detail-dashboard.tsx`
 5. `src/components/dashboard/stock/category-stock-dashboard.tsx`
 

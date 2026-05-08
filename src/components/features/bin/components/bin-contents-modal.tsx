@@ -4,9 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/features/bins/bin-contents-modal.md
  */
 
-
-import { useCallback, useEffect, useMemo, useState } from 'react'
-
 import { Package } from 'lucide-react'
 
 import { TableShell } from '@/components/tables/table-shell'
@@ -18,43 +15,13 @@ import {
   DialogFooter,
   DialogTitle
 } from '@/components/ui/dialog'
-import { dashboardApiClient } from '@/lib/axios'
-import type { BinWithContent } from '@/lib/locations'
+import { useBinContents } from '@/hooks/dashboard/locations/use-bin-contents'
 import { cn } from '@/lib/utils'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'
-import type { BinItemStatus } from '@/types/models/enums'
-import type { ApiResponse } from '@/types/responses/basic-response'
+import type { BinContentTableRowDto } from '@/types/dto/locations/bin-contents'
 
-type ContentLine = BinWithContent['content'][number]
-
-export type BinContentTableRow = ContentLine & {
-  statusQuantity: number
-}
-
-function quantityForBinItemStatus(line: ContentLine): number {
-  switch (line.status as BinItemStatus) {
-  case 'AVAILABLE':
-    return line.quantityAvailable
-  case 'RESERVED':
-    return line.quantityReserved
-  case 'BLOCKED':
-    return line.quantityBlocked
-  case 'IN_TRANSIT':
-    return line.quantityAvailable
-  default:
-    return line.quantityAvailable
-  }
-}
-
-function toContentTableRows(lines: ContentLine[]): BinContentTableRow[] {
-  return lines.map((line) => ({
-    ...line,
-    statusQuantity: quantityForBinItemStatus(line)
-  }))
-}
-
-const contentColumns: ColumnConfig<BinContentTableRow>[] = [
+const contentColumns: ColumnConfig<BinContentTableRowDto>[] = [
   { label: 'SKU', accessor: 'sku' },
   { label: 'Name', accessor: 'name' },
   {
@@ -87,46 +54,7 @@ export type BinContentsModalProps = {
 }
 
 export function BinContentsModal({ binId, open, onOpenChange }: BinContentsModalProps) {
-  const [bin, setBin] = useState<BinWithContent | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-
-  const load = useCallback(async () => {
-    if (!binId) {
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-
-    try {
-      const res = await dashboardApiClient.get<ApiResponse<BinWithContent>>(`/dashboard/bins/${binId}`)
-      if (res.success && res.data) {
-        setBin(res.data)
-      } else {
-        setBin(null)
-        setError(res.message ?? 'Could not load bin.')
-      }
-    } catch {
-      setBin(null)
-      setError('Could not load bin.')
-    } finally {
-      setLoading(false)
-    }
-  }, [binId])
-
-  useEffect(() => {
-    if (!open || !binId) {
-      setBin(null)
-      setError(null)
-
-      return
-    }
-
-    void load()
-  }, [open, binId, load])
-
-  const tableRows = useMemo(() => (bin ? toContentTableRows(bin.content) : []), [bin])
+  const { bin, error, tableRows, dialogTitle, showSpinner } = useBinContents(binId, open)
 
   const {
     visibleColumns,
@@ -149,9 +77,6 @@ export function BinContentsModal({ binId, open, onOpenChange }: BinContentsModal
       fields: ['sku', 'name', 'status']
     }
   })
-
-  const dialogTitle = bin ? `${bin.name} (${bin.code})` : 'Bin contents'
-  const showSpinner = loading || (Boolean(open && binId && !bin && !error))
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

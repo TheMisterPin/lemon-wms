@@ -8,12 +8,12 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { AppErrorDialog } from '@/components/shared/AppErrorDialog'
-import PageWrapper from '@/components/shared/PageWrapper'
+import { AppErrorDialog } from '@/components/shared/app-error-dialog'
+import PageWrapper from '@/components/shared/page-wrapper'
 import { MoveItemsProvider } from '@/components/warehouse/layout/use-move-items'
-import { WarehouseFooter } from './WarehouseFooter'
-import { WarehouseHeader } from './WarehouseHeader'
-import { WarehouseSidebar } from './WarehouseSidebar'
+import { WarehouseFooter } from './warehouse-footer'
+import { WarehouseHeader } from './warehouse-header'
+import { WarehouseSidebar } from './warehouse-sidebar'
 
 type WarehouseShellProps = { children: ReactNode }
 

@@ -1,5 +1,5 @@
 ---
-source: src/components/shared/NumericKeypad.tsx
+source: src/components/shared/numeric-keypad.tsx
 type: component
 isCorrectCase: false
 ---

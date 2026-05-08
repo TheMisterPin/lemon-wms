@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PackageOpen } from 'lucide-react'
 
-import { PaginationSelector } from '@/components/shared/PaginationSelector'
+import { PaginationSelector } from '@/components/shared/pagination-selector'
 import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'
 import type { BinRecord } from './dashboard-types'
 

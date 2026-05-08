@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { WarehouseDashboardOverviewSkeleton } from '@/components/dashboard/warehouses/components/WarehouseDashboardOverviewSkeleton'
+import { WarehouseDashboardOverviewSkeleton } from '@/components/dashboard/warehouses/components/warehouse-dashboard-overview-skeleton'
 import { DashboardWarehouseOverviewView } from '@/components/dashboard/warehouses/dashboard-warehouse-overview'
 import { dashboardApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'

@@ -4,9 +4,10 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-activity-summary.md
  */
 
-
 import {
-  WarehouseOverviewShellSection,
+  DashboardActivityPreviewSection
+} from '@/components/primitives/dashboard'
+import {
   WarehouseOverviewStatusPill
 } from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
@@ -32,36 +33,36 @@ type WarehouseActivitySummaryProps = {
 /** Recent warehouse events with coarse status colouring. */
 export function WarehouseActivitySummary({ activity, title = 'Recent activity' }: WarehouseActivitySummaryProps) {
   return (
-    <WarehouseOverviewShellSection
+    <DashboardActivityPreviewSection
       title={title}
-      action={<WarehouseOverviewStatusPill>{activity.length} events</WarehouseOverviewStatusPill>}
-    >
-      <div className="space-y-3">
-        {activity.map((item) => {
-          const tone = activityTone(item.status)
+      items={activity}
+      getKey={(item) => item.id}
+      sheetTitle={title}
+      sheetDescription={`${activity.length} ${activity.length === 1 ? 'event' : 'events'}`}
+      emptyMessage="No recent activity found."
+      renderItem={(item) => {
+        const tone = activityTone(item.status)
 
-          return (
-            <div
-              key={item.id}
-              className="rounded-xl border p-3"
-              style={{ background: 'var(--wh-card-bg)', borderColor: 'var(--wh-border)' }}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-xs" style={{ color: 'var(--wh-text-muted)' }}>
-                    {item.time} · {item.user}
-                  </div>
-                  <div className="mt-1 text-sm font-medium">{item.action}</div>
-                  <div className="mt-1 text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
-                    {item.entity}
-                  </div>
+        return (
+          <div
+            className="rounded-xl border p-3"
+            style={{ background: 'var(--wh-card-bg)', borderColor: 'var(--wh-border)' }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs" style={{ color: 'var(--wh-text-muted)' }}>
+                  {item.time} · {item.user}
                 </div>
-                <WarehouseOverviewStatusPill tone={tone}>{item.status}</WarehouseOverviewStatusPill>
+                <div className="mt-1 text-sm font-medium">{item.action}</div>
+                <div className="mt-1 text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
+                  {item.entity}
+                </div>
               </div>
+              <WarehouseOverviewStatusPill tone={tone}>{item.status}</WarehouseOverviewStatusPill>
             </div>
-          )
-        })}
-      </div>
-    </WarehouseOverviewShellSection>
+          </div>
+        )
+      }}
+    />
   )
 }

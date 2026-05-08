@@ -6,8 +6,8 @@
 
 import type { ReactNode } from 'react'
 
-import { AppErrorDialog } from '@/components/shared/AppErrorDialog'
-import PageWrapper from '@/components/shared/PageWrapper'
+import { AppErrorDialog } from '@/components/shared/app-error-dialog'
+import PageWrapper from '@/components/shared/page-wrapper'
 import DashboardFooter from './dashboard-footer'
 import DashboardHeader from './dashboard-header'
 import DashboardSidebar from './dashboard-sidebar'

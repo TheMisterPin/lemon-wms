@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/zones/components/ZoneOverviewKpiStrip.tsx
+source: src/components/dashboard/zones/components/zone-overview-kpi-strip.tsx
 type: component
 isCorrectCase: true
 ---
@@ -10,7 +10,7 @@ Component name:
 ZoneOverviewKpiStrip
 
 Current file path:
-`src/components/dashboard/zones/components/ZoneOverviewKpiStrip.tsx`
+`src/components/dashboard/zones/components/zone-overview-kpi-strip.tsx`
 
 Current responsibility:
 KPI metric strip for zone overview dashboard.

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { ColumnConfig, StyleCondition } from '@/types/components/table/column.types'
 import type { LucideIcon } from 'lucide-react'
 
-/** Matches {@link import('@/components/shared/PaginationSelector').PaginationPosition}. */
+/** Matches {@link import('@/components/shared/pagination-selector').PaginationPosition}. */
 export type GenericTablePaginationPosition = 'header' | 'footer'
 
 export type { ColumnConfig } from '@/types/components/table/column.types'

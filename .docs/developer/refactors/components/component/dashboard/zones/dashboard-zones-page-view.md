@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/zones/DashboardZonesPageView.tsx
+source: src/components/dashboard/zones/dashboard-zones-page-view.tsx
 type: component
 isCorrectCase: true
 ---
@@ -10,7 +10,7 @@ Component name:
 DashboardZonesPageView
 
 Current file path:
-`src/components/dashboard/zones/DashboardZonesPageView.tsx`
+`src/components/dashboard/zones/dashboard-zones-page-view.tsx`
 
 Current responsibility:
 Zones list page via `PageWithGrid`; **prop-driven** — **`zones`**, loading/error, **`headerActions`** (**Phase 22-07**). Container **`DashboardZonesPage`** wires **`CreateZoneForm`** with **`onCreateZone`** (**Phase 23** verified).

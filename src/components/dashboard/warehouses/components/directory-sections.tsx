@@ -6,7 +6,7 @@
 import Link from 'next/link'
 import { MapPin, Warehouse } from 'lucide-react'
 
-import { PaginationSelector } from '@/components/shared/PaginationSelector'
+import { PaginationSelector } from '@/components/shared/pagination-selector'
 import type { DashboardWarehouseDisplayRecord, DashboardZoneDisplayRecord } from './dashboard-types'
 
 type SectionBlockProps = {

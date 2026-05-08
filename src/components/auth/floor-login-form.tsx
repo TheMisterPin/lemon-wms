@@ -10,8 +10,8 @@ import { useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 
 import { useFloorLoginFlow } from '@/components/auth/use-floor-login-flow'
-import NumericKeypad from '@/components/shared/NumericKeypad'
-import ScanInput from '@/components/shared/ScanInput'
+import NumericKeypad from '@/components/shared/numeric-keypad'
+import ScanInput from '@/components/shared/scan-input'
 import { useIsMobile } from '@/components/shared/use-mobile'
 
 type Step = 'device' | 'badge' | 'pin'

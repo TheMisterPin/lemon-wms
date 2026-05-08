@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/orders/CreatePurchaseOrderModal.tsx
+source: src/components/dashboard/orders/create-purchase-order-modal.tsx
 type: component
 isCorrectCase: false
 ---

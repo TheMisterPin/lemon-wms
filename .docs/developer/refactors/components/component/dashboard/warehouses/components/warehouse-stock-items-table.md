@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseStockItemsTable.tsx
+source: src/components/dashboard/warehouses/components/warehouse-stock-items-table.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseStockItemsTable
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseStockItemsTable.tsx`
+`src/components/dashboard/warehouses/components/warehouse-stock-items-table.tsx`
 
 Current responsibility:
 Table of top stock items for warehouse stock view.

@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/zones/components/ZoneFillDistributionBarChart.tsx
+source: src/components/dashboard/zones/components/zone-fill-distribution-bar-chart.tsx
 type: component
 isCorrectCase: true
 ---
@@ -10,7 +10,7 @@ Component name:
 ZoneFillDistributionBarChart
 
 Current file path:
-`src/components/dashboard/zones/components/ZoneFillDistributionBarChart.tsx`
+`src/components/dashboard/zones/components/zone-fill-distribution-bar-chart.tsx`
 
 Current responsibility:
 Bar chart for zone fill distribution (recharts or similar — see source).

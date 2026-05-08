@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/DirectorySections.tsx
+source: src/components/dashboard/warehouses/components/directory-sections.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 DirectorySections
 
 Current file path:
-`src/components/dashboard/warehouses/components/DirectorySections.tsx`
+`src/components/dashboard/warehouses/components/directory-sections.tsx`
 
 Current responsibility:
 Two-column directory sections for warehouses and zones with pagination controls.
@@ -139,7 +139,7 @@ See **Dismounted Components**.
 
 **Purpose:** Section chrome with title row, optional action control, optional `headerRight`, and children — used to frame directory lists.
 
-**Reuse evidence:** A **separate** component also named `SectionBlock` exists in `src/components/dashboard/warehouses/components/BinGrid.tsx` (nested helper). Implementations must be diffed before any shared primitive (**Phase 22** task — not Phase 21).
+**Reuse evidence:** A **separate** component also named `SectionBlock` exists in `src/components/dashboard/warehouses/components/bin-grid.tsx` (nested helper). Implementations must be diffed before any shared primitive (**Phase 22** task — not Phase 21).
 
 **Target primitive path (if ever approved):** `src/components/primitives/dashboard-section-block.tsx` (tentative).
 

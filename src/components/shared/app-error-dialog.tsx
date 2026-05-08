@@ -5,7 +5,7 @@
  */
 
 
-import { ErrorModal } from '@/components/shared/ErrorModal'
+import { ErrorModal } from '@/components/shared/error-modal'
 import { useErrorDialog } from '@/components/shared/use-error-dialog'
 
 export function AppErrorDialog() {

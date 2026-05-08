@@ -1,5 +1,5 @@
 ---
-source: src/components/auth/CredentialLoginForm.tsx
+source: src/components/auth/credential-login-form.tsx
 type: component
 isCorrectCase: false
 ---

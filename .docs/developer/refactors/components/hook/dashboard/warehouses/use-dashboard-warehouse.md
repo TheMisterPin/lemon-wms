@@ -117,7 +117,7 @@ Record the split decision as planned ownership only. Phase 19 does not move sour
 
 ## Logic Mapping
 
-**Canonical hook responsibility + full Logic Mapping:** `.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md` — treat that file as source of truth for Phase 22 split (`types/api`, `types/dto`, `lib/transformers/locations`, hook `actions`, **`src/lib/api/extract-mutation-error.ts`**, provider scaffolding). This generated doc mirrors inventory/classification only; do not contradict the canonical movement table.
+**Canonical hook responsibility + full Logic Mapping:** `.docs/developer/refactors/hooks/dashboard/warehouses/use-dashboard-warehouse.md` — treat that file as source of truth for the split (`types/api`, `types/dto`, `lib/transformers/locations`, hook `actions`, **`src/lib/api/extract-mutation-error.ts`**, provider removal). This generated doc mirrors inventory/classification only; do not contradict the canonical movement table.
 
 **CFR-13:** Shared **`extractMutationError`** (**Phase 22-02**) — see `@/lib/api/extract-mutation-error.ts` and devices hook consumer path above.
 
@@ -133,3 +133,16 @@ Record the split decision as planned ownership only. Phase 19 does not move sour
 | `BinApiRecord` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/bin-api-record.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `DashboardHomePayload` | `src/types/api/locations/dashboard-warehouse.ts` | `.docs/developer/refactors/components/dismounted/dashboard-home-payload.md` | Separate render child/helper responsibility so the future move keeps the parent focused and reviewable. |
 | `extractMutationError` | `src/lib/api/extract-mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | **Phase 22-02** ✅ shared utility (CFR-13); devices hook consumes same module — not under `lib/transformers`. |
+
+## Refactor Status
+
+Status: split
+Old path: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx`
+New path: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx`
+Related files:
+- `src/app/(dashboard)/layout.tsx`
+- `src/components/features/locations/pages/dashboard-bins-page.tsx`
+- `src/components/features/locations/pages/dashboard-zones-page.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed; targeted ESLint passed; full `pnpm lint` still has unrelated pre-existing repo failures.
+Notes: Generated doc updated after `DashboardWarehouseProvider` and context consumption were removed. Canonical behavior details live in the hook responsibility doc.

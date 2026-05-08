@@ -8,7 +8,7 @@ import { Search, type LucideIcon } from 'lucide-react'
 import {
   PaginationPosition,
   PaginationSelector
-} from '@/components/shared/PaginationSelector'
+} from '@/components/shared/pagination-selector'
 import { Input } from '@/components/ui/input'
 import { OrderStatus } from '@/generated/prisma'
 

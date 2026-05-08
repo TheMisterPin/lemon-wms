@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
 
 import { Search } from 'lucide-react'
 
-import { PaginationSelector } from '@/components/shared/PaginationSelector'
+import { PaginationSelector } from '@/components/shared/pagination-selector'
 import { Input } from '@/components/ui/input'
 import {
   Table,

@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/features/bins/create-bin-form.tsx
+source: src/components/features/locations/components/create-bin-form.tsx
 type: component
 isCorrectCase: true
 ---
@@ -10,7 +10,7 @@ Component name:
 CreateBinForm
 
 Current file path:
-`src/components/dashboard/features/bins/create-bin-form.tsx`
+`src/components/features/locations/components/create-bin-form.tsx`
 
 Current responsibility:
 Bin create dialog form; receives **`zonesList`** + **`onCreateBin`** (**Phase 22-07**/**CFR-21**) — parent passes **`actions.createBin`** from **`DashboardBinsPage**.
@@ -98,3 +98,14 @@ None beyond Classification target paths — physical files created in Phase 22.
 ### Notes
 
 `createBin` + zone options flow through `useDashboardWarehouse` — target nested **`actions`** shape documented in canonical warehouse hook (CFR-12).
+
+## Refactor Status
+
+Status: moved
+Old path: `src/components/dashboard/features/bins/create-bin-form.tsx`
+New path: `src/components/features/bin/components/create-bin-form.tsx`
+Related files:
+- `src/components/features/bin/pages/dashboard-bins-page.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed; targeted ESLint passed; full `pnpm lint` still has unrelated pre-existing repo failures.
+Notes: Form remains prop-only and receives `onCreateBin`; no visual or mutation behavior changes. Updated from temporary locations feature ownership to entity-aligned bin ownership.

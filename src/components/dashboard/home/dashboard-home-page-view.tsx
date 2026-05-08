@@ -13,7 +13,7 @@
 // import { DashboardHomeSearchBar } from '@/components/dashboard/dashboard-home-search-bar'
 // import { DashboardInfoCards } from '@/components/dashboard/dashboard-info-card'
 // import { DashboardRecordListSection } from '@/components/dashboard/dashboard-record-list-section'
-// import { BinContentsModal } from '@/components/dashboard/features/bins/bin-contents-modal'
+// import { BinContentsModal } from '@/components/features/bin/components/bin-contents-modal'
 // import { useDashboardHome, type DashboardBinRecord } from '@/components/dashboard/home/use-dashboard-home'
 // import { GenericTable } from '@/components/tables/generic-table'
 // import type { ColumnConfig } from '@/types/components/table/column.types'

@@ -14,10 +14,10 @@ import {
   WarehouseOverviewStatusPill,
   warehouseOverviewToneStyles
 } from '@/components/primitives/warehouse-overview-primitives'
-import { WarehouseActivitySummary } from './components/WarehouseActivitySummary'
-import { WarehouseOrderWorkload } from './components/WarehouseOrderWorkload'
-import { WarehouseStockSummary } from './components/WarehouseStockSummary'
-import { WarehouseZoneSummary } from './components/WarehouseZoneSummary'
+import { WarehouseActivitySummary } from './components/warehouse-activity-summary'
+import { WarehouseOrderWorkload } from './components/warehouse-order-workload'
+import { WarehouseStockSummary } from './components/warehouse-stock-summary'
+import { WarehouseZoneSummary } from './components/warehouse-zone-summary'
 import type { WarehouseOverviewIconProps } from './components/warehouse-overview-icons'
 import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 

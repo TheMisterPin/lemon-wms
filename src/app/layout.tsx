@@ -1,5 +1,5 @@
-import AuthProvider from '@/components/shared/AuthProvider'
-import NotificationDialog from '@/components/shared/NotificationDialog'
+import AuthProvider from '@/components/shared/auth-provider'
+import NotificationDialog from '@/components/shared/notification-dialog'
 import { ErrorDialogProvider } from '@/components/shared/use-error-dialog'
 import type { Metadata } from 'next'
 

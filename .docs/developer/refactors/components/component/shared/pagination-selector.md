@@ -1,5 +1,5 @@
 ---
-source: src/components/shared/PaginationSelector.tsx
+source: src/components/shared/pagination-selector.tsx
 type: component
 isCorrectCase: false
 ---

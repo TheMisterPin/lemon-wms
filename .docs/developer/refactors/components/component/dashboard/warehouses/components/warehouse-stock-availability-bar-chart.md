@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseStockAvailabilityBarChart.tsx
+source: src/components/dashboard/warehouses/components/warehouse-stock-availability-bar-chart.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseStockAvailabilityBarChart
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseStockAvailabilityBarChart.tsx`
+`src/components/dashboard/warehouses/components/warehouse-stock-availability-bar-chart.tsx`
 
 Current responsibility:
 Bar chart for availability / fill visualization in stock dashboard.

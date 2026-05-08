@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseZoneSummary.tsx
+source: src/components/dashboard/warehouses/components/warehouse-zone-summary.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseZoneSummary
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseZoneSummary.tsx`
+`src/components/dashboard/warehouses/components/warehouse-zone-summary.tsx`
 
 Current responsibility:
 Zone cards/list for warehouse overview.

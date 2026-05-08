@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { DashboardBinsPageView } from '@/components/dashboard/bins/DashboardBinsPageView'
-import { DashboardDevicesPageView } from '@/components/dashboard/devices/DashboardDevicesPageView'
-import { DashboardItemsPageView } from '@/components/dashboard/items/DashboardItemsPageView'
-import { DashboardUsersPageView } from '@/components/dashboard/users/DashboardUsersPageView'
+import { DashboardBinsPageView } from '@/components/dashboard/bins/dashboard-bins-page-view'
+import { DashboardDevicesPageView } from '@/components/dashboard/devices/dashboard-devices-page-view'
+import { DashboardItemsPageView } from '@/components/dashboard/items/dashboard-items-page-view'
+import { DashboardUsersPageView } from '@/components/dashboard/users/dashboard-users-page-view'
 import { DashboardLocationsPageView } from '@/components/dashboard/warehouses/dashboard-location-page'
 import { DashboardWarehouseHomePageView } from '@/components/dashboard/warehouses/dashboard-warehouse-home-page'
-import { DashboardZonesPageView } from '@/components/dashboard/zones/DashboardZonesPageView'
+import { DashboardZonesPageView } from '@/components/dashboard/zones/dashboard-zones-page-view'
 
 describe('dashboard page component organization', () => {
   it('exports all dashboard page containers', () => {

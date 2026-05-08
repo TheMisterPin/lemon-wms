@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseActivitySummary.tsx
+source: src/components/dashboard/warehouses/components/warehouse-activity-summary.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseActivitySummary
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseActivitySummary.tsx`
+`src/components/dashboard/warehouses/components/warehouse-activity-summary.tsx`
 
 Current responsibility:
 Lists recent activity rows with tone mapping.
@@ -125,3 +125,13 @@ None beyond Classification target paths — physical files created in Phase 22.
 ### Notes
 
 Presentational panel reused in warehouse/zone overviews — preserve DTO prop contracts.
+
+## Refactor Status
+
+Status: in-progress
+Old path: `src/components/dashboard/warehouses/components/warehouse-activity-summary.tsx`
+New path: current batch keeps path; preview/sheet behavior moved to `src/components/primitives/dashboard/dashboard-preview-sections.tsx`
+Related files: `src/components/primitives/dashboard/dashboard-preview-sections.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed
+Notes: Activity summary now shows 4 visible rows and uses a shared show-all sheet.

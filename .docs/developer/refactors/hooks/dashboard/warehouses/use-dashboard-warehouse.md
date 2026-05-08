@@ -10,7 +10,6 @@ cross_link_generated: .docs/developer/refactors/components/hook/dashboard/wareho
 Current source: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx`
 Target hook file: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` (**Phase 22-03** — implemented; extension `.tsx` retained for JSX in provider)
 Used by:
-- src/app/(dashboard)/layout.tsx
 - src/components/features/locations/pages/dashboard-bins-page.tsx
 - src/components/features/locations/pages/dashboard-zones-page.tsx
 Owns fetching: Yes - current source issues dashboard data requests.
@@ -37,7 +36,7 @@ Current return/context shape is derived from the existing source, not a new cont
 
 ## Provider / context decision
 
-`DashboardWarehouseProvider` remains **compatibility scaffolding** mounted from `src/app/(dashboard)/layout.tsx` until usage searches prove all consumers can migrate off hidden context (D-20-08). Phase 22 may dual-export hook + thin provider during migration.
+`DashboardWarehouseProvider` removed after usage search proved `useDashboardWarehouse` is only consumed by the locations bins/zones page containers. `src/app/(dashboard)/layout.tsx` now keeps only the dashboard shell plus Suspense boundary; page containers call the hook explicitly and pass DTOs/actions into views.
 
 ## Dependencies
 
@@ -46,7 +45,7 @@ Current return/context shape is derived from the existing source, not a new cont
 
 ## Refactor Notes
 
-- Provider/context status: Current DashboardWarehouseProvider wraps dashboard routes and useDashboardWarehouse has a hidden provider dependency. D-02 and D-03 require documenting this before later removal or replacement.
+- Provider/context status: hidden dashboard-wide provider removed; `useDashboardWarehouse` is a direct hook with explicit page-container consumers.
 - D-05/D-07/D-09 apply: frontmatter preserved, current responsibilities documented, no source movement or behavior change.
 - Phase 19/20 follow-up: classify target ownership, decide whether callbacks should be grouped under actions, and move reusable DTO transformation only after the documentation baseline is accepted.
 
@@ -55,7 +54,7 @@ Current return/context shape is derived from the existing source, not a new cont
 ### Logic Found
 
 Render logic:
-- Provider wraps children with context; minimal JSX besides error/loading consumers downstream.
+- No provider render logic remains; the hook returns page-ready state directly.
 
 UI-only state:
 - No isolated UI-only state beyond loading/error strings exposed on context.
@@ -92,7 +91,7 @@ Types/interfaces declared inline:
 | UI-ready rows, options, context data shape | `useMemo` in hook file | `src/types/dto/locations/` + remaining transformers | Future DTO files (**not** landed Phase 22) | high |
 | Mutation calls + refresh coupling | Flat fields + **`actions`** | Hook-owned (**Phase 22-06** ✅) | D-20-09 grouped callbacks (**CFR-11/12**) | medium |
 | Mutation error parsing helper | ~~Inline~~ → **`extractMutationError` imported** | `src/lib/api/extract-mutation-error.ts` | Shared **utility** (CFR-13); **Phase 22-02** consolidated warehouse + devices implementations | done |
-| Provider shell / context typing | Same file today | Future `src/components/features/locations/providers/dashboard-warehouse-provider.tsx` | Compatibility until consumers migrate (D-20-08 **retained render**/feature wiring) | high |
+| Provider shell / context typing | Removed from `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` | n/a | Usage search showed only page containers consume the hook; hidden layout dependency removed | medium |
 
 ### New Files Needed
 
@@ -102,12 +101,12 @@ Types/interfaces declared inline:
 | `src/types/dto/locations/*` | Table rows, options, KPI-ready shapes consumed by feature components |
 | `src/lib/transformers/locations/dashboard-home.ts` | Normalize `/dashboard/home` wire lists (**Phase 22-05** ✅) |
 | `src/lib/api/extract-mutation-error.ts` | Shared mutation error parsing (**Phase 22-02** ✅) |
-| `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` | Hook + provider implementation (**Phase 22-03** ✅; `.tsx` for JSX) |
+| `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx` | Standalone hook implementation; `.tsx` retained for compatibility with existing path |
 
 ### Notes
 
 - **CFR-13:** ~~Duplicate `extractMutationError`~~ **Resolved Phase 22-02** — shared `src/lib/api/extract-mutation-error.ts` used by warehouse hook and `src/components/dashboard/devices/use-dashboard-devices.tsx`.
-- **Compatibility checklist:** Preserve URL `warehouseId` filtering semantics, mutation success refresh behavior, and error dialog metadata (`dashboard/warehouses/create`, `dashboard/zones/create`, `dashboard/bins/create`). Re-run consumer inventory from **Used by** before deleting compatibility provider exports.
+- **Compatibility checklist:** Preserve URL `warehouseId` filtering semantics, mutation success refresh behavior, and error dialog metadata (`dashboard/warehouses/create`, `dashboard/zones/create`, `dashboard/bins/create`). Consumer inventory now limits direct hook usage to the locations bins/zones page containers.
 
 ## Classification
 
@@ -147,3 +146,16 @@ Record the split decision as planned ownership only. Phase 19 does not move sour
 | `BinApiRecord` | `src/types/api/locations/dashboard-home.ts` | `.docs/developer/refactors/components/dismounted/bin-api-record.md` | Typed alongside **`DashboardHomePayload`** (**Phase 22-04**) |
 | `DashboardHomePayload` | `src/types/api/locations/dashboard-home.ts` | `.docs/developer/refactors/components/dismounted/dashboard-home-payload.md` | Inner **`data`** shape for **`GET /dashboard/home`** (**Phase 22-04**) |
 | `extractMutationError` | `src/lib/api/extract-mutation-error.ts` | `.docs/developer/refactors/components/dismounted/extract-mutation-error.md` | **Phase 22-02** ✅ CFR-13 **utility** tier — not `lib/transformers`; shared by warehouse hook + devices hook. |
+
+## Refactor Status
+
+Status: split
+Old path: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx`
+New path: `src/hooks/dashboard/locations/use-dashboard-warehouse.tsx`
+Related files:
+- `src/app/(dashboard)/layout.tsx`
+- `src/components/features/locations/pages/dashboard-bins-page.tsx`
+- `src/components/features/locations/pages/dashboard-zones-page.tsx`
+Imports updated: yes
+Typecheck status: `pnpm exec tsc --noEmit` passed; targeted ESLint passed; full `pnpm lint` still has unrelated pre-existing repo failures.
+Notes: `DashboardWarehouseProvider`, `DashboardWarehouseContext`, and `useContext` consumption were removed. The hook now owns fetching/mutations directly and returns the existing flat fields plus nested `actions`.

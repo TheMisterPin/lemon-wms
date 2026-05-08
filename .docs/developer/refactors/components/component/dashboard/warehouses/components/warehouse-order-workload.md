@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseOrderWorkload.tsx
+source: src/components/dashboard/warehouses/components/warehouse-order-workload.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseOrderWorkload
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseOrderWorkload.tsx`
+`src/components/dashboard/warehouses/components/warehouse-order-workload.tsx`
 
 Current responsibility:
 Order-type workload breakdown panel for warehouse overview.

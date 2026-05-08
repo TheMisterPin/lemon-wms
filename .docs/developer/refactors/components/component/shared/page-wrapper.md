@@ -1,5 +1,5 @@
 ---
-source: src/components/shared/PageWrapper.tsx
+source: src/components/shared/page-wrapper.tsx
 type: component
 isCorrectCase: false
 ---

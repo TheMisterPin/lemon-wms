@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { ClipboardList, Truck } from 'lucide-react'
 
-import { CreatePurchaseOrderModal } from '@/components/dashboard/orders/CreatePurchaseOrderModal'
+import { CreatePurchaseOrderModal } from '@/components/dashboard/orders/create-purchase-order-modal'
 import { GenericTable } from '@/components/tables/generic-table'
 import { Button } from '@/components/ui/button'
 import {

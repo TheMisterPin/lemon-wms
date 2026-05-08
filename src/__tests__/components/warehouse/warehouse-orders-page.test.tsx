@@ -5,7 +5,7 @@ import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePurchaseOrders } from '@/components/warehouse/orders/use-purchase-orders'
-import { WarehouseOrdersPageView } from '@/components/warehouse/orders/WarehouseOrdersPageView'
+import { WarehouseOrdersPageView } from '@/components/warehouse/orders/warehouse-orders-page-view'
 import { OrderStatus } from '@/generated/prisma'
 
 const mockLoadOrders = vi.fn()

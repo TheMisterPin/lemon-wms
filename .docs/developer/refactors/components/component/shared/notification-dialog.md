@@ -1,5 +1,5 @@
 ---
-source: src/components/shared/NotificationDialog.tsx
+source: src/components/shared/notification-dialog.tsx
 type: component
 isCorrectCase: false
 ---

@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/OverviewCards.tsx
+source: src/components/dashboard/warehouses/components/overview-cards.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 OverviewCards
 
 Current file path:
-`src/components/dashboard/warehouses/components/OverviewCards.tsx`
+`src/components/dashboard/warehouses/components/overview-cards.tsx`
 
 Current responsibility:
 Three-up stat cards (warehouses/zones/bins) from `DashboardOverviewCard[]`.
@@ -137,7 +137,7 @@ See **Dismounted Components**.
 
 **Purpose:** Compact KPI tile with icon, accent stripe, title, and formatted value inside the locations overview grid.
 
-**Reuse evidence:** `rg 'function StatCard' src` → **only** `src/components/dashboard/warehouses/components/OverviewCards.tsx` defines `StatCard`; it is not imported as a standalone component elsewhere.
+**Reuse evidence:** `rg 'function StatCard' src` → **only** `src/components/dashboard/warehouses/components/overview-cards.tsx` defines `StatCard`; it is not imported as a standalone component elsewhere.
 
 **Target primitive path (only if promoted later):** `src/components/primitives/dashboard-stat-card.tsx` (name tentative).
 

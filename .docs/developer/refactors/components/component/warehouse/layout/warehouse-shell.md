@@ -1,5 +1,5 @@
 ---
-source: src/components/warehouse/layout/WarehouseShell.tsx
+source: src/components/warehouse/layout/warehouse-shell.tsx
 type: component
 isCorrectCase: false
 ---

@@ -1,5 +1,5 @@
 ---
-source: src/components/dashboard/warehouses/components/WarehouseStockDashboardSkeleton.tsx
+source: src/components/dashboard/warehouses/components/warehouse-stock-dashboard-skeleton.tsx
 type: component
 isCorrectCase: false
 ---
@@ -12,7 +12,7 @@ Component name:
 WarehouseStockDashboardSkeleton
 
 Current file path:
-`src/components/dashboard/warehouses/components/WarehouseStockDashboardSkeleton.tsx`
+`src/components/dashboard/warehouses/components/warehouse-stock-dashboard-skeleton.tsx`
 
 Current responsibility:
 Skeleton matching warehouse stock dashboard layout.

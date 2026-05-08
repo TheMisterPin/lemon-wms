@@ -5,14 +5,11 @@
  */
 
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState
 } from 'react'
-import type { ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 import type { BinTableRow } from '@/components/configs/entities/bin/config'
@@ -34,7 +31,7 @@ import type {
 } from '@/types/api/locations/dashboard-home'
 import type { SelectOption } from '@/types/components/form/generic-form.types'
 
-interface DashboardWarehouseContextValue {
+export type UseDashboardWarehouseResult = {
   warehouses: Warehouse[]
   zones: ZoneTableRow[]
   bins: BinTableRow[]
@@ -55,9 +52,7 @@ interface DashboardWarehouseContextValue {
   }
 }
 
-const DashboardWarehouseContext = createContext<DashboardWarehouseContextValue | null>(null)
-
-export function DashboardWarehouseProvider({ children }: { children: ReactNode }) {
+export function useDashboardWarehouse(): UseDashboardWarehouseResult {
   const searchParams = useSearchParams()
   const warehouseIdFilter = searchParams.get('warehouseId')
 
@@ -230,7 +225,7 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
     [refresh, reportError]
   )
 
-  const value = useMemo<DashboardWarehouseContextValue>(
+  return useMemo<UseDashboardWarehouseResult>(
     () => ({
       warehouses: rawWarehouses,
       zones,
@@ -266,22 +261,4 @@ export function DashboardWarehouseProvider({ children }: { children: ReactNode }
       refresh
     ]
   )
-
-  return (
-    <DashboardWarehouseContext.Provider value={value}>
-      {children}
-    </DashboardWarehouseContext.Provider>
-  )
-}
-
-export function useDashboardWarehouse() {
-  const context = useContext(DashboardWarehouseContext)
-
-  if (!context) {
-    throw new Error(
-      'useDashboardWarehouse must be used within DashboardWarehouseProvider'
-    )
-  }
-
-  return context
 }

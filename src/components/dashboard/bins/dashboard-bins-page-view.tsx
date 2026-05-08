@@ -10,7 +10,7 @@ import { Box } from 'lucide-react'
 
 import { viewBinContentsRowAction } from '@/components/configs/entities/bin/bin-table-actions'
 import { binTableColumns, type BinTableRow } from '@/components/configs/entities/bin/config'
-import { BinContentsModal } from '@/components/dashboard/features/bins/bin-contents-modal'
+import { BinContentsModal } from '@/components/features/bin/components/bin-contents-modal'
 import PageWithGrid from '@/components/pages/page-with-grid'
 
 type DashboardBinsPageViewProps = {
