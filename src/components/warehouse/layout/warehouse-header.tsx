@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/warehouse/layout/warehouse-header.md
  */
 
-
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 

@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/inputs/checkbox-input.md
  */
 
-
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   FieldContent,

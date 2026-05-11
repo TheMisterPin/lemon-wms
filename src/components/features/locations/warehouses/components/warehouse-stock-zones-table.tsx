@@ -4,14 +4,13 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-stock-zones-table.md
  */
 
-
 import Link from 'next/link'
 
-import type { WarehouseStockDashboardZoneRow } from '@/types/warehouse-stock-dashboard.types'
 import {
   WarehouseOverviewButton,
   WarehouseOverviewShellSection
 } from '@/components/primitives/warehouse-overview-primitives'
+import type { WarehouseStockDashboardZoneRow } from '@/types/warehouse-stock-dashboard.types'
 
 type WarehouseStockZonesTableProps = {
   zones: WarehouseStockDashboardZoneRow[]

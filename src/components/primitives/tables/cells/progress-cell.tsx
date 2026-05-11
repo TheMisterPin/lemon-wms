@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/tables/cells/progress-cell.md
  */
 
-
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { EMPTY_DISPLAY_VALUE } from '@/lib/utils/get-value-by-path'

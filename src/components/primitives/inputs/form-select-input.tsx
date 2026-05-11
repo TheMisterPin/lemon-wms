@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/inputs/form-select-input.md
  */
 
-
 import {
   Field,
   FieldError,

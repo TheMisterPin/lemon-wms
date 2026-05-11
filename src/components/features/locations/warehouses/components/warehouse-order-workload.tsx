@@ -4,19 +4,18 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-order-workload.md
  */
 
-
 import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
 
-import { warehouseOverviewIcons } from './warehouse-overview-icons'
 import {
   WarehouseOverviewChartPanel,
   WarehouseOverviewShellSection,
   WarehouseOverviewStatusPill,
   warehouseOverviewToneStyles
 } from '@/components/primitives/warehouse-overview-primitives'
-import type { WarehouseOverviewIconProps } from './warehouse-overview-icons'
 import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
+import { warehouseOverviewIcons } from './warehouse-overview-icons'
+import type { WarehouseOverviewIconProps } from './warehouse-overview-icons'
 import type { WarehouseOrderTypeRow } from './warehouse-overview-types'
 
 const orderTabMap = {

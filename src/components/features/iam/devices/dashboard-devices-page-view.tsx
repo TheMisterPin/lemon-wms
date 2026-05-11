@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/devices/dashboard-devices-page-view.md
  */
 
-
 import Link from 'next/link'
 import { Package2, Router, Shield, Smartphone } from 'lucide-react'
 

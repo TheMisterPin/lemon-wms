@@ -4,14 +4,13 @@
  * @doc .docs/developer/refactors/components/hook/dashboard/home/use-dashboard-home.md
  */
 
-
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Building2, Map as MapIcon, Package } from 'lucide-react'
 import type { DashboardInfoCardItem } from '@/components/dashboard/primitives/dashboard-info-card'
+import type { DashboardOverviewCard, DashboardWarehouseDisplayRecord, DashboardZoneDisplayRecord, DashboardBinDisplayRecord } from '@/components/features/locations/warehouses/components/dashboard-types'
 import { dashboardApiClient } from '@/lib/axios'
 import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
-import type { DashboardOverviewCard, DashboardWarehouseDisplayRecord, DashboardZoneDisplayRecord, DashboardBinDisplayRecord } from '@/components/features/locations/warehouses/components/dashboard-types'
 
 const PAGE_SIZE = 3
 

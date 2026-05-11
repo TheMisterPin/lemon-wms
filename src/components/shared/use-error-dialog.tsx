@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/shared/use-error-dialog.md
  */
 
-
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
 
 export type ErrorSeverity = 'info' | 'warning' | 'error'

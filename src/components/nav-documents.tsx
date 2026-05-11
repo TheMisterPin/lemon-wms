@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/nav-documents.md
  */
 
-
 import {
   IconDots,
   IconFolder,

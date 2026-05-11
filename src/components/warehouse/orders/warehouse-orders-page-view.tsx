@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/warehouse/orders/warehouse-orders-page-view.md
  */
 
-
 import { useEffect, useMemo } from 'react'
 import { ClipboardList, Pause, Play } from 'lucide-react'
 import { GenericTable } from '@/components/primitives/tables/generic-table'

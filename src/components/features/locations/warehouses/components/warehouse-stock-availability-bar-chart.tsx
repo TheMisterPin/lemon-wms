@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-stock-availability-bar-chart.md
  */
 
-
 import {
   Bar,
   BarChart,

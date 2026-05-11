@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/stock/category-stock-dashboard.md
  */
 
-
 import Link from 'next/link'
 
 import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'

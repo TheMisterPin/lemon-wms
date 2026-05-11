@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/tables/generic-table.md
  */
 
-
 import { TableShell } from '@/components/primitives/tables/table-shell'
 import { useTableShellController } from '@/components/primitives/tables/use-table-shell-controller'
 import type { GenericTableProps } from '@/types/components/table/generic-table.types'

@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/devices/device-detail-page-client.md
  */
 
-
 import Link from 'next/link'
 
 import { DeviceDetailDashboard } from '@/components/features/iam/devices/device-detail-dashboard'

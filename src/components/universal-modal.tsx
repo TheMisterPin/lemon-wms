@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/universal-modal.md
  */
 
-
 import {
   Dialog,
   DialogContent,

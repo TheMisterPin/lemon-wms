@@ -4,15 +4,14 @@
  * @doc .docs/developer/refactors/components/component/auth/floor-login-form.md
  */
 
-
 import { useRef } from 'react'
 
 import { Loader2 } from 'lucide-react'
 
-import { useFloorLoginFlow } from '@/hooks/dashboard/iam/use-floor-login-flow'
 import NumericKeypad from '@/components/shared/numeric-keypad'
 import ScanInput from '@/components/shared/scan-input'
 import { useIsMobile } from '@/components/shared/use-mobile'
+import { useFloorLoginFlow } from '@/hooks/dashboard/iam/use-floor-login-flow'
 
 type Step = 'device' | 'badge' | 'pin'
 

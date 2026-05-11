@@ -5,10 +5,10 @@
  */
 
 import { MapPin, Warehouse } from 'lucide-react'
-import { useDashboardHome, type DashboardBinRecord } from '@/components/features/home/use-dashboard-home'
 import { DashboardHomeSearchBar } from '@/components/dashboard/primitives/dashboard-home-search-bar'
 import { DashboardInfoCards } from '@/components/dashboard/primitives/dashboard-info-card'
 import { DashboardRecordListSection } from '@/components/dashboard/primitives/dashboard-record-list-section'
+import { useDashboardHome, type DashboardBinRecord } from '@/components/features/home/use-dashboard-home'
 import { GenericTable } from '@/components/primitives/tables/generic-table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuth } from '@/lib/auth/use-auth'

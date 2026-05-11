@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/shared/notification-dialog.md
  */
 
-
 import {
   AlertTriangle,
   CheckCircle2,

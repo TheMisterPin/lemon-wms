@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/tables/table-body.md
  */
 
-
 import {
   TableBody,
   TableCell,

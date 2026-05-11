@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/warehouse/home/use-warehouse-home.md
  */
 
-
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MapPin, Warehouse } from 'lucide-react'
 

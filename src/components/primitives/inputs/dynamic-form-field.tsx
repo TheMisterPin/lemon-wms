@@ -16,11 +16,11 @@ import {
 import { cn } from '@/lib/utils'
 import { getValueByPath } from '@/lib/utils/get-value-by-path'
 
+import { FormFieldConfig } from '@/types/components/form/generic-form.types'
+import { TextInput } from './branded-text-input'
 import { CheckboxInput } from './checkbox-input'
 import { FormDateInput } from './form-date-input'
 import { FormSelectInput } from './form-select-input'
-import { TextInput } from './branded-text-input'
-import { FormFieldConfig } from '@/types/components/form/generic-form.types'
 
 interface GenericFormFieldProps<T extends FieldValues> {
   field: FormFieldConfig<T>

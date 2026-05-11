@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/shared/use-camera.md
  */
 
-
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useErrorDialog } from '@/components/shared/use-error-dialog'

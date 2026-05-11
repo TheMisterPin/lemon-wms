@@ -243,4 +243,4 @@ async function getCategoryStockOverview(
   return Array.from(grouped.values())
 }
 
-export { getCategoryStockOverview, getCategoriesOverview, getBasicCategoryInfo, getCategory, getCategoryByCode, getItemsByCategory, getCategories }
+export { getCategoryStockOverview, getCategoriesOverview, getBasicCategoryInfo, getCategory, getCategoryByCode, getItemsByCategory, getCategories, getCategoriesTree }

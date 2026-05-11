@@ -4,17 +4,16 @@
  * @doc .docs/developer/refactors/components/component/dashboard/stock/item-detail-dashboard.md
  */
 
-
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
+import { format } from 'date-fns'
+import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
 import type { ItemDetailDashboardDTO } from '@/types/item-detail-dashboard.types'
-import { format } from 'date-fns'
 
 function formatTs(value: string): string {
   return format(new Date(value), 'MMM d, yyyy · HH:mm')
@@ -22,9 +21,16 @@ function formatTs(value: string): string {
 
 function getStatusBadgeColor(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
   const statusLower = status.toLowerCase()
-  if (statusLower.includes('completed') || statusLower.includes('executed')) return 'default'
-  if (statusLower.includes('draft')) return 'secondary'
-  if (statusLower.includes('cancelled')) return 'destructive'
+  if (statusLower.includes('completed') || statusLower.includes('executed')) {
+    return 'default'
+  }
+  if (statusLower.includes('draft')) {
+    return 'secondary'
+  }
+  if (statusLower.includes('cancelled')) {
+    return 'destructive'
+  }
+
   return 'outline'
 }
 
@@ -109,64 +115,64 @@ export function ItemDetailDashboard({ data }: { data: ItemDetailDashboardDTO }) 
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {visibleWarehouses.map((row) => {
-            const total = row.available + row.reserved + row.blocked
-            const availablePercent = total > 0 ? (row.available / total) * 100 : 0
-            const reservedPercent = total > 0 ? (row.reserved / total) * 100 : 0
-            const blockedPercent = total > 0 ? (row.blocked / total) * 100 : 0
+              const total = row.available + row.reserved + row.blocked
+              const availablePercent = total > 0 ? (row.available / total) * 100 : 0
+              const reservedPercent = total > 0 ? (row.reserved / total) * 100 : 0
+              const blockedPercent = total > 0 ? (row.blocked / total) * 100 : 0
 
-            return (
-              <article
-                key={row.warehouseId}
-                className="rounded-xl border p-4"
-                style={{
-                  background: 'var(--wh-card-bg-soft)',
-                  borderColor: 'var(--wh-border)'
-                }}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--wh-text-primary)' }}>
-                      {row.warehouseName}
-                    </p>
-                    <p className="mt-1 text-2xl font-bold" style={{ color: 'var(--wh-text-primary)' }}>
-                      {row.totalOnHand}
-                    </p>
-                    <p className="mt-1 text-xs" style={{ color: 'var(--wh-text-muted)' }}>
-                      {row.binsCount} bins stacked
-                    </p>
+              return (
+                <article
+                  key={row.warehouseId}
+                  className="rounded-xl border p-4"
+                  style={{
+                    background: 'var(--wh-card-bg-soft)',
+                    borderColor: 'var(--wh-border)'
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--wh-text-primary)' }}>
+                        {row.warehouseName}
+                      </p>
+                      <p className="mt-1 text-2xl font-bold" style={{ color: 'var(--wh-text-primary)' }}>
+                        {row.totalOnHand}
+                      </p>
+                      <p className="mt-1 text-xs" style={{ color: 'var(--wh-text-muted)' }}>
+                        {row.binsCount} bins stacked
+                      </p>
+                    </div>
+                    <div className="space-y-1 text-right text-xs">
+                      <p style={{ color: '#22c55e' }}>Available {row.available}</p>
+                      <p style={{ color: '#eab308' }}>Reserved {row.reserved}</p>
+                      <p style={{ color: '#ef4444' }}>Blocked {row.blocked}</p>
+                    </div>
                   </div>
-                  <div className="space-y-1 text-right text-xs">
-                    <p style={{ color: '#22c55e' }}>Available {row.available}</p>
-                    <p style={{ color: '#eab308' }}>Reserved {row.reserved}</p>
-                    <p style={{ color: '#ef4444' }}>Blocked {row.blocked}</p>
-                  </div>
-                </div>
 
-                <div className="mt-4 flex h-3 gap-1 overflow-hidden rounded-full" aria-hidden="true">
-                  {availablePercent > 0 && (
-                    <div
-                      className="bg-green-500"
-                      style={{ width: `${availablePercent}%` }}
-                      title={`Available: ${row.available}`}
-                    />
-                  )}
-                  {reservedPercent > 0 && (
-                    <div
-                      className="bg-yellow-500"
-                      style={{ width: `${reservedPercent}%` }}
-                      title={`Reserved: ${row.reserved}`}
-                    />
-                  )}
-                  {blockedPercent > 0 && (
-                    <div
-                      className="bg-red-500"
-                      style={{ width: `${blockedPercent}%` }}
-                      title={`Blocked: ${row.blocked}`}
-                    />
-                  )}
-                </div>
-              </article>
-            )
+                  <div className="mt-4 flex h-3 gap-1 overflow-hidden rounded-full" aria-hidden="true">
+                    {availablePercent > 0 && (
+                      <div
+                        className="bg-green-500"
+                        style={{ width: `${availablePercent}%` }}
+                        title={`Available: ${row.available}`}
+                      />
+                    )}
+                    {reservedPercent > 0 && (
+                      <div
+                        className="bg-yellow-500"
+                        style={{ width: `${reservedPercent}%` }}
+                        title={`Reserved: ${row.reserved}`}
+                      />
+                    )}
+                    {blockedPercent > 0 && (
+                      <div
+                        className="bg-red-500"
+                        style={{ width: `${blockedPercent}%` }}
+                        title={`Blocked: ${row.blocked}`}
+                      />
+                    )}
+                  </div>
+                </article>
+              )
             })}
           </div>
 
@@ -191,6 +197,7 @@ export function ItemDetailDashboard({ data }: { data: ItemDetailDashboardDTO }) 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {data.orders.map((row) => {
             const progressPercent = row.requiredQty > 0 ? (row.processedQty / row.requiredQty) * 100 : 0
+
             return (
               <button
                 key={`${row.type}:${row.orderId}`}

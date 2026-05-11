@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/tables/checkbox-table.md
  */
 
-
 import * as React from 'react'
 
 import { Checkbox } from '@/components/ui/checkbox'

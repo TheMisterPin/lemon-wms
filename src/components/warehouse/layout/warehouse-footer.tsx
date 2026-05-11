@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/warehouse/layout/warehouse-footer.md
  */
 
-
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'

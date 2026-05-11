@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/tables/cells/indicator-cell.md
  */
 
-
 import { cn } from '@/lib/utils'
 import {
   getDataColumnDisplayString,

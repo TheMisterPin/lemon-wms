@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/nav-main.md
  */
 
-
 import { IconCirclePlusFilled, IconMail, type Icon } from '@tabler/icons-react'
 
 import { Button } from '@/components/ui/button'

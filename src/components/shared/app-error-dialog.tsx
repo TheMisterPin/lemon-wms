@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/shared/app-error-dialog.md
  */
 
-
 import { ErrorModal } from '@/components/shared/error-modal'
 import { useErrorDialog } from '@/components/shared/use-error-dialog'
 

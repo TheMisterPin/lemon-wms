@@ -4,16 +4,15 @@
  * @doc .docs/developer/refactors/components/component/dynamic-form.md
  */
 
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FieldValues, Resolver, useForm } from 'react-hook-form'
 
+import { GenericFormField } from '@/components/primitives/inputs/dynamic-form-field'
 import { Button } from '@/components/ui/button'
 import { FieldGroup } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 
-import { GenericFormField } from '@/components/primitives/inputs/dynamic-form-field'
 import { GenericFormProps } from '../types/components/form/generic-form.types'
 
 function getColumnsClass(columns: 1 | 2 | 3 | 4 = 2): string {

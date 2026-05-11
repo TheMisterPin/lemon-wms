@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/dashboard/stock/use-item-detail-dashboard.md
  */
 
-
 import { useCallback, useEffect, useState } from 'react'
 
 import { dashboardApiClient } from '@/lib/axios'

@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/shared/numeric-keypad.md
  */
 
-
 // TODO: `onChangeUser` is a login-specific concern that couples this generic
 // keypad to auth semantics. Refactor to generic secondary-action props:
 //   onSecondaryAction?: () => void

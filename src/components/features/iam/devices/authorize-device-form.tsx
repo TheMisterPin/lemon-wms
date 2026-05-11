@@ -4,12 +4,11 @@
  * @doc .docs/developer/refactors/components/component/dashboard/features/devices/authorize-device-form.md
  */
 
-
 import { useState } from 'react'
 
 import { createAuthorizeDeviceFormConfig } from '@/components/configs/entities/device/config'
-import { useDashboardDevices } from '@/components/features/iam/devices/use-dashboard-devices'
 import DynamicForm from '@/components/dynamic-form'
+import { useDashboardDevices } from '@/components/features/iam/devices/use-dashboard-devices'
 import {
   Dialog,
   DialogContent,

@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/nav-user.md
  */
 
-
 import {
   IconCreditCard,
   IconDotsVertical,

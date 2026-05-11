@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/warehouse/items/use-load-item-to-trolley.md
  */
 
-
 import { useCallback, useState } from 'react'
 
 import type { BinStockRecord } from '@/components/warehouse/items/use-bin-details'

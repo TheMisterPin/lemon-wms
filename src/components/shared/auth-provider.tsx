@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/shared/auth-provider.md
  */
 
-
 import { useEffect, useState, type ReactNode } from 'react'
 
 import { getUsableAccessToken } from '@/lib/auth/decode'

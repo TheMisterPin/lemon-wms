@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/tables/table-shell.md
  */
 
-
 import type { ReactNode } from 'react'
 
 import { Search } from 'lucide-react'

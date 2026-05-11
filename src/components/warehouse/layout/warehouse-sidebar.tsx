@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/warehouse/layout/warehouse-sidebar.md
  */
 
-
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {

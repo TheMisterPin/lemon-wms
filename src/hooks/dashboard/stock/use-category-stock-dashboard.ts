@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/dashboard/stock/use-category-stock-dashboard.md
  */
 
-
 import { useCallback, useEffect, useState } from 'react'
 
 import { dashboardApiClient } from '@/lib/axios'

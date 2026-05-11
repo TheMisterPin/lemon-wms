@@ -4,12 +4,11 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-stock-items-table.md
  */
 
-
-import type { WarehouseStockDashboardItemRow } from '@/types/warehouse-stock-dashboard.types'
 import {
   WarehouseOverviewButton,
   WarehouseOverviewShellSection
 } from '@/components/primitives/warehouse-overview-primitives'
+import type { WarehouseStockDashboardItemRow } from '@/types/warehouse-stock-dashboard.types'
 
 type WarehouseStockItemsTableProps = {
   items: WarehouseStockDashboardItemRow[]

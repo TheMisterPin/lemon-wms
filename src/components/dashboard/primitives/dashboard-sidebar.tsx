@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/dashboard-sidebar.md
  */
 
-
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -13,11 +12,11 @@ import {
   Moon,
   ChevronDown
 } from 'lucide-react'
-import { useTheme } from '@/components/shared/use-theme'
 import {
   DASHBOARD_NAV_GROUPS,
   isRouteActive
 } from '@/components/dashboard/primitives/dashboard-navigation'
+import { useTheme } from '@/components/shared/use-theme'
 
 interface DashboardSidebarProps {
   onClose?: () => void
@@ -43,6 +42,7 @@ export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(activeGroups)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpenGroups((current) => {
       let changed = false
       const next = { ...current }

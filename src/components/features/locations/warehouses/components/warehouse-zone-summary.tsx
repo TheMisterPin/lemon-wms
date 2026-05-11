@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-zone-summary.md
  */
 
-
 import {
   WarehouseOverviewButton,
   WarehouseOverviewShellSection

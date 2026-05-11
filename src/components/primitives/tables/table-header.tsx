@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/tables/table-header.md
  */
 
-
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 
 import {

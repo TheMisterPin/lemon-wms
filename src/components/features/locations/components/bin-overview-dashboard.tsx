@@ -18,6 +18,7 @@ import {
 } from 'recharts'
 
 import { warehouseOverviewIcons } from '@/components/features/locations/warehouses/components/warehouse-overview-icons'
+import { WarehouseActivityRow } from '@/components/features/locations/warehouses/components/warehouse-overview-types'
 import {
   WarehouseOverviewButton,
   WarehouseOverviewChartPanel,
@@ -34,7 +35,6 @@ import {
   SheetTitle
 } from '@/components/ui/sheet'
 import type { BinActivityRow, BinContentRow, BinDetailDashboardDTO } from '@/types/bin-detail-dashboard.types'
-import { WarehouseActivityRow } from '@/components/features/locations/warehouses/components/warehouse-overview-types'
 
 type BinOverviewDashboardProps = {
   data: BinDetailDashboardDTO

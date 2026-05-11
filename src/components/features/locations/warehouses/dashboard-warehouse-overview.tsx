@@ -4,22 +4,21 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/dashboard-warehouse-overview.md
  */
 
-
 import type { ComponentType } from 'react'
 
-import type { WarehouseOverviewDashboardData, WarehouseOverviewDashboardKpiRow } from '@/types/warehouse-overview-dashboard.types'
-import { warehouseOverviewIcons } from './components/warehouse-overview-icons'
 import {
   WarehouseOverviewButton,
   WarehouseOverviewStatusPill,
   warehouseOverviewToneStyles
 } from '@/components/primitives/warehouse-overview-primitives'
+import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
+import type { WarehouseOverviewDashboardData, WarehouseOverviewDashboardKpiRow } from '@/types/warehouse-overview-dashboard.types'
 import { WarehouseActivitySummary } from './components/warehouse-activity-summary'
 import { WarehouseOrderWorkload } from './components/warehouse-order-workload'
+import { warehouseOverviewIcons } from './components/warehouse-overview-icons'
 import { WarehouseStockSummary } from './components/warehouse-stock-summary'
 import { WarehouseZoneSummary } from './components/warehouse-zone-summary'
 import type { WarehouseOverviewIconProps } from './components/warehouse-overview-icons'
-import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 
 type KpiRenderable = WarehouseOverviewDashboardKpiRow & {
   icon: ComponentType<WarehouseOverviewIconProps>

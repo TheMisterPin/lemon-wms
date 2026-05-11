@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-stock-dashboard-skeleton.md
  */
 
-
 export function WarehouseStockDashboardSkeleton() {
   return (
     <div className="mx-auto max-w-7xl space-y-5">

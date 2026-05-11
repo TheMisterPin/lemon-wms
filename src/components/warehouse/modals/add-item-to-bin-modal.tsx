@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/warehouse/modals/add-item-to-bin-modal.md
  */
 
-
 import { Loader2, PackagePlus, Search, X } from 'lucide-react'
 
 import NumericKeypad from '@/components/shared/numeric-keypad'

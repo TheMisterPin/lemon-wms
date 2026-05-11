@@ -4,14 +4,13 @@
  * @doc .docs/developer/refactors/components/component/dashboard/users/user-detail-dashboard.md
  */
 
-
-import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 
 import { format } from 'date-fns'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { UserActivityRow, UserDetailDashboardDTO } from '@/types/user-detail-dashboard.types'
 
 function formatTs(value?: string): string {
@@ -266,7 +265,7 @@ export function UserDetailDashboard({ data }: { data: UserDetailDashboardDTO }) 
                     color: 'var(--wh-text-secondary)'
                   }}
                 >
-{JSON.stringify(selectedActivity.metadata ?? {}, null, 2)}
+                  {JSON.stringify(selectedActivity.metadata ?? {}, null, 2)}
                 </pre>
               </div>
             </div>

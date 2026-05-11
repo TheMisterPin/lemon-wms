@@ -4,20 +4,19 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/dashboard-warehouse-stock.md
  */
 
-
 import type { ComponentType } from 'react'
 import Link from 'next/link'
 
 import type { WarehouseOverviewIconProps } from '@/components/features/locations/warehouses/components/warehouse-overview-icons'
 import { warehouseOverviewIcons } from '@/components/features/locations/warehouses/components/warehouse-overview-icons'
-import {
-  warehouseOverviewToneStyles
-} from '@/components/primitives/warehouse-overview-primitives'
-import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
 import { WarehouseStockAvailabilityBarChart } from '@/components/features/locations/warehouses/components/warehouse-stock-availability-bar-chart'
 import { WarehouseStockItemsTable } from '@/components/features/locations/warehouses/components/warehouse-stock-items-table'
 import { WarehouseStockSummary } from '@/components/features/locations/warehouses/components/warehouse-stock-summary'
 import { WarehouseStockZonesTable } from '@/components/features/locations/warehouses/components/warehouse-stock-zones-table'
+import type { WarehouseOverviewTone } from '@/components/primitives/warehouse-overview-primitives'
+import {
+  warehouseOverviewToneStyles
+} from '@/components/primitives/warehouse-overview-primitives'
 import type { WarehouseStockDashboardData } from '@/types/warehouse-stock-dashboard.types'
 
 type StockKpiRenderable = WarehouseStockDashboardData['kpis'][number] & {

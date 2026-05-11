@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/shared/pagination-selector.md
  */
 
-
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { cn } from '@/lib/utils'

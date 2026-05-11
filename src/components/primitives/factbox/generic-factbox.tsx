@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/factbox/generic-factbox.md
  */
 
-
 import { FieldValues } from 'react-hook-form'
 
 import {

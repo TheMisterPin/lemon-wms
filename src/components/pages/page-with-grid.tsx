@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/pages/page-with-grid.md
  */
 
-
 import type { ReactNode } from 'react'
 
 import { GenericTable } from '@/components/primitives/tables/generic-table'

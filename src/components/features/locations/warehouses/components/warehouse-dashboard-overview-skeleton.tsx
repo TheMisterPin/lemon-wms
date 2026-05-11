@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/warehouses/components/warehouse-dashboard-overview-skeleton.md
  */
 
-
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 

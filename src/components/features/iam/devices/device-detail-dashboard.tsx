@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/devices/device-detail-dashboard.md
  */
 
-
 import Link from 'next/link'
 
 import { format } from 'date-fns'

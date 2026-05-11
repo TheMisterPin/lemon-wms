@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/app-sidebar.md
  */
 
-
 import * as React from 'react'
 import {
   IconCamera,

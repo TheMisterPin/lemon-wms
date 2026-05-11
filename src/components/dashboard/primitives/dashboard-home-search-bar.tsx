@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/dashboard-home-search-bar.md
  */
 
-
 import { Search } from 'lucide-react'
 
 import { Input } from '@/components/ui/input'

@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/warehouse/items/use-add-item-to-bin.md
  */
 
-
 import { useEffect, useRef, useState } from 'react'
 
 import { warehouseApiClient } from '@/lib/axios'

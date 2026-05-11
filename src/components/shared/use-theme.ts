@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/shared/use-theme.md
  */
 
-
 import { useCallback, useSyncExternalStore } from 'react'
 
 function getSnapshot(): 'light' | 'dark' {

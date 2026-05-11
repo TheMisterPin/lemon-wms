@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/users/user-detail-page-client.md
  */
 
-
 import { useUserDetailDashboard } from '@/components/features/iam/users/use-user-detail-dashboard'
 import { UserDetailDashboard } from '@/components/features/iam/users/user-detail-dashboard'
 import { Skeleton } from '@/components/ui/skeleton'

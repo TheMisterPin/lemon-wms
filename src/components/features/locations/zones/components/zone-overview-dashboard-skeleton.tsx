@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/dashboard/zones/components/zone-overview-dashboard-skeleton.md
  */
 
-
 export function ZoneOverviewDashboardSkeleton() {
   return (
     <div className="mx-auto max-w-7xl space-y-5">

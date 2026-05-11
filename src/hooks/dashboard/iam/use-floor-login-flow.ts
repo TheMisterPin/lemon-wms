@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/hook/auth/use-floor-login-flow.md
  */
 
-
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { z } from 'zod'

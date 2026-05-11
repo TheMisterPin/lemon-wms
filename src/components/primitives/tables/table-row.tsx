@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/component/tables/table-row.md
  */
 
-
 import { CellRenderer } from '@/components/primitives/tables/cells/cell-renderer'
 import { Button } from '@/components/ui/button'
 import {
