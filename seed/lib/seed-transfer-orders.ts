@@ -5,7 +5,11 @@ import {
   type PrismaClient
 } from '@/generated/prisma'
 
-const TRANSFER_ORDER_COUNT = 20
+import {
+  SEED_ORDER_WAREHOUSE_COUNT,
+  warehouseOrderSeedCount
+} from './warehouse-order-seed-count'
+
 const UPDATE_BATCH_SIZE = 100
 
 function randomInt(min: number, max: number): number {
@@ -35,6 +39,19 @@ type TransferCandidate = {
 }
 
 export async function seedTransferOrders(prisma: PrismaClient) {
+  const seedWarehouses = await prisma.warehouse.findMany({
+    where: { deletedAt: null },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, name: true },
+    take: SEED_ORDER_WAREHOUSE_COUNT
+  })
+
+  const seedWarehouseIds = seedWarehouses.map((w) => w.id)
+
+  if (seedWarehouseIds.length === 0) {
+    return { count: 0, reservedUpdates: 0 }
+  }
+
   const [users, bins, stockRows] = await Promise.all([
     prisma.user.findMany({
       where: { isActive: true, role: { in: ['OWNER', 'OFFICE_MANAGER'] } },
@@ -42,7 +59,11 @@ export async function seedTransferOrders(prisma: PrismaClient) {
       select: { id: true }
     }),
     prisma.bin.findMany({
-      where: { deletedAt: null, isBlocked: false },
+      where: {
+        deletedAt: null,
+        isBlocked: false,
+        warehouseId: { in: seedWarehouseIds }
+      },
       orderBy: { createdAt: 'asc' },
       select: { id: true, warehouseId: true }
     }),
@@ -50,6 +71,7 @@ export async function seedTransferOrders(prisma: PrismaClient) {
       where: {
         quantityAvailable: { gt: 0 },
         status: { in: ['AVAILABLE', 'RESERVED'] },
+        warehouseId: { in: seedWarehouseIds },
         bin: { deletedAt: null, isBlocked: false }
       },
       orderBy: { createdAt: 'asc' },
@@ -90,57 +112,73 @@ export async function seedTransferOrders(prisma: PrismaClient) {
   }))
 
   let created = 0
+  let globalIndex = 0
 
-  for (let index = 0; index < TRANSFER_ORDER_COUNT; index += 1) {
-    const available = mutableStock.filter((row) => row.quantityAvailable > 0)
-    if (available.length === 0) {
-      break
-    }
+  for (const originWarehouse of seedWarehouses) {
+    const transfersForWarehouse = warehouseOrderSeedCount(originWarehouse.id, 'transfer')
+    let createdForWarehouse = 0
 
-    const source = available[index % available.length]
-    const destinationWarehouses = [...binsByWarehouse.keys()].filter((id) => id !== source.warehouseId)
+    for (let k = 0; k < transfersForWarehouse; k += 1) {
+      const index = globalIndex
+      globalIndex += 1
 
-    if (destinationWarehouses.length === 0) {
-      continue
-    }
-
-    const destinationWarehouseId = destinationWarehouses[index % destinationWarehouses.length]
-    const destinationBins = binsByWarehouse.get(destinationWarehouseId) ?? []
-
-    if (destinationBins.length === 0) {
-      continue
-    }
-
-    const destinationBinId = destinationBins[index % destinationBins.length]
-    const reserveQty = Math.min(source.quantityAvailable, randomInt(1, Math.min(4, source.quantityAvailable)))
-
-    source.quantityAvailable -= reserveQty
-    source.quantityReserved += reserveQty
-
-    await prisma.transferOrder.create({
-      data: {
-        reference: `TO-SEED-${String(index + 1).padStart(4, '0')}`,
-        status: pickStatus(index),
-        warehouseId: source.warehouseId,
-        originBinId: source.binId,
-        destinationBinId,
-        isCrossWarehouse: true,
-        createdById: users[index % users.length].id,
-        lines: {
-          create: [{
-            itemId: source.itemId,
-            itemNameSnapshot: source.itemName,
-            binId: source.binId,
-            baseQuantity: new Prisma.Decimal(reserveQty),
-            handledQuantity: new Prisma.Decimal(0),
-            isShort: false,
-            uom: source.uom
-          }]
-        }
+      const available = mutableStock.filter((row) => row.quantityAvailable > 0)
+      if (available.length === 0) {
+        break
       }
-    })
 
-    created += 1
+      const targetWarehouseId = originWarehouse.id
+      const inRotatedWarehouse = available.filter((row) => row.warehouseId === targetWarehouseId)
+      const candidatePool =
+        inRotatedWarehouse.length > 0 ? inRotatedWarehouse : available
+      const source = candidatePool[index % candidatePool.length]
+      const destinationWarehouses = seedWarehouseIds.filter((id) => id !== source.warehouseId)
+
+      if (destinationWarehouses.length === 0) {
+        continue
+      }
+
+      const destinationWarehouseId = destinationWarehouses[index % destinationWarehouses.length]
+      const destinationBins = binsByWarehouse.get(destinationWarehouseId) ?? []
+
+      if (destinationBins.length === 0) {
+        continue
+      }
+
+      const destinationBinId = destinationBins[index % destinationBins.length]
+      const reserveQty = Math.min(source.quantityAvailable, randomInt(1, Math.min(4, source.quantityAvailable)))
+
+      source.quantityAvailable -= reserveQty
+      source.quantityReserved += reserveQty
+
+      await prisma.transferOrder.create({
+        data: {
+          reference: `TO-SEED-${String(index + 1).padStart(4, '0')}`,
+          status: pickStatus(index),
+          warehouseId: source.warehouseId,
+          originBinId: source.binId,
+          destinationBinId,
+          isCrossWarehouse: true,
+          createdById: users[index % users.length].id,
+          lines: {
+            create: [{
+              itemId: source.itemId,
+              itemNameSnapshot: source.itemName,
+              binId: source.binId,
+              baseQuantity: new Prisma.Decimal(reserveQty),
+              handledQuantity: new Prisma.Decimal(0),
+              isShort: false,
+              uom: source.uom
+            }]
+          }
+        }
+      })
+
+      created += 1
+      createdForWarehouse += 1
+    }
+
+    console.warn(`Seeded ${createdForWarehouse} transfer orders in ${originWarehouse.name}`)
   }
 
   const updates = mutableStock

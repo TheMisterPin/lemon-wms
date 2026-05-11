@@ -42,6 +42,7 @@ model ItemCategory {
   code        String   @unique
   name        String   @unique
   description String?
+  iconUrl     String?
   hasChildren Boolean  @default(false)
   parentCode  String?
   handlingFlags Json?  // e.g. { "COLD": true, "HAZMAT": false }

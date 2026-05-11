@@ -1,4 +1,4 @@
-import { DashboardBinsPage } from '@/components/features/locations/pages/dashboard-bins-page'
+import { DashboardBinsPage } from '@/components/features/locations/bins/pages/dashboard-bins-page'
 
 export default function BinsHomePage() {
   return <DashboardBinsPage />

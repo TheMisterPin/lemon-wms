@@ -1,4 +1,4 @@
-import { DashboardLocationsPageView } from '@/components/features/locations/warehouses/dashboard-location-page'
+import { DashboardLocationsPageView } from '@/components/features/locations/warehouses/pages/dashboard-location-page'
 
 export default function DashboardHomePage() {
   return <DashboardLocationsPageView />

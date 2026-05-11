@@ -5,7 +5,9 @@
  */
 
 import Link from 'next/link'
+import { LayoutGrid, Layers } from 'lucide-react'
 
+import { CategoryIcon, CategoryPickerIcon } from '@/components/primitives/media/category-icon'
 import { WarehouseOverviewShellSection } from '@/components/primitives/warehouse-overview-primitives'
 import type { CategoryStockDashboardDTO } from '@/types/category-stock-dashboard.types'
 
@@ -19,8 +21,16 @@ export function CategoryStockDashboard({ data }: { data: CategoryStockDashboardD
           borderColor: 'var(--wh-border)'
         }}
       >
-        <h1 className="text-xl font-bold xl:text-2xl" style={{ color: 'var(--wh-text-primary)' }}>
-          {data.header.title}
+        <h1 className="flex items-center gap-3 text-xl font-bold xl:text-2xl" style={{ color: 'var(--wh-text-primary)' }}>
+          {data.selectedCategoryIconUrl ? (
+            <span
+              className="inline-flex shrink-0 rounded-lg border p-1"
+              style={{ borderColor: 'var(--wh-border)', background: 'var(--wh-card-bg)' }}
+            >
+              <CategoryIcon src={data.selectedCategoryIconUrl} size={28} alt="" />
+            </span>
+          ) : null}
+          <span>{data.header.title}</span>
         </h1>
         <p className="mt-1 text-sm" style={{ color: 'var(--wh-text-muted)' }}>
           {data.header.subtitle}
@@ -38,7 +48,8 @@ export function CategoryStockDashboard({ data }: { data: CategoryStockDashboardD
               borderColor: 'var(--wh-border)'
             }}
           >
-            <p className="text-sm font-semibold" style={{ color: 'var(--wh-text-primary)' }}>
+            <p className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--wh-text-primary)' }}>
+              <CategoryPickerIcon iconUrl={card.iconUrl} fallback={LayoutGrid} size={20} />
               {card.name}
             </p>
             <p className="mt-1 text-xl font-bold" style={{ color: 'var(--wh-text-primary)' }}>
@@ -65,7 +76,10 @@ export function CategoryStockDashboard({ data }: { data: CategoryStockDashboardD
                 return (
                   <div key={slice.categoryId}>
                     <div className="mb-1 flex items-center justify-between text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
-                      <span>{slice.categoryName}</span>
+                      <span className="flex min-w-0 items-center gap-2">
+                        <CategoryPickerIcon iconUrl={slice.iconUrl} fallback={LayoutGrid} size={14} />
+                        <span className="truncate">{slice.categoryName}</span>
+                      </span>
                       <span>{slice.totalOnHand}</span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full" style={{ background: 'var(--wh-border)' }}>
@@ -112,7 +126,8 @@ export function CategoryStockDashboard({ data }: { data: CategoryStockDashboardD
           <div className="space-y-4">
             {data.subcategoryGroups.map((group) => (
               <div key={group.parentCategoryId}>
-                <p className="text-sm font-semibold" style={{ color: 'var(--wh-text-primary)' }}>
+                <p className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--wh-text-primary)' }}>
+                  <CategoryPickerIcon iconUrl={group.parentIconUrl} fallback={LayoutGrid} size={18} />
                   {group.parentCategoryName}
                 </p>
                 <div className="mt-2 space-y-2">
@@ -126,7 +141,10 @@ export function CategoryStockDashboard({ data }: { data: CategoryStockDashboardD
                         color: 'var(--wh-text-secondary)'
                       }}
                     >
-                      <span>{row.name}</span>
+                      <span className="flex min-w-0 items-center gap-2">
+                        <CategoryPickerIcon iconUrl={row.iconUrl} fallback={Layers} size={16} />
+                        <span className="truncate">{row.name}</span>
+                      </span>
                       <span>{row.onHand}</span>
                     </Link>
                   ))}

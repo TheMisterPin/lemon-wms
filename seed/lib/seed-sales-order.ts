@@ -5,7 +5,11 @@ import {
   type PrismaClient
 } from '@/generated/prisma'
 
-const SALES_ORDER_COUNT = 30
+import {
+  SEED_ORDER_WAREHOUSE_COUNT,
+  warehouseOrderSeedCount
+} from './warehouse-order-seed-count'
+
 const UPDATE_BATCH_SIZE = 100
 
 function pickStatus(index: number): OrderStatus {
@@ -36,6 +40,15 @@ type MutableStock = {
 }
 
 export async function seedSalesOrders(prisma: PrismaClient) {
+  const seedWarehouses = await prisma.warehouse.findMany({
+    where: { deletedAt: null },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, name: true },
+    take: SEED_ORDER_WAREHOUSE_COUNT
+  })
+
+  const seedWarehouseIds = new Set(seedWarehouses.map((w) => w.id))
+
   const [customers, users, stockRows] = await Promise.all([
     prisma.businessParty.findMany({
       where: { type: 'CUSTOMER', isActive: true },
@@ -54,7 +67,8 @@ export async function seedSalesOrders(prisma: PrismaClient) {
       where: {
         quantityAvailable: { gt: 0 },
         status: 'AVAILABLE',
-        bin: { deletedAt: null }
+        bin: { deletedAt: null },
+        warehouseId: { in: [...seedWarehouseIds] }
       },
       orderBy: { createdAt: 'asc' },
       select: {
@@ -70,7 +84,12 @@ export async function seedSalesOrders(prisma: PrismaClient) {
     })
   ])
 
-  if (customers.length === 0 || users.length === 0 || stockRows.length === 0) {
+  if (
+    customers.length === 0
+    || users.length === 0
+    || stockRows.length === 0
+    || seedWarehouses.length === 0
+  ) {
     return { count: 0, reservedUpdates: 0 }
   }
 
@@ -86,72 +105,83 @@ export async function seedSalesOrders(prisma: PrismaClient) {
   }))
 
   let created = 0
+  let globalIndex = 0
 
-  for (let index = 0; index < SALES_ORDER_COUNT; index += 1) {
-    const availableForOrder = mutableStock.filter((row) => row.quantityAvailable > 0)
-    if (availableForOrder.length === 0) {
-      break
-    }
+  for (const targetWarehouse of seedWarehouses) {
+    const warehouseId = targetWarehouse.id
+    const ordersForWarehouse = warehouseOrderSeedCount(targetWarehouse.id, 'sales')
+    let createdForWarehouse = 0
 
-    const sourceRow = availableForOrder[index % availableForOrder.length]
-    const warehouseId = sourceRow.warehouseId
-    const warehousePool = mutableStock.filter(
-      (row) => row.warehouseId === warehouseId && row.quantityAvailable > 0
-    )
+    for (let k = 0; k < ordersForWarehouse; k += 1) {
+      const index = globalIndex
+      globalIndex += 1
 
-    if (warehousePool.length === 0) {
-      continue
-    }
+      const availableForOrder = mutableStock.filter((row) => row.quantityAvailable > 0)
+      if (availableForOrder.length === 0) {
+        break
+      }
 
-    const lineCount = Math.min(warehousePool.length, randomInt(2, 5))
-    const start = (index * 7) % warehousePool.length
-    const selected: MutableStock[] = []
+      const warehousePool = mutableStock.filter(
+        (row) => row.warehouseId === warehouseId && row.quantityAvailable > 0
+      )
 
-    for (let offset = 0; offset < warehousePool.length && selected.length < lineCount; offset += 1) {
-      const row = warehousePool[(start + offset) % warehousePool.length]
-      if (selected.some((s) => s.id === row.id)) {
+      if (warehousePool.length === 0) {
         continue
       }
-      selected.push(row)
+
+      const lineCount = Math.min(warehousePool.length, randomInt(2, 5))
+      const start = (index * 7) % warehousePool.length
+      const selected: MutableStock[] = []
+
+      for (let offset = 0; offset < warehousePool.length && selected.length < lineCount; offset += 1) {
+        const row = warehousePool[(start + offset) % warehousePool.length]
+        if (selected.some((s) => s.id === row.id)) {
+          continue
+        }
+        selected.push(row)
+      }
+
+      if (selected.length === 0) {
+        continue
+      }
+
+      const customer = customers[index % customers.length]
+      const createdBy = users[index % users.length]
+
+      const lines: Prisma.SalesOrderLineUncheckedCreateWithoutSalesOrderInput[] = selected.map((stock) => {
+        const reserveQty = Math.min(stock.quantityAvailable, randomInt(1, Math.min(6, stock.quantityAvailable)))
+
+        stock.quantityAvailable -= reserveQty
+        stock.quantityReserved += reserveQty
+
+        return {
+          itemId: stock.itemId,
+          itemNameSnapshot: stock.itemName,
+          originBinId: stock.binId,
+          baseQuantity: new Prisma.Decimal(reserveQty),
+          handledQuantity: new Prisma.Decimal(0),
+          isShort: false,
+          uom: stock.uom
+        }
+      })
+
+      await prisma.salesOrder.create({
+        data: {
+          reference: `SO-SEED-${String(index + 1).padStart(4, '0')}`,
+          status: pickStatus(index),
+          warehouseId,
+          businessPartyId: customer.id,
+          customerName: customer.name,
+          createdById: createdBy.id,
+          lines: { create: lines }
+        }
+      })
+
+      created += 1
+      createdForWarehouse += 1
     }
 
-    if (selected.length === 0) {
-      continue
-    }
-
-    const customer = customers[index % customers.length]
-    const createdBy = users[index % users.length]
-
-    const lines: Prisma.SalesOrderLineUncheckedCreateWithoutSalesOrderInput[] = selected.map((stock) => {
-      const reserveQty = Math.min(stock.quantityAvailable, randomInt(1, Math.min(6, stock.quantityAvailable)))
-
-      stock.quantityAvailable -= reserveQty
-      stock.quantityReserved += reserveQty
-
-      return {
-        itemId: stock.itemId,
-        itemNameSnapshot: stock.itemName,
-        originBinId: stock.binId,
-        baseQuantity: new Prisma.Decimal(reserveQty),
-        handledQuantity: new Prisma.Decimal(0),
-        isShort: false,
-        uom: stock.uom
-      }
-    })
-
-    await prisma.salesOrder.create({
-      data: {
-        reference: `SO-SEED-${String(index + 1).padStart(4, '0')}`,
-        status: pickStatus(index),
-        warehouseId,
-        businessPartyId: customer.id,
-        customerName: customer.name,
-        createdById: createdBy.id,
-        lines: { create: lines }
-      }
-    })
-
-    created += 1
+    console.warn(`Seeded ${createdForWarehouse} sales orders in ${targetWarehouse.name}`)
   }
 
   const updates = mutableStock

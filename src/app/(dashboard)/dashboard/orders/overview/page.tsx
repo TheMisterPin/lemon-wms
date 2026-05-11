@@ -1,5 +1,5 @@
-import { DashboardOrdersOverviewView } from '@/components/features/orders/components/dashboard-orders-overview-view'
+import { redirect } from 'next/navigation'
 
-export default function DashboardOrdersIndexPage() {
-  return <DashboardOrdersOverviewView />
+export default function DashboardOrdersOverviewRedirectPage() {
+  redirect('/dashboard/orders')
 }

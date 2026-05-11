@@ -294,7 +294,7 @@ function buildWarehouseWorkload(rows: OrderSummaryRow[]): WarehouseWorkloadRow[]
         released: 0,
         completedToday: 0,
         exceptions: 0,
-        href: `/dashboard/warehouses/${r.warehouseId}`
+        href: `/dashboard/locations/warehouses/${r.warehouseId}`
       })
     }
 

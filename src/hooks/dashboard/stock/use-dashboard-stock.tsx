@@ -13,6 +13,8 @@ import type { StockDashboardData } from '@/types/stock-dashboard.types'
 export type UseDashboardStockOptions = {
   /** Omit or `null` for all warehouses; pass a UUID to scope. */
   warehouseId?: string | null
+  /** When false, no request is made (e.g. sidebar only loads when on stock routes). */
+  enabled?: boolean
 }
 
 export type UseDashboardStockReturn = {
@@ -54,14 +56,23 @@ async function fetchStockDashboardData(
 
 export function useDashboardStock(options: UseDashboardStockOptions = {}): UseDashboardStockReturn {
   const warehouseId = options.warehouseId ?? null
+  const enabled = options.enabled ?? true
 
   const [data, setData] = useState<StockDashboardData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [fetching, setFetching] = useState(Boolean(enabled))
   const [error, setError] = useState<string | null>(null)
 
+  const isLoading = Boolean(enabled && fetching)
+  const visibleData = enabled ? data : null
+  const visibleError = enabled ? error : null
+
   const refetch = useCallback(() => {
+    if (!enabled) {
+      return
+    }
+
     void (async () => {
-      setIsLoading(true)
+      setFetching(true)
       setError(null)
       const result = await fetchStockDashboardData(warehouseId)
       if (result.ok) {
@@ -70,15 +81,19 @@ export function useDashboardStock(options: UseDashboardStockOptions = {}): UseDa
         setError(result.error)
         setData(null)
       }
-      setIsLoading(false)
+      setFetching(false)
     })()
-  }, [warehouseId])
+  }, [warehouseId, enabled])
 
   useEffect(() => {
+    if (!enabled) {
+      return
+    }
+
     let cancelled = false
 
     async function run() {
-      setIsLoading(true)
+      setFetching(true)
       setError(null)
       const result = await fetchStockDashboardData(warehouseId)
       if (cancelled) {
@@ -90,7 +105,7 @@ export function useDashboardStock(options: UseDashboardStockOptions = {}): UseDa
         setError(result.error)
         setData(null)
       }
-      setIsLoading(false)
+      setFetching(false)
     }
 
     void run()
@@ -98,12 +113,12 @@ export function useDashboardStock(options: UseDashboardStockOptions = {}): UseDa
     return () => {
       cancelled = true
     }
-  }, [warehouseId])
+  }, [warehouseId, enabled])
 
   return {
     isLoading,
-    error,
+    error: visibleError,
     refetch,
-    data
+    data: visibleData
   }
 }

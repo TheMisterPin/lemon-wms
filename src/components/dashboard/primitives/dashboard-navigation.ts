@@ -15,12 +15,19 @@ import type { LucideIcon } from 'lucide-react'
 export type DashboardNavLink = {
   label: string
   href: string
+  selectLocationVariant?: 'warehouse' | 'zone' | 'bin'
+  /** Opens stock category picker instead of navigating (Stock hub only). */
+  openStockCategoryModal?: boolean
+  /** Opens stock subcategory picker instead of navigating (Stock hub only). */
+  openStockSubcategoryModal?: boolean
 }
 
 export type DashboardNavGroup = {
   label: string
   icon: LucideIcon
   href?: string
+  /** When set, child links render only while `pathname` is under this prefix (e.g. `/dashboard/locations`). */
+  showChildLinksWhenPathPrefix?: string
   links?: DashboardNavLink[]
 }
 
@@ -28,9 +35,13 @@ type DashboardRouteMetadata = {
   label: string
   icon: LucideIcon
   segment?: string
+  showChildLinksWhenPathPrefix?: string
   children?: Array<{
     label: string
-    segment: string
+    segment?: string
+    selectLocationVariant?: 'warehouse' | 'zone' | 'bin'
+    openStockCategoryModal?: boolean
+    openStockSubcategoryModal?: boolean
   }>
 }
 
@@ -55,9 +66,22 @@ function buildDashboardNavGroups(metadata: DashboardRouteMetadata[]): DashboardN
     return {
       label: node.label,
       icon: node.icon,
+      href:
+        node.segment !== undefined && node.segment !== null && node.segment !== ''
+          ? joinDashboardHref(node.segment)
+          : undefined,
+      showChildLinksWhenPathPrefix: node.showChildLinksWhenPathPrefix,
       links: node.children.map((child) => ({
         label: child.label,
-        href: joinDashboardHref(child.segment)
+        href:
+          child.openStockCategoryModal || child.openStockSubcategoryModal
+            ? ''
+            : child.segment
+              ? joinDashboardHref(child.segment)
+              : '',
+        selectLocationVariant: child.selectLocationVariant,
+        openStockCategoryModal: child.openStockCategoryModal,
+        openStockSubcategoryModal: child.openStockSubcategoryModal
       }))
     }
   })
@@ -72,23 +96,33 @@ export const DASHBOARD_ROUTE_METADATA: DashboardRouteMetadata[] = [
   {
     label: 'Locations',
     icon: Warehouse,
+    segment: 'locations',
+    showChildLinksWhenPathPrefix: '/dashboard/locations',
     children: [
-      { label: 'Warehouses', segment: 'locations/warehouses' }
+      { label: 'Warehouses', segment: 'locations/warehouses', selectLocationVariant: 'warehouse' },
+      { label: 'Zones', segment: 'locations/zones', selectLocationVariant: 'zone' },
+      { label: 'Bins', segment: 'locations/bins', selectLocationVariant: 'bin' }
     ]
   },
   {
     label: 'Orders',
     icon: ClipboardList,
+    segment: 'orders',
+    showChildLinksWhenPathPrefix: '/dashboard/orders',
     children: [
-      { label: 'Overview', segment: 'orders' }
+      { label: 'Sales Orders', segment: 'orders/sales' },
+      { label: 'Purchase Orders', segment: 'orders/purchase' },
+      { label: 'Transfer Orders', segment: 'orders/transfer' }
     ]
   },
   {
     label: 'Stock',
     icon: BarChart2,
+    segment: 'stock',
+    showChildLinksWhenPathPrefix: '/dashboard/stock',
     children: [
-      { label: 'Overview', segment: 'stock' },
-      { label: 'Categories', segment: 'stock/categories' },
+      { label: 'Categories', openStockCategoryModal: true },
+      { label: 'Sub categories', openStockSubcategoryModal: true },
       { label: 'Health', segment: 'stock/health' }
     ]
   },

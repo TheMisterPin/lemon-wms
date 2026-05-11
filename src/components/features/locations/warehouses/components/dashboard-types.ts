@@ -1,7 +1,3 @@
-/**
- * @generated-doc-link
- * @doc .docs/developer/refactors/components/misc/dashboard/warehouses/components/dashboard-types.md
- */
 
 export type DashboardOverviewCard = {
   label: 'Warehouses' | 'Zones' | 'Bins'
@@ -11,7 +7,6 @@ export type DashboardOverviewCard = {
 export type DashboardWarehouseDisplayRecord = {
   id: string
   name: string
-  /** For {@link import('@/components/dashboard/dashboard-record-list-section').DashboardRecordListItem} */
   title: string
   subtitle: string
   metric: string
@@ -35,5 +30,4 @@ export type DashboardBinDisplayRecord = {
   isBlocked: boolean
 }
 
-/** Bins in overview grid (e.g. {@link BinGrid}) */
 export type BinRecord = DashboardBinDisplayRecord

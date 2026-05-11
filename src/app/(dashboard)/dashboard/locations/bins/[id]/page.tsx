@@ -1,4 +1,4 @@
-import { BinDashboardOverviewPage } from '@/components/features/locations/pages'
+import { BinDashboardOverviewPage } from '@/components/features/locations/bins/pages'
 
 type BinOverviewPageProps = {
   params: Promise<{ id: string }>

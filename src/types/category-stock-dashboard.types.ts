@@ -4,6 +4,7 @@ export type CategoryStockCard = {
   categoryId: string
   name: string
   iconName?: string
+  iconUrl: string | null
   totalOnHand: number
   available: number
   reserved: number
@@ -14,6 +15,7 @@ export type CategoryStockCard = {
 export type StockCategorySlice = {
   categoryId: string
   categoryName: string
+  iconUrl: string | null
   totalOnHand: number
   href: string
 }
@@ -28,9 +30,11 @@ export type StockBreakdownBar = {
 export type SubcategoryStockGroup = {
   parentCategoryId: string
   parentCategoryName: string
+  parentIconUrl: string | null
   rows: {
     categoryId: string
     name: string
+    iconUrl: string | null
     onHand: number
     available: number
     reserved: number
@@ -64,6 +68,8 @@ export type StockItemSummaryRow = {
 
 export type CategoryStockDashboardDTO = {
   header: DashboardHeader
+  /** Present when the overview is scoped to a single parent category via `categoryId`. */
+  selectedCategoryIconUrl: string | null
   categoryCards: CategoryStockCard[]
   categoryDistribution: StockCategorySlice[]
   statusBreakdown: StockBreakdownBar[]

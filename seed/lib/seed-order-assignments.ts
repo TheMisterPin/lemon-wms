@@ -29,7 +29,7 @@ function atTime(base: Date, hour: number, minute: number) {
 }
 
 /**
- * Seeds order assignments for purchase orders with lifecycle timestamps
+ * Seeds floor order assignments for operational purchase, sales, and transfer orders with lifecycle timestamps
  * and matching assignment-related user activity events.
  */
 export async function seedOrderAssignments(prisma: PrismaClient) {
@@ -102,7 +102,7 @@ export async function seedOrderAssignments(prisma: PrismaClient) {
     })
   ])
 
-  if (purchaseOrders.length === 0 || floorUsers.length === 0) {
+  if (floorUsers.length === 0) {
     return { assignmentsCount: 0, userActivitiesCount: 0 }
   }
 
@@ -132,6 +132,18 @@ export async function seedOrderAssignments(prisma: PrismaClient) {
       orderType: OrderType.TRANSFER
     }))
   ]
+
+  if (operationalOrders.length === 0) {
+    return { assignmentsCount: 0, userActivitiesCount: 0 }
+  }
+
+  operationalOrders.sort((a, b) => {
+    if (a.warehouseId !== b.warehouseId) {
+      return a.warehouseId.localeCompare(b.warehouseId)
+    }
+
+    return a.createdAt.getTime() - b.createdAt.getTime()
+  })
 
   operationalOrders.forEach((order, index: number) => {
     const user = floorUsers[index % floorUsers.length] as FloorUserSeed

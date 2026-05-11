@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { LayoutGrid, Layers } from 'lucide-react'
 import {
   Bar,
   BarChart,
@@ -20,6 +21,7 @@ import {
   YAxis
 } from 'recharts'
 
+import { CategoryPickerIcon } from '@/components/primitives/media/category-icon'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useCategoryStockDashboard } from '@/hooks/dashboard/stock/use-category-stock-dashboard'
@@ -48,6 +50,7 @@ type SubcategoryCardDatum = {
   reserved: number
   blocked: number
   href: string
+  iconUrl: string | null
   color: string
 }
 
@@ -64,7 +67,7 @@ function StockSection({
   headerRight,
   children
 }: {
-  title: string
+  title: ReactNode
   action?: string
   headerRight?: ReactNode
   children: ReactNode
@@ -118,12 +121,20 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
   const { data, isLoading, error, refetch } = useCategoryStockDashboard(categoryId)
   const [showSubcategoriesSheet, setShowSubcategoriesSheet] = useState(false)
 
-  const subcategoriesForCards = useMemo((): SubcategoryCardDatum[] => {
+  const scopedSubcategoryGroups = useMemo(() => {
     if (!data) {
       return []
     }
 
-    const rows = data.subcategoryGroups.flatMap((group) => group.rows)
+    if (categoryId) {
+      return data.subcategoryGroups
+    }
+
+    return data.subcategoryGroups.filter((g) => g.rows.length > 1)
+  }, [data, categoryId])
+
+  const subcategoriesForCards = useMemo((): SubcategoryCardDatum[] => {
+    const rows = scopedSubcategoryGroups.flatMap((group) => group.rows)
 
     return rows
       .slice()
@@ -136,9 +147,10 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
         reserved: row.reserved,
         blocked: row.blocked,
         href: row.href,
+        iconUrl: row.iconUrl,
         color: chartColors[index % chartColors.length]
       }))
-  }, [data])
+  }, [scopedSubcategoryGroups])
 
   const visibleSubcategories = subcategoriesForCards.slice(0, 4)
   const hiddenSubcategories = subcategoriesForCards.slice(4)
@@ -161,6 +173,7 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
     return subcategoriesForCards.map((row) => ({
       categoryId: row.categoryId,
       name: row.label,
+      iconUrl: row.iconUrl,
       onHand: row.onHand,
       available: row.available,
       reserved: row.reserved,
@@ -174,12 +187,20 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
       return [] as Array<{
         categoryId: string
         categoryName: string
+        iconUrl: string | null
         items: StockItemSummaryRow[]
       }>
     }
 
+    const itemsSource =
+      categoryId !== undefined && categoryId !== ''
+        ? data.items
+        : data.items.filter((item) =>
+          scopedSubcategoryGroups.some((g) => g.rows.some((r) => r.name === item.categoryName))
+        )
+
     const grouped = new Map<string, StockItemSummaryRow[]>()
-    for (const item of data.items) {
+    for (const item of itemsSource) {
       const key = item.categoryName
       const list = grouped.get(key) ?? []
       list.push(item)
@@ -187,17 +208,29 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
     }
 
     return [...grouped.entries()]
-      .map(([categoryName, items]) => ({
-        categoryId: categoryName,
-        categoryName,
-        items: items.slice().sort((a, b) => b.quantity - a.quantity)
-      }))
+      .map(([categoryName, items]) => {
+        let iconUrl: string | null = null
+        for (const g of scopedSubcategoryGroups) {
+          const row = g.rows.find((r) => r.name === categoryName)
+          if (row) {
+            iconUrl = row.iconUrl ?? null
+            break
+          }
+        }
+
+        return {
+          categoryId: categoryName,
+          categoryName,
+          iconUrl,
+          items: items.slice().sort((a, b) => b.quantity - a.quantity)
+        }
+      })
       .sort(
         (a, b) =>
           b.items.reduce((sum, item) => sum + item.quantity, 0)
           - a.items.reduce((sum, item) => sum + item.quantity, 0)
       )
-  }, [data])
+  }, [data, categoryId, scopedSubcategoryGroups])
 
   const [itemsSheetSubcategory, setItemsSheetSubcategory] = useState<string | null>(null)
 
@@ -205,6 +238,20 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
     () => itemsBySubcategory.find((group) => group.categoryId === itemsSheetSubcategory) ?? null,
     [itemsBySubcategory, itemsSheetSubcategory]
   )
+
+  const itemsInScopeCount = useMemo(() => {
+    if (!data) {
+      return 0
+    }
+
+    if (categoryId !== undefined && categoryId !== '') {
+      return data.items.length
+    }
+
+    return data.items.filter((item) =>
+      scopedSubcategoryGroups.some((g) => g.rows.some((r) => r.name === item.categoryName))
+    ).length
+  }, [data, categoryId, scopedSubcategoryGroups])
 
   if (isLoading) {
     return (
@@ -244,20 +291,31 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
     )
   }
 
-  const subtitle = categoryId
-    ? `Subcategory rollups for ${categoryId}`
-    : 'Subcategory rollups across categories'
-
   return (
     <main className="min-h-screen" style={{ background: 'var(--wh-page-bg)' }}>
       <div className="mx-auto min-h-screen max-w-7xl space-y-8 p-4 text-wh-text-primary xl:space-y-10 xl:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">{data.header.title}</h1>
+            <h1 className="flex items-center gap-3 text-3xl font-bold">
+              {categoryId !== undefined && categoryId !== '' ? (
+                <span
+                  className="inline-flex shrink rounded-lg border p-1.5"
+                  style={{ borderColor: 'var(--wh-border)', background: 'var(--wh-card-bg)' }}
+                >
+                  <CategoryPickerIcon
+                    iconUrl={data.selectedCategoryIconUrl}
+                    fallback={LayoutGrid}
+                    size={36}
+                  />
+                </span>
+              ) : null}
+              <span>{data.header.title}</span>
+            </h1>
             <p className="text-sm" style={{ color: 'var(--wh-text-muted)' }}>
-              {subtitle} ·{' '}
+              {data.header.subtitle}
               <span style={{ color: 'var(--wh-text-secondary)' }}>
-                {subcategoriesForCards.length.toLocaleString()} subcategories · {data.items.length.toLocaleString()} items
+                {' · '}
+                {subcategoriesForCards.length.toLocaleString()} subcategories · {itemsInScopeCount.toLocaleString()} items
               </span>
             </p>
           </div>
@@ -283,19 +341,29 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
                       }}
                     >
                       <CardContent className="space-y-3 p-5">
-                        <div className="text-sm font-medium" style={{ color: 'var(--wh-text-primary)' }}>
-                          {sub.label}
-                        </div>
-                        <div>
-                          <div className="text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
+                        <div className="flex items-start gap-2">
+                          <span
+                            className="mt-0.5 inline-flex shrink rounded-md border p-1"
+                            style={{ borderColor: 'var(--wh-border)', background: 'var(--wh-card-bg)' }}
+                          >
+                            <CategoryPickerIcon iconUrl={sub.iconUrl} fallback={Layers} size={22} />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium" style={{ color: 'var(--wh-text-primary)' }}>
+                              {sub.label}
+                            </div>
+                            <div>
+                              <div className="text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
                             Total On Hand
+                              </div>
+                              <div className="text-3xl font-bold">{sub.onHand.toLocaleString()}</div>
+                            </div>
+                            <div className="mt-2 flex justify-between text-xs">
+                              <span style={{ color: 'var(--wh-text-secondary)' }}>Avail {sub.available.toLocaleString()}</span>
+                              <span style={{ color: 'var(--wh-text-secondary)' }}>Res {sub.reserved.toLocaleString()}</span>
+                              <span style={{ color: 'var(--wh-text-secondary)' }}>Blocked {sub.blocked.toLocaleString()}</span>
+                            </div>
                           </div>
-                          <div className="text-3xl font-bold">{sub.onHand.toLocaleString()}</div>
-                        </div>
-                        <div className="mt-2 flex justify-between text-xs">
-                          <span style={{ color: 'var(--wh-text-secondary)' }}>Avail {sub.available.toLocaleString()}</span>
-                          <span style={{ color: 'var(--wh-text-secondary)' }}>Res {sub.reserved.toLocaleString()}</span>
-                          <span style={{ color: 'var(--wh-text-secondary)' }}>Blocked {sub.blocked.toLocaleString()}</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -335,7 +403,8 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
                         return (
                           <div key={`legend-${sub.categoryId}`} className="text-sm" style={{ color: 'var(--wh-text-primary)' }}>
                             <div className="flex items-center gap-2">
-                              <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: sub.color }} />
+                              <CategoryPickerIcon iconUrl={sub.iconUrl} fallback={Layers} size={16} />
+                              <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: sub.color }} aria-hidden />
                               <span className="min-w-0 truncate">{sub.label}</span>
                             </div>
                             <div className="ml-5 text-xs" style={{ color: 'var(--wh-text-muted)' }}>
@@ -424,7 +493,10 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
                   <div className="space-y-1.5 text-sm" style={{ color: 'var(--wh-text-primary)' }}>
                     {subcategoryTableRows.map((row) => (
                       <Link key={`sub-row-${row.categoryId}`} href={row.href} className="grid grid-cols-5 gap-1 transition-opacity hover:opacity-90">
-                        <span className="min-w-0 truncate">{row.name}</span>
+                        <span className="flex min-w-0 items-center gap-2">
+                          <CategoryPickerIcon iconUrl={row.iconUrl} fallback={Layers} size={16} />
+                          <span className="min-w-0 truncate">{row.name}</span>
+                        </span>
                         <span className="tabular-nums">{row.onHand.toLocaleString()}</span>
                         <span className="tabular-nums" style={{ color: 'var(--wh-status-available)' }}>
                           {row.available.toLocaleString()}
@@ -443,14 +515,19 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
             </div>
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-5">
-              {itemsBySubcategory.map((group) => {
+              {itemsBySubcategory.map((group, groupIndex) => {
                 const visibleItems = group.items.slice(0, 8)
                 const hiddenItemsCount = Math.max(0, group.items.length - visibleItems.length)
 
                 return (
                   <StockSection
                     key={`items-${group.categoryId}`}
-                    title={group.categoryName}
+                    title={
+                      <span className="flex items-center gap-2">
+                        <CategoryPickerIcon iconUrl={group.iconUrl} fallback={Layers} size={20} />
+                        <span>{group.categoryName}</span>
+                      </span>
+                    }
                     action={`${group.items.length} items`}
                   >
                     <StockChartPanel>
@@ -464,26 +541,31 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
                       </div>
 
                       <div className="space-y-1.5 text-sm" style={{ color: 'var(--wh-text-primary)' }}>
-                        {visibleItems.map((item) => (
-                          <Link
-                            key={item.itemId}
-                            href={item.href}
-                            className="grid grid-cols-6 gap-1 transition-opacity hover:opacity-90"
-                          >
-                            <span className="min-w-0 truncate">{item.sku}</span>
-                            <span className="min-w-0 truncate">{item.name}</span>
-                            <span className="tabular-nums">{item.quantity.toLocaleString()}</span>
-                            <span className="tabular-nums" style={{ color: 'var(--wh-status-available)' }}>
-                              {item.available.toLocaleString()}
-                            </span>
-                            <span className="tabular-nums" style={{ color: 'var(--wh-status-full)' }}>
-                              {item.reserved.toLocaleString()}
-                            </span>
-                            <span className="tabular-nums" style={{ color: 'var(--wh-status-blocked)' }}>
-                              {item.blocked.toLocaleString()}
-                            </span>
-                          </Link>
-                        ))}
+                        {visibleItems.map((item, idx) => {
+                          const rowColor = chartColors[(groupIndex * 37 + idx) % chartColors.length]
+
+                          return (
+                            <Link
+                              key={item.itemId}
+                              href={item.href}
+                              className="grid grid-cols-6 gap-1 rounded-md py-0.5 pl-2 transition-opacity hover:opacity-90"
+                              style={{ borderLeft: `4px solid ${rowColor}` }}
+                            >
+                              <span className="min-w-0 truncate">{item.sku}</span>
+                              <span className="min-w-0 truncate">{item.name}</span>
+                              <span className="tabular-nums">{item.quantity.toLocaleString()}</span>
+                              <span className="tabular-nums" style={{ color: 'var(--wh-status-available)' }}>
+                                {item.available.toLocaleString()}
+                              </span>
+                              <span className="tabular-nums" style={{ color: 'var(--wh-status-full)' }}>
+                                {item.reserved.toLocaleString()}
+                              </span>
+                              <span className="tabular-nums" style={{ color: 'var(--wh-status-blocked)' }}>
+                                {item.blocked.toLocaleString()}
+                              </span>
+                            </Link>
+                          )
+                        })}
                       </div>
 
                       {hiddenItemsCount > 0 ? (
@@ -526,19 +608,29 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
                     }}
                   >
                     <CardContent className="space-y-3 p-5">
-                      <div className="text-sm font-medium" style={{ color: 'var(--wh-text-primary)' }}>
-                        {sub.label}
-                      </div>
-                      <div>
-                        <div className="text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
+                      <div className="flex items-start gap-2">
+                        <span
+                          className="mt-0.5 inline-flex shrink rounded-md border p-1"
+                          style={{ borderColor: 'var(--wh-border)', background: 'var(--wh-card-bg)' }}
+                        >
+                          <CategoryPickerIcon iconUrl={sub.iconUrl} fallback={Layers} size={22} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium" style={{ color: 'var(--wh-text-primary)' }}>
+                            {sub.label}
+                          </div>
+                          <div>
+                            <div className="text-xs" style={{ color: 'var(--wh-text-secondary)' }}>
                           Total On Hand
+                            </div>
+                            <div className="text-3xl font-bold">{sub.onHand.toLocaleString()}</div>
+                          </div>
+                          <div className="mt-2 flex justify-between text-xs">
+                            <span style={{ color: 'var(--wh-text-secondary)' }}>Avail {sub.available.toLocaleString()}</span>
+                            <span style={{ color: 'var(--wh-text-secondary)' }}>Res {sub.reserved.toLocaleString()}</span>
+                            <span style={{ color: 'var(--wh-text-secondary)' }}>Blocked {sub.blocked.toLocaleString()}</span>
+                          </div>
                         </div>
-                        <div className="text-3xl font-bold">{sub.onHand.toLocaleString()}</div>
-                      </div>
-                      <div className="mt-2 flex justify-between text-xs">
-                        <span style={{ color: 'var(--wh-text-secondary)' }}>Avail {sub.available.toLocaleString()}</span>
-                        <span style={{ color: 'var(--wh-text-secondary)' }}>Res {sub.reserved.toLocaleString()}</span>
-                        <span style={{ color: 'var(--wh-text-secondary)' }}>Blocked {sub.blocked.toLocaleString()}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -574,27 +666,31 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
               <span>Blocked</span>
             </div>
 
-            {activeItemsSheetGroup?.items.map((item) => (
-              <Link
-                key={`sheet-item-${item.itemId}`}
-                href={item.href}
-                className="grid grid-cols-6 gap-1 text-sm transition-opacity hover:opacity-90"
-                style={{ color: 'var(--wh-text-primary)' }}
-              >
-                <span className="min-w-0 truncate">{item.sku}</span>
-                <span className="min-w-0 truncate">{item.name}</span>
-                <span className="tabular-nums">{item.quantity.toLocaleString()}</span>
-                <span className="tabular-nums" style={{ color: 'var(--wh-status-available)' }}>
-                  {item.available.toLocaleString()}
-                </span>
-                <span className="tabular-nums" style={{ color: 'var(--wh-status-full)' }}>
-                  {item.reserved.toLocaleString()}
-                </span>
-                <span className="tabular-nums" style={{ color: 'var(--wh-status-blocked)' }}>
-                  {item.blocked.toLocaleString()}
-                </span>
-              </Link>
-            ))}
+            {activeItemsSheetGroup?.items.map((item, idx) => {
+              const rowColor = chartColors[idx % chartColors.length]
+
+              return (
+                <Link
+                  key={`sheet-item-${item.itemId}`}
+                  href={item.href}
+                  className="grid grid-cols-6 gap-1 rounded-md py-0.5 pl-2 text-sm transition-opacity hover:opacity-90"
+                  style={{ color: 'var(--wh-text-primary)', borderLeft: `4px solid ${rowColor}` }}
+                >
+                  <span className="min-w-0 truncate">{item.sku}</span>
+                  <span className="min-w-0 truncate">{item.name}</span>
+                  <span className="tabular-nums">{item.quantity.toLocaleString()}</span>
+                  <span className="tabular-nums" style={{ color: 'var(--wh-status-available)' }}>
+                    {item.available.toLocaleString()}
+                  </span>
+                  <span className="tabular-nums" style={{ color: 'var(--wh-status-full)' }}>
+                    {item.reserved.toLocaleString()}
+                  </span>
+                  <span className="tabular-nums" style={{ color: 'var(--wh-status-blocked)' }}>
+                    {item.blocked.toLocaleString()}
+                  </span>
+                </Link>
+              )
+            })}
           </div>
         </SheetContent>
       </Sheet>

@@ -77,6 +77,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 260510-s7u | Reorganize locations feature components by entity folder and consolidate duplicated UI logic | 2026-05-11 | — | [260510-s7u-reorganize-src-components-features-locat](./quick/260510-s7u-reorganize-src-components-features-locat/) |
 | 260413-m7z | Document RBAC module in .docs/developer/RBAC.md | 2026-04-13 | 9cc97b4 | [260413-m7z-document-rbac-module-in-docs-developer-r](./quick/260413-m7z-document-rbac-module-in-docs-developer-r/) |
 
 ## Session Continuity

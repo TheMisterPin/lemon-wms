@@ -1,6 +1,10 @@
 import { OrderStatus, type PrismaClient } from '@/generated/prisma'
 
-const PURCHASE_ORDER_COUNT = 30
+import {
+  SEED_ORDER_WAREHOUSE_COUNT,
+  warehouseOrderSeedCount
+} from './warehouse-order-seed-count'
+
 const MIN_LINES_PER_ORDER = 10
 const MAX_LINES_PER_ORDER = 20
 
@@ -61,13 +65,14 @@ function buildPurchaseOrderLines(
  * Seeds purchase orders with 10 to 20 lines each.
  */
 export async function seedPurchaseOrders(prisma: PrismaClient) {
-  const warehouse = await prisma.warehouse.findFirst({
+  const warehouses = await prisma.warehouse.findMany({
     where: { deletedAt: null },
     orderBy: { createdAt: 'asc' },
-    select: { id: true }
+    select: { id: true, name: true },
+    take: SEED_ORDER_WAREHOUSE_COUNT
   })
 
-  if (!warehouse) {
+  if (warehouses.length === 0) {
     throw new Error('No warehouse found for purchase order seeding.')
   }
 
@@ -121,34 +126,46 @@ export async function seedPurchaseOrders(prisma: PrismaClient) {
   }
 
   let createdCount = 0
+  let globalIndex = 0
 
-  for (let i = 0; i < PURCHASE_ORDER_COUNT; i++) {
-    const supplier = suppliers[i % suppliers.length]
-    const supplierItems = itemBySupplier.get(supplier.id) ?? []
+  for (const warehouse of warehouses) {
+    const ordersForWarehouse = warehouseOrderSeedCount(warehouse.id, 'purchase')
+    let createdForWarehouse = 0
 
-    if (supplierItems.length === 0) {
-      continue
+    for (let k = 0; k < ordersForWarehouse; k += 1) {
+      const i = globalIndex
+      const supplier = suppliers[i % suppliers.length]
+      const supplierItems = itemBySupplier.get(supplier.id) ?? []
+
+      if (supplierItems.length === 0) {
+        globalIndex += 1
+        continue
+      }
+
+      const createdById = users[i % users.length].id
+      const sequence = String(globalIndex + 1).padStart(4, '0')
+      const lines = buildPurchaseOrderLines(supplierItems, i)
+
+      await prisma.purchaseOrder.create({
+        data: {
+          reference: `PO-SEED-${sequence}`,
+          status: pickStatus(i),
+          warehouseId: warehouse.id,
+          supplierNameSnapshot: supplier.name,
+          businessPartyId: supplier.id,
+          createdById,
+          lines: {
+            create: lines
+          }
+        }
+      })
+
+      globalIndex += 1
+      createdCount += 1
+      createdForWarehouse += 1
     }
 
-    const createdById = users[i % users.length].id
-    const sequence = String(i + 1).padStart(4, '0')
-    const lines = buildPurchaseOrderLines(supplierItems, i)
-
-    await prisma.purchaseOrder.create({
-      data: {
-        reference: `PO-SEED-${sequence}`,
-        status: pickStatus(i),
-        warehouseId: warehouse.id,
-        supplierNameSnapshot: supplier.name,
-        businessPartyId: supplier.id,
-        createdById,
-        lines: {
-          create: lines
-        }
-      }
-    })
-
-    createdCount += 1
+    console.warn(`Seeded ${createdForWarehouse} purchase orders in ${warehouse.name}`)
   }
 
   return { count: createdCount }

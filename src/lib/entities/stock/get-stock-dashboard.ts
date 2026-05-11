@@ -73,8 +73,9 @@ async function getStockDashboard(
             select: {
               code: true,
               name: true,
+              iconUrl: true,
               parentCode: true,
-              parent: { select: { code: true, name: true } }
+              parent: { select: { code: true, name: true, iconUrl: true } }
             }
           }
         }
@@ -214,6 +215,33 @@ async function getStockDashboard(
     itemMap.set(row.itemId, item)
   }
 
+  const iconCodes = new Set<string>()
+  for (const k of categoryMap.keys()) {
+    if (k !== '__none__') {
+      iconCodes.add(k)
+    }
+  }
+  for (const [pk, sm] of subByParent) {
+    if (pk !== '__none__') {
+      iconCodes.add(pk)
+    }
+    for (const ck of sm.keys()) {
+      if (ck !== '__none__') {
+        iconCodes.add(ck)
+      }
+    }
+  }
+
+  const iconRows =
+    iconCodes.size === 0
+      ? []
+      : await prisma.itemCategory.findMany({
+        where: { code: { in: [...iconCodes] } },
+        select: { code: true, iconUrl: true }
+      })
+
+  const iconByCode = new Map<string, string | null>(iconRows.map((r) => [r.code, r.iconUrl ?? null]))
+
   const items: StockDashboardItemRow[] = Array.from(itemMap.values())
     .map(
       (item): StockDashboardItemRow => ({
@@ -234,6 +262,7 @@ async function getStockDashboard(
     .map((c): StockDashboardCategoryRow => ({
       key: c.key,
       label: c.label,
+      iconUrl: c.key === '__none__' ? null : (iconByCode.get(c.key) ?? null),
       totalAvailable: displayRound(c.totalAvailable),
       totalReserved: displayRound(c.totalReserved),
       totalBlocked: displayRound(c.totalBlocked),
@@ -243,9 +272,10 @@ async function getStockDashboard(
 
   const subcategoryGroups: StockDashboardSubcategoryGroup[] = categories.map((cat) => {
     const subMap = subByParent.get(cat.key) ?? new Map<string, SubAgg>()
-    const subRows: StockDashboardSubcategoryRow[] = Array.from(subMap.values())
-      .map((s) => ({
+    const subRows: StockDashboardSubcategoryRow[] = Array.from(subMap.entries())
+      .map(([code, s]) => ({
         name: s.name,
+        iconUrl: code === '__none__' ? null : (iconByCode.get(code) ?? null),
         onHand: displayRound(s.onHand),
         available: displayRound(s.available),
         reserved: displayRound(s.reserved),
@@ -256,6 +286,7 @@ async function getStockDashboard(
     return {
       parentKey: cat.key,
       parentLabel: cat.label,
+      parentIconUrl: cat.key === '__none__' ? null : (iconByCode.get(cat.key) ?? null),
       rows: subRows
     }
   })

@@ -71,15 +71,21 @@ export async function getCategoryStockDashboardData(
     }
   })
 
+  let selectedCategoryName: string | null = null
+  let selectedCategoryIconUrl: string | null = null
+
   if (selectedCategoryId) {
     const category = await prisma.itemCategory.findUnique({
       where: { code: selectedCategoryId },
-      select: { code: true }
+      select: { code: true, name: true, iconUrl: true }
     })
 
     if (!category) {
       throw new DomainError('Category not found.', 'NOT_FOUND', 404)
     }
+
+    selectedCategoryName = category.name
+    selectedCategoryIconUrl = category.iconUrl ?? null
   }
 
   const byParentCategory = new Map<string, CategoryAccumulator>()
@@ -162,10 +168,33 @@ export async function getCategoryStockDashboardData(
     }
   }
 
+  const iconCodes = new Set<string>()
+  for (const id of byParentCategory.keys()) {
+    iconCodes.add(id)
+  }
+  for (const [, subMap] of bySubcategory) {
+    for (const id of subMap.keys()) {
+      iconCodes.add(id)
+    }
+  }
+
+  const iconRows =
+    iconCodes.size === 0
+      ? []
+      : await prisma.itemCategory.findMany({
+        where: { code: { in: [...iconCodes] } },
+        select: { code: true, iconUrl: true }
+      })
+
+  const iconByCode = new Map<string, string | null>(
+    iconRows.map((r) => [r.code, r.iconUrl ?? null])
+  )
+
   const categoryCards: CategoryStockCard[] = [...byParentCategory.values()]
     .map((category) => ({
       categoryId: category.categoryId,
       name: category.name,
+      iconUrl: iconByCode.get(category.categoryId) ?? null,
       totalOnHand: Math.round(category.totalOnHand),
       available: Math.round(category.available),
       reserved: Math.round(category.reserved),
@@ -179,17 +208,19 @@ export async function getCategoryStockDashboardData(
       .map((sub) => ({
         categoryId: sub.categoryId,
         name: sub.name,
+        iconUrl: iconByCode.get(sub.categoryId) ?? null,
         onHand: Math.round(sub.totalOnHand),
         available: Math.round(sub.available),
         reserved: Math.round(sub.reserved),
         blocked: Math.round(sub.blocked),
-        href: `/dashboard/stock/categories/${sub.categoryId}`
+        href: `/dashboard/stock/subcategory/${encodeURIComponent(sub.categoryId)}`
       }))
       .sort((a, b) => b.onHand - a.onHand)
 
     return {
       parentCategoryId: category.categoryId,
       parentCategoryName: category.name,
+      parentIconUrl: iconByCode.get(category.categoryId) ?? null,
       rows
     }
   })
@@ -211,6 +242,7 @@ export async function getCategoryStockDashboardData(
   const categoryDistribution = categoryCards.map((category) => ({
     categoryId: category.categoryId,
     categoryName: category.name,
+    iconUrl: category.iconUrl,
     totalOnHand: category.totalOnHand,
     href: category.href
   }))
@@ -228,11 +260,15 @@ export async function getCategoryStockDashboardData(
 
   return {
     header: {
-      title: selectedCategoryId ? `Category: ${selectedCategoryId}` : 'Category Stock Overview',
+      title:
+        selectedCategoryId && selectedCategoryName
+          ? selectedCategoryName
+          : 'Category Stock Overview',
       subtitle: selectedCategoryId
-        ? 'Filtered category and subcategory stock distribution'
+        ? `Subcategory rollups under ${selectedCategoryName ?? selectedCategoryId}`
         : 'Stock by parent category and subcategory'
     },
+    selectedCategoryIconUrl: selectedCategoryId ? selectedCategoryIconUrl : null,
     categoryCards,
     categoryDistribution,
     statusBreakdown,
