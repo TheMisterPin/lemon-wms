@@ -1,4 +1,4 @@
-import { UserDetailPageClient } from '@/components/dashboard/users/user-detail-page-client'
+import { UserDetailPageClient } from '@/components/features/iam/users/user-detail-page-client'
 
 type PageProps = {
   params: Promise<{ userId: string }>

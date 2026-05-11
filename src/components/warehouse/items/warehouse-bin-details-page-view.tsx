@@ -11,8 +11,8 @@ import { useParams } from 'next/navigation'
 
 import { ArrowLeft, Filter, Package, Truck } from 'lucide-react'
 
-import { CheckBoxTable } from '@/components/tables/checkbox-table'
-import { GenericTable } from '@/components/tables/generic-table'
+import { CheckBoxTable } from '@/components/primitives/tables/checkbox-table'
+import { GenericTable } from '@/components/primitives/tables/generic-table'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { UniversalModal } from '@/components/universal-modal'

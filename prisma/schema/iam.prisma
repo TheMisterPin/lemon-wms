@@ -21,6 +21,7 @@ model User {
   lastName          String
   fullName          String
   role              Role
+  profilePictureUrl String?
   loginType         LoginType
   isActive          Boolean   @default(true)
   deletedAt         DateTime?

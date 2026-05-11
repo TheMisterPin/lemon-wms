@@ -1,4 +1,4 @@
-import { OrderDetailPageClient } from '@/components/dashboard/orders/order-detail-page-client'
+import { OrderDetailPageClient } from '@/components/features/orders/components/order-detail-page-client'
 
 type PageProps = {
   params: Promise<{ orderType: string; id: string }>

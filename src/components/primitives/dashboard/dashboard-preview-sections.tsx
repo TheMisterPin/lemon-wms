@@ -4,7 +4,6 @@
  * @doc .docs/developer/refactors/components/_dashboard-standardization-plan.md
  */
 
-import type { ReactNode } from 'react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -20,18 +19,7 @@ import {
   DashboardChartPanel,
   DashboardSection
 } from './dashboard-section'
-
-type DashboardPreviewSectionProps<T> = {
-  title: ReactNode
-  items: T[]
-  getKey: (item: T) => string
-  renderItem: (item: T) => ReactNode
-  emptyMessage?: ReactNode
-  sheetTitle: ReactNode
-  sheetDescription?: ReactNode
-  previewCount: number
-  sheetGridClassName?: string
-}
+import { DashboardActivityPreviewSectionProps, DashboardEntityPreviewSectionProps, DashboardPreviewSectionProps } from './types'
 
 function DashboardPreviewSection<T>({
   title,
@@ -102,13 +90,9 @@ function DashboardPreviewSection<T>({
   )
 }
 
-export type DashboardEntityPreviewSectionProps<T> = Omit<DashboardPreviewSectionProps<T>, 'previewCount'>
-
 export function DashboardEntityPreviewSection<T>(props: DashboardEntityPreviewSectionProps<T>) {
   return <DashboardPreviewSection {...props} previewCount={3} />
 }
-
-export type DashboardActivityPreviewSectionProps<T> = Omit<DashboardPreviewSectionProps<T>, 'previewCount'>
 
 export function DashboardActivityPreviewSection<T>(props: DashboardActivityPreviewSectionProps<T>) {
   return <DashboardPreviewSection {...props} previewCount={4} sheetGridClassName="grid grid-cols-1 gap-3" />

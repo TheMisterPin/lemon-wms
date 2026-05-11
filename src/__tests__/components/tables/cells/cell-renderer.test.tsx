@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { CellRenderer } from '@/components/tables/cells/cell-renderer'
+import { CellRenderer } from '@/components/primitives/tables/cells/cell-renderer'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
 type Row = {

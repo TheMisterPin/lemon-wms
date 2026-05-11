@@ -8,6 +8,7 @@ import type { ReactNode } from 'react'
 import Link from 'next/link'
 
 import { Card, CardContent } from '@/components/ui/card'
+import { DashboardKpiCardMetric } from './types'
 
 type DashboardKpiGridProps = {
   children: ReactNode
@@ -20,12 +21,6 @@ export function DashboardKpiGrid({ children, className }: DashboardKpiGridProps)
       {children}
     </div>
   )
-}
-
-export type DashboardKpiCardMetric = {
-  label: string
-  value: ReactNode
-  tone?: 'available' | 'reserved' | 'blocked' | 'neutral'
 }
 
 type DashboardKpiCardProps = {

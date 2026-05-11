@@ -1,8 +1,4 @@
 'use client'
-/**
- * @generated-doc-link
- * @doc .docs/developer/refactors/components/_dashboard-standardization-plan.md
- */
 
 import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
@@ -10,13 +6,7 @@ import {
   DashboardChartPanel
 } from '@/components/primitives/dashboard/dashboard-section'
 import { warehouseOverviewRechartsTooltipProps } from '@/components/primitives/warehouse-overview-primitives'
-
-export type DashboardDonutBreakdownRow = {
-  id: string
-  label: string
-  value: number
-  color: string
-}
+import { DashboardDonutBreakdownRow, DashboardStatusBreakdownRow } from './types'
 
 type DashboardDonutBreakdownProps = {
   rows: DashboardDonutBreakdownRow[]
@@ -33,7 +23,7 @@ export function DashboardDonutBreakdown({
 }: DashboardDonutBreakdownProps) {
   return (
     <DashboardChartPanel>
-      <div className="flex min-h-[300px] w-full min-w-0 flex-col gap-4 md:flex-row">
+      <div className="flex min-h-75 w-full min-w-0 flex-col gap-4 md:flex-row">
         <div className="flex flex-col justify-center gap-3 md:w-1/3 md:pr-3">
           {rows.map((row) => {
             const pct = total > 0 ? ((row.value / total) * 100).toFixed(1) : '0'
@@ -52,7 +42,7 @@ export function DashboardDonutBreakdown({
           })}
         </div>
 
-        <div className="relative h-[260px] w-full min-w-0 md:w-2/3">
+        <div className="relative h-65 w-full min-w-0 md:w-2/3">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -90,14 +80,6 @@ export function DashboardDonutBreakdown({
   )
 }
 
-export type DashboardStatusBreakdownRow = {
-  id: string
-  label: string
-  available: number
-  reserved: number
-  blocked: number
-}
-
 type DashboardStatusBreakdownProps = {
   rows: DashboardStatusBreakdownRow[]
 }
@@ -105,7 +87,7 @@ type DashboardStatusBreakdownProps = {
 export function DashboardStatusBreakdown({ rows }: DashboardStatusBreakdownProps) {
   return (
     <DashboardChartPanel>
-      <div className="h-[300px] w-full min-w-0">
+      <div className="h-75 w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={rows}

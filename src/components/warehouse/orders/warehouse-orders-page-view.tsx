@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react'
 import { ClipboardList, Pause, Play } from 'lucide-react'
-import { GenericTable } from '@/components/tables/generic-table'
+import { GenericTable } from '@/components/primitives/tables/generic-table'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { usePurchaseOrders } from '@/components/warehouse/orders/use-purchase-orders'

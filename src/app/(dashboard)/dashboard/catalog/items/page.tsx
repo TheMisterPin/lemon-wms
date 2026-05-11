@@ -1,4 +1,4 @@
-import { DashboardItemsPageView } from '@/components/dashboard/items/dashboard-items-page-view'
+import { DashboardItemsPageView } from '@/components/features/catalog/pages/dashboard-items-page-view'
 
 export default function ItemPage() {
   return <DashboardItemsPageView />

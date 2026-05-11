@@ -3,15 +3,15 @@
  * @doc .docs/developer/refactors/components/misc/index.md
  */
 
-export * from './auth'
+export * from './features/auth'
 export * from './dashboard'
 export * from './dynamic-form'
-export * from './factbox'
-export * from './inputs'
-export * from './media'
+export * from './primitives/factbox'
+export * from './primitives/inputs'
+export * from './primitives/media'
 export * from './shared'
-export * from './tables'
-export * from './typography'
+export * from './primitives/tables'
+export * from './primitives/typography'
 export * from './universal-button'
 export * from './universal-loader'
 export * from './universal-modal'

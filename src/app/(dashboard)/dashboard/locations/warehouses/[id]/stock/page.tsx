@@ -1,4 +1,4 @@
-import { WarehouseStockDashboardPageClient } from '@/components/dashboard/warehouses/warehouse-stock-dashboard-page-client'
+import { WarehouseStockDashboardPageClient } from '@/components/features/locations/warehouses/warehouse-stock-dashboard-page-client'
 
 type WarehouseStockPageProps = {
   params: Promise<{ id: string }>

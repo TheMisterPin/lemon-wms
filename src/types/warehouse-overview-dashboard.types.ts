@@ -3,7 +3,7 @@ import type {
   WarehouseOrderTypeRow,
   WarehouseStockCategoryRow,
   WarehouseZoneSummaryRow
-} from '@/components/dashboard/warehouses/components/warehouse-overview-types'
+} from '@/components/features/locations/warehouses/components/warehouse-overview-types'
 
 /** KPI descriptors without icon — merged client-side via label → icon map. */
 export type WarehouseOverviewDashboardKpiRow = {

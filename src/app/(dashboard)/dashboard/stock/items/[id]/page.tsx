@@ -1,4 +1,4 @@
-import { ItemDetailPageClient } from '@/components/dashboard/stock/item-detail-page-client'
+import { ItemDetailPageClient } from '@/components/features/stock/pages/item-detail-page-client'
 
 type PageProps = {
   params: Promise<{ id: string }>

@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { TableShell } from '@/components/tables/table-shell'
+import { TableShell } from '@/components/primitives/tables/table-shell'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 
 type Row = { id: string, name: string }

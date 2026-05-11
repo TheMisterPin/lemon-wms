@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react'
 
-import { GenericTable } from '@/components/tables/generic-table'
+import { GenericTable } from '@/components/primitives/tables/generic-table'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 import type {
   EntityTone,

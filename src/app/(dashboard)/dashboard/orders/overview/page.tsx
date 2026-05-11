@@ -1,4 +1,4 @@
-import { DashboardOrdersOverviewView } from '@/components/dashboard/orders/dashboard-orders-overview-view'
+import { DashboardOrdersOverviewView } from '@/components/features/orders/components/dashboard-orders-overview-view'
 
 export default function DashboardOrdersIndexPage() {
   return <DashboardOrdersOverviewView />

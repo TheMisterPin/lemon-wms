@@ -1,4 +1,4 @@
-import { CategoryStockPageClient } from '@/components/dashboard/stock/category-stock-page-client'
+import { CategoryStockPageClient } from '@/components/features/stock/pages/category-stock-page-client'
 
 type PageProps = {
   params: Promise<{ id: string }>

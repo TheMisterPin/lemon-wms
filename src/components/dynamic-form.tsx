@@ -13,7 +13,7 @@ import { FieldGroup } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 
-import { GenericFormField } from './inputs/dynamic-form-field'
+import { GenericFormField } from '@/components/primitives/inputs/dynamic-form-field'
 import { GenericFormProps } from '../types/components/form/generic-form.types'
 
 function getColumnsClass(columns: 1 | 2 | 3 | 4 = 2): string {

@@ -1,4 +1,4 @@
-import { InventoryHealthPageClient } from '@/components/dashboard/stock/inventory-health-page-client'
+import { InventoryHealthPageClient } from '@/components/features/stock/components/inventory-health-page-client'
 
 export default function StockHealthPage() {
   return <InventoryHealthPageClient />

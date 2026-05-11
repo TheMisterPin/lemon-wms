@@ -4,8 +4,8 @@
  */
 
 import type { BinDirectoryRow } from '@/components/configs/entities/bin/bin-directory-table'
-import type { DashboardInfoCardItem } from '@/components/dashboard/dashboard-info-card'
-import type { DashboardRecordListItem } from '@/components/dashboard/dashboard-record-list-section'
+import type { DashboardInfoCardItem } from '@/components/dashboard/primitives/dashboard-info-card'
+import type { DashboardRecordListItem } from '@/components/dashboard/primitives/dashboard-record-list-section'
 
 export type WarehouseOrderRecord = {
   id: string

@@ -1,4 +1,4 @@
-import { DeviceDetailPageClient } from '@/components/dashboard/devices/device-detail-page-client'
+import { DeviceDetailPageClient } from '@/components/features/iam/devices/device-detail-page-client'
 
 type Props = { params: Promise<{ deviceId: string }> }
 

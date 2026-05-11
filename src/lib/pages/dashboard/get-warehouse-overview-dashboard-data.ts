@@ -5,7 +5,7 @@ import type {
   WarehouseOrderTypeRow,
   WarehouseStockCategoryRow,
   WarehouseZoneSummaryRow
-} from '@/components/dashboard/warehouses/components/warehouse-overview-types'
+} from '@/components/features/locations/warehouses/components/warehouse-overview-types'
 import type { PrismaClient } from '@/generated/prisma'
 import { OrderStatus, Prisma, ReceiptStatus } from '@/generated/prisma'
 

@@ -1,4 +1,4 @@
-import { ZoneDashboardOverviewPageClient } from '@/components/dashboard/zones/zone-dashboard-overview-page-client'
+import { ZoneDashboardOverviewPageClient } from '@/components/features/locations/zones/zone-dashboard-overview-page'
 
 type ZoneOverviewPageProps = {
   params: Promise<{ id: string }>
