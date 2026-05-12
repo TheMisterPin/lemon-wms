@@ -1,0 +1,317 @@
+type CategoryHealthRow {
+  blocked: Int
+  categoryId: String
+  categoryName: String
+  expiring: Int
+  href: String
+  lowStock: Int
+  quarantine: Int
+}
+
+type DashboardHeader {
+  subtitle: String
+  title: String
+}
+
+type DashboardKpi {
+  helper: String
+  label: String
+  tone: String
+  value: String
+}
+
+type DeviceRow {
+  authorizationStatus: String
+  code: String
+  currentOrderLabel: String
+  deviceId: String
+  href: String
+  label: String
+  lastSeenAt: String
+  onlineStatus: String
+  userId: String
+  userName: String
+  warehouseId: String
+  warehouseName: String
+}
+
+type DeviceStatusTab {
+  count: Int
+  key: String
+  label: String
+}
+
+type DevicesDashboard {
+  devices: [DeviceRow!]
+  header: DashboardHeader
+  kpis: [DashboardKpi!]
+  tabs: [DeviceStatusTab!]
+  trolleys: [TrolleySummaryRow!]
+}
+
+type InventoryHealthAlert {
+  entityLabel: String
+  href: String
+  id: String
+  reason: String
+  severity: String
+  title: String
+}
+
+type InventoryHealthDashboard {
+  alerts: [InventoryHealthAlert!]
+  categoryHealth: [CategoryHealthRow!]
+  header: DashboardHeader
+  issueDistribution: [InventoryHealthIssueSlice!]
+  issues: [InventoryHealthIssueRow!]
+  kpis: [DashboardKpi!]
+  warehouseHealth: [WarehouseHealthRow!]
+}
+
+type InventoryHealthIssueRow {
+  detectedAt: String
+  entityLabel: String
+  href: String
+  issueId: String
+  quantity: Float
+  severity: String
+  type: String
+  warehouseName: String
+}
+
+type InventoryHealthIssueSlice {
+  count: Int
+  type: String
+}
+
+type OrderAttentionCard {
+  href: String
+  orderId: String
+  orderLabel: String
+  reason: String
+  tone: String
+  type: String
+}
+
+type OrderStatusBreakdown {
+  active: Int
+  assigned: Int
+  completed: Int
+  exception: Int
+  label: String
+  paused: Int
+  released: Int
+}
+
+type OrderSummaryRow {
+  assignedUserName: String
+  href: String
+  lastActivityAt: String
+  orderId: String
+  orderLabel: String
+  progressPercent: Float
+  startedAt: String
+  status: String
+  type: String
+  warehouseId: String
+  warehouseName: String
+}
+
+type OrderTypeSlice {
+  count: Int
+  href: String
+  type: String
+}
+
+type OrdersDashboard {
+  attention: [OrderAttentionCard!]
+  header: DashboardHeader
+  kpis: [DashboardKpi!]
+  orderTypeDistribution: [OrderTypeSlice!]
+  orders: [OrderSummaryRow!]
+  statusBreakdown: [OrderStatusBreakdown!]
+  warehouseWorkload: [WarehouseWorkloadRow!]
+}
+
+type Query {
+  devicesDashboard: DevicesDashboard
+  inventoryHealthDashboard: InventoryHealthDashboard
+  ordersDashboard: OrdersDashboard
+  stockDashboard(warehouseId: String): StockDashboard
+  usersDashboard(warehouseId: String): UsersDashboard
+  warehouseOverviewDashboard(id: String!): WarehouseOverviewDashboard
+}
+
+type StockDashboard {
+  categories: [StockDashboardCategoryRow!]
+  distinctSkus: Int
+  items: [StockDashboardItemRow!]
+  occupiedBins: Int
+  subcategoryGroups: [StockDashboardSubcategoryGroup!]
+  totalAvailable: Float
+  totalBlocked: Float
+  totalOnHand: Float
+  totalReserved: Float
+  warehouseId: String
+}
+
+type StockDashboardCategoryRow {
+  iconUrl: String
+  key: String
+  label: String
+  totalAvailable: Float
+  totalBlocked: Float
+  totalOnHand: Float
+  totalReserved: Float
+}
+
+type StockDashboardItemRow {
+  binsCount: Int
+  itemId: String
+  name: String
+  sku: String
+  totalAvailable: Float
+  totalBlocked: Float
+  totalOnHand: Float
+  totalReserved: Float
+  uom: String
+}
+
+type StockDashboardSubcategoryGroup {
+  parentIconUrl: String
+  parentKey: String
+  parentLabel: String
+  rows: [StockDashboardSubcategoryRow!]
+}
+
+type StockDashboardSubcategoryRow {
+  available: Float
+  blocked: Float
+  iconUrl: String
+  name: String
+  onHand: Float
+  reserved: Float
+}
+
+type TrolleySummaryRow {
+  code: String
+  deviceCode: String
+  href: String
+  itemCount: Int
+  linkedOrdersCount: Int
+  trolleyId: String
+  userName: String
+  warehouseName: String
+}
+
+type UserSummaryRow {
+  activeOrderLabel: String
+  deviceCode: String
+  href: String
+  lastActivityAt: String
+  name: String
+  role: String
+  status: String
+  userId: String
+  warehouseId: String
+  warehouseName: String
+}
+
+type UsersDashboard {
+  header: DashboardHeader
+  kpis: [DashboardKpi!]
+  users: [UserSummaryRow!]
+  warehouseSummaries: [WarehouseUserSummaryRow!]
+}
+
+type WarehouseActivityRow {
+  action: String
+  entity: String
+  id: String
+  status: String
+  time: String
+  user: String
+}
+
+type WarehouseHealthRow {
+  criticalCount: Int
+  href: String
+  issueCount: Int
+  warehouseId: String
+  warehouseName: String
+  warningCount: Int
+}
+
+type WarehouseInfo {
+  code: String
+  id: String
+  lastActivityRelative: String
+  name: String
+}
+
+type WarehouseOrderTypeRow {
+  active: Int
+  assigned: Int
+  completed: Int
+  exceptions: Int
+  paused: Int
+  released: Int
+  type: String
+}
+
+type WarehouseOverviewDashboard {
+  activity: [WarehouseActivityRow!]
+  kpis: [WarehouseOverviewKpi!]
+  orderTypes: [WarehouseOrderTypeRow!]
+  stockCategories: [WarehouseStockCategoryRow!]
+  warehouse: WarehouseInfo
+  zones: [WarehouseZoneSummaryRow!]
+}
+
+type WarehouseOverviewKpi {
+  helper: String
+  label: String
+  tone: String
+  value: String
+}
+
+type WarehouseStockCategoryRow {
+  available: Float
+  blocked: Float
+  color: String
+  label: String
+  reserved: Float
+  totalOnHand: Float
+}
+
+type WarehouseUserSummaryRow {
+  activeOrders: Int
+  activeUsers: Int
+  averageOrdersPerUser: Float
+  href: String
+  idleUsers: Int
+  totalUsers: Int
+  warehouseId: String
+  warehouseName: String
+}
+
+type WarehouseWorkloadRow {
+  active: Int
+  completedToday: Int
+  exceptions: Int
+  href: String
+  released: Int
+  warehouseId: String
+  warehouseName: String
+}
+
+type WarehouseZoneSummaryRow {
+  available: Float
+  blocked: Float
+  fill: Float
+  id: String
+  name: String
+  onHand: Float
+  reserved: Float
+  type: String
+}

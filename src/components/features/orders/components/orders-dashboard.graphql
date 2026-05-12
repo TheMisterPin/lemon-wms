@@ -1,0 +1,73 @@
+fragment OrdersDashboardHeader on OrdersDashboard {
+  header {
+    title
+    subtitle
+  }
+}
+
+fragment OrdersDashboardKpis on OrdersDashboard {
+  kpis {
+    label
+    value
+    helper
+    tone
+  }
+}
+
+fragment OrdersTypeDistribution on OrdersDashboard {
+  orderTypeDistribution {
+    type
+    count
+    href
+  }
+}
+
+fragment OrdersWarehouseWorkload on OrdersDashboard {
+  warehouseWorkload {
+    warehouseId
+    warehouseName
+    active
+    released
+    completedToday
+    exceptions
+    href
+  }
+}
+
+fragment OrdersAttentionCards on OrdersDashboard {
+  attention {
+    orderId
+    orderLabel
+    type
+    reason
+    tone
+    href
+  }
+}
+
+fragment OrdersSummaryRows on OrdersDashboard {
+  orders {
+    orderId
+    orderLabel
+    type
+    warehouseId
+    warehouseName
+    status
+    progressPercent
+    assignedUserName
+    startedAt
+    lastActivityAt
+    href
+  }
+}
+
+query GetOrdersDashboard {
+  ordersDashboard {
+    ...OrdersDashboardHeader
+    ...OrdersDashboardKpis
+    ...OrdersTypeDistribution
+    ...OrdersWarehouseWorkload
+    ...OrdersAttentionCards
+    ...OrdersSummaryRows
+  }
+}
