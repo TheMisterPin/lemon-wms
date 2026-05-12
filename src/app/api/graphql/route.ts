@@ -36,4 +36,10 @@ const { handleRequest } = createYoga({
   },
 })
 
-export { handleRequest as GET, handleRequest as POST }
+export async function GET(request: Request): Promise<Response> {
+  return handleRequest(request, {})
+}
+
+export async function POST(request: Request): Promise<Response> {
+  return handleRequest(request, {})
+}
