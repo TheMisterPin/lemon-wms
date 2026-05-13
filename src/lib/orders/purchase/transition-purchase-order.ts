@@ -1,5 +1,5 @@
 import type { Prisma, PrismaClient } from '@/generated/prisma'
-import { OrderStatus } from '@/generated/prisma'
+import { AssignmentLifecycle, OrderStatus, OrderType } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
 import { createUserActivityEntry, LOG_ACTION_TYPES } from '@/lib/logs'
@@ -64,6 +64,12 @@ function assertWarehouseMatch(row: PoScopeRow, tokenWarehouseId: string) {
 export type TransitionedPurchaseOrder = {
   id: string
   status: OrderStatus
+}
+
+export type StartedPurchaseOrder = {
+  id: string
+  status: OrderStatus
+  orderAssignmentId: string
 }
 
 async function writeOrderLifecycleLog(
@@ -131,13 +137,16 @@ export async function releasePurchaseOrder(
 /**
  * Starts operational execution of a released purchase order.
  * Allowed transition: RELEASED -> EXECUTING.
+ * Also creates or re-activates the OrderAssignment for this worker so that
+ * subsequent line-handling mutations have a valid assignment context.
  */
 export async function startPurchaseOrder(
   prisma: PrismaClient,
   id: string,
   tokenWarehouseId: string,
-  userId: string
-): Promise<TransitionedPurchaseOrder> {
+  userId: string,
+  zoneId?: string | null
+): Promise<StartedPurchaseOrder> {
   const row = await loadActivePurchaseOrder(prisma, id)
   assertWarehouseMatch(row, tokenWarehouseId)
   if (row.status !== OrderStatus.RELEASED) {
@@ -149,7 +158,7 @@ export async function startPurchaseOrder(
       data: { status: OrderStatus.EXECUTING }
     })
     if (updated.count === 0) {
-      return updated
+      return null
     }
 
     await writeOrderLifecycleLog(tx, {
@@ -158,13 +167,54 @@ export async function startPurchaseOrder(
       row
     })
 
-    return updated
+    const now = new Date()
+    const existing = await tx.orderAssignment.findFirst({
+      where: { orderType: OrderType.PURCHASE, orderId: id, userId }
+    })
+
+    let assignmentId: string
+    if (existing) {
+      const refreshed = await tx.orderAssignment.update({
+        where: { id: existing.id },
+        data: {
+          status: AssignmentLifecycle.STARTED,
+          warehouseId: tokenWarehouseId,
+          zoneId: zoneId ?? existing.zoneId,
+          isActive: true,
+          assignedAt: now,
+          startedAt: now,
+          pausedAt: null,
+          releasedAt: null,
+          completedAt: null,
+          cancelledAt: null,
+          timedOutAt: null
+        }
+      })
+      assignmentId = refreshed.id
+    } else {
+      const created = await tx.orderAssignment.create({
+        data: {
+          orderId: id,
+          orderType: OrderType.PURCHASE,
+          warehouseId: tokenWarehouseId,
+          userId,
+          zoneId: zoneId ?? null,
+          status: AssignmentLifecycle.STARTED,
+          isActive: true,
+          startedAt: now
+        }
+      })
+      assignmentId = created.id
+    }
+
+    return { assignmentId }
   })
-  if (result.count === 0) {
+
+  if (result === null) {
     throw new DomainError(INVALID_START, 'INVALID_TRANSITION', 409)
   }
 
-  return { id, status: OrderStatus.EXECUTING }
+  return { id, status: OrderStatus.EXECUTING, orderAssignmentId: result.assignmentId }
 }
 
 /**

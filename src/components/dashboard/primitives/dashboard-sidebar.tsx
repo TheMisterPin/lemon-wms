@@ -10,8 +10,10 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   Sun,
   Moon,
-  ChevronDown
+  ChevronDown,
+  FlaskConical
 } from 'lucide-react'
+import { SimulationModal } from '@/components/features/simulation/simulation-modal'
 import {
   DASHBOARD_NAV_GROUPS,
   isRouteActive
@@ -28,9 +30,10 @@ import type { SelectLocationModalConfirmPayload, SelectLocationModalVariant } fr
 
 interface DashboardSidebarProps {
   onClose?: () => void
+  isDemoEnabled?: boolean
 }
 
-export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
+export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { theme, toggleTheme } = useTheme()
@@ -45,6 +48,7 @@ export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
     refetch: refetchStockCategoryTree
   } = useStockCategoryTree(stockAreaActive)
 
+  const [simulationOpen, setSimulationOpen] = useState(false)
   const [locationPickerOpen, setLocationPickerOpen] = useState(false)
   const [locationPickerVariant, setLocationPickerVariant] =
     useState<SelectLocationModalVariant>('warehouse')
@@ -469,6 +473,22 @@ export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
         })}
       </nav>
 
+      {isDemoEnabled && (
+        <div className="border-t border-dash-border p-4">
+          <div className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-dash-muted">
+            Simulation
+          </div>
+          <button
+            type="button"
+            onClick={() => setSimulationOpen(true)}
+            className="flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
+          >
+            <FlaskConical size={18} className="shrink-0" />
+            Purchase Order
+          </button>
+        </div>
+      )}
+
       <div className="border-t border-dash-border p-4">
         <button
           type="button"
@@ -483,6 +503,10 @@ export default function DashboardSidebar({ onClose }: DashboardSidebarProps) {
           {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         </button>
       </div>
+
+      {isDemoEnabled && (
+        <SimulationModal open={simulationOpen} onOpenChange={setSimulationOpen} />
+      )}
 
       <SelectLocationModal
         key={locationPickerSession}

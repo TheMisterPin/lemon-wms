@@ -16,6 +16,7 @@
     "seed:users": "tsx seed/seed-users.ts",
     "seed:warehouses": "tsx seed/seed-warehouses.ts",
     "seed:stock": "tsx seed/seed-stock.ts",
+    "simulate": "tsx simulation/run-purchase-order.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
