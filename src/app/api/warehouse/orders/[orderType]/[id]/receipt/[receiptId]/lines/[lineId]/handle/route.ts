@@ -51,9 +51,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return fail('Order id, receipt id, and line id are required.', 'VALIDATION_ERROR', 400)
   }
 
-  if (!payload.warehouseId) {
+  if (!warehouseId) {
     return fail('Warehouse context is required.', 'VALIDATION_ERROR', 400)
   }
+  const warehouseId = warehouseId
 
   const body = await req.json().catch(() => null)
   const parsed = handleLineSchema.safeParse(body)
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return fail('Receipt line does not belong to this purchase order.', 'INVALID_STATE', 400)
     }
 
-    if (receiptLine.receiptLine.warehouseId !== payload.warehouseId) {
+    if (receiptLine.receiptLine.warehouseId !== warehouseId) {
       return fail('Receipt does not belong to your warehouse.', 'FORBIDDEN', 403)
     }
 
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       notes: notes ?? null,
       orderAssignmentId,
       userId: payload.userId,
-      warehouseId: payload.warehouseId,
+      warehouseId: warehouseId,
       orderId: id,
       orderLineRefId: receiptLine.purchaseOrderLineId,
       activityNotes: activityNotes ?? null,
@@ -130,7 +131,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         stockMove: {
           binOperation: {
             userId: payload.userId,
-            warehouseId: payload.warehouseId,
+            warehouseId: warehouseId,
             zoneId: destBin.zoneId,
             type: BinOperationType.RECEIVE,
             toBinId,
@@ -158,7 +159,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
       await prisma.$transaction(async (tx) => {
         await upsertAvailableStockItem(tx, {
-          warehouseId: payload.warehouseId,
+          warehouseId: warehouseId,
           binId: toBinId,
           itemId: receiptLine.itemId,
           name: receiptLine.itemNameSnapshot,
@@ -170,7 +171,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         await updateBinCapacityBy(tx, toBinId, quantity)
         await tx.itemLedgerEntry.create({
           data: {
-            warehouseId: payload.warehouseId,
+            warehouseId: warehouseId,
             zoneId: destBin!.zoneId,
             warItemId: receiptLine.itemId,
             orderId: id,
