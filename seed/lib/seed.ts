@@ -20,12 +20,19 @@ import { seedUsers } from './users'
 import { seedWarehouses } from './warehouses'
 import { seedZones } from './zones'
 
+function seedElapsedMs(startedAt: number): string {
+  const ms = Date.now() - startedAt
+
+  return ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${ms}ms`
+}
+
 /**
  * seedDB.
  * @param prisma - Parameter for seedDB.
  * @returns Result from seedDB.
  */
 export async function seedDB(prisma: PrismaClient) {
+  const clearStartedAt = Date.now()
   console.warn('Clearing existing data...\n')
 
   await prisma.userActivityEntry.deleteMany()
@@ -111,87 +118,116 @@ export async function seedDB(prisma: PrismaClient) {
   await prisma.user.deleteMany()
   console.warn('Cleared users.')
   await prisma.warehouse.deleteMany()
-  console.warn('Cleared warehouses.\n')
-  console.warn('Existing data cleared.\n')
+  console.warn('Cleared warehouses.')
+  console.warn(`Existing data cleared in ${seedElapsedMs(clearStartedAt)}.\n`)
   console.warn('Seeding new data...\n')
 
+  let stageStartedAt = Date.now()
   console.warn('Seeding units of measure...')
   const unitsOfMeasure = await seedUnitsOfMeasure(prisma)
-  console.warn(`Seeded ${unitsOfMeasure.count} units of measure.\n`)
+  console.warn(`Seeded ${unitsOfMeasure.count} units of measure. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding warehouses...')
   const warehouses = await seedWarehouses(prisma)
-  console.warn(`Seeded ${warehouses.count} warehouses.\n`)
+  console.warn(`Seeded ${warehouses.count} warehouses. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding zones...')
   const zones = await seedZones(prisma)
-  console.warn(`Seeded ${zones.count} zones.\n`)
+  console.warn(`Seeded ${zones.count} zones. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding bins...')
   const bins = await seedBins(prisma)
-  console.warn(`Seeded ${bins.count} bins.\n`)
+  console.warn(`Seeded ${bins.count} bins. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding users...')
   const users = await seedUsers(prisma)
-  console.warn(`Seeded ${users.count} users.\n`)
+  console.warn(`Seeded ${users.count} users. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding demo device...')
   const devices = await seedDemoDevice(prisma)
-  console.warn(`Seeded ${devices.count} devices.\n`)
+  console.warn(`Seeded ${devices.count} devices. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding suppliers and customers...')
   const businessParties = await seedBusinessParties(prisma)
-  console.warn(`Seeded ${businessParties.partiesCount} business parties (${businessParties.suppliersCount} suppliers, ${businessParties.customersCount} customers).\n`)
+  console.warn(
+    `Seeded ${businessParties.partiesCount} business parties (${businessParties.suppliersCount} suppliers, ${businessParties.customersCount} customers). (${seedElapsedMs(stageStartedAt)})\n`
+  )
 
+  stageStartedAt = Date.now()
   console.warn('Seeding item categories...')
   const itemCategories = await seedCategories(prisma)
-  console.warn(`Seeded ${itemCategories.parentCount} parent categories and ${itemCategories.childCount} child categories.\n`)
+  console.warn(
+    `Seeded ${itemCategories.parentCount} parent categories and ${itemCategories.childCount} child categories. (${seedElapsedMs(stageStartedAt)})\n`
+  )
 
+  stageStartedAt = Date.now()
   console.warn('Seeding items...')
   const seededItems = await seedItems(prisma)
-  console.warn(`Seeded ${seededItems.itemsCount} items.\n`)
+  console.warn(`Seeded ${seededItems.itemsCount} items. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding bin stock items...')
   const binStockItems = await seedBinStockItems(prisma)
-  console.warn(`Seeded ${binStockItems.count} bin stock items.\n`)
+  console.warn(`Seeded ${binStockItems.count} bin stock items. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding bin operations (movement log)...')
   const binOperations = await seedBinOperations(prisma)
-  console.warn(`Seeded ${binOperations.count} bin operation entries.\n`)
+  console.warn(`Seeded ${binOperations.count} bin operation entries. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding bin daily history snapshots...')
   const binHistory = await seedBinHistory(prisma)
-  console.warn(`Seeded ${binHistory.count} bin history snapshot rows.\n`)
+  console.warn(`Seeded ${binHistory.count} bin history snapshot rows. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding purchase orders...')
   const purchaseOrders = await seedPurchaseOrders(prisma)
-  console.warn(`Seeded ${purchaseOrders.count} purchase orders.\n`)
+  console.warn(`Seeded ${purchaseOrders.count} purchase orders. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding purchase receipts...')
   const receiptOrders = await seedReceiptOrders(prisma)
-  console.warn(`Seeded ${receiptOrders.count} purchase receipts.\n`)
+  console.warn(`Seeded ${receiptOrders.count} purchase receipts. (${seedElapsedMs(stageStartedAt)})\n`)
 
+  stageStartedAt = Date.now()
   console.warn('Seeding sales orders...')
   const salesOrders = await seedSalesOrders(prisma)
-  console.warn(`Seeded ${salesOrders.count} sales orders and updated ${salesOrders.reservedUpdates} stock rows as reserved.\n`)
+  console.warn(
+    `Seeded ${salesOrders.count} sales orders and updated ${salesOrders.reservedUpdates} stock rows as reserved. (${seedElapsedMs(stageStartedAt)})\n`
+  )
 
+  stageStartedAt = Date.now()
   console.warn('Seeding transfer orders...')
   const transferOrders = await seedTransferOrders(prisma)
-  console.warn(`Seeded ${transferOrders.count} transfer orders and updated ${transferOrders.reservedUpdates} stock rows as reserved.\n`)
+  console.warn(
+    `Seeded ${transferOrders.count} transfer orders and updated ${transferOrders.reservedUpdates} stock rows as reserved. (${seedElapsedMs(stageStartedAt)})\n`
+  )
 
+  stageStartedAt = Date.now()
   console.warn('Seeding order assignments...')
   const orderAssignments = await seedOrderAssignments(prisma)
-  console.warn(`Seeded ${orderAssignments.assignmentsCount} order assignments and ${orderAssignments.userActivitiesCount} assignment activities.\n`)
+  console.warn(
+    `Seeded ${orderAssignments.assignmentsCount} order assignments and ${orderAssignments.userActivitiesCount} assignment activities. (${seedElapsedMs(stageStartedAt)})\n`
+  )
 
+  stageStartedAt = Date.now()
   console.warn('Seeding order execution activities (line progress + execution trail)...')
   const executionSeed = await seedOrderExecutionActivities(prisma)
   console.warn(
-    `Seeded ${executionSeed.linesTouched} execution lines (${executionSeed.mutationCalls} via mutations, ${executionSeed.directWrites} direct).\n`
+    `Seeded ${executionSeed.linesTouched} execution lines (${executionSeed.mutationCalls} via mutations, ${executionSeed.directWrites} direct). (${seedElapsedMs(stageStartedAt)})\n`
   )
 
+  stageStartedAt = Date.now()
   console.warn('Seeding auth user activities...')
   const userActivities = await seedUserActivities(prisma)
-  console.warn(`Seeded ${userActivities.count} auth user activities.\n`)
+  console.warn(`Seeded ${userActivities.count} auth user activities. (${seedElapsedMs(stageStartedAt)})\n`)
 
   return {
     unitsOfMeasureSeeded: unitsOfMeasure.count,
