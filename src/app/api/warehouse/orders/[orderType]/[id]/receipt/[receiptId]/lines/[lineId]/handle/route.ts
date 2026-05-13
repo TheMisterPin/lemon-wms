@@ -51,10 +51,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return fail('Order id, receipt id, and line id are required.', 'VALIDATION_ERROR', 400)
   }
 
-  if (!warehouseId) {
+  if (!payload.warehouseId) {
     return fail('Warehouse context is required.', 'VALIDATION_ERROR', 400)
   }
-  const warehouseId = warehouseId
+  const warehouseId = payload.warehouseId
 
   const body = await req.json().catch(() => null)
   const parsed = handleLineSchema.safeParse(body)
