@@ -12,12 +12,12 @@ import DashboardFooter from './dashboard-footer'
 import DashboardHeader from './dashboard-header'
 import DashboardSidebar from './dashboard-sidebar'
 
-export default function DashboardShell({ children }: { children: ReactNode }) {
+export default function DashboardShell({ children, isDemoEnabled }: { children: ReactNode; isDemoEnabled?: boolean }) {
   return (
     <>
       <PageWrapper
         header={<DashboardHeader />}
-        sidebar={<DashboardSidebar />}
+        sidebar={<DashboardSidebar isDemoEnabled={isDemoEnabled} />}
         sidebarOpen
         footer={<DashboardFooter />}
       >

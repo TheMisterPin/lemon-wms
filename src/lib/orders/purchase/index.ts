@@ -16,5 +16,6 @@ export {
   startPurchaseOrder,
   pausePurchaseOrder,
   resumePurchaseOrder,
-  type TransitionedPurchaseOrder
+  type TransitionedPurchaseOrder,
+  type StartedPurchaseOrder
 } from './transition-purchase-order'
