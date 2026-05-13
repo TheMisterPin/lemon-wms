@@ -91,6 +91,7 @@ model BinOperationEntry {
   reversedByEntryId   String? // Points to the compensating BOE if this was reversed
   reversesEntryId     String? // Points to the original BOE this entry reverses
   userActivityEntryId String?
+  orderExecutionActivityId String?
   createdAt           DateTime         @default(now())
 
   user              User               @relation(fields: [userId], references: [id])
@@ -100,7 +101,6 @@ model BinOperationEntry {
   trolley           Trolley?           @relation("TrolleyBinOperations", fields: [trolleyId], references: [id])
   unitOfMeasure     UnitOfMeasure      @relation(fields: [uom], references: [id])
   userActivityEntry UserActivityEntry? @relation(fields: [userActivityEntryId], references: [id])
-
   itemLedgers ItemLedgerEntry[]
 
   @@index([warehouseId, warItemId, createdAt])
@@ -108,6 +108,7 @@ model BinOperationEntry {
   @@index([toBinId, createdAt])
   @@index([type, createdAt])
   @@index([orderType, orderId])
+  @@index([orderExecutionActivityId])
 }
 
 // Layer 3 — FISCAL STOCK IMPACT.
@@ -201,6 +202,8 @@ model OrderAssignment {
 // It records actor, order context, optional line context, warehouse context,
 // and timestamp. It does not replace stock movement entries or current-state
 // order line fields.
+// orderLineRefId: master order line id (no FK).
+// executionLineDocument + executionLineId: receipt/pick execution line id (no FK).
 model OrderExecutionActivity {
   id                String            @id @default(uuid())
   orderAssignmentId String
@@ -213,8 +216,11 @@ model OrderExecutionActivity {
   orderId           String
   orderType         OrderType
   orderLineRefId    String?
+  executionLineDocument OrderExecutionLineDocument?
+  executionLineId     String?
   notes             String?
   createdAt         DateTime          @default(now())
+  binOperationEntryId String?
 
   orderAssignment OrderAssignment @relation("ActivitiesPerformedInSession", fields: [orderAssignmentId], references: [id], onDelete: Cascade)
   user            User            @relation(fields: [userId], references: [id])
@@ -228,6 +234,7 @@ model OrderExecutionActivity {
   @@index([userId, createdAt])
   @@index([warehouseId, createdAt])
   @@index([activityType, createdAt])
+  @@index([binOperationEntryId])
 }
 
 // Daily bin-level aggregates for dashboards (distinct from immutable BOEs).

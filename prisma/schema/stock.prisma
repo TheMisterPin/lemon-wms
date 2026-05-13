@@ -52,6 +52,10 @@ model BinStockItem {
   updatedAt                 DateTime                   @updatedAt
   boxId                     String?
   purchaseOrderReceiptLines PurchaseOrderReceiptLine[] @relation("BinStockItemPurchaseOrderReceiptLines")
+  salesOrderPickLines       SalesOrderPickLine[]       @relation("BinStockItemSalesOrderPickLines")
+  transferOrderPickLines    TransferOrderPickLine[]    @relation("BinStockItemTransferOrderPickLines")
+  returnOrderPickLines      ReturnOrderPickLine[]      @relation("BinStockItemReturnOrderPickLines")
+  adjustmentOrderPickLines  AdjustmentOrderPickLine[]  @relation("BinStockItemAdjustmentOrderPickLines")
 
   bin            Bin           @relation(fields: [binId], references: [id])
   item           Item          @relation(fields: [itemId], references: [id])

@@ -1,5 +1,5 @@
 import type { Prisma, PrismaClient } from '@/generated/prisma'
-import { AssignmentLifecycle, ExecutionActivity, type OrderType } from '@/generated/prisma'
+import { AssignmentLifecycle, ExecutionActivity, type OrderExecutionLineDocument, type OrderType } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
 
@@ -70,14 +70,20 @@ async function assertLifecycleCommand(
   return a
 }
 
-type OrderAssignmentActivityInput = OrderAssignmentCommandBase & {
+export type OrderAssignmentActivityInput = OrderAssignmentCommandBase & {
   orderId: string
   orderType: OrderType
   orderLineRefId: string | null
   notes?: string | null
 }
 
-async function loadAssignmentForActivity(
+export type CreateExecutionActivityOptions = {
+  id?: string
+  executionLineDocument?: OrderExecutionLineDocument | null
+  executionLineId?: string | null
+}
+
+export async function loadAssignmentForActivity(
   tx: Tx,
   input: OrderAssignmentActivityInput
 ): Promise<OrderAssignmentDetailRow> {
@@ -90,11 +96,12 @@ async function loadAssignmentForActivity(
   return a
 }
 
-async function createExecutionActivityInTx(
+export async function createExecutionActivityInTx(
   tx: Tx,
   a: OrderAssignmentDetailRow,
   input: OrderAssignmentActivityInput,
-  activityType: ExecutionActivity
+  activityType: ExecutionActivity,
+  options?: CreateExecutionActivityOptions
 ): Promise<OrderExecutionActivityListRow> {
   const zoneId = a.zoneId
   if (!zoneId) {
@@ -107,6 +114,7 @@ async function createExecutionActivityInTx(
 
   return tx.orderExecutionActivity.create({
     data: {
+      ...(options?.id ? { id: options.id } : {}),
       orderAssignmentId: a.id,
       userId: input.userId,
       warehouseId: a.warehouseId,
@@ -114,6 +122,8 @@ async function createExecutionActivityInTx(
       orderId: a.orderId,
       orderType: a.orderType,
       orderLineRefId: input.orderLineRefId,
+      executionLineDocument: options?.executionLineDocument ?? null,
+      executionLineId: options?.executionLineId ?? null,
       activityType,
       notes: input.notes ?? null
     },

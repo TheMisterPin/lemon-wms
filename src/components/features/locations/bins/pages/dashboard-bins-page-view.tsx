@@ -5,7 +5,7 @@
  */
 
 import type { ReactNode } from 'react'
-import { Box } from 'lucide-react'
+import { ShelvingUnit } from 'lucide-react'
 
 import { viewBinContentsRowAction } from '@/components/configs/entities/bin/bin-table-actions'
 import { binTableColumns, type BinTableRow } from '@/components/configs/entities/bin/config'
@@ -32,7 +32,7 @@ export function DashboardBinsPageView({
     <>
       <PageWithGrid
         title="Bins"
-        titleIcon={Box}
+        titleIcon={ShelvingUnit}
         entityTone="bin"
         headerActions={headerActions}
         isLoading={isLoading}

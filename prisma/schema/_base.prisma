@@ -275,6 +275,16 @@ enum ExecutionActivity {
   LINE_REVERSED
 }
 
+// Identifies which execution document row (receipt line or pick line) an activity refers to.
+// IDs are stored as strings without FK — see OrderExecutionActivity.executionLineId.
+enum OrderExecutionLineDocument {
+  PURCHASE_RECEIPT_LINE
+  SALES_PICK_LINE
+  TRANSFER_PICK_LINE
+  RETURN_PICK_LINE
+  ADJUSTMENT_PICK_LINE
+}
+
 // -----------------------------------------------------------------------------
 // Party enums
 // -----------------------------------------------------------------------------

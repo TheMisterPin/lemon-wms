@@ -20,7 +20,12 @@ import type { FieldValues } from 'react-hook-form'
 import type { z } from 'zod'
 
 type CreateLocationFormDialogProps<TValues extends FieldValues> = {
-  triggerLabel: string
+  /**
+   * When true, render only the form (no trigger/dialog). Use inside another dialog or page.
+   */
+  inline?: boolean
+  /** Required when `inline` is false. */
+  triggerLabel?: string
   title: string
   description: ReactNode
   formConfig: GenericFormConfig<TValues>
@@ -30,7 +35,8 @@ type CreateLocationFormDialogProps<TValues extends FieldValues> = {
 }
 
 export function CreateLocationFormDialog<TValues extends FieldValues>({
-  triggerLabel,
+  inline = false,
+  triggerLabel = 'Add',
   title,
   description,
   formConfig,
@@ -46,7 +52,9 @@ export function CreateLocationFormDialog<TValues extends FieldValues>({
 
     try {
       await onSubmit(values)
-      setIsOpen(false)
+      if (!inline) {
+        setIsOpen(false)
+      }
     } catch (submissionError) {
       setCreateError(
         submissionError instanceof Error
@@ -54,6 +62,26 @@ export function CreateLocationFormDialog<TValues extends FieldValues>({
           : fallbackError
       )
     }
+  }
+
+  if (inline) {
+    return (
+      <div className="space-y-3 rounded-lg border border-border bg-card/40 p-4">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold">{title}</h3>
+          <div className="text-xs text-muted-foreground">{description}</div>
+        </div>
+        <DynamicForm<TValues>
+          fields={formConfig.fields}
+          defaultValues={formConfig.defaultValues}
+          submitLabel={formConfig.submitLabel}
+          columns={formConfig.columns}
+          schema={schema}
+          onSubmit={handleCreate}
+        />
+        {createError ? <p className="text-sm text-red-400">{createError}</p> : null}
+      </div>
+    )
   }
 
   return (
@@ -79,9 +107,7 @@ export function CreateLocationFormDialog<TValues extends FieldValues>({
           schema={schema}
           onSubmit={handleCreate}
         />
-        {createError ? (
-          <p className="text-sm text-red-400">{createError}</p>
-        ) : null}
+        {createError ? <p className="text-sm text-red-400">{createError}</p> : null}
       </DialogContent>
     </Dialog>
   )

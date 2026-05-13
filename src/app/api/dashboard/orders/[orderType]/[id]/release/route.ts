@@ -5,7 +5,7 @@ import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middlewar
 import { DomainError } from '@/lib/errors'
 import { logAppError } from '@/lib/logs/app-logger'
 import { releasePurchaseOrder } from '@/lib/orders/purchase'
-import { createPurchaseOrderReceipt } from '@/lib/orders/receipt/create-reciept-order'
+import { createPurchaseOrderReceipt } from '@/lib/orders/purchase/receipt/create-receipt-order'
 import prisma from '@/lib/prisma'
 
 type RouteParams = { params: Promise<{ orderType: string; id: string }> }
@@ -58,7 +58,10 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
       return fail(attachedRecieptOrder.message, attachedRecieptOrder.code, 400)
     }
 
-    return ok({ ...data, ...attachedRecieptOrder.receiptOrder }, 'Purchase order released successfully.')
+    return ok(
+      { ...attachedRecieptOrder.receiptOrder, ...data },
+      'Purchase order released successfully.'
+    )
   } catch (error) {
     if (error instanceof DomainError) {
       return fail(error.message, error.code, error.status)

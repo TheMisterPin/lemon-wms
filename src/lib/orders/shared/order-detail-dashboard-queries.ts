@@ -1,6 +1,8 @@
 import type { OrderType, PrismaClient } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
+import { sumPickLineQuantities, toQty } from '@/lib/orders/shared/pick-line-progress'
+import { computePurchaseOrderProgressPercentFromMasterLines } from '@/lib/orders/shared/order-progress'
 import type { OrderExecutionLineRow } from '@/types/order-detail-dashboard.types'
 
 export type OrderDetailHeaderSource = {
@@ -11,12 +13,6 @@ export type OrderDetailHeaderSource = {
   warehouseName: string
   status: string
   progressPercent: number
-}
-
-type DecimalLike = { toNumber(): number }
-
-function toQty(value: DecimalLike): number {
-  return Math.round(value.toNumber() * 100) / 100
 }
 
 function lineStatus(expectedQty: number, processedQty: number, isShort: boolean): OrderExecutionLineRow['status'] {
@@ -65,8 +61,6 @@ async function getPurchaseOrderDetail(prisma: PrismaClient, orderId: string): Pr
       warehouseId: true,
       status: true,
       warehouse: { select: { name: true } },
-      completedLines: true,
-      totalLines: true,
       lines: {
         select: {
           id: true,
@@ -109,9 +103,12 @@ async function getPurchaseOrderDetail(prisma: PrismaClient, orderId: string): Pr
 
   const expectedTotal = lines.reduce((sum, line) => sum + line.expectedQty, 0)
   const processedTotal = lines.reduce((sum, line) => sum + line.processedQty, 0)
-  const progressPercent = order.totalLines > 0
-    ? Math.round((order.completedLines / order.totalLines) * 100)
-    : 0
+  const progressPercent = computePurchaseOrderProgressPercentFromMasterLines(
+    order.lines.map((line) => ({
+      orderedQuantity: line.orderedQuantity,
+      receiptLines: line.receiptLines
+    }))
+  )
 
   return {
     header: {
@@ -126,48 +123,6 @@ async function getPurchaseOrderDetail(prisma: PrismaClient, orderId: string): Pr
     lines,
     expectedTotal,
     processedTotal
-  }
-}
-
-type CommonLine = {
-  itemId: string
-  itemNameSnapshot: string
-  baseQuantity: DecimalLike
-  handledQuantity: DecimalLike
-  isShort: boolean
-  uom: string
-  sku: string
-}
-
-function mapCommonLines(lines: CommonLine[], keyer: (index: number) => string): {
-  lines: OrderExecutionLineRow[]
-  expectedTotal: number
-  processedTotal: number
-} {
-  const mapped = lines.map((line, index) => {
-    const expectedQty = toQty(line.baseQuantity)
-    const processedQty = toQty(line.handledQuantity)
-    const remainingQty = Math.max(0, expectedQty - processedQty)
-
-    return {
-      lineId: keyer(index),
-      itemId: line.itemId,
-      sku: line.sku,
-      name: line.itemNameSnapshot,
-      expectedQty,
-      processedQty,
-      remainingQty,
-      uom: line.uom,
-      status: lineStatus(expectedQty, processedQty, line.isShort),
-      outcome: line.isShort ? 'REJECTED' : undefined,
-      href: itemHref(line.itemId)
-    } satisfies OrderExecutionLineRow
-  })
-
-  return {
-    lines: mapped,
-    expectedTotal: mapped.reduce((sum, line) => sum + line.expectedQty, 0),
-    processedTotal: mapped.reduce((sum, line) => sum + line.processedQty, 0)
   }
 }
 
@@ -186,9 +141,8 @@ async function getSalesOrderDetail(prisma: PrismaClient, orderId: string) {
           itemId: true,
           itemNameSnapshot: true,
           baseQuantity: true,
-          handledQuantity: true,
-          isShort: true,
-          uom: true
+          uom: true,
+          pickLines: { select: { quantity: true, disposition: true } }
         }
       }
     }
@@ -199,12 +153,33 @@ async function getSalesOrderDetail(prisma: PrismaClient, orderId: string) {
   }
 
   const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
-  const linesWithSku = order.lines.map((line) => ({
-    ...line,
-    sku: skuMap.get(line.itemId) ?? '—'
-  }))
-  const lineStats = mapCommonLines(linesWithSku, (index) => order.lines[index].id)
-  const completedCount = lineStats.lines.filter((line) => line.status === 'COMPLETED').length
+
+  const lines: OrderExecutionLineRow[] = order.lines.map((line) => {
+    const expectedQty = toQty(line.baseQuantity)
+    const processedQty = sumPickLineQuantities(line.pickLines)
+    const remainingQty = Math.max(0, expectedQty - processedQty)
+    const latestOutcome = line.pickLines.at(-1)?.disposition
+
+    return {
+      lineId: line.id,
+      itemId: line.itemId,
+      sku: skuMap.get(line.itemId) ?? '—',
+      name: line.itemNameSnapshot,
+      expectedQty,
+      processedQty,
+      remainingQty,
+      uom: line.uom,
+      status: lineStatus(
+        expectedQty,
+        processedQty,
+        latestOutcome !== undefined && latestOutcome !== 'ACCEPTED'
+      ),
+      outcome: latestOutcome,
+      href: itemHref(line.itemId)
+    }
+  })
+
+  const completedCount = lines.filter((line) => line.status === 'COMPLETED').length
 
   return {
     header: {
@@ -216,9 +191,9 @@ async function getSalesOrderDetail(prisma: PrismaClient, orderId: string) {
       status: order.status,
       progressPercent: order.lines.length > 0 ? Math.round((completedCount / order.lines.length) * 100) : 0
     },
-    lines: lineStats.lines,
-    expectedTotal: lineStats.expectedTotal,
-    processedTotal: lineStats.processedTotal
+    lines,
+    expectedTotal: lines.reduce((sum, line) => sum + line.expectedQty, 0),
+    processedTotal: lines.reduce((sum, line) => sum + line.processedQty, 0)
   }
 }
 
@@ -237,9 +212,8 @@ async function getTransferOrderDetail(prisma: PrismaClient, orderId: string) {
           itemId: true,
           itemNameSnapshot: true,
           baseQuantity: true,
-          handledQuantity: true,
-          isShort: true,
-          uom: true
+          uom: true,
+          pickLines: { select: { quantity: true, disposition: true } }
         }
       }
     }
@@ -250,12 +224,33 @@ async function getTransferOrderDetail(prisma: PrismaClient, orderId: string) {
   }
 
   const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
-  const linesWithSku = order.lines.map((line) => ({
-    ...line,
-    sku: skuMap.get(line.itemId) ?? '—'
-  }))
-  const lineStats = mapCommonLines(linesWithSku, (index) => order.lines[index].id)
-  const completedCount = lineStats.lines.filter((line) => line.status === 'COMPLETED').length
+
+  const lines: OrderExecutionLineRow[] = order.lines.map((line) => {
+    const expectedQty = toQty(line.baseQuantity)
+    const processedQty = sumPickLineQuantities(line.pickLines)
+    const remainingQty = Math.max(0, expectedQty - processedQty)
+    const latestOutcome = line.pickLines.at(-1)?.disposition
+
+    return {
+      lineId: line.id,
+      itemId: line.itemId,
+      sku: skuMap.get(line.itemId) ?? '—',
+      name: line.itemNameSnapshot,
+      expectedQty,
+      processedQty,
+      remainingQty,
+      uom: line.uom,
+      status: lineStatus(
+        expectedQty,
+        processedQty,
+        latestOutcome !== undefined && latestOutcome !== 'ACCEPTED'
+      ),
+      outcome: latestOutcome,
+      href: itemHref(line.itemId)
+    }
+  })
+
+  const completedCount = lines.filter((line) => line.status === 'COMPLETED').length
 
   return {
     header: {
@@ -267,9 +262,9 @@ async function getTransferOrderDetail(prisma: PrismaClient, orderId: string) {
       status: order.status,
       progressPercent: order.lines.length > 0 ? Math.round((completedCount / order.lines.length) * 100) : 0
     },
-    lines: lineStats.lines,
-    expectedTotal: lineStats.expectedTotal,
-    processedTotal: lineStats.processedTotal
+    lines,
+    expectedTotal: lines.reduce((sum, line) => sum + line.expectedQty, 0),
+    processedTotal: lines.reduce((sum, line) => sum + line.processedQty, 0)
   }
 }
 
@@ -288,9 +283,8 @@ async function getReturnOrderDetail(prisma: PrismaClient, orderId: string) {
           itemId: true,
           itemNameSnapshot: true,
           baseQuantity: true,
-          handledQuantity: true,
-          isShort: true,
-          uom: true
+          uom: true,
+          pickLines: { select: { quantity: true, disposition: true } }
         }
       }
     }
@@ -301,12 +295,33 @@ async function getReturnOrderDetail(prisma: PrismaClient, orderId: string) {
   }
 
   const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
-  const linesWithSku = order.lines.map((line) => ({
-    ...line,
-    sku: skuMap.get(line.itemId) ?? '—'
-  }))
-  const lineStats = mapCommonLines(linesWithSku, (index) => order.lines[index].id)
-  const completedCount = lineStats.lines.filter((line) => line.status === 'COMPLETED').length
+
+  const lines: OrderExecutionLineRow[] = order.lines.map((line) => {
+    const expectedQty = toQty(line.baseQuantity)
+    const processedQty = sumPickLineQuantities(line.pickLines)
+    const remainingQty = Math.max(0, expectedQty - processedQty)
+    const latestOutcome = line.pickLines.at(-1)?.disposition
+
+    return {
+      lineId: line.id,
+      itemId: line.itemId,
+      sku: skuMap.get(line.itemId) ?? '—',
+      name: line.itemNameSnapshot,
+      expectedQty,
+      processedQty,
+      remainingQty,
+      uom: line.uom,
+      status: lineStatus(
+        expectedQty,
+        processedQty,
+        latestOutcome !== undefined && latestOutcome !== 'ACCEPTED'
+      ),
+      outcome: latestOutcome,
+      href: itemHref(line.itemId)
+    }
+  })
+
+  const completedCount = lines.filter((line) => line.status === 'COMPLETED').length
 
   return {
     header: {
@@ -318,9 +333,9 @@ async function getReturnOrderDetail(prisma: PrismaClient, orderId: string) {
       status: order.status,
       progressPercent: order.lines.length > 0 ? Math.round((completedCount / order.lines.length) * 100) : 0
     },
-    lines: lineStats.lines,
-    expectedTotal: lineStats.expectedTotal,
-    processedTotal: lineStats.processedTotal
+    lines,
+    expectedTotal: lines.reduce((sum, line) => sum + line.expectedQty, 0),
+    processedTotal: lines.reduce((sum, line) => sum + line.processedQty, 0)
   }
 }
 
@@ -340,9 +355,8 @@ async function getAdjustmentOrderDetail(prisma: PrismaClient, orderId: string) {
           itemId: true,
           itemNameSnapshot: true,
           baseQuantity: true,
-          handledQuantity: true,
-          isShort: true,
-          uom: true
+          uom: true,
+          pickLines: { select: { quantity: true, disposition: true } }
         }
       }
     }
@@ -353,21 +367,34 @@ async function getAdjustmentOrderDetail(prisma: PrismaClient, orderId: string) {
   }
 
   const skuMap = await loadSkuByItemId(prisma, order.lines.map((line) => line.itemId))
-  const linesWithSku = order.lines.map((line) => ({
-    itemId: line.itemId,
-    itemNameSnapshot: line.itemNameSnapshot,
-    baseQuantity: line.baseQuantity,
-    handledQuantity: line.handledQuantity,
-    isShort: line.isShort,
-    uom: line.uom,
-    sku: skuMap.get(line.itemId) ?? '—'
-  }))
-  const lineStats = mapCommonLines(linesWithSku, (index) => {
-    const line = order.lines[index]
 
-    return `${line.adjustmentOrderId}:${line.sequence}`
+  const lines: OrderExecutionLineRow[] = order.lines.map((line) => {
+    const expectedQty = toQty(line.baseQuantity)
+    const processedQty = sumPickLineQuantities(line.pickLines)
+    const remainingQty = Math.max(0, expectedQty - processedQty)
+    const latestOutcome = line.pickLines.at(-1)?.disposition
+    const compositeId = `${line.adjustmentOrderId}:${line.sequence}`
+
+    return {
+      lineId: compositeId,
+      itemId: line.itemId,
+      sku: skuMap.get(line.itemId) ?? '—',
+      name: line.itemNameSnapshot,
+      expectedQty,
+      processedQty,
+      remainingQty,
+      uom: line.uom,
+      status: lineStatus(
+        expectedQty,
+        processedQty,
+        latestOutcome !== undefined && latestOutcome !== 'ACCEPTED'
+      ),
+      outcome: latestOutcome,
+      href: itemHref(line.itemId)
+    }
   })
-  const completedCount = lineStats.lines.filter((line) => line.status === 'COMPLETED').length
+
+  const completedCount = lines.filter((line) => line.status === 'COMPLETED').length
 
   return {
     header: {
@@ -379,9 +406,9 @@ async function getAdjustmentOrderDetail(prisma: PrismaClient, orderId: string) {
       status: order.status,
       progressPercent: order.lines.length > 0 ? Math.round((completedCount / order.lines.length) * 100) : 0
     },
-    lines: lineStats.lines,
-    expectedTotal: lineStats.expectedTotal,
-    processedTotal: lineStats.processedTotal
+    lines,
+    expectedTotal: lines.reduce((sum, line) => sum + line.expectedQty, 0),
+    processedTotal: lines.reduce((sum, line) => sum + line.processedQty, 0)
   }
 }
 

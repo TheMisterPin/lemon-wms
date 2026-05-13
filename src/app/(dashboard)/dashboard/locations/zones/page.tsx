@@ -1,5 +1,5 @@
-import { DashboardZonesPage } from '@/components/features/locations/zones/pages/dashboard-zones-page'
+import { LocationsPickerLanding } from '@/components/features/locations/shared/components/locations-picker-landing'
 
 export default function ZonesHomePage() {
-  return <DashboardZonesPage />
+  return <LocationsPickerLanding variant="zone" />
 }

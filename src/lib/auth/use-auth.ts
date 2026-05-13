@@ -19,6 +19,7 @@ export type AuthState = {
     location: AuthLocation | null
     device: AuthDevice | null
   } | null
+  isOwner: boolean
   isAuthenticated: boolean
   isOfficeRole: boolean
   isFloorRole: boolean
@@ -41,6 +42,7 @@ export function useAuth(): AuthState {
   const isOfficeRole = user !== null && OFFICE_ROLES.includes(user.role)
   const isFloorRole = user !== null && FLOOR_ROLES.includes(user.role)
   const isHydrating = token !== null && user === null
+  const isOwner = user !== null && user.role === 'OWNER'
 
   const dashboard = useMemo(() => {
     if (!user || !isOfficeRole) {
@@ -66,6 +68,7 @@ export function useAuth(): AuthState {
     user,
     location,
     device,
+    isOwner,
     dashboard,
     warehouse,
     isAuthenticated: user !== null,

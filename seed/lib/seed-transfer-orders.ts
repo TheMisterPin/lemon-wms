@@ -2,6 +2,7 @@ import {
   BinItemStatus,
   OrderStatus,
   Prisma,
+  ReceiptStatus,
   type PrismaClient
 } from '@/generated/prisma'
 
@@ -151,9 +152,11 @@ export async function seedTransferOrders(prisma: PrismaClient) {
       source.quantityAvailable -= reserveQty
       source.quantityReserved += reserveQty
 
-      await prisma.transferOrder.create({
+      const reference = `TO-SEED-${String(index + 1).padStart(4, '0')}`
+
+      const transfer = await prisma.transferOrder.create({
         data: {
-          reference: `TO-SEED-${String(index + 1).padStart(4, '0')}`,
+          reference,
           status: pickStatus(index),
           warehouseId: source.warehouseId,
           originBinId: source.binId,
@@ -166,13 +169,50 @@ export async function seedTransferOrders(prisma: PrismaClient) {
               itemNameSnapshot: source.itemName,
               binId: source.binId,
               baseQuantity: new Prisma.Decimal(reserveQty),
-              handledQuantity: new Prisma.Decimal(0),
-              isShort: false,
               uom: source.uom
             }]
           }
+        },
+        select: {
+          id: true,
+          warehouseId: true,
+          lines: {
+            select: {
+              id: true,
+              itemId: true,
+              itemNameSnapshot: true,
+              baseQuantity: true,
+              uom: true
+            }
+          }
         }
       })
+
+      const line = transfer.lines[0]
+      if (line) {
+        await prisma.transferOrderPick.create({
+          data: {
+            reference: `${reference}/PICK-001`,
+            transferOrderId: transfer.id,
+            status: ReceiptStatus.OPEN,
+            warehouseId: transfer.warehouseId,
+            createdById: users[index % users.length].id,
+            totalLines: 1,
+            openLines: 1,
+            completedLines: 0,
+            lines: {
+              create: [{
+                transferOrderLineId: line.id,
+                quantity: new Prisma.Decimal(0),
+                orderedQuantity: line.baseQuantity,
+                uom: line.uom,
+                itemId: line.itemId,
+                itemNameSnapshot: line.itemNameSnapshot
+              }]
+            }
+          }
+        })
+      }
 
       created += 1
       createdForWarehouse += 1

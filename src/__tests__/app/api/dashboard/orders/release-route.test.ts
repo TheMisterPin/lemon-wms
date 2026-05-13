@@ -14,18 +14,34 @@ vi.mock('@/lib/prisma', () => ({
   default: {}
 }))
 
+vi.mock('@/lib/orders/purchase/receipt/create-receipt-order', () => ({
+  createPurchaseOrderReceipt: vi.fn()
+}))
+
 import { POST } from '@/app/api/dashboard/orders/[orderType]/[id]/release/route'
 import { OrderStatus } from '@/generated/prisma'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { releasePurchaseOrder } from '@/lib/orders/purchase'
+import { createPurchaseOrderReceipt } from '@/lib/orders/purchase/receipt/create-receipt-order'
 
 const mockAuth = verifyAccessTokenFromRequest as ReturnType<typeof vi.fn>
 const mockOffice = isOfficeRole as ReturnType<typeof vi.fn>
 const mockRelease = releasePurchaseOrder as ReturnType<typeof vi.fn>
+const mockCreateReceipt = createPurchaseOrderReceipt as ReturnType<typeof vi.fn>
 
 describe('POST /api/dashboard/orders/[orderType]/[id]/release', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockCreateReceipt.mockResolvedValue({
+      success: true,
+      receiptOrder: {
+        id: 'rec-1',
+        reference: 'PO-1/0001',
+        status: 'OPEN',
+        lineCount: 1,
+        lines: [{ id: 'rl-1' }]
+      }
+    })
   })
 
   it('returns 401 when not authenticated', async () => {

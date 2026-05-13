@@ -18,6 +18,15 @@ export const binFormSchema = z.object({
   type: binTypeSchema
 })
 
+/** Allowed fields for PUT /dashboard/bins/[id] (extends create fields with operational attrs). */
+export const binUpdateSchema = z.object({
+  zoneId: z.string().optional(),
+  name: z.string().trim().min(1, 'Name is required.').max(120, 'Name must be at most 120 characters.').optional(),
+  type: binTypeSchema.optional(),
+  isActive: z.boolean().optional(),
+  maxCapacity: z.union([z.number().nonnegative('Capacity must be zero or greater.'), z.null()]).optional()
+})
+
 const binItemStatusSchema = z.enum(['AVAILABLE', 'RESERVED', 'BLOCKED', 'IN_TRANSIT'])
 
 export const binInfoItemSchema = z.object({
@@ -73,6 +82,7 @@ export const binSchema = z.object({
   name: z.string(),
   code: z.string(),
   type: binTypeSchema,
+  isActive: z.boolean(),
   maxCapacity: z.number().nullable(),
   currentCapacity: z.number().nullable(),
   filledPercentage: z.number().nullable(),
@@ -93,4 +103,5 @@ export type Bin = z.infer<typeof binSchema>
 export type BinWithContent = z.infer<typeof binWithContentSchema>
 export type BinItem = z.infer<typeof binItemSchema>
 export type BinFormValues = z.infer<typeof binFormSchema>
+export type BinUpdateValues = z.infer<typeof binUpdateSchema>
 export type BinTypeValue = z.infer<typeof binTypeSchema>

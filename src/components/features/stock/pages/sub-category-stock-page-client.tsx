@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { format } from 'date-fns'
 import { Layers, Tags } from 'lucide-react'
 import {
   CartesianGrid,
@@ -31,6 +32,8 @@ import {
 import { useSubcategoryStockDashboard } from '@/hooks/dashboard/stock/use-subcategory-stock-dashboard'
 import type { SubcategoryStockItemRow } from '@/types/subcategory-stock-dashboard.types'
 import { formatTs, humanizeEnum } from '@/utils/components/formatters/enums'
+
+import CategoryStockPageSkeleton from '../skeletons/category-stock-page-skeleton'
 
 const ITEM_TABLE_PREVIEW = 10
 const ACTIVITY_PREVIEW = 5
@@ -151,12 +154,19 @@ export function SubCategoryStockPageClient({ subcategoryId }: SubCategoryStockPa
   )
   const hiddenActivityCount = Math.max(0, (data?.activities.length ?? 0) - previewActivities.length)
 
-  if (isLoading && !data) {
-    return (
-      <DashboardPageShell title="Subcategory" subtitle="Loading…" isLoading>
-        <div />
-      </DashboardPageShell>
-    )
+  const fillChartRows = useMemo(() => {
+    if (!data) {
+      return []
+    }
+
+    return data.fillOverTime.map((p) => ({
+      ...p,
+      tick: format(new Date(p.occurredAt), 'MMM d HH:mm')
+    }))
+  }, [data])
+
+  if (isLoading) {
+    return <CategoryStockPageSkeleton />
   }
 
   if (error !== null || data === null) {
@@ -324,8 +334,8 @@ export function SubCategoryStockPageClient({ subcategoryId }: SubCategoryStockPa
         </DashboardSection>
 
         <DashboardSection
-          title="Stock over time"
-          action="Ledger net · all items in subcategory"
+          title="Units in bins over time (BinHistory)"
+          action="Daily snapshots · summed across bins that hold this subcategory"
         >
           <div
             className="rounded-2xl p-3 xl:p-4"
@@ -335,47 +345,44 @@ export function SubCategoryStockPageClient({ subcategoryId }: SubCategoryStockPa
               border: '1px solid var(--wh-border)'
             }}
           >
-            <div className="h-75 w-full min-w-0">
-              {data.availabilityOverTime.length === 0 ? (
+            <div className="h-[260px] w-full min-w-0">
+              {fillChartRows.length === 0 ? (
                 <p className="text-sm" style={{ color: 'var(--wh-text-muted)' }}>
-                  No ledger history yet for items in this subcategory.
+                  No BinHistory yet for bins that hold this subcategory.
                 </p>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={data.availabilityOverTime}
-                    margin={{ top: 8, right: 8, left: 0, bottom: 24 }}
-                  >
+                  <LineChart data={fillChartRows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid stroke="var(--wh-border)" strokeDasharray="3 3" />
                     <XAxis
-                      dataKey="date"
+                      dataKey="tick"
+                      stroke="var(--wh-text-muted)"
                       tick={{ fill: 'var(--wh-text-muted)', fontSize: 10 }}
-                      interval="preserveStartEnd"
-                      tickFormatter={(value: string) => {
-                        const [y, m, d] = value.split('-')
-                        if (!y || !m || !d) {
-                          return value
-                        }
-
-                        return `${m}/${d}`
-                      }}
-                      angle={-25}
-                      textAnchor="end"
-                      height={52}
                     />
                     <YAxis
+                      stroke="var(--wh-text-muted)"
                       tick={{ fill: 'var(--wh-text-muted)', fontSize: 11 }}
-                      stroke="var(--wh-border)"
-                      axisLine={{ stroke: 'var(--wh-border)' }}
                     />
-                    <Tooltip {...lineTooltip} labelFormatter={(label) => String(label)} />
+                    <Tooltip
+                      {...lineTooltip}
+                      labelFormatter={(_label, items) => {
+                        const first =
+                          Array.isArray(items) && items.length > 0 && typeof items[0] === 'object'
+                            ? (items[0] as { payload?: { occurredAt?: string } }).payload
+                            : undefined
+
+                        return first?.occurredAt !== undefined
+                          ? format(new Date(first.occurredAt), 'PPpp')
+                          : ''
+                      }}
+                    />
                     <Line
                       type="monotone"
-                      dataKey="totalUnits"
-                      name="On hand (net)"
-                      stroke="var(--wh-status-available)"
+                      dataKey="unitsOnHand"
+                      name="Units on hand"
+                      stroke="var(--wh-status-available, #22c55e)"
                       strokeWidth={2}
-                      dot={{ r: 2, fill: 'var(--wh-status-available)' }}
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>

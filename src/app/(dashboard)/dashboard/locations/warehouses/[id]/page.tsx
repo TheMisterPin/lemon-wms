@@ -2,10 +2,18 @@ import { WarehouseDashboardOverviewPageClient } from '@/components/features/loca
 
 type WarehouseDetailPageProps = {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ stockCategories?: string }>
 }
 
-export default async function WarehouseDetailPage({ params }: WarehouseDetailPageProps) {
+export default async function WarehouseDetailPage({ params, searchParams }: WarehouseDetailPageProps) {
   const { id } = await params
+  const sp = await searchParams
+  const stockCategoriesRollup = sp.stockCategories === 'leaf' ? 'leaf' : 'parent'
 
-  return <WarehouseDashboardOverviewPageClient warehouseId={id} />
+  return (
+    <WarehouseDashboardOverviewPageClient
+      warehouseId={id}
+      stockCategoriesRollup={stockCategoriesRollup}
+    />
+  )
 }

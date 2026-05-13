@@ -2,6 +2,7 @@ import {
   BinItemStatus,
   OrderStatus,
   Prisma,
+  ReceiptStatus,
   type PrismaClient
 } from '@/generated/prisma'
 
@@ -159,21 +160,57 @@ export async function seedSalesOrders(prisma: PrismaClient) {
           itemNameSnapshot: stock.itemName,
           originBinId: stock.binId,
           baseQuantity: new Prisma.Decimal(reserveQty),
-          handledQuantity: new Prisma.Decimal(0),
-          isShort: false,
           uom: stock.uom
         }
       })
 
-      await prisma.salesOrder.create({
+      const reference = `SO-SEED-${String(index + 1).padStart(4, '0')}`
+
+      const order = await prisma.salesOrder.create({
         data: {
-          reference: `SO-SEED-${String(index + 1).padStart(4, '0')}`,
+          reference,
           status: pickStatus(index),
           warehouseId,
           businessPartyId: customer.id,
           customerName: customer.name,
           createdById: createdBy.id,
           lines: { create: lines }
+        },
+        select: {
+          id: true,
+          lines: {
+            select: {
+              id: true,
+              itemId: true,
+              itemNameSnapshot: true,
+              baseQuantity: true,
+              uom: true
+            }
+          }
+        }
+      })
+
+      await prisma.salesOrderPick.create({
+        data: {
+          reference: `${reference}/PICK-001`,
+          salesOrderId: order.id,
+          status: ReceiptStatus.OPEN,
+          warehouseId,
+          customerNameSnapshot: customer.name,
+          createdById: createdBy.id,
+          totalLines: order.lines.length,
+          openLines: order.lines.length,
+          completedLines: 0,
+          lines: {
+            create: order.lines.map((line) => ({
+              salesOrderLineId: line.id,
+              quantity: new Prisma.Decimal(0),
+              orderedQuantity: line.baseQuantity,
+              uom: line.uom,
+              itemId: line.itemId,
+              itemNameSnapshot: line.itemNameSnapshot
+            }))
+          }
         }
       })
 

@@ -33,13 +33,51 @@ export const zoneTypeOptions: SelectOption[] = [
 ]
 
 export function createZoneFormConfig(
-  warehouseOptions: SelectOption[]
+  warehouseOptions: SelectOption[],
+  opts?: { lockedWarehouseId?: string }
 ): GenericFormConfig<ZoneFormValues> {
+  const lockedWarehouseId = opts?.lockedWarehouseId
+
+  const baseFields: GenericFormConfig<ZoneFormValues>['fields'] = [
+    {
+      name: 'name',
+      label: 'Zone name',
+      type: 'text',
+      placeholder: 'Main storage zone',
+      required: true
+    },
+    {
+      name: 'type',
+      label: 'Zone type',
+      type: 'select',
+      options: zoneTypeOptions,
+      required: true
+    },
+    {
+      name: 'warehouseId',
+      label: 'Warehouse',
+      type: 'select',
+      options: warehouseOptions,
+      placeholder: 'Select a warehouse',
+      required: true
+    },
+    {
+      name: 'isActive',
+      label: 'Active',
+      type: 'checkbox'
+    }
+  ]
+
+  const fields =
+    lockedWarehouseId !== undefined
+      ? baseFields.filter((f) => f.name !== 'warehouseId')
+      : baseFields
+
   return {
     columns: 2,
     submitLabel: 'Save zone',
     defaultValues: {
-      warehouseId: '',
+      warehouseId: lockedWarehouseId ?? '',
       name: '',
       type: 'GENERAL',
       isActive: true,
@@ -48,35 +86,7 @@ export function createZoneFormConfig(
       defaultQuarantineBinId: null,
       defaultOutgoingBinId: null
     },
-    fields: [
-      {
-        name: 'name',
-        label: 'Zone name',
-        type: 'text',
-        placeholder: 'Main storage zone',
-        required: true
-      },
-      {
-        name: 'type',
-        label: 'Zone type',
-        type: 'select',
-        options: zoneTypeOptions,
-        required: true
-      },
-      {
-        name: 'warehouseId',
-        label: 'Warehouse',
-        type: 'select',
-        options: warehouseOptions,
-        placeholder: 'Select a warehouse',
-        required: true
-      },
-      {
-        name: 'isActive',
-        label: 'Active',
-        type: 'checkbox'
-      }
-    ]
+    fields
   }
 }
 

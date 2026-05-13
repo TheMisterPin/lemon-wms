@@ -80,10 +80,20 @@ function activityStatus(actionType: string): WarehouseActivityRow['status'] {
   return 'SUCCESS'
 }
 
+type GetWarehouseOverviewDashboardOptions = {
+  /**
+   * `parent` rolls item subcategory stock into the root category for the donut (items without `parent` stay as their own slice).
+   * `leaf` keeps the item’s direct category (legacy behavior).
+   */
+  stockCategoriesGranularity?: 'parent' | 'leaf'
+}
+
 async function getWarehouseOverviewDashboardData(
   prisma: PrismaClient,
-  warehouseId: string
+  warehouseId: string,
+  options?: GetWarehouseOverviewDashboardOptions
 ): Promise<WarehouseOverviewDashboardData> {
+  const stockCategoriesGranularity = options?.stockCategoriesGranularity ?? 'parent'
   const warehouse = await prisma.warehouse.findFirst({
     where: { id: warehouseId, deletedAt: null },
     select: { id: true, name: true }
@@ -310,7 +320,14 @@ async function getWarehouseOverviewDashboardData(
           category: {
             select: {
               code: true,
-              name: true
+              name: true,
+              parentCode: true,
+              parent: {
+                select: {
+                  code: true,
+                  name: true
+                }
+              }
             }
           }
         }
@@ -322,8 +339,26 @@ async function getWarehouseOverviewDashboardData(
   const catMap = new Map<string, CatAgg>()
 
   for (const line of categoryLines) {
-    const code = line.item.category?.code ?? 'UNCATEGORIZED'
-    const label = line.item.category?.name ?? 'Uncategorized'
+    const cat = line.item.category
+    let code: string
+    let label: string
+
+    if (!cat) {
+      code = 'UNCATEGORIZED'
+      label = 'Uncategorized'
+    } else if (stockCategoriesGranularity === 'leaf') {
+      code = cat.code
+      label = cat.name
+    } else {
+      const parent = cat.parent
+      if (parent) {
+        code = parent.code
+        label = parent.name
+      } else {
+        code = cat.code
+        label = cat.name
+      }
+    }
     const existing = catMap.get(code) ?? {
       label,
       available: new Prisma.Decimal(0),

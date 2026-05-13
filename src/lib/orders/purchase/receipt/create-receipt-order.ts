@@ -95,7 +95,7 @@ async function createPurchaseOrderReceipt(
   purchaseOrderId: string
 ): Promise<CreatePurchaseOrderReceiptResult> {
   try {
-    const newRecieptOrder = await prisma.$transaction(async tx => {
+    const newReceiptOrder = await prisma.$transaction(async tx => {
       const purchaseOrder = await getPurchaseOrder(tx, purchaseOrderId)
       const newReference = `${purchaseOrder.reference}/0001`
 
@@ -142,7 +142,7 @@ async function createPurchaseOrderReceipt(
 
     return {
       success: true,
-      receiptOrder: newRecieptOrder
+      receiptOrder: newReceiptOrder
     }
   } catch (err) {
     if (err instanceof DomainError) {

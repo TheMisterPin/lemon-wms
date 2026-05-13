@@ -1,5 +1,5 @@
-import { DashboardBinsPage } from '@/components/features/locations/bins/pages/dashboard-bins-page'
+import { LocationsPickerLanding } from '@/components/features/locations/shared/components/locations-picker-landing'
 
 export default function BinsHomePage() {
-  return <DashboardBinsPage />
+  return <LocationsPickerLanding variant="bin" />
 }

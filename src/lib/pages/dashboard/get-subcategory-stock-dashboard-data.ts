@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
+import { getBinsAggregatedFillTimelineFromBinHistory } from '@/lib/logs/bin-history/bin-history-queries'
 import type { SubcategoryStockDashboardDTO } from '@/types/subcategory-stock-dashboard.types'
 
 function displayRound(n: number): number {
@@ -149,54 +150,11 @@ export async function getSubcategoryStockDashboardData(
     availabilityDonut.push({ bucket: 'BLOCKED', quantity: blkQ })
   }
 
-  let availabilityOverTime: SubcategoryStockDashboardDTO['availabilityOverTime'] = []
-
-  if (itemIds.length > 0) {
-    const ledgerRows = await prisma.itemLedgerEntry.findMany({
-      where: { warItemId: { in: itemIds } },
-      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
-      take: 12000,
-      select: {
-        createdAt: true,
-        quantityDelta: true
-      }
-    })
-
-    let running = 0
-    const byDay = new Map<string, number>()
-
-    for (const row of ledgerRows) {
-      running += row.quantityDelta.toNumber()
-      const day = row.createdAt.toISOString().slice(0, 10)
-      byDay.set(day, running)
-    }
-
-    availabilityOverTime = [...byDay.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, totalUnits]) => ({
-        date,
-        totalUnits: displayRound(totalUnits)
-      }))
-  }
-
   const currentTotal = displayRound(totalAvailable + totalReserved + totalBlocked)
 
-  if (availabilityOverTime.length === 0 && currentTotal > 0) {
-    const today = new Date().toISOString().slice(0, 10)
-    availabilityOverTime = [{ date: today, totalUnits: currentTotal }]
-  } else if (availabilityOverTime.length > 0) {
-    const today = new Date().toISOString().slice(0, 10)
-    const last = availabilityOverTime[availabilityOverTime.length - 1]
-
-    if (last.date !== today) {
-      availabilityOverTime = [...availabilityOverTime, { date: today, totalUnits: currentTotal }]
-    } else {
-      availabilityOverTime = [
-        ...availabilityOverTime.slice(0, -1),
-        { date: today, totalUnits: currentTotal }
-      ]
-    }
-  }
+  const fillOverTime = await getBinsAggregatedFillTimelineFromBinHistory(prisma, [...binIds], {
+    currentUnitsHint: currentTotal
+  })
 
   const orderKeySet = new Set<string>()
 
@@ -310,7 +268,7 @@ export async function getSubcategoryStockDashboardData(
       lowStockItemsCount: lowStockCount
     },
     availabilityDonut,
-    availabilityOverTime,
+    fillOverTime,
     items: itemRows,
     activities
   }

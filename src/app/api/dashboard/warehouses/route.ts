@@ -3,7 +3,12 @@ import { z } from 'zod'
 
 import { created, fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { createWarehouse, getWarehouses, warehouseFormSchema } from '@/lib/locations'
+import {
+  createWarehouse,
+  getWarehouses,
+  createWarehouseBodySchema,
+  warehouseFormSchema
+} from '@/lib/locations'
 import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { toWarehouseTableRecords } from '@/utils/converters/table-records'
@@ -59,7 +64,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const parsed = warehouseFormSchema.parse(body)
+    const full = warehouseFormSchema.safeParse(body)
+    const parsed = full.success ? full.data : createWarehouseBodySchema.parse(body)
     const id = await generateWarehouseSerial(prisma)
     const warehouse = await createWarehouse(prisma, {
       ...parsed,

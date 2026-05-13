@@ -91,6 +91,7 @@ async function getBinWithContent(prisma: PrismaClient, id: string): Promise<IBin
     name: bin.name,
     code: bin.code,
     type: bin.type,
+    isActive: bin.isActive,
     maxCapacity,
     currentCapacity,
     filledPercentage,

@@ -12,10 +12,10 @@
 // =============================================================================
 
 model User {
-  id                String    @id @default(uuid())
-  email             String?   @unique
+  id                String          @id @default(uuid())
+  email             String?         @unique
   passwordHash      String?
-  badgeNumber       String    @unique
+  badgeNumber       String          @unique
   pinHash           String?
   firstName         String
   lastName          String
@@ -23,16 +23,16 @@ model User {
   role              Role
   profilePictureUrl String?
   loginType         LoginType
-  isActive          Boolean   @default(true)
+  isActive          Boolean         @default(true)
   deletedAt         DateTime?
-  createdAt         DateTime  @default(now())
+  createdAt         DateTime        @default(now())
   lastLoginDeviceId String?
-  isLoggedIn        Boolean   @default(false)
-
+  isLoggedIn        Boolean         @default(false)
+  
   // Auth
-  lastLoginDevice Device?         @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
-  refreshTokens   RefreshToken[]
-  deviceSessions  DeviceSession[]
+  lastLoginDevice   Device?         @relation("UserLastDevice", fields: [lastLoginDeviceId], references: [id])
+  refreshTokens     RefreshToken[]
+  deviceSessions    DeviceSession[]
 
   // Assignments
   warehouseAssignments WarehouseAssignment[]

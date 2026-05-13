@@ -2,6 +2,8 @@ import type { OrderType, PrismaClient } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
 import { getDeviceDetailRecord } from '@/lib/iam/devices/devices-dashboard-queries'
+import { computePickLineProgressPercent } from '@/lib/orders/shared/pick-line-progress'
+import { computePurchaseOrderProgressPercentFromMasterLines } from '@/lib/orders/shared/order-progress'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
 import type { DeviceDetailDashboardDTO, DeviceCurrentWorkRow, DeviceActivityRow } from '@/types/device-detail-dashboard.types'
 
@@ -25,26 +27,14 @@ async function resolveOrderProgress(
   if (orderType === 'PURCHASE') {
     const order = await prisma.purchaseOrder.findFirst({
       where: { id: orderId },
-      select: { reference: true, completedLines: true, totalLines: true }
-    })
-
-    if (!order) {
-      return { reference: orderId, progressPercent: 0 }
-    }
-
-    const pct = order.totalLines > 0
-      ? Math.round((order.completedLines / order.totalLines) * 100)
-      : 0
-
-    return { reference: order.reference, progressPercent: pct }
-  }
-
-  if (orderType === 'SALES') {
-    const order = await prisma.salesOrder.findFirst({
-      where: { id: orderId },
       select: {
         reference: true,
-        lines: { select: { baseQuantity: true, handledQuantity: true } }
+        lines: {
+          select: {
+            orderedQuantity: true,
+            receiptLines: { select: { quantity: true } }
+          }
+        }
       }
     })
 
@@ -52,14 +42,28 @@ async function resolveOrderProgress(
       return { reference: orderId, progressPercent: 0 }
     }
 
-    const total = order.lines.length
-    const done = order.lines.filter(
-      (l) => l.handledQuantity.greaterThanOrEqualTo(l.baseQuantity)
-    ).length
+    return {
+      reference: order.reference,
+      progressPercent: computePurchaseOrderProgressPercentFromMasterLines(order.lines)
+    }
+  }
+
+  if (orderType === 'SALES') {
+    const order = await prisma.salesOrder.findFirst({
+      where: { id: orderId },
+      select: {
+        reference: true,
+        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
+      }
+    })
+
+    if (!order) {
+      return { reference: orderId, progressPercent: 0 }
+    }
 
     return {
       reference: order.reference,
-      progressPercent: total > 0 ? Math.round((done / total) * 100) : 0
+      progressPercent: computePickLineProgressPercent(order.lines)
     }
   }
 
@@ -68,7 +72,7 @@ async function resolveOrderProgress(
       where: { id: orderId },
       select: {
         reference: true,
-        lines: { select: { baseQuantity: true, handledQuantity: true } }
+        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
       }
     })
 
@@ -76,14 +80,9 @@ async function resolveOrderProgress(
       return { reference: orderId, progressPercent: 0 }
     }
 
-    const total = order.lines.length
-    const done = order.lines.filter(
-      (l) => l.handledQuantity.greaterThanOrEqualTo(l.baseQuantity)
-    ).length
-
     return {
       reference: order.reference,
-      progressPercent: total > 0 ? Math.round((done / total) * 100) : 0
+      progressPercent: computePickLineProgressPercent(order.lines)
     }
   }
 
@@ -92,7 +91,7 @@ async function resolveOrderProgress(
       where: { id: orderId },
       select: {
         reference: true,
-        lines: { select: { baseQuantity: true, handledQuantity: true } }
+        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
       }
     })
 
@@ -100,14 +99,9 @@ async function resolveOrderProgress(
       return { reference: orderId, progressPercent: 0 }
     }
 
-    const total = order.lines.length
-    const done = order.lines.filter(
-      (l) => l.handledQuantity.greaterThanOrEqualTo(l.baseQuantity)
-    ).length
-
     return {
       reference: order.reference,
-      progressPercent: total > 0 ? Math.round((done / total) * 100) : 0
+      progressPercent: computePickLineProgressPercent(order.lines)
     }
   }
 
@@ -116,7 +110,7 @@ async function resolveOrderProgress(
       where: { id: orderId },
       select: {
         reference: true,
-        lines: { select: { baseQuantity: true, handledQuantity: true } }
+        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
       }
     })
 
@@ -124,14 +118,9 @@ async function resolveOrderProgress(
       return { reference: orderId, progressPercent: 0 }
     }
 
-    const total = order.lines.length
-    const done = order.lines.filter(
-      (l) => l.handledQuantity.greaterThanOrEqualTo(l.baseQuantity)
-    ).length
-
     return {
       reference: order.reference,
-      progressPercent: total > 0 ? Math.round((done / total) * 100) : 0
+      progressPercent: computePickLineProgressPercent(order.lines)
     }
   }
 

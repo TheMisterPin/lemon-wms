@@ -16,9 +16,13 @@ export async function GET(req: NextRequest, { params }: Params): Promise<Respons
   }
 
   const { id } = await params
+  const stockCategoriesRaw = req.nextUrl.searchParams.get('stockCategories')
+  const stockCategoriesGranularity = stockCategoriesRaw === 'leaf' ? 'leaf' : 'parent'
 
   try {
-    const data = await getWarehouseOverviewDashboardData(prisma, id)
+    const data = await getWarehouseOverviewDashboardData(prisma, id, {
+      stockCategoriesGranularity
+    })
 
     return ok(data, 'Warehouse overview retrieved successfully.')
   } catch (error) {

@@ -45,9 +45,13 @@ model Warehouse {
   purchaseOrders        PurchaseOrder[]
   purchaseOrderReceipts PurchaseOrderReceipt[]
   salesOrders           SalesOrder[]
+  salesOrderPicks       SalesOrderPick[]
   transferOrders        TransferOrder[]
+  transferOrderPicks    TransferOrderPick[]
   returnOrders          ReturnOrder[]
+  returnOrderPicks      ReturnOrderPick[]
   adjustOrders          AdjustmentOrder[]
+  adjustmentOrderPicks  AdjustmentOrderPick[]
 
   // Logs
   binOperationEntries      BinOperationEntry[]

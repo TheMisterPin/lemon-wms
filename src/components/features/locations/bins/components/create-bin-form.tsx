@@ -9,13 +9,25 @@ import type { SelectOption } from '@/types/components/form/generic-form.types'
 type CreateBinFormProps = {
   zonesList: SelectOption[]
   onCreateBin: (values: BinFormValues) => Promise<void>
+  /** When set, zone is fixed and the field is hidden. */
+  lockedZoneId?: string
+  inline?: boolean
 }
 
-export default function CreateBinForm({ zonesList, onCreateBin }: CreateBinFormProps) {
-  const formConfig = createBinFormConfig(zonesList)
+export default function CreateBinForm({
+  zonesList,
+  onCreateBin,
+  lockedZoneId,
+  inline
+}: CreateBinFormProps) {
+  const formConfig = createBinFormConfig(
+    zonesList,
+    lockedZoneId !== undefined ? { lockedZoneId } : undefined
+  )
 
   return (
     <CreateLocationFormDialog<BinFormValues>
+      inline={inline}
       triggerLabel="Add bin"
       title="Create Bin"
       description="Add a bin and assign it to a zone."

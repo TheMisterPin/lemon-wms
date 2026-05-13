@@ -61,3 +61,68 @@ export async function getBinFillTimelineFromBinHistory(
 
   return points
 }
+
+/**
+ * Daily sum of `quantityOnHand` across multiple bins (BinHistory), for category/subcategory dashboards.
+ * Same point shape as {@link getBinFillTimelineFromBinHistory}; `fillPercent` is always `null`.
+ */
+export async function getBinsAggregatedFillTimelineFromBinHistory(
+  prisma: PrismaClient,
+  binIds: string[],
+  opts?: { currentUnitsHint?: number }
+): Promise<BinFillOverTimePoint[]> {
+  const fallbackUnits = opts?.currentUnitsHint
+
+  const toPoint = (occurredAt: string, unitsOnHand: number): BinFillOverTimePoint => {
+    const capped = Number.isFinite(unitsOnHand) ? Math.max(0, Math.round(unitsOnHand)) : 0
+
+    return {
+      occurredAt,
+      unitsOnHand: capped,
+      fillPercent: null
+    }
+  }
+
+  if (binIds.length === 0) {
+    const units = fallbackUnits !== undefined ? Math.max(0, fallbackUnits) : 0
+
+    return [toPoint(new Date().toISOString(), units)]
+  }
+
+  const rows = await prisma.binHistory.findMany({
+    where: { binId: { in: binIds } },
+    select: {
+      date: true,
+      quantityOnHand: true
+    },
+    orderBy: { date: 'asc' }
+  })
+
+  const sumByDay = new Map<string, number>()
+
+  for (const row of rows) {
+    const day = row.date.toISOString().slice(0, 10)
+    const q = decimalToNum(row.quantityOnHand)
+    sumByDay.set(day, (sumByDay.get(day) ?? 0) + q)
+  }
+
+  if (sumByDay.size === 0) {
+    const units = fallbackUnits !== undefined ? Math.max(0, fallbackUnits) : 0
+
+    return [toPoint(new Date().toISOString(), units)]
+  }
+
+  const sortedDays = [...sumByDay.keys()].sort((a, b) => a.localeCompare(b))
+  const points: BinFillOverTimePoint[] = sortedDays.map((day) =>
+    toPoint(new Date(`${day}T12:00:00.000Z`).toISOString(), sumByDay.get(day) ?? 0)
+  )
+
+  if (
+    fallbackUnits !== undefined
+    && Math.abs(points[points.length - 1].unitsOnHand - fallbackUnits) > 0.0001
+  ) {
+    points.push(toPoint(new Date().toISOString(), fallbackUnits))
+  }
+
+  return points
+}

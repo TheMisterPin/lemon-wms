@@ -10,6 +10,7 @@ import { seedBinOperations } from './seed-bin-operations'
 import { seedBinStockItems } from './seed-bin-stock-items'
 import { seedDemoDevice } from './seed-devices'
 import { seedOrderAssignments } from './seed-order-assignments'
+import { seedReceiptOrders } from './seed-receipt-orders'
 import { seedSalesOrders } from './seed-sales-order'
 import { seedTransferOrders } from './seed-transfer-orders'
 import { seedUserActivities } from './seed-user-activities'
@@ -32,6 +33,26 @@ export async function seedDB(prisma: PrismaClient) {
   console.warn('Cleared order execution activities.')
   await prisma.orderAssignment.deleteMany()
   console.warn('Cleared order assignments.')
+  await prisma.purchaseOrderReceiptLine.deleteMany()
+  console.warn('Cleared purchase order receipt lines.')
+  await prisma.purchaseOrderReceipt.deleteMany()
+  console.warn('Cleared purchase order receipts.')
+  await prisma.salesOrderPickLine.deleteMany()
+  console.warn('Cleared sales order pick lines.')
+  await prisma.salesOrderPick.deleteMany()
+  console.warn('Cleared sales order picks.')
+  await prisma.transferOrderPickLine.deleteMany()
+  console.warn('Cleared transfer order pick lines.')
+  await prisma.transferOrderPick.deleteMany()
+  console.warn('Cleared transfer order picks.')
+  await prisma.returnOrderPickLine.deleteMany()
+  console.warn('Cleared return order pick lines.')
+  await prisma.returnOrderPick.deleteMany()
+  console.warn('Cleared return order picks.')
+  await prisma.adjustmentOrderPickLine.deleteMany()
+  console.warn('Cleared adjustment order pick lines.')
+  await prisma.adjustmentOrderPick.deleteMany()
+  console.warn('Cleared adjustment order picks.')
   await prisma.purchaseOrderLine.deleteMany()
   console.warn('Cleared purchase order lines.')
   await prisma.salesOrderLine.deleteMany()
@@ -145,6 +166,10 @@ export async function seedDB(prisma: PrismaClient) {
   const purchaseOrders = await seedPurchaseOrders(prisma)
   console.warn(`Seeded ${purchaseOrders.count} purchase orders.\n`)
 
+  console.warn('Seeding purchase receipts...')
+  const receiptOrders = await seedReceiptOrders(prisma)
+  console.warn(`Seeded ${receiptOrders.count} purchase receipts.\n`)
+
   console.warn('Seeding sales orders...')
   const salesOrders = await seedSalesOrders(prisma)
   console.warn(`Seeded ${salesOrders.count} sales orders and updated ${salesOrders.reservedUpdates} stock rows as reserved.\n`)
@@ -170,6 +195,7 @@ export async function seedDB(prisma: PrismaClient) {
     binOperationsSeeded: binOperations.count,
     binHistorySnapshotsSeeded: binHistory.count,
     purchaseOrdersSeeded: purchaseOrders.count,
+    purchaseReceiptsSeeded: receiptOrders.count,
     salesOrdersSeeded: salesOrders.count,
     transferOrdersSeeded: transferOrders.count,
     orderAssignmentsSeeded: orderAssignments.assignmentsCount,

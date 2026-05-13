@@ -1,6 +1,6 @@
 
 import { type PrismaClient } from '@/generated/prisma'
-import { bins } from './mocks/bins-mock'
+import { bins, zoneDefaultBinPointers } from './mocks/bins-mock'
 
 /**
  * seedBins.
@@ -12,6 +12,19 @@ export async function seedBins(prisma: PrismaClient) {
     data: bins,
     skipDuplicates: true // optional but useful for seeding
   })
+
+  await Promise.all(
+    zoneDefaultBinPointers.map((z) =>
+      prisma.zone.update({
+        where: { id: z.zoneId },
+        data: {
+          defaultReceivingBinId: z.defaultReceivingBinId,
+          defaultQuarantineBinId: z.defaultQuarantineBinId,
+          defaultOutgoingBinId: z.defaultOutgoingBinId
+        }
+      })
+    )
+  )
 
   return { count: bins.length }
 }

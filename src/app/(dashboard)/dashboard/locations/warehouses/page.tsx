@@ -1,5 +1,5 @@
-import { DashboardWarehouseHomePageView } from '@/components/features/locations/warehouses/pages/dashboard-warehouse-home-page'
+import { LocationsPickerLanding } from '@/components/features/locations/shared/components/locations-picker-landing'
 
 export default function WarehouseHomePage() {
-  return <DashboardWarehouseHomePageView />
+  return <LocationsPickerLanding variant="warehouse" />
 }

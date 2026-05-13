@@ -12,6 +12,11 @@ import { warehouseFormSchema } from '@/lib/locations'
 import type { WarehouseFormValues } from '@/lib/locations'
 import type { FormFieldConfig, GenericFormConfig } from '@/types/components/form/generic-form.types'
 
+const warehouseFullCreateConfig = {
+  ...warehouseFormConfig,
+  submitLabel: 'Create warehouse'
+} satisfies GenericFormConfig<WarehouseFormValues>
+
 type CreateWarehouseFormValues = Pick<WarehouseFormValues, 'name'>
 
 const warehouseNameField = warehouseFormConfig.fields.find((field) => field.name === 'name')
@@ -32,7 +37,7 @@ const createWarehouseNameField: FormFieldConfig<CreateWarehouseFormValues> = {
   colSpan: warehouseNameField.colSpan
 }
 
-const createWarehouseFormConfig = {
+const createWarehouseNameOnlyConfig = {
   columns: 1 as const,
   submitLabel: 'Create warehouse',
   defaultValues: {
@@ -41,24 +46,54 @@ const createWarehouseFormConfig = {
   fields: [createWarehouseNameField]
 } satisfies GenericFormConfig<CreateWarehouseFormValues>
 
-const createWarehouseFormSchema = warehouseFormSchema.pick({
+const createWarehouseNameOnlySchema = warehouseFormSchema.pick({
   name: true
 }) satisfies z.ZodType<CreateWarehouseFormValues>
 
-type CreateWarehouseFormProps = {
+type CreateWarehouseFormNameOnlyProps = {
+  mode?: 'nameOnly'
+  inline?: boolean
   onCreateWarehouse: (values: CreateWarehouseFormValues) => Promise<void>
 }
 
-export default function CreateWarehouseForm({ onCreateWarehouse }: CreateWarehouseFormProps) {
+type CreateWarehouseFormFullProps = {
+  mode: 'full'
+  inline?: boolean
+  onCreateWarehouse: (values: WarehouseFormValues) => Promise<void>
+}
+
+export type CreateWarehouseFormProps =
+  | CreateWarehouseFormNameOnlyProps
+  | CreateWarehouseFormFullProps
+
+export default function CreateWarehouseForm(props: CreateWarehouseFormProps) {
+  const { inline } = props
+
+  if (props.mode === 'full') {
+    return (
+      <CreateLocationFormDialog<WarehouseFormValues>
+        inline={inline}
+        triggerLabel="Add warehouse"
+        title="Create warehouse"
+        description="Enter all required warehouse details. Fields match what you use when editing a warehouse."
+        formConfig={warehouseFullCreateConfig}
+        schema={warehouseFormSchema}
+        fallbackError="Unable to create warehouse."
+        onSubmit={props.onCreateWarehouse}
+      />
+    )
+  }
+
   return (
     <CreateLocationFormDialog<CreateWarehouseFormValues>
+      inline={inline}
       triggerLabel="Add warehouse"
       title="Create Warehouse"
       description="Add a warehouse with its initial name. You can complete the remaining details later."
-      formConfig={createWarehouseFormConfig}
-      schema={createWarehouseFormSchema}
+      formConfig={createWarehouseNameOnlyConfig}
+      schema={createWarehouseNameOnlySchema}
       fallbackError="Unable to create warehouse."
-      onSubmit={onCreateWarehouse}
+      onSubmit={props.onCreateWarehouse}
     />
   )
 }

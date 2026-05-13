@@ -1,8 +1,4 @@
 'use client'
-/**
- * @generated-doc-link
- * @doc .docs/developer/refactors/components/component/dashboard/warehouses/warehouse-dashboard-overview-page-client.md
- */
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -13,13 +9,15 @@ import type { WarehouseOverviewDashboardData } from '@/types/warehouse-overview-
 import { WarehouseDashboardOverviewSkeleton } from '../skeletons/warehouse-dashboard-overview-skeleton'
 
 export function WarehouseDashboardOverviewPageClient({
-  warehouseId
+  warehouseId,
+  stockCategoriesRollup = 'parent'
 }: {
   warehouseId: string
+  stockCategoriesRollup?: 'parent' | 'leaf'
 }) {
   const router = useRouter()
   const { data, isLoading, error, reload } = useDashboardLocationResource<WarehouseOverviewDashboardData>({
-    endpoint: `/dashboard/warehouses/${warehouseId}/overview`,
+    endpoint: `/dashboard/warehouses/${warehouseId}/overview?stockCategories=${stockCategoriesRollup}`,
     fallbackError: 'Could not load warehouse overview. Please try again.'
   })
 

@@ -10,8 +10,11 @@ type CreateUserActivityEntryParams = {
   entityId: string
   warehouseId?: string
   zoneId?: string
+  deviceId?: string
+  trolleyId?: string
   orderId?: string
   orderType?: OrderType
+  orderAssignmentId?: string
   metadata?: Prisma.InputJsonValue
   ipAddress?: string
   notes?: string
@@ -26,8 +29,11 @@ export async function createUserActivityEntry(params: CreateUserActivityEntryPar
     entityId,
     warehouseId,
     zoneId,
+    deviceId,
+    trolleyId,
     orderId,
     orderType,
+    orderAssignmentId,
     metadata,
     ipAddress,
     notes
@@ -41,8 +47,11 @@ export async function createUserActivityEntry(params: CreateUserActivityEntryPar
       entityId,
       warehouseId,
       zoneId,
+      deviceId,
+      trolleyId,
       orderId,
       orderType,
+      orderAssignmentId,
       metadata,
       ipAddress,
       notes

@@ -62,6 +62,8 @@ export const orderExecutionActivityListSelect = {
   orderId: true,
   orderType: true,
   orderLineRefId: true,
+  executionLineDocument: true,
+  executionLineId: true,
   warehouseId: true,
   zoneId: true,
   userId: true,
@@ -81,6 +83,8 @@ export const orderExecutionActivityDetailSelect = {
   orderId: true,
   orderType: true,
   orderLineRefId: true,
+  executionLineDocument: true,
+  executionLineId: true,
   activityType: true,
   notes: true,
   createdAt: true,
@@ -162,6 +166,8 @@ export function mapOrderExecutionActivityToListItemDTO(row: OrderExecutionActivi
     orderId: row.orderId,
     orderType: row.orderType,
     orderLineRefId: row.orderLineRefId,
+    executionLineDocument: row.executionLineDocument,
+    executionLineId: row.executionLineId,
     warehouseId: row.warehouseId,
     zoneId: row.zoneId,
     warehouseName: row.warehouse.name,
@@ -180,6 +186,8 @@ export function mapOrderExecutionActivityToDetailDTO(row: OrderExecutionActivity
     orderId: row.orderId,
     orderType: row.orderType,
     orderLineRefId: row.orderLineRefId,
+    executionLineDocument: row.executionLineDocument,
+    executionLineId: row.executionLineId,
     zoneId: row.zoneId,
     activityType: row.activityType,
     notes: row.notes,
@@ -197,7 +205,9 @@ function mapOrderExecutionActivityToLatestDTO(row: OrderExecutionActivityListRow
     createdAt: row.createdAt,
     userId: row.userId,
     userFullName: row.user.fullName,
-    notes: row.notes
+    notes: row.notes,
+    executionLineDocument: row.executionLineDocument,
+    executionLineId: row.executionLineId
   }
 }
 

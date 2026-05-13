@@ -1,6 +1,8 @@
 import { OrderStatus, OrderType, type PrismaClient } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
+import { computePickLineProgressPercent } from '@/lib/orders/shared/pick-line-progress'
+import { computePurchaseOrderProgressPercentFromMasterLines } from '@/lib/orders/shared/order-progress'
 import { getDashboardPurchaseOrders, type DashboardPurchaseOrderRow } from '@/lib/orders/purchase'
 import type {
   OrderTypeDashboardDTO,
@@ -43,20 +45,6 @@ function orderDetailHref(routeKey: RouteKey, orderId: string): string {
 
 function warehouseOverviewHref(warehouseId: string): string {
   return `/dashboard/locations/warehouses/${warehouseId}`
-}
-
-function computeLineProgress(
-  lines: Array<{ baseQuantity: { toNumber(): number }; handledQuantity: { toNumber(): number } }>
-): number {
-  if (lines.length === 0) {
-    return 0
-  }
-
-  const done = lines.filter(
-    (l) => l.handledQuantity.toNumber() >= l.baseQuantity.toNumber()
-  ).length
-
-  return Math.round((done / lines.length) * 100)
 }
 
 type NormalizedOrder = {
@@ -125,9 +113,13 @@ async function getOrderTypeDashboardData(
         status: true,
         warehouseId: true,
         createdAt: true,
-        completedLines: true,
-        totalLines: true,
-        warehouse: { select: { name: true } }
+        warehouse: { select: { name: true } },
+        lines: {
+          select: {
+            orderedQuantity: true,
+            receiptLines: { select: { quantity: true } }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     })
@@ -139,8 +131,7 @@ async function getOrderTypeDashboardData(
       warehouseId: r.warehouseId,
       warehouseName: r.warehouse.name,
       createdAt: r.createdAt,
-      progressPercent:
-        r.totalLines > 0 ? Math.round((r.completedLines / r.totalLines) * 100) : 0
+      progressPercent: computePurchaseOrderProgressPercentFromMasterLines(r.lines)
     }))
   } else if (routeKey === 'sales') {
     const rows = await prisma.salesOrder.findMany({
@@ -152,7 +143,7 @@ async function getOrderTypeDashboardData(
         warehouseId: true,
         createdAt: true,
         warehouse: { select: { name: true } },
-        lines: { select: { baseQuantity: true, handledQuantity: true } }
+        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
       },
       orderBy: { createdAt: 'desc' }
     })
@@ -164,7 +155,7 @@ async function getOrderTypeDashboardData(
       warehouseId: r.warehouseId,
       warehouseName: r.warehouse.name,
       createdAt: r.createdAt,
-      progressPercent: computeLineProgress(r.lines)
+      progressPercent: computePickLineProgressPercent(r.lines)
     }))
   } else {
     const rows = await prisma.transferOrder.findMany({
@@ -176,7 +167,7 @@ async function getOrderTypeDashboardData(
         warehouseId: true,
         createdAt: true,
         warehouse: { select: { name: true } },
-        lines: { select: { baseQuantity: true, handledQuantity: true } }
+        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
       },
       orderBy: { createdAt: 'desc' }
     })
@@ -188,7 +179,7 @@ async function getOrderTypeDashboardData(
       warehouseId: r.warehouseId,
       warehouseName: r.warehouse.name,
       createdAt: r.createdAt,
-      progressPercent: computeLineProgress(r.lines)
+      progressPercent: computePickLineProgressPercent(r.lines)
     }))
   }
 

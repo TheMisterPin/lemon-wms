@@ -13,7 +13,7 @@ import { DirectorySections } from '../components/directory-sections'
 import { OverviewCards } from '../components/overview-cards'
 import { DashboardLocationsPageSkeleton } from '../skeletons/dashboard-location-page-skeleton'
 
-/** Aggregate warehouses / zones / bins hub at `/dashboard/warehouses` (all locations). */
+/** Aggregate warehouses / zones / bins hub (e.g. embedded views). */
 export function DashboardWarehouseHomePageView() {
   const {
     isLoading,
@@ -99,7 +99,6 @@ export function DashboardWarehouseHomePageView() {
         open={contentsDialog.open}
         onOpenChange={contentsDialog.onOpenChange}
       />
-
     </main>
   )
 }

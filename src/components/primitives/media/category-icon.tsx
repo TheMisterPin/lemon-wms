@@ -3,6 +3,7 @@
 import * as React from 'react'
 import type { LucideIcon } from 'lucide-react'
 
+import { useTheme } from '@/components/shared/use-theme'
 import { cn } from '@/lib/utils'
 
 type CategoryIconProps = {
@@ -20,12 +21,10 @@ const TRANSPARENT_PIXEL_RATIO_THRESHOLD = 0.03
 const WEIGHTED_LUM_THRESHOLD = 135
 
 /**
- * Rewrites pixels to white foreground + transparency.
- * - Opaque sheets (black on white): luminance inversion only.
- * - Images with real transparency: multiply by source alpha so RGB under alpha=0 cannot become opaque white.
- * - Transparent + mostly light strokes: treat as light-on-dark artwork and use luminance as ink strength.
+ * Rewrites pixels to monochrome foreground + transparency for dashboard UI.
+ * @param foregroundRgb — `255` for white glyphs (dark theme), `0` for black glyphs (light theme)
  */
-function remapRasterIconToWhiteTransparent(imageData: ImageData): boolean {
+function remapRasterIconForUi(imageData: ImageData, foregroundRgb: 255 | 0): boolean {
   const data = imageData.data
   const len = data.length
   const totalPixels = len / 4
@@ -82,9 +81,9 @@ function remapRasterIconToWhiteTransparent(imageData: ImageData): boolean {
     const alphaOut = Math.round((ink * srcA) / 255)
     maxOutAlpha = Math.max(maxOutAlpha, alphaOut)
 
-    data[i] = 255
-    data[i + 1] = 255
-    data[i + 2] = 255
+    data[i] = foregroundRgb
+    data[i + 1] = foregroundRgb
+    data[i + 2] = foregroundRgb
     data[i + 3] = alphaOut
   }
 
@@ -92,7 +91,8 @@ function remapRasterIconToWhiteTransparent(imageData: ImageData): boolean {
 }
 
 /**
- * Loads a raster icon and redraws it as white glyphs on a transparent background for dark UI.
+ * Loads a raster icon and redraws it as monochrome glyphs on a transparent background
+ * (white on dark theme, black on light theme).
  */
 export function CategoryIcon({
   src,
@@ -101,6 +101,8 @@ export function CategoryIcon({
   size = 24,
   onRasterDecodeError
 }: CategoryIconProps): React.ReactElement | null {
+  const { theme } = useTheme()
+  const foregroundRgb: 255 | 0 = theme === 'dark' ? 255 : 0
   const canvasRef = React.useRef<HTMLCanvasElement>(null)
   const [phase, setPhase] = React.useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const reportedErrorRef = React.useRef(false)
@@ -181,7 +183,7 @@ export function CategoryIcon({
         return
       }
 
-      const okGlyph = remapRasterIconToWhiteTransparent(imageData)
+      const okGlyph = remapRasterIconForUi(imageData, foregroundRgb)
       if (!okGlyph) {
         setPhase('error')
         reportDecodeError()
@@ -205,11 +207,7 @@ export function CategoryIcon({
     return () => {
       cancelled = true
     }
-  }, [src])
-
-  if (!src) {
-    return null
-  }
+  }, [src, foregroundRgb])
 
   return (
     <canvas

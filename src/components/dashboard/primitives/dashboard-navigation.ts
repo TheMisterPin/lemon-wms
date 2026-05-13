@@ -7,6 +7,9 @@ import {
   BarChart2,
   ClipboardList,
   LayoutDashboard,
+  MapPin,
+  Settings2,
+  ShelvingUnit,
   Users,
   Warehouse
 } from 'lucide-react'
@@ -15,11 +18,15 @@ import type { LucideIcon } from 'lucide-react'
 export type DashboardNavLink = {
   label: string
   href: string
+  /** Optional icon shown next to the link label (e.g. Locations sub-links). */
+  icon?: LucideIcon
   selectLocationVariant?: 'warehouse' | 'zone' | 'bin'
   /** Opens stock category picker instead of navigating (Stock hub only). */
   openStockCategoryModal?: boolean
   /** Opens stock subcategory picker instead of navigating (Stock hub only). */
   openStockSubcategoryModal?: boolean
+  /** Opens Manage Locations modal (Locations hub, office roles only). */
+  openManageLocationsModal?: boolean
 }
 
 export type DashboardNavGroup = {
@@ -39,9 +46,11 @@ type DashboardRouteMetadata = {
   children?: Array<{
     label: string
     segment?: string
+    icon?: LucideIcon
     selectLocationVariant?: 'warehouse' | 'zone' | 'bin'
     openStockCategoryModal?: boolean
     openStockSubcategoryModal?: boolean
+    openManageLocationsModal?: boolean
   }>
 }
 
@@ -73,15 +82,19 @@ function buildDashboardNavGroups(metadata: DashboardRouteMetadata[]): DashboardN
       showChildLinksWhenPathPrefix: node.showChildLinksWhenPathPrefix,
       links: node.children.map((child) => ({
         label: child.label,
+        icon: child.icon,
         href:
-          child.openStockCategoryModal || child.openStockSubcategoryModal
+          child.openStockCategoryModal
+            || child.openStockSubcategoryModal
+            || child.openManageLocationsModal
             ? ''
             : child.segment
               ? joinDashboardHref(child.segment)
               : '',
         selectLocationVariant: child.selectLocationVariant,
         openStockCategoryModal: child.openStockCategoryModal,
-        openStockSubcategoryModal: child.openStockSubcategoryModal
+        openStockSubcategoryModal: child.openStockSubcategoryModal,
+        openManageLocationsModal: child.openManageLocationsModal
       }))
     }
   })
@@ -99,9 +112,29 @@ export const DASHBOARD_ROUTE_METADATA: DashboardRouteMetadata[] = [
     segment: 'locations',
     showChildLinksWhenPathPrefix: '/dashboard/locations',
     children: [
-      { label: 'Warehouses', segment: 'locations/warehouses', selectLocationVariant: 'warehouse' },
-      { label: 'Zones', segment: 'locations/zones', selectLocationVariant: 'zone' },
-      { label: 'Bins', segment: 'locations/bins', selectLocationVariant: 'bin' }
+      {
+        label: 'Warehouses',
+        segment: 'locations/warehouses',
+        icon: Warehouse,
+        selectLocationVariant: 'warehouse'
+      },
+      {
+        label: 'Zones',
+        segment: 'locations/zones',
+        icon: MapPin,
+        selectLocationVariant: 'zone'
+      },
+      {
+        label: 'Bins',
+        segment: 'locations/bins',
+        icon: ShelvingUnit,
+        selectLocationVariant: 'bin'
+      },
+      {
+        label: 'Manage Locations',
+        icon: Settings2,
+        openManageLocationsModal: true
+      }
     ]
   },
   {

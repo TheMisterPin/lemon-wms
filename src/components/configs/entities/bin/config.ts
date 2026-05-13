@@ -36,40 +36,48 @@ export const binTypeOptions: SelectOption[] = [
 ]
 
 export function createBinFormConfig(
-  zoneOptions: SelectOption[]
+  zoneOptions: SelectOption[],
+  opts?: { lockedZoneId?: string }
 ): GenericFormConfig<BinFormValues> {
+  const lockedZoneId = opts?.lockedZoneId
+
+  const baseFields: GenericFormConfig<BinFormValues>['fields'] = [
+    {
+      name: 'name',
+      label: 'Bin name',
+      type: 'text',
+      placeholder: 'A-01-01',
+      required: true
+    },
+    {
+      name: 'type',
+      label: 'Bin type',
+      type: 'select',
+      options: binTypeOptions,
+      required: true
+    },
+    {
+      name: 'zoneId',
+      label: 'Zone',
+      type: 'select',
+      options: zoneOptions,
+      placeholder: 'Select a zone',
+      required: true
+    }
+  ]
+
+  const fields =
+    lockedZoneId !== undefined ? baseFields.filter((f) => f.name !== 'zoneId') : baseFields
+
   return {
     columns: 2,
     submitLabel: 'Save bin',
     defaultValues: {
-      zoneId: '',
+      zoneId: lockedZoneId ?? '',
       name: '',
       type: 'GENERAL'
     },
-    fields: [
-      {
-        name: 'name',
-        label: 'Bin name',
-        type: 'text',
-        placeholder: 'A-01-01',
-        required: true
-      },
-      {
-        name: 'type',
-        label: 'Bin type',
-        type: 'select',
-        options: binTypeOptions,
-        required: true
-      },
-      {
-        name: 'zoneId',
-        label: 'Zone',
-        type: 'select',
-        options: zoneOptions,
-        placeholder: 'Select a zone',
-        required: true
-      }
-    ]
+    fields
   }
 }
 

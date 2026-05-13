@@ -13,12 +13,15 @@
 //                → /2 child (DRAFT — the remainder, re-enters OM workflow)
 //
 // Models:
-//   PurchaseOrder, PurchaseOrderLine, PurchaseOrderReceiptLine
-//   SalesOrder, SalesOrderLine
-//   TransferOrder, TransferOrderLine
-//   ReturnOrder, ReturnOrderLine
-//   AdjustmentOrder, AdjustmentOrderLine
+//   PurchaseOrder, PurchaseOrderLine, PurchaseOrderReceipt, PurchaseOrderReceiptLine
+//   SalesOrder, SalesOrderLine, SalesOrderPick, SalesOrderPickLine
+//   TransferOrder, TransferOrderLine, TransferOrderPick, TransferOrderPickLine
+//   ReturnOrder, ReturnOrderLine, ReturnOrderPick, ReturnOrderPickLine
+//   AdjustmentOrder, AdjustmentOrderLine, AdjustmentOrderPick, AdjustmentOrderPickLine
 //   OrderAssignment
+//
+// Pick documents mirror receipts: master order lines hold planned quantities only;
+// floor execution (picked qty, outcome, corrections, stock links) lives on pick lines.
 //
 // Dependencies:
 //   → locations.prisma (Warehouse, Bin)
@@ -182,6 +185,7 @@ model SalesOrder {
   businessParty BusinessParty? @relation("CustomerSalesOrders", fields: [businessPartyId], references: [id])
 
   lines SalesOrderLine[]
+  picks SalesOrderPick[]
 
   @@index([warehouseId, status])
   @@index([businessPartyId])
@@ -195,19 +199,82 @@ model SalesOrderLine {
   destinationBinId String?
   originBinId      String?
   baseQuantity     Decimal @db.Decimal(18, 4)
-  handledQuantity  Decimal @default(0) @db.Decimal(18, 4)
-  isShort          Boolean @default(false)
   lotId            String?
   serialNumberId   String?
   uom              String
 
   salesOrder    SalesOrder    @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
   unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+  pickLines     SalesOrderPickLine[]
 
   @@index([salesOrderId])
   @@index([itemId])
 }
 
+// Floor pick wave for a sales order — parallels PurchaseOrderReceipt (ReceiptStatus, not OrderStatus).
+model SalesOrderPick {
+  id                   String        @id @default(uuid())
+  reference            String        @unique
+  salesOrderId         String
+  status               ReceiptStatus @default(OPEN)
+  warehouseId          String
+  customerNameSnapshot String?
+  notes                String?
+
+  pickSequence Int @default(0)
+
+  createdById   String
+  startedById   String?
+  completedById String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  totalPickedQuantity Decimal @default(0) @db.Decimal(18, 4)
+  totalShortQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  completedLines      Int     @default(0)
+  openLines           Int     @default(0)
+  totalLines          Int     @default(0)
+
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  warehouse  Warehouse  @relation(fields: [warehouseId], references: [id])
+  lines      SalesOrderPickLine[]
+
+  @@index([salesOrderId])
+  @@index([warehouseId, status])
+  @@index([status])
+}
+
+model SalesOrderPickLine {
+  id                String @id @default(uuid())
+  salesOrderPickId  String
+  salesOrderLineId  String
+
+  quantity         Decimal @default(0) @db.Decimal(18, 4)
+  orderedQuantity  Decimal @db.Decimal(18, 4)
+  uom              String
+  itemId           String
+  itemNameSnapshot String
+  disposition      ReceiptOutcome @default(ACCEPTED)
+  notes            String?
+
+  orderExecutionActivityId String?
+  correctionOfLineId         String?
+  createdAt                  DateTime @default(now())
+
+  pick           SalesOrderPick      @relation(fields: [salesOrderPickId], references: [id], onDelete: Cascade)
+  salesOrderLine SalesOrderLine      @relation(fields: [salesOrderLineId], references: [id], onDelete: Cascade)
+  correctedLine  SalesOrderPickLine? @relation("SalesOrderPickLineCorrections", fields: [correctionOfLineId], references: [id])
+  correctionLines SalesOrderPickLine[] @relation("SalesOrderPickLineCorrections")
+
+  stockItems BinStockItem[] @relation("BinStockItemSalesOrderPickLines")
+
+  @@index([salesOrderPickId])
+  @@index([salesOrderLineId])
+  @@index([disposition])
+  @@index([correctionOfLineId])
+}
 // =============================================================================
 // Transfer Orders — stock movement between bins or warehouses
 // =============================================================================
@@ -234,6 +301,7 @@ model TransferOrder {
   destinationBin Bin?      @relation("TransferToBin", fields: [destinationBinId], references: [id])
 
   lines TransferOrderLine[]
+  picks TransferOrderPick[]
 
   @@index([warehouseId, status])
 }
@@ -245,17 +313,79 @@ model TransferOrderLine {
   itemNameSnapshot String
   binId            String?
   baseQuantity     Decimal @db.Decimal(18, 4)
-  handledQuantity  Decimal @default(0) @db.Decimal(18, 4)
-  isShort          Boolean @default(false)
   lotId            String?
   serialNumberId   String?
   uom              String
 
   transferOrder TransferOrder @relation(fields: [transferOrderId], references: [id], onDelete: Cascade)
   unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+  pickLines     TransferOrderPickLine[]
 
   @@index([transferOrderId])
   @@index([itemId])
+}
+
+model TransferOrderPick {
+  id              String        @id @default(uuid())
+  reference       String        @unique
+  transferOrderId String
+  status          ReceiptStatus @default(OPEN)
+  warehouseId     String
+  notes           String?
+
+  pickSequence Int @default(0)
+
+  createdById   String
+  startedById   String?
+  completedById String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  totalPickedQuantity Decimal @default(0) @db.Decimal(18, 4)
+  totalShortQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  completedLines      Int     @default(0)
+  openLines           Int     @default(0)
+  totalLines          Int     @default(0)
+
+  transferOrder TransferOrder @relation(fields: [transferOrderId], references: [id], onDelete: Cascade)
+  warehouse     Warehouse     @relation(fields: [warehouseId], references: [id])
+  lines         TransferOrderPickLine[]
+
+  @@index([transferOrderId])
+  @@index([warehouseId, status])
+  @@index([status])
+}
+
+model TransferOrderPickLine {
+  id                 String @id @default(uuid())
+  transferOrderPickId String
+  transferOrderLineId String
+
+  quantity         Decimal @default(0) @db.Decimal(18, 4)
+  orderedQuantity  Decimal @db.Decimal(18, 4)
+  uom              String
+  itemId           String
+  itemNameSnapshot String
+  disposition      ReceiptOutcome @default(ACCEPTED)
+  notes            String?
+
+  orderExecutionActivityId String?
+  correctionOfLineId       String?
+  createdAt                DateTime @default(now())
+
+  pick            TransferOrderPick      @relation(fields: [transferOrderPickId], references: [id], onDelete: Cascade)
+  transferOrderLine TransferOrderLine    @relation(fields: [transferOrderLineId], references: [id], onDelete: Cascade)
+  correctedLine   TransferOrderPickLine? @relation("TransferOrderPickLineCorrections", fields: [correctionOfLineId], references: [id])
+  correctionLines TransferOrderPickLine[] @relation("TransferOrderPickLineCorrections")
+
+  stockItems BinStockItem[] @relation("BinStockItemTransferOrderPickLines")
+
+  @@index([transferOrderPickId])
+  @@index([transferOrderLineId])
+  @@index([disposition])
+  @@index([correctionOfLineId])
 }
 
 // =============================================================================
@@ -282,6 +412,7 @@ model ReturnOrder {
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
 
   lines ReturnOrderLine[]
+  picks ReturnOrderPick[]
 
   @@index([warehouseId, status])
   @@index([originSalesOrderId])
@@ -294,19 +425,80 @@ model ReturnOrderLine {
   itemNameSnapshot String
   binId            String?
   baseQuantity     Decimal @db.Decimal(18, 4)
-  handledQuantity  Decimal @default(0) @db.Decimal(18, 4)
-  isShort          Boolean @default(false)
   lotId            String?
   serialNumberId   String?
   uom              String
 
   returnOrder   ReturnOrder   @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
   unitOfMeasure UnitOfMeasure @relation(fields: [uom], references: [id])
+  pickLines     ReturnOrderPickLine[]
 
   @@index([returnOrderId])
   @@index([itemId])
 }
 
+model ReturnOrderPick {
+  id            String        @id @default(uuid())
+  reference     String        @unique
+  returnOrderId String
+  status        ReceiptStatus @default(OPEN)
+  warehouseId   String
+  notes         String?
+
+  pickSequence Int @default(0)
+
+  createdById   String
+  startedById   String?
+  completedById String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  totalPickedQuantity Decimal @default(0) @db.Decimal(18, 4)
+  totalShortQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  completedLines      Int     @default(0)
+  openLines           Int     @default(0)
+  totalLines          Int     @default(0)
+
+  returnOrder ReturnOrder @relation(fields: [returnOrderId], references: [id], onDelete: Cascade)
+  warehouse   Warehouse   @relation(fields: [warehouseId], references: [id])
+  lines       ReturnOrderPickLine[]
+
+  @@index([returnOrderId])
+  @@index([warehouseId, status])
+  @@index([status])
+}
+
+model ReturnOrderPickLine {
+  id                String @id @default(uuid())
+  returnOrderPickId String
+  returnOrderLineId String
+
+  quantity         Decimal @default(0) @db.Decimal(18, 4)
+  orderedQuantity  Decimal @db.Decimal(18, 4)
+  uom              String
+  itemId           String
+  itemNameSnapshot String
+  disposition      ReceiptOutcome @default(ACCEPTED)
+  notes            String?
+
+  orderExecutionActivityId String?
+  correctionOfLineId       String?
+  createdAt                DateTime @default(now())
+
+  pick            ReturnOrderPick      @relation(fields: [returnOrderPickId], references: [id], onDelete: Cascade)
+  returnOrderLine ReturnOrderLine      @relation(fields: [returnOrderLineId], references: [id], onDelete: Cascade)
+  correctedLine   ReturnOrderPickLine? @relation("ReturnOrderPickLineCorrections", fields: [correctionOfLineId], references: [id])
+  correctionLines ReturnOrderPickLine[] @relation("ReturnOrderPickLineCorrections")
+
+  stockItems BinStockItem[] @relation("BinStockItemReturnOrderPickLines")
+
+  @@index([returnOrderPickId])
+  @@index([returnOrderLineId])
+  @@index([disposition])
+  @@index([correctionOfLineId])
+}
 // =============================================================================
 // Adjustment Orders — stock corrections with full audit trail
 // =============================================================================
@@ -330,6 +522,7 @@ model AdjustmentOrder {
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
 
   lines AdjustmentOrderLine[]
+  picks AdjustmentOrderPick[]
 
   @@index([warehouseId, status])
   @@index([reasonCode])
@@ -343,16 +536,79 @@ model AdjustmentOrderLine {
   itemNameSnapshot  String
   binId             String?
   baseQuantity      Decimal @db.Decimal(18, 4)
-  handledQuantity   Decimal @default(0) @db.Decimal(18, 4)
-  isShort           Boolean @default(false)
   lotId             String?
   serialNumberId    String?
   uom               String
 
   adjustmentOrder AdjustmentOrder @relation(fields: [adjustmentOrderId], references: [id], onDelete: Cascade)
   unitOfMeasure   UnitOfMeasure   @relation(fields: [uom], references: [id])
+  pickLines       AdjustmentOrderPickLine[]
 
   @@id([adjustmentOrderId, sequence])
   @@index([adjustmentOrderId])
   @@index([itemId])
+}
+
+model AdjustmentOrderPick {
+  id                String        @id @default(uuid())
+  reference         String        @unique
+  adjustmentOrderId String
+  status            ReceiptStatus @default(OPEN)
+  warehouseId       String
+  notes             String?
+
+  pickSequence Int @default(0)
+
+  createdById   String
+  startedById   String?
+  completedById String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  totalPickedQuantity Decimal @default(0) @db.Decimal(18, 4)
+  totalShortQuantity  Decimal @default(0) @db.Decimal(18, 4)
+  completedLines      Int     @default(0)
+  openLines           Int     @default(0)
+  totalLines          Int     @default(0)
+
+  adjustmentOrder AdjustmentOrder @relation(fields: [adjustmentOrderId], references: [id], onDelete: Cascade)
+  warehouse       Warehouse       @relation(fields: [warehouseId], references: [id])
+  lines           AdjustmentOrderPickLine[]
+
+  @@index([adjustmentOrderId])
+  @@index([warehouseId, status])
+  @@index([status])
+}
+
+model AdjustmentOrderPickLine {
+  id                   String @id @default(uuid())
+  adjustmentOrderPickId String
+  adjustmentOrderId    String
+  sequence             Int
+
+  quantity         Decimal @default(0) @db.Decimal(18, 4)
+  orderedQuantity  Decimal @db.Decimal(18, 4)
+  uom              String
+  itemId           String
+  itemNameSnapshot String
+  disposition      ReceiptOutcome @default(ACCEPTED)
+  notes            String?
+
+  orderExecutionActivityId String?
+  correctionOfLineId       String?
+  createdAt                DateTime @default(now())
+
+  pick              AdjustmentOrderPick    @relation(fields: [adjustmentOrderPickId], references: [id], onDelete: Cascade)
+  adjustmentOrderLine AdjustmentOrderLine  @relation(fields: [adjustmentOrderId, sequence], references: [adjustmentOrderId, sequence], onDelete: Cascade)
+  correctedLine     AdjustmentOrderPickLine? @relation("AdjustmentOrderPickLineCorrections", fields: [correctionOfLineId], references: [id])
+  correctionLines   AdjustmentOrderPickLine[] @relation("AdjustmentOrderPickLineCorrections")
+
+  stockItems BinStockItem[] @relation("BinStockItemAdjustmentOrderPickLines")
+
+  @@index([adjustmentOrderPickId])
+  @@index([adjustmentOrderId, sequence])
+  @@index([disposition])
+  @@index([correctionOfLineId])
 }

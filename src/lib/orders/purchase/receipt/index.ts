@@ -1,4 +1,4 @@
 export {
   createPurchaseOrderReceipt,
   type CreatePurchaseOrderReceiptResult
-} from './create-reciept-order'
+} from './create-receipt-order'

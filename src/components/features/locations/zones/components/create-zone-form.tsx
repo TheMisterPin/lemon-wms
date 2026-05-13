@@ -9,13 +9,25 @@ import type { SelectOption } from '@/types/components/form/generic-form.types'
 type CreateZoneFormProps = {
   warehouseList: SelectOption[]
   onCreateZone: (values: ZoneFormValues) => Promise<void>
+  /** When set, warehouse is fixed and the field is hidden (e.g. edit warehouse context). */
+  lockedWarehouseId?: string
+  inline?: boolean
 }
 
-export default function CreateZoneForm({ warehouseList, onCreateZone }: CreateZoneFormProps) {
-  const formConfig = createZoneFormConfig(warehouseList)
+export default function CreateZoneForm({
+  warehouseList,
+  onCreateZone,
+  lockedWarehouseId,
+  inline
+}: CreateZoneFormProps) {
+  const formConfig = createZoneFormConfig(
+    warehouseList,
+    lockedWarehouseId !== undefined ? { lockedWarehouseId } : undefined
+  )
 
   return (
     <CreateLocationFormDialog<ZoneFormValues>
+      inline={inline}
       triggerLabel="Add zone"
       title="Create Zone"
       description="Add a zone and assign it to a warehouse."

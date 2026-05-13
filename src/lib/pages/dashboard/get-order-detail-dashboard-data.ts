@@ -1,7 +1,7 @@
 import type { OrderType, PrismaClient } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
-import { getOrderDetailByType } from '@/lib/orders/order-detail-dashboard-queries'
+import { getOrderDetailByType } from '@/lib/orders/shared/order-detail-dashboard-queries'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
 import type {
   OrderActivityRow,

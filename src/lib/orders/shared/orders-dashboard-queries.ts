@@ -1,5 +1,7 @@
 import type { OrderStatus, PrismaClient } from '@/generated/prisma'
 
+import { computePickLineProgressPercent } from '@/lib/orders/shared/pick-line-progress'
+import { computePurchaseOrderProgressPercentFromMasterLines } from '@/lib/orders/shared/order-progress'
 import type { OrderSummaryRow, WarehouseWorkloadRow, OrderAttentionCard } from '@/types/orders-dashboard.types'
 
 const ACTIVE_STATUSES: OrderStatus[] = ['RELEASED', 'EXECUTING', 'PAUSED']
@@ -7,20 +9,6 @@ const COMPLETED_STATUSES: OrderStatus[] = ['EXECUTED', 'SIGNED_OFF']
 const EXCEPTION_STATUSES: OrderStatus[] = ['EXECUTED_WITH_PROBLEMS']
 
 const ORDER_LIMIT_PER_TYPE = 15
-
-function computeLineProgress(
-  lines: Array<{ baseQuantity: { toNumber(): number }; handledQuantity: { toNumber(): number } }>
-): number {
-  if (lines.length === 0) {
-    return 0
-  }
-
-  const done = lines.filter(
-    (l) => l.handledQuantity.toNumber() >= l.baseQuantity.toNumber()
-  ).length
-
-  return Math.round((done / lines.length) * 100)
-}
 
 function orderHref(type: string, id: string): string {
   return `/dashboard/orders/${type.toLowerCase()}/${id}`
@@ -37,10 +25,14 @@ async function getPurchaseOrderSummaries(prisma: PrismaClient) {
       status: true,
       warehouseId: true,
       createdAt: true,
-      completedLines: true,
-      totalLines: true,
       executionStartedAt: true,
-      warehouse: { select: { name: true } }
+      warehouse: { select: { name: true } },
+      lines: {
+        select: {
+          orderedQuantity: true,
+          receiptLines: { select: { quantity: true } }
+        }
+      }
     }
   })
 }
@@ -57,7 +49,7 @@ async function getSalesOrderSummaries(prisma: PrismaClient) {
       warehouseId: true,
       createdAt: true,
       warehouse: { select: { name: true } },
-      lines: { select: { baseQuantity: true, handledQuantity: true } }
+      lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
     }
   })
 }
@@ -74,7 +66,7 @@ async function getTransferOrderSummaries(prisma: PrismaClient) {
       warehouseId: true,
       createdAt: true,
       warehouse: { select: { name: true } },
-      lines: { select: { baseQuantity: true, handledQuantity: true } }
+      lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
     }
   })
 }
@@ -91,7 +83,7 @@ async function getReturnOrderSummaries(prisma: PrismaClient) {
       warehouseId: true,
       createdAt: true,
       warehouse: { select: { name: true } },
-      lines: { select: { baseQuantity: true, handledQuantity: true } }
+      lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
     }
   })
 }
@@ -108,7 +100,7 @@ async function getAdjustmentOrderSummaries(prisma: PrismaClient) {
       warehouseId: true,
       createdAt: true,
       warehouse: { select: { name: true } },
-      lines: { select: { baseQuantity: true, handledQuantity: true } }
+      lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
     }
   })
 }
@@ -178,9 +170,7 @@ function buildOrderSummaryRows(
   const rows: OrderSummaryRow[] = []
 
   for (const o of pos) {
-    const pct = o.totalLines > 0
-      ? Math.round((o.completedLines / o.totalLines) * 100)
-      : 0
+    const pct = computePurchaseOrderProgressPercentFromMasterLines(o.lines)
     const assignment = assignmentMap.get(o.id)
 
     rows.push({
@@ -207,7 +197,7 @@ function buildOrderSummaryRows(
       warehouseId: o.warehouseId,
       warehouseName: o.warehouse.name,
       status: o.status,
-      progressPercent: computeLineProgress(o.lines),
+      progressPercent: computePickLineProgressPercent(o.lines),
       assignedUserName: assignment?.userName,
       startedAt: assignment?.startedAt ?? undefined,
       href: orderHref('sales', o.id)
@@ -224,7 +214,7 @@ function buildOrderSummaryRows(
       warehouseId: o.warehouseId,
       warehouseName: o.warehouse.name,
       status: o.status,
-      progressPercent: computeLineProgress(o.lines),
+      progressPercent: computePickLineProgressPercent(o.lines),
       assignedUserName: assignment?.userName,
       startedAt: assignment?.startedAt ?? undefined,
       href: orderHref('transfer', o.id)
@@ -241,7 +231,7 @@ function buildOrderSummaryRows(
       warehouseId: o.warehouseId,
       warehouseName: o.warehouse.name,
       status: o.status,
-      progressPercent: computeLineProgress(o.lines),
+      progressPercent: computePickLineProgressPercent(o.lines),
       assignedUserName: assignment?.userName,
       startedAt: assignment?.startedAt ?? undefined,
       href: orderHref('return', o.id)
@@ -258,7 +248,7 @@ function buildOrderSummaryRows(
       warehouseId: o.warehouseId,
       warehouseName: o.warehouse.name,
       status: o.status,
-      progressPercent: computeLineProgress(o.lines),
+      progressPercent: computePickLineProgressPercent(o.lines),
       assignedUserName: assignment?.userName,
       startedAt: assignment?.startedAt ?? undefined,
       href: orderHref('adjustment', o.id)

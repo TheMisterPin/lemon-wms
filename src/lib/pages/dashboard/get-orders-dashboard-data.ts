@@ -11,7 +11,7 @@ import {
   getReturnOrderSummaries,
   getSalesOrderSummaries,
   getTransferOrderSummaries
-} from '@/lib/orders/orders-dashboard-queries'
+} from '@/lib/orders/shared/orders-dashboard-queries'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
 import type { OrdersDashboardDTO, OrderTypeSlice, OrderStatusBreakdown } from '@/types/orders-dashboard.types'
 

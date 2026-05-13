@@ -10,6 +10,7 @@ import { ClipboardList, Truck } from 'lucide-react'
 
 import { CreatePurchaseOrderModal } from '@/components/features/orders/components/create-purchase-order-modal'
 import { OrderTypeOverview } from '@/components/features/orders/components/order-type-overview'
+import { OrderTypeOverviewSkeleton } from '@/components/features/orders/skeletons/order-type-overview-skeleton'
 import { GenericTable } from '@/components/primitives/tables/generic-table'
 import { Button } from '@/components/ui/button'
 import {
@@ -197,13 +198,7 @@ export function DashboardOrdersPageView({ orderType }: { orderType: string }) {
   }
 
   if (isLoading && !data) {
-    return (
-      <main className="min-h-screen p-6" style={{ background: 'var(--wh-page-bg)' }}>
-        <p className="text-sm" style={{ color: 'var(--wh-text-muted)' }}>
-          Loading order dashboard…
-        </p>
-      </main>
-    )
+    return <OrderTypeOverviewSkeleton />
   }
 
   if ((!isLoading && error) || !data) {

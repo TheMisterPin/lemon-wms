@@ -8,6 +8,7 @@ export interface IBin {
   name: string
   code: string
   type: BinType
+  isActive: boolean
   maxCapacity: number | null
   currentCapacity: number | null
   filledPercentage: number | null

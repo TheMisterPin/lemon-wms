@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { fail, notFound, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
-import { deleteBin, getBin, getBinWithContent, updateBin, binFormSchema } from '@/lib/locations'
+import { deleteBin, getBin, getBinWithContent, updateBin, binUpdateSchema } from '@/lib/locations'
 import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
@@ -82,7 +82,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     }
 
     const body = await req.json()
-    const parsed = binFormSchema.partial().parse(body)
+    const parsed = binUpdateSchema.partial().parse(body)
     const bin = await updateBin(prisma, id, parsed)
 
     return ok(bin, 'Bin updated successfully.')

@@ -3,7 +3,7 @@ import type { BinType } from '@/generated/prisma'
 import { DomainError } from '@/lib/errors'
 import { generateBinSerial } from '@/utils/serials'
 
-import type { BinFormValues } from './bins-schemas'
+import type { BinFormValues, BinUpdateValues } from './bins-schemas'
 
 type PrismaExecutor = PrismaClient | Prisma.TransactionClient
 
@@ -84,8 +84,49 @@ async function createBin(prisma: PrismaClient, data: BinFormValues) {
   })
 }
 
-async function updateBin(prisma: PrismaClient, id: string, data: Partial<BinFormValues>) {
-  return prisma.bin.update({ where: { id }, data })
+async function updateBin(prisma: PrismaClient, id: string, data: BinUpdateValues) {
+  let warehouseId: string | undefined
+  if (data.zoneId !== undefined) {
+    const zone = await prisma.zone.findUnique({
+      where: { id: data.zoneId },
+      select: { warehouseId: true, deletedAt: true, isActive: true }
+    })
+
+    if (!zone || zone.deletedAt) {
+      throw new DomainError('Zone not found.', 'ZONE_NOT_FOUND', 404)
+    }
+
+    if (!zone.isActive) {
+      throw new DomainError('Cannot assign bin to an inactive zone.', 'ZONE_INACTIVE', 409)
+    }
+
+    warehouseId = zone.warehouseId
+  }
+
+  const patch: Prisma.BinUncheckedUpdateInput = {}
+
+  if (data.name !== undefined) {
+    patch.name = data.name
+  }
+
+  if (data.type !== undefined) {
+    patch.type = data.type as BinType
+  }
+
+  if (data.zoneId !== undefined && warehouseId !== undefined) {
+    patch.zoneId = data.zoneId
+    patch.warehouseId = warehouseId
+  }
+
+  if (data.isActive !== undefined) {
+    patch.isActive = data.isActive
+  }
+
+  if (data.maxCapacity !== undefined) {
+    patch.maxCapacity = data.maxCapacity === null ? null : new Prisma.Decimal(data.maxCapacity)
+  }
+
+  return prisma.bin.update({ where: { id }, data: patch })
 }
 
 async function deleteBin(prisma: PrismaClient, id: string) {

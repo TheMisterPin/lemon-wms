@@ -1,4 +1,4 @@
-import { AssignmentLifecycle, ExecutionActivity, OrderType } from '@/generated/prisma'
+import { AssignmentLifecycle, ExecutionActivity, type OrderExecutionLineDocument, OrderType } from '@/generated/prisma'
 
 /** Row shape for lists, filters, and monitoring views (denormalized names for display). */
 export type OrderAssignmentListItemDTO = {
@@ -84,6 +84,8 @@ export type OrderExecutionActivityListItemDTO = {
   orderId: string
   orderType: OrderType
   orderLineRefId: string | null
+  executionLineDocument: OrderExecutionLineDocument | null
+  executionLineId: string | null
   warehouseId: string
   zoneId: string
   warehouseName?: string
@@ -100,6 +102,8 @@ export type OrderExecutionActivityDetailDTO = {
   orderId: string
   orderType: OrderType
   orderLineRefId: string | null
+  executionLineDocument: OrderExecutionLineDocument | null
+  executionLineId: string | null
   zoneId: string
   activityType: ExecutionActivity
   notes: string | null
@@ -123,6 +127,8 @@ export type LatestOrderExecutionActivityDTO = {
   userId: string
   userFullName?: string
   notes: string | null
+  executionLineDocument: OrderExecutionLineDocument | null
+  executionLineId: string | null
 }
 export type OrderAssignmentExecutionTimelineDTO = {
   assignment: OrderAssignmentDetailDTO

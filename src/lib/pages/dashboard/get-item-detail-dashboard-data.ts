@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
+import { sumPickLineQuantities } from '@/lib/orders/shared/pick-line-progress'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
 import type { ItemDetailDashboardDTO, ItemOrderRow } from '@/types/item-detail-dashboard.types'
 import type { OrderMovementRow } from '@/types/order-detail-dashboard.types'
@@ -90,7 +91,7 @@ export async function getItemDetailDashboardData(
       where: { itemId, salesOrder: { deletedAt: null } },
       select: {
         baseQuantity: true,
-        handledQuantity: true,
+        pickLines: { select: { quantity: true } },
         salesOrder: {
           select: {
             id: true,
@@ -106,7 +107,7 @@ export async function getItemDetailDashboardData(
       where: { itemId, transferOrder: { deletedAt: null } },
       select: {
         baseQuantity: true,
-        handledQuantity: true,
+        pickLines: { select: { quantity: true } },
         transferOrder: {
           select: {
             id: true,
@@ -122,7 +123,7 @@ export async function getItemDetailDashboardData(
       where: { itemId, returnOrder: { deletedAt: null } },
       select: {
         baseQuantity: true,
-        handledQuantity: true,
+        pickLines: { select: { quantity: true } },
         returnOrder: {
           select: {
             id: true,
@@ -138,7 +139,7 @@ export async function getItemDetailDashboardData(
       where: { itemId, adjustmentOrder: { deletedAt: null } },
       select: {
         baseQuantity: true,
-        handledQuantity: true,
+        pickLines: { select: { quantity: true } },
         adjustmentOrder: {
           select: {
             id: true,
@@ -245,7 +246,7 @@ export async function getItemDetailDashboardData(
       type: 'SALES',
       warehouseName: line.salesOrder.warehouse.name,
       requiredQty: Math.round(toQty(line.baseQuantity)),
-      processedQty: Math.round(toQty(line.handledQuantity)),
+      processedQty: Math.round(sumPickLineQuantities(line.pickLines)),
       status: line.salesOrder.status,
       href: orderHref('sales', line.salesOrder.id)
     })
@@ -257,7 +258,7 @@ export async function getItemDetailDashboardData(
       type: 'TRANSFER',
       warehouseName: line.transferOrder.warehouse.name,
       requiredQty: Math.round(toQty(line.baseQuantity)),
-      processedQty: Math.round(toQty(line.handledQuantity)),
+      processedQty: Math.round(sumPickLineQuantities(line.pickLines)),
       status: line.transferOrder.status,
       href: orderHref('transfer', line.transferOrder.id)
     })
@@ -269,7 +270,7 @@ export async function getItemDetailDashboardData(
       type: 'RETURN',
       warehouseName: line.returnOrder.warehouse.name,
       requiredQty: Math.round(toQty(line.baseQuantity)),
-      processedQty: Math.round(toQty(line.handledQuantity)),
+      processedQty: Math.round(sumPickLineQuantities(line.pickLines)),
       status: line.returnOrder.status,
       href: orderHref('return', line.returnOrder.id)
     })
@@ -281,7 +282,7 @@ export async function getItemDetailDashboardData(
       type: 'ADJUSTMENT',
       warehouseName: line.adjustmentOrder.warehouse.name,
       requiredQty: Math.round(toQty(line.baseQuantity)),
-      processedQty: Math.round(toQty(line.handledQuantity)),
+      processedQty: Math.round(sumPickLineQuantities(line.pickLines)),
       status: line.adjustmentOrder.status,
       href: orderHref('adjustment', line.adjustmentOrder.id)
     })

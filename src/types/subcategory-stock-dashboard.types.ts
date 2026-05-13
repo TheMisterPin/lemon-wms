@@ -1,3 +1,5 @@
+import type { BinFillOverTimePoint } from '@/types/bin-detail-dashboard.types'
+
 export type SubcategoryStockBreadcrumb = {
   label: string
   href: string
@@ -16,11 +18,6 @@ export type SubcategoryStockKpis = {
 export type SubcategoryAvailabilityDonutSlice = {
   bucket: 'AVAILABLE' | 'RESERVED' | 'BLOCKED'
   quantity: number
-}
-
-export type SubcategoryStockOverTimePoint = {
-  date: string
-  totalUnits: number
 }
 
 export type SubcategoryStockItemRow = {
@@ -66,7 +63,8 @@ export type SubcategoryStockDashboardDTO = {
   }
   kpis: SubcategoryStockKpis
   availabilityDonut: SubcategoryAvailabilityDonutSlice[]
-  availabilityOverTime: SubcategoryStockOverTimePoint[]
+  /** Daily BinHistory snapshots summed across bins that currently hold stock for this subcategory (same shape as bin overview). */
+  fillOverTime: BinFillOverTimePoint[]
   items: SubcategoryStockItemRow[]
   activities: SubcategoryBinActivityRow[]
 }
