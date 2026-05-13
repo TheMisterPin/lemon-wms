@@ -54,18 +54,21 @@ export function OverviewCards({ overview }: { overview: DashboardOverviewCard[] 
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:gap-4">
       <StatCard
+        key="overview:kpi:warehouses"
         title="Warehouses"
         value={overview[0].value}
         icon={Building2}
         accent="var(--wh-warehouse-accent)"
       />
       <StatCard
+        key="overview:kpi:zones"
         title="Zones"
         value={overview[1].value}
         icon={Map}
         accent="var(--wh-zone-accent)"
       />
       <StatCard
+        key="overview:kpi:bins"
         title="Bins"
         value={overview[2].value}
         icon={Archive}

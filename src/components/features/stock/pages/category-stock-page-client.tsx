@@ -395,7 +395,7 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
                 action={`${totalOnHand.toLocaleString()} units total`}
               >
                 <StockChartPanel>
-                  <div className="flex h-75">
+                  <div className="flex h-[300px] min-h-0">
                     <div className="flex w-1/3 flex-col justify-center space-y-3 pr-3">
                       {subcategoriesForCards.map((sub) => {
                         const pct = totalOnHand > 0 ? ((sub.onHand / totalOnHand) * 100).toFixed(1) : '0'
@@ -451,7 +451,7 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
 
               <StockSection title="Stock breakdown" action="By status">
                 <StockChartPanel>
-                  <div className="h-75">
+                  <div className="h-[300px] w-full min-w-0 shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={stockBreakdownRows} layout="vertical" margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
                         <XAxis

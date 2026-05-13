@@ -21,10 +21,16 @@ describe('getWarehousePurchaseOrders', () => {
         id: true,
         reference: true,
         status: true,
-        supplier: true,
+        supplierNameSnapshot: true,
         warehouseId: true,
         createdAt: true,
-        businessPartyId: true
+        businessPartyId: true,
+        businessParty: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     })

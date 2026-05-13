@@ -8,7 +8,8 @@ import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 const demoSchema = z.object({
-  role: z.nativeEnum(Role)
+  role: z.nativeEnum(Role),
+  surface: z.enum(['dashboard', 'warehouse'])
 })
 
 const isDemoModeEnabled = (): boolean => process.env.IS_DEMO === 'true'
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
   try {
     const result = await demoLogin(prisma, {
       role: parsed.data.role,
+      surface: parsed.data.surface,
       ipAddress: request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? undefined,
       userAgent: request.headers.get('user-agent') ?? undefined
     })

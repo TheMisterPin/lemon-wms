@@ -57,6 +57,7 @@ export function ZoneDashboardOverviewPageClient({ zoneId }: { zoneId: string }) 
                 All zones
               </button>
               <Link
+                prefetch={false}
                 href="/dashboard/locations/warehouses"
                 className="rounded-xl px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
                 style={{

@@ -5,6 +5,7 @@
  */
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { format } from 'date-fns'
@@ -242,9 +243,10 @@ export function ItemDetailDashboard({ data }: { data: ItemDetailDashboardDTO }) 
         <WarehouseOverviewShellSection title={`Stock by Bin (${data.stockByBin.length})`}>
           <div className="space-y-3">
             {visibleBins.map((row) => (
-              <div
+              <Link
                 key={row.binStockItemId}
-                className="rounded-lg border p-3"
+                href={row.href}
+                className="block rounded-lg border p-3 transition-opacity hover:opacity-90"
                 style={{
                   background: 'var(--wh-card-bg-soft)',
                   borderColor: 'var(--wh-border)'
@@ -292,7 +294,7 @@ export function ItemDetailDashboard({ data }: { data: ItemDetailDashboardDTO }) 
                     Blocked {row.blocked}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
             {hiddenBins.length > 0 && (
               <button
@@ -439,9 +441,10 @@ export function ItemDetailDashboard({ data }: { data: ItemDetailDashboardDTO }) 
           </SheetHeader>
           <div className="mt-6 space-y-3 pr-6">
             {data.stockByBin.map((row) => (
-              <div
+              <Link
                 key={row.binStockItemId}
-                className="rounded-lg border p-3"
+                href={row.href}
+                className="block rounded-lg border p-3 transition-opacity hover:opacity-90"
                 style={{
                   background: 'var(--wh-card-bg-soft)',
                   borderColor: 'var(--wh-border)'
@@ -499,7 +502,7 @@ export function ItemDetailDashboard({ data }: { data: ItemDetailDashboardDTO }) 
                     Serial: {row.serialNumber}
                   </p>
                 )}
-              </div>
+              </Link>
             ))}
           </div>
         </SheetContent>

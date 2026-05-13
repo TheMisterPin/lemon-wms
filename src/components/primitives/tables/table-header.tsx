@@ -10,7 +10,7 @@ import {
   TableHead,
   TableRow
 } from '@/components/ui/table'
-import { isDataColumn } from '@/lib/utils/table'
+import { getStableColumnConfigKey, isDataColumn } from '@/lib/utils/table'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 import type { RowAction, SortDirection } from '@/types/components/table/generic-table.types'
 
@@ -55,7 +55,7 @@ export function TableHeaderRow<T extends { id: string }>({
 
         return (
           <TableHead
-            key={index}
+            key={getStableColumnConfigKey(column, index)}
             className={[
               'bg-dash-card2 text-dash-muted text-xs font-semibold uppercase tracking-wider text-center select-none transition-colors duration-200',
               sortable ? 'cursor-pointer hover:text-dash-text hover:bg-dash-bg' : '',

@@ -122,6 +122,7 @@ function ListCard({
 
           {detailsHref ? (
             <Link
+              prefetch={false}
               href={detailsHref}
               className={`inline-flex items-center justify-center font-medium ${ctaClassName}`}
               style={ctaStyle}

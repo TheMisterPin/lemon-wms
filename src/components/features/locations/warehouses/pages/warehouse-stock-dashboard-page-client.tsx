@@ -61,6 +61,7 @@ export function WarehouseStockDashboardPageClient({
                 Warehouses home
               </button>
               <Link
+                prefetch={false}
                 href={`/dashboard/locations/warehouses/${warehouseId}`}
                 className="rounded-xl px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90"
                 style={{

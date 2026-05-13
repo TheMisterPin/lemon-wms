@@ -8,12 +8,12 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  Sun,
-  Moon,
   ChevronDown,
-  FlaskConical
+  FlaskConical,
+  Moon,
+  Sun
 } from 'lucide-react'
-import { SimulationModal } from '@/components/features/simulation/simulation-modal'
+
 import {
   DASHBOARD_NAV_GROUPS,
   isRouteActive
@@ -21,6 +21,8 @@ import {
 import { ManageLocationsModal } from '@/components/features/locations/shared/components/manage-locations-modal'
 import { SelectLocationModal } from '@/components/features/locations/shared/components/select-location-modal'
 import { useSelectLocationModalData } from '@/components/features/locations/shared/hooks/use-select-location-modal-data'
+import { AddProgressModal } from '@/components/features/simulation/add-progress-modal'
+import { SimulationModal } from '@/components/features/simulation/simulation-modal'
 import { SelectStockCategoryModal } from '@/components/features/stock/shared/components/select-stock-category-modal'
 import { SelectStockSubcategoryModal } from '@/components/features/stock/shared/components/select-stock-subcategory-modal'
 import { useTheme } from '@/components/shared/use-theme'
@@ -49,6 +51,9 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
   } = useStockCategoryTree(stockAreaActive)
 
   const [simulationOpen, setSimulationOpen] = useState(false)
+  const [simulationSectionOpen, setSimulationSectionOpen] = useState(false)
+  const [addProgressModalOpen, setAddProgressModalOpen] = useState(false)
+  const [addProgressSession, setAddProgressSession] = useState(0)
   const [locationPickerOpen, setLocationPickerOpen] = useState(false)
   const [locationPickerVariant, setLocationPickerVariant] =
     useState<SelectLocationModalVariant>('warehouse')
@@ -80,7 +85,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(activeGroups)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync open nav groups from route
     setOpenGroups((current) => {
       let changed = false
       const next = { ...current }
@@ -148,6 +153,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
             return (
               <div key={group.label} className="space-y-0.5">
                 <Link
+                  prefetch={false}
                   href={group.href}
                   onClick={() => onClose?.()}
                   className={[
@@ -162,7 +168,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                 </Link>
                 {showLocationStyleChildren ? (
                   <div className="ml-4 space-y-0.5 border-l border-dash-border pl-3">
-                    {links.map((link) => {
+                    {links.map((link, linkIndex) => {
                       const SubIcon = link.icon
 
                       if (link.openManageLocationsModal) {
@@ -172,7 +178,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
 
                         return (
                           <button
-                            key={link.label}
+                            key={`${group.label}:lnk:${linkIndex}`}
                             type="button"
                             onClick={() => {
                               setManageLocationsSession((s) => s + 1)
@@ -195,7 +201,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                       if (link.selectLocationVariant) {
                         return (
                           <button
-                            key={link.label}
+                            key={`${group.label}:lnk:${linkIndex}`}
                             type="button"
                             onClick={() => {
                               openLocationPicker(link.selectLocationVariant!)
@@ -217,7 +223,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                       if (link.openStockCategoryModal) {
                         return (
                           <button
-                            key={link.label}
+                            key={`${group.label}:lnk:${linkIndex}`}
                             type="button"
                             onClick={() => {
                               setStockCategoryModalSession((s) => s + 1)
@@ -240,7 +246,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                       if (link.openStockSubcategoryModal) {
                         return (
                           <button
-                            key={link.label}
+                            key={`${group.label}:lnk:${linkIndex}`}
                             type="button"
                             onClick={() => {
                               setStockSubcategoryModalSession((s) => s + 1)
@@ -268,7 +274,8 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
 
                       return (
                         <Link
-                          key={link.href}
+                          key={`${group.label}:lnk:${linkIndex}:${link.href}`}
+                          prefetch={false}
                           href={link.href}
                           onClick={() => onClose?.()}
                           className={[
@@ -295,6 +302,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
             return (
               <Link
                 key={group.label}
+                prefetch={false}
                 href={group.href}
                 onClick={() => onClose?.()}
                 className={[
@@ -343,7 +351,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
               </summary>
               <div className="grid grid-rows-[0fr] transition-all duration-200 ease-out group-open/nav-section:grid-rows-[1fr]">
                 <div className="mt-1 space-y-1 overflow-hidden pl-10">
-                  {links.map((link) => {
+                  {links.map((link, linkIndex) => {
                     const SubIcon = link.icon
 
                     if (link.openManageLocationsModal) {
@@ -353,7 +361,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
 
                       return (
                         <button
-                          key={link.label}
+                          key={`${group.label}:lnk:${linkIndex}`}
                           type="button"
                           onClick={() => {
                             setManageLocationsSession((s) => s + 1)
@@ -376,7 +384,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                     if (link.selectLocationVariant) {
                       return (
                         <button
-                          key={link.label}
+                          key={`${group.label}:lnk:${linkIndex}`}
                           type="button"
                           onClick={() => {
                             openLocationPicker(link.selectLocationVariant!)
@@ -398,7 +406,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                     if (link.openStockCategoryModal) {
                       return (
                         <button
-                          key={link.label}
+                          key={`${group.label}:lnk:${linkIndex}`}
                           type="button"
                           onClick={() => {
                             setStockCategoryModalSession((s) => s + 1)
@@ -421,7 +429,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                     if (link.openStockSubcategoryModal) {
                       return (
                         <button
-                          key={link.label}
+                          key={`${group.label}:lnk:${linkIndex}`}
                           type="button"
                           onClick={() => {
                             setStockSubcategoryModalSession((s) => s + 1)
@@ -449,7 +457,8 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
 
                     return (
                       <Link
-                        key={link.href}
+                        key={`${group.label}:lnk:${linkIndex}:${link.href}`}
+                        prefetch={false}
                         href={link.href}
                         onClick={() => onClose?.()}
                         className={[
@@ -475,17 +484,59 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
 
       {isDemoEnabled && (
         <div className="border-t border-dash-border p-4">
-          <div className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-dash-muted">
-            Simulation
-          </div>
-          <button
-            type="button"
-            onClick={() => setSimulationOpen(true)}
-            className="flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
+          <details
+            className="group/nav-section rounded-md"
+            open={simulationSectionOpen}
+            onToggle={(event) => {
+              const target = event.currentTarget as HTMLDetailsElement
+              setSimulationSectionOpen(target.open)
+            }}
           >
-            <FlaskConical size={18} className="shrink-0" />
-            Purchase Order
-          </button>
+            <summary
+              className={[
+                'flex cursor-pointer list-none items-center justify-between gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-200 [&::-webkit-details-marker]:hidden',
+                simulationSectionOpen
+                  ? 'bg-dash-card2 text-dash-text'
+                  : 'text-dash-muted hover:bg-dash-card2 hover:text-dash-text'
+              ].join(' ')}
+            >
+              <span className="flex items-center gap-3">
+                <FlaskConical size={18} className="shrink-0 opacity-90" />
+                Simulation
+              </span>
+              <ChevronDown
+                size={16}
+                className="shrink-0 opacity-70 transition-transform duration-200 group-open/nav-section:rotate-180"
+              />
+            </summary>
+            <div className="grid grid-rows-[0fr] transition-all duration-200 ease-out group-open/nav-section:grid-rows-[1fr]">
+              <div className="mt-1 overflow-hidden">
+                <div className="ml-4 space-y-0.5 border-l border-dash-border pl-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSimulationOpen(true)
+                      onClose?.()
+                    }}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
+                  >
+                    Purchase Order
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAddProgressSession((s) => s + 1)
+                      setAddProgressModalOpen(true)
+                      onClose?.()
+                    }}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
+                  >
+                    Add progress
+                  </button>
+                </div>
+              </div>
+            </div>
+          </details>
         </div>
       )}
 
@@ -505,11 +556,18 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
       </div>
 
       {isDemoEnabled && (
-        <SimulationModal open={simulationOpen} onOpenChange={setSimulationOpen} />
+        <>
+          <AddProgressModal
+            key={`dashboard-add-progress-${addProgressSession}`}
+            open={addProgressModalOpen}
+            onOpenChange={setAddProgressModalOpen}
+          />
+          <SimulationModal key="dashboard-simulation" open={simulationOpen} onOpenChange={setSimulationOpen} />
+        </>
       )}
 
       <SelectLocationModal
-        key={locationPickerSession}
+        key={`dashboard-select-location-${locationPickerSession}`}
         open={locationPickerOpen}
         onOpenChange={setLocationPickerOpen}
         variant={locationPickerVariant}
@@ -521,7 +579,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
       />
 
       <SelectStockCategoryModal
-        key={stockCategoryModalSession}
+        key={`dashboard-select-stock-category-${stockCategoryModalSession}`}
         open={stockCategoryModalOpen}
         onOpenChange={setStockCategoryModalOpen}
         parents={stockCategoryTree?.parents ?? []}
@@ -536,7 +594,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
       />
 
       <SelectStockSubcategoryModal
-        key={stockSubcategoryModalSession}
+        key={`dashboard-select-stock-subcategory-${stockSubcategoryModalSession}`}
         open={stockSubcategoryModalOpen}
         onOpenChange={setStockSubcategoryModalOpen}
         tree={stockCategoryTree}
@@ -551,7 +609,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
       />
 
       <ManageLocationsModal
-        key={manageLocationsSession}
+        key={`dashboard-manage-locations-${manageLocationsSession}`}
         open={manageLocationsOpen}
         onOpenChange={setManageLocationsOpen}
       />

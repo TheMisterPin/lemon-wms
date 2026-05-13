@@ -1,7 +1,8 @@
 export {
   getRowValue,
   applyIfNull,
-  isDataColumn
+  isDataColumn,
+  getStableColumnConfigKey
 } from './row-access'
 
 export { evaluateOperation } from './operation'

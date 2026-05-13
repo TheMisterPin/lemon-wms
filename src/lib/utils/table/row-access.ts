@@ -31,3 +31,18 @@ export function isDataColumn<T extends { id: string }>(
 ): col is DataColumnConfig {
   return 'accessor' in col && !('cell' in col)
 }
+
+/**
+ * Stable list key for a table column definition. Prefer over array index keys,
+ * which can collide across separate lists reconciled under the same parent (e.g. headers + rows).
+ */
+export function getStableColumnConfigKey<T extends { id: string }>(
+  column: ColumnConfig<T>,
+  fallbackIndex: number
+): string {
+  if (isDataColumn(column)) {
+    return `${column.label}::${column.accessor}`
+  }
+
+  return `${column.label}::cell::${fallbackIndex}`
+}

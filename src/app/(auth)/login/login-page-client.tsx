@@ -17,19 +17,15 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { useAuthStore } from '@/lib/auth/store'
-import type { AuthUser } from '@/types'
+import type { AuthDevice, AuthLocation, AuthUser } from '@/types'
 
 type Tab = 'office' | 'warehouse'
 
-const DEMO_ROLES = [
-  'OWNER',
-  'OFFICE_MANAGER',
-  'OFFICE_WORKER',
-  'WAREHOUSE_MANAGER',
-  'WAREHOUSE_WORKER'
-] as const
+const DEMO_OFFICE_ROLES = ['OWNER', 'OFFICE_MANAGER', 'OFFICE_WORKER'] as const
 
-type DemoRole = (typeof DEMO_ROLES)[number]
+const DEMO_WAREHOUSE_ROLES = ['OWNER', 'WAREHOUSE_MANAGER', 'WAREHOUSE_WORKER'] as const
+
+type DemoRole = (typeof DEMO_OFFICE_ROLES)[number] | (typeof DEMO_WAREHOUSE_ROLES)[number]
 
 const DEMO_ROLE_LABELS: Record<DemoRole, string> = {
   OWNER: 'Owner',
@@ -43,6 +39,8 @@ type DemoLoginResponse = {
   accessToken: string
   user: AuthUser
   error?: string
+  location?: AuthLocation
+  device?: AuthDevice
 }
 
 type LoginPageClientProps = {
@@ -58,6 +56,7 @@ export function LoginPageClient({ isDemoEnabled }: LoginPageClientProps) {
   const [demoError, setDemoError] = useState<string | null>(null)
 
   const handleDemoLogin = async (role: DemoRole) => {
+    const surface = tab === 'office' ? 'dashboard' : 'warehouse'
     setDemoError(null)
     setDemoLoadingRole(role)
 
@@ -65,7 +64,7 @@ export function LoginPageClient({ isDemoEnabled }: LoginPageClientProps) {
       const res = await fetch('/api/auth/demo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role })
+        body: JSON.stringify({ role, surface })
       })
 
       const data = (await res.json()) as DemoLoginResponse
@@ -76,14 +75,30 @@ export function LoginPageClient({ isDemoEnabled }: LoginPageClientProps) {
         return
       }
 
-      setAuth(data.accessToken, data.user)
+      setAuth(
+        data.accessToken,
+        data.user,
+        data.device && data.location
+          ? { location: data.location, device: data.device }
+          : undefined
+      )
 
-      const userRole = data.user.role
-      if (userRole === 'WAREHOUSE_MANAGER' || userRole === 'WAREHOUSE_WORKER') {
-        router.push('/warehouse')
-      } else {
-        router.push('/dashboard')
+      if (surface === 'warehouse' && data.device) {
+        try {
+          localStorage.setItem('wms_device_code', data.device.code)
+          localStorage.setItem(
+            'wms_floor_last_login',
+            JSON.stringify({
+              deviceCode: data.device.code,
+              badgeNumber: data.user.badgeNumber
+            })
+          )
+        } catch {
+          // Ignore storage failures; auth store still has device context for this session.
+        }
       }
+
+      router.push(surface === 'warehouse' ? '/warehouse' : '/dashboard')
 
       setDemoOpen(false)
     } catch {
@@ -118,11 +133,13 @@ export function LoginPageClient({ isDemoEnabled }: LoginPageClientProps) {
                 <DialogHeader>
                   <DialogTitle className="text-brand-text">Demo login</DialogTitle>
                   <DialogDescription className="text-brand-muted">
-                    Sign in as the first seeded user with each role. Only active when IS_DEMO=true on the server.
+                    {tab === 'office'
+                      ? 'Sign in to the dashboard as a seeded office user. Only active when IS_DEMO=true on the server.'
+                      : 'Sign in to the warehouse app with a seeded device, warehouse, and zone. Only active when IS_DEMO=true on the server.'}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col gap-2">
-                  {DEMO_ROLES.map((role) => (
+                  {(tab === 'office' ? DEMO_OFFICE_ROLES : DEMO_WAREHOUSE_ROLES).map((role) => (
                     <Button
                       key={role}
                       type="button"
@@ -163,7 +180,10 @@ export function LoginPageClient({ isDemoEnabled }: LoginPageClientProps) {
               <button
                 key={t}
                 type="button"
-                onClick={() => setTab(t)}
+                onClick={() => {
+                  setTab(t)
+                  setDemoError(null)
+                }}
                 className={[
                   'flex-1 py-3.5 text-sm font-semibold uppercase tracking-wider transition-colors',
                   tab === t

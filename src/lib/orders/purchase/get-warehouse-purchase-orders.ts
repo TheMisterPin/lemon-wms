@@ -5,10 +5,16 @@ const listSelect = {
   id: true,
   reference: true,
   status: true,
-  supplier: true,
+  supplierNameSnapshot: true,
   warehouseId: true,
   createdAt: true,
-  businessPartyId: true
+  businessPartyId: true,
+  businessParty: {
+    select: {
+      id: true,
+      name: true
+    }
+  }
 } as const
 
 export type WarehousePurchaseOrderRow = {
@@ -25,7 +31,7 @@ async function getWarehousePurchaseOrders(
   prisma: PrismaClient,
   warehouseId: string
 ): Promise<WarehousePurchaseOrderRow[]> {
-  return prisma.purchaseOrder.findMany({
+  const orders = await prisma.purchaseOrder.findMany({
     where: {
       deletedAt: null,
       warehouseId,
@@ -36,6 +42,16 @@ async function getWarehousePurchaseOrders(
     select: listSelect,
     orderBy: { createdAt: 'desc' }
   })
+
+  return orders.map(order => ({
+    id: order.id,
+    reference: order.reference,
+    status: order.status,
+    supplier: order.businessParty?.name ?? order.supplierNameSnapshot ?? '',
+    warehouseId: order.warehouseId,
+    createdAt: order.createdAt,
+    businessPartyId: order.businessPartyId
+  }))
 }
 
 export { getWarehousePurchaseOrders }

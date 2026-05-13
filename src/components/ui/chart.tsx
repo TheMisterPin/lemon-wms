@@ -211,7 +211,7 @@ function ChartTooltipContent({
 
             return (
               <div
-                key={index}
+                key={`chart-tooltip:${index}:${String(item.dataKey ?? '')}:${String(item.name ?? '')}`}
                 className={cn(
                   "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                   indicator === "dot" && "items-center"
@@ -309,7 +309,7 @@ function ChartLegendContent({
 
           return (
             <div
-              key={index}
+              key={`chart-legend:${index}:${String(item.dataKey ?? '')}:${String(item.color ?? '')}`}
               className={cn(
                 "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
               )}

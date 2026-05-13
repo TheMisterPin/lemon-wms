@@ -3,9 +3,11 @@
 import '@testing-library/jest-dom/vitest'
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { DashboardOrdersPageView } from '@/components/features/orders/components/dashboard-orders-page-view'
+import { OrderTypeOverview } from '@/components/features/orders/components/order-type-overview'
 import { OrderStatus } from '@/generated/prisma'
 import { dashboardApiClient } from '@/lib/axios'
 
@@ -77,35 +79,38 @@ function purchaseDashboardPayload() {
         createdAt: '2026-01-02T00:00:00.000Z'
       }
     ],
-    activities: [],
-    purchaseOrdersForTable: [
-      {
-        id: 'po-1',
-        reference: 'PO-001',
-        status: OrderStatus.DRAFT,
-        supplier: 'Acme',
-        warehouseId: 'wh-1',
-        createdAt: '2026-01-01T00:00:00.000Z',
-        businessPartyId: 'bp-1',
-        lineCount: 0,
-        lines: []
-      },
-      {
-        id: 'po-2',
-        reference: 'PO-002',
-        status: OrderStatus.RELEASED,
-        supplier: 'Beta',
-        warehouseId: 'wh-1',
-        createdAt: '2026-01-02T00:00:00.000Z',
-        businessPartyId: null,
-        lineCount: 0,
-        lines: []
-      }
-    ]
+    activities: []
+  }
+}
+
+function purchaseOverviewWithManyOrders() {
+  const base = purchaseDashboardPayload()
+  const more = Array.from({ length: 5 }, (_, index) => ({
+    orderId: `po-bulk-${index}`,
+    orderLabel: `PO-BULK-${index}`,
+    status: OrderStatus.RELEASED,
+    warehouseId: 'wh-1',
+    warehouseName: 'Warehouse 1',
+    progressPercent: index * 5,
+    href: `/dashboard/orders/purchase/po-bulk-${index}`,
+    createdAt: '2026-01-03T00:00:00.000Z'
+  }))
+
+  return {
+    ...base,
+    orders: [...base.orders, ...more],
+    kpis: { ...base.kpis, totalOrders: base.orders.length + more.length }
   }
 }
 
 describe('DashboardOrdersPageView', () => {
+  beforeAll(() => {
+    Element.prototype.hasPointerCapture = (): boolean => false
+    Element.prototype.releasePointerCapture = (): void => undefined
+    Element.prototype.setPointerCapture = (): void => undefined
+    HTMLElement.prototype.scrollIntoView = (): void => undefined
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -140,7 +145,7 @@ describe('DashboardOrdersPageView', () => {
     expect(mockGet).toHaveBeenCalledWith('/dashboard/orders/sales')
   })
 
-  it('loads purchase orders and shows release for DRAFT rows', async () => {
+  it('loads purchase orders and shows create modal action', async () => {
     mockGet.mockResolvedValue({
       success: true,
       message: 'ok',
@@ -153,7 +158,51 @@ describe('DashboardOrdersPageView', () => {
     expect(screen.getAllByText('PO-002').length).toBeGreaterThanOrEqual(1)
     expect(mockGet).toHaveBeenCalledWith('/dashboard/orders/purchase')
 
-    expect(screen.getAllByRole('button', { name: /release to warehouse/i })).toHaveLength(1)
+    expect(screen.getByTestId('create-po-modal')).toBeInTheDocument()
+  })
+
+  it('filters purchase orders by status on the overview', async () => {
+    const user = userEvent.setup()
+    render(<OrderTypeOverview data={purchaseDashboardPayload()} />)
+
+    await screen.findByText('PO-001')
+
+    await user.click(screen.getByRole('combobox', { name: /order status filter \(overview\)/i }))
+    await user.click(await screen.findByRole('option', { name: /^released$/i }))
+
+    expect(screen.queryByText('PO-001')).not.toBeInTheDocument()
+    expect(screen.getAllByText('PO-002').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('reorders overview cards by completion when sort is enabled', async () => {
+    const user = userEvent.setup()
+    render(<OrderTypeOverview data={purchaseDashboardPayload()} />)
+
+    const po1Heading = await screen.findByText('PO-001')
+    const po2Heading = screen.getByText('PO-002')
+
+    expect(po1Heading.compareDocumentPosition(po2Heading) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+
+    await user.click(screen.getByRole('checkbox', { name: /sort by completion %/i }))
+
+    expect(po2Heading.compareDocumentPosition(po1Heading) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  })
+
+  it('shows matching filter controls inside the orders sheet', async () => {
+    const user = userEvent.setup()
+    render(<OrderTypeOverview data={purchaseOverviewWithManyOrders()} />)
+
+    await screen.findByText('PO-001')
+    await user.click(screen.getByRole('button', { name: /show all/i }))
+
+    await screen.findByRole('combobox', { name: /order status filter \(all orders\)/i })
+
+    expect(
+      screen.getAllByRole('checkbox', {
+        hidden: true,
+        name: /sort by completion %/i
+      })
+    ).toHaveLength(2)
   })
 
   it('shows list error and retry refetches', async () => {

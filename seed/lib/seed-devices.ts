@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@/generated/prisma'
 
 export async function seedDemoDevice(prisma: PrismaClient) {
-  const [warehouses, zones, managers, workers] = await Promise.all([
+  const [warehouses, zones, owner, managers, workers] = await Promise.all([
     prisma.warehouse.findMany({
       where: { deletedAt: null },
       orderBy: { createdAt: 'asc' },
@@ -12,14 +12,18 @@ export async function seedDemoDevice(prisma: PrismaClient) {
       orderBy: { createdAt: 'asc' },
       select: { id: true, warehouseId: true }
     }),
-    prisma.user.findMany({
-      where: { isActive: true, role: 'WAREHOUSE_MANAGER' },
-      orderBy: { createdAt: 'asc' },
+    prisma.user.findUnique({
+      where: { id: 'USR-0000' },
       select: { id: true }
     }),
     prisma.user.findMany({
-      where: { isActive: true, role: 'WAREHOUSE_WORKER' },
-      orderBy: { createdAt: 'asc' },
+      where: { isActive: true, role: 'WAREHOUSE_MANAGER', deletedAt: null },
+      orderBy: { id: 'asc' },
+      select: { id: true }
+    }),
+    prisma.user.findMany({
+      where: { isActive: true, role: 'WAREHOUSE_WORKER', deletedAt: null },
+      orderBy: { id: 'asc' },
       select: { id: true }
     })
   ])
@@ -40,19 +44,28 @@ export async function seedDemoDevice(prisma: PrismaClient) {
   let workerCursor = 0
   let created = 0
 
-  for (const warehouse of warehouses) {
+  for (let warehouseIndex = 0; warehouseIndex < warehouses.length; warehouseIndex += 1) {
+    const warehouse = warehouses[warehouseIndex]
     const warehouseZones = zonesByWarehouse.get(warehouse.id) ?? []
 
     for (let index = 0; index < 10; index += 1) {
-      const isManagerSlot = index < 3
-      const assigneeId = isManagerSlot
-        ? managers[managerCursor % Math.max(managers.length, 1)]?.id
-        : workers[workerCursor % Math.max(workers.length, 1)]?.id
+      const isOwnerTerminal = warehouseIndex === 0 && index === 0
+      let assigneeId: string | undefined
 
-      if (isManagerSlot) {
-        managerCursor += 1
+      if (isOwnerTerminal && owner) {
+        assigneeId = owner.id
       } else {
-        workerCursor += 1
+        const effectiveIndex = warehouseIndex === 0 && index > 0 ? index - 1 : index
+        const isManagerSlot = effectiveIndex < 3
+        assigneeId = isManagerSlot
+          ? managers[managerCursor % Math.max(managers.length, 1)]?.id
+          : workers[workerCursor % Math.max(workers.length, 1)]?.id
+
+        if (isManagerSlot) {
+          managerCursor += 1
+        } else {
+          workerCursor += 1
+        }
       }
 
       const zoneId = index < warehouseZones.length ? warehouseZones[index] : null

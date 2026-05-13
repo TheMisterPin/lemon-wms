@@ -1,12 +1,15 @@
 'use client'
 
+/* eslint-disable react-hooks/set-state-in-effect -- fetch-on-mount and bins reload when PO changes */
+
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { SimulationConfig } from './simulation-modal'
 import type { ApiResponse } from '@/types/responses/basic-response'
+import type { SimulationConfig } from './simulation-modal'
 
 type SimUser = { id: string; fullName: string; badgeNumber: string; role: string }
 type ReleasedOrder = { id: string; reference: string; warehouseId: string; supplierNameSnapshot: string; totalLines: number }
@@ -24,6 +27,7 @@ export function SimulationSetupForm({ onRun }: Props) {
   const [selectedUserId, setSelectedUserId] = useState('')
   const [selectedOrderId, setSelectedOrderId] = useState('')
   const [selectedBinId, setSelectedBinId] = useState('')
+  const [partialExecute, setPartialExecute] = useState(false)
 
   const [loading, setLoading] = useState(true)
   const [loadingBins, setLoadingBins] = useState(false)
@@ -47,10 +51,13 @@ export function SimulationSetupForm({ onRun }: Props) {
     if (!selectedOrderId) {
       setBins([])
       setSelectedBinId('')
+
       return
     }
     const order = orders.find((o) => o.id === selectedOrderId)
-    if (!order) return
+    if (!order) {
+      return
+    }
 
     setLoadingBins(true)
     setSelectedBinId('')
@@ -62,13 +69,24 @@ export function SimulationSetupForm({ onRun }: Props) {
   }, [selectedOrderId, orders])
 
   function handleRun() {
-    if (!selectedUserId || !selectedOrderId || !selectedBinId) return
+    if (!selectedUserId || !selectedOrderId || !selectedBinId) {
+      return
+    }
     const order = orders.find((o) => o.id === selectedOrderId)
+    const totalLines = order?.totalLines ?? 0
+    const partialOk = partialExecute && totalLines >= 2
+    let linesToCompleteBeforePause: number | undefined
+    if (partialOk) {
+      linesToCompleteBeforePause = 1 + Math.floor(Math.random() * (totalLines - 1))
+    }
+
     onRun({
       userId: selectedUserId,
       orderId: selectedOrderId,
       toBinId: selectedBinId,
-      orderReference: order?.reference ?? selectedOrderId
+      orderReference: order?.reference ?? selectedOrderId,
+      partialExecute: partialOk,
+      linesToCompleteBeforePause
     })
   }
 
@@ -80,7 +98,15 @@ export function SimulationSetupForm({ onRun }: Props) {
     return <div className="py-6 text-center text-sm text-red-500">{error}</div>
   }
 
-  const canRun = !!selectedUserId && !!selectedOrderId && !!selectedBinId
+  const selectedOrder = orders.find((o) => o.id === selectedOrderId)
+  const partialNeedsMoreLines =
+    partialExecute && selectedOrder !== undefined && selectedOrder.totalLines < 2
+
+  const canRun =
+    !!selectedUserId &&
+    !!selectedOrderId &&
+    !!selectedBinId &&
+    !partialNeedsMoreLines
 
   return (
     <div className="space-y-4">
@@ -118,6 +144,28 @@ export function SimulationSetupForm({ onRun }: Props) {
             )}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="flex items-start gap-3 rounded-md border border-dash-border px-3 py-3">
+        <Checkbox
+          id="sim-partial"
+          checked={partialExecute}
+          onCheckedChange={(v) => setPartialExecute(v === true)}
+          disabled={!selectedOrderId || (selectedOrder !== undefined && selectedOrder.totalLines < 2)}
+        />
+        <div className="space-y-1">
+          <label htmlFor="sim-partial" className="cursor-pointer text-sm font-medium leading-none text-dash-text">
+            Partial execution
+          </label>
+          <p className="text-xs text-dash-muted">
+            Start the order, declare receipt lines, then pause before every line is completed. How many lines finish first is chosen at random when you run (needs at least two PO lines).
+          </p>
+          {partialNeedsMoreLines && (
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              This order has fewer than two lines — choose another order or turn off partial execution.
+            </p>
+          )}
+        </div>
       </div>
 
       {selectedOrderId && (

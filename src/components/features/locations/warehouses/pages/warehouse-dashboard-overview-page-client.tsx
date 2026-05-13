@@ -94,6 +94,7 @@ export function WarehouseDashboardOverviewPageClient({
       <div className="mx-auto max-w-7xl p-4 xl:p-6">
         <div className="mb-4">
           <Link
+            prefetch={false}
             href="/dashboard/locations/warehouses"
             className="text-sm font-medium transition-opacity hover:opacity-80"
             style={{ color: 'var(--wh-text-muted)' }}

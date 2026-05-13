@@ -1,9 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Bar, BarChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
+import { CreatePurchaseOrderModal } from '@/components/features/orders/components/create-purchase-order-modal'
 import {
   DashboardDonutBreakdown,
   DashboardPageShell,
@@ -17,6 +18,15 @@ import {
 } from '@/components/primitives/warehouse-overview-primitives'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import {
   Sheet,
   SheetContent,
@@ -33,6 +43,75 @@ import type {
 import { formatTs, humanizeEnum } from '@/utils/components/formatters/enums'
 
 const ORDERS_AND_ACTIVITIES_PREVIEW_LIMIT = 4
+
+const ALL_ORDER_STATUSES = 'all'
+
+type PurchaseListActions = {
+  existingOrderCount: number
+  onPurchaseCreated: () => Promise<void>
+}
+
+type OrderCardsFilterBarProps = {
+  idPrefix: string
+  statusSelectAriaLabel: string
+  statusFilter: string
+  onStatusChange: (value: string) => void
+  sortByCompletionPercent: boolean
+  onSortByCompletionPercentChange: (checked: boolean) => void
+}
+
+function OrderCardsFilterBar({
+  idPrefix,
+  statusSelectAriaLabel,
+  statusFilter,
+  onStatusChange,
+  sortByCompletionPercent,
+  onSortByCompletionPercentChange
+}: OrderCardsFilterBarProps) {
+  const sortCheckboxId = `${idPrefix}-sort-completion`
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+      <Select value={statusFilter} onValueChange={onStatusChange}>
+        <SelectTrigger
+          size="sm"
+          id={`${idPrefix}-status`}
+          aria-label={statusSelectAriaLabel}
+          className="w-full min-w-[200px] sm:w-[240px]"
+          style={{
+            borderColor: 'var(--wh-border)',
+            background: 'var(--wh-card-bg)',
+            color: 'var(--wh-text-primary)'
+          }}
+        >
+          <SelectValue placeholder="Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL_ORDER_STATUSES}>All statuses</SelectItem>
+          {ORDER_STATUS_SEQUENCE.map((st) => (
+            <SelectItem key={st} value={st}>
+              {humanizeEnum(st)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id={sortCheckboxId}
+          checked={sortByCompletionPercent}
+          onCheckedChange={(checked) => onSortByCompletionPercentChange(checked === true)}
+        />
+        <Label
+          htmlFor={sortCheckboxId}
+          className="cursor-pointer text-sm font-normal"
+          style={{ color: 'var(--wh-text-secondary)' }}
+        >
+          Sort by completion %
+        </Label>
+      </div>
+    </div>
+  )
+}
 
 const ORDER_TYPE_SHEET_CONTENT_CLASS =
   'flex h-full max-h-[100dvh] w-full flex-col gap-0 overflow-hidden border-wh-border bg-wh-page-bg p-0 text-wh-text-primary sm:max-w-2xl'
@@ -158,15 +237,32 @@ function OrderTypePreviewActivityRow({ row }: { row: OrderTypeOverviewActivityIt
 
 type OrderTypeOverviewProps = {
   data: OrderTypeDashboardPayload
+  purchaseListActions?: PurchaseListActions
 }
 
-export function OrderTypeOverview({ data }: OrderTypeOverviewProps) {
+export function OrderTypeOverview({ data, purchaseListActions }: OrderTypeOverviewProps) {
+  const filterDomId = useId()
   const [ordersSheetOpen, setOrdersSheetOpen] = useState(false)
   const [activitiesSheetOpen, setActivitiesSheetOpen] = useState(false)
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>(ALL_ORDER_STATUSES)
+  const [sortOrdersByCompletionPercent, setSortOrdersByCompletionPercent] = useState(false)
 
-  const previewOrders = data.orders.slice(0, ORDERS_AND_ACTIVITIES_PREVIEW_LIMIT)
+  const filteredAndSortedOrders = useMemo(() => {
+    let list =
+      orderStatusFilter === ALL_ORDER_STATUSES
+        ? data.orders.slice()
+        : data.orders.filter((order) => order.status === orderStatusFilter)
+
+    if (sortOrdersByCompletionPercent) {
+      list = [...list].sort((a, b) => b.progressPercent - a.progressPercent)
+    }
+
+    return list
+  }, [data.orders, orderStatusFilter, sortOrdersByCompletionPercent])
+
+  const previewOrders = filteredAndSortedOrders.slice(0, ORDERS_AND_ACTIVITIES_PREVIEW_LIMIT)
   const previewActivities = data.activities.slice(0, ORDERS_AND_ACTIVITIES_PREVIEW_LIMIT)
-  const ordersHiddenCount = Math.max(0, data.orders.length - previewOrders.length)
+  const ordersHiddenCount = Math.max(0, filteredAndSortedOrders.length - previewOrders.length)
   const activitiesHiddenCount = Math.max(0, data.activities.length - previewActivities.length)
 
   const donutTotal = useMemo(
@@ -176,7 +272,7 @@ export function OrderTypeOverview({ data }: OrderTypeOverviewProps) {
 
   const donutRows = useMemo(() => {
     return data.statusDonut.map((row, index) => ({
-      id: row.status,
+      id: `${row.status}-${index}`,
       label: humanizeEnum(row.status),
       value: row.count,
       color: DONUT_PALETTE[index % DONUT_PALETTE.length]
@@ -189,6 +285,23 @@ export function OrderTypeOverview({ data }: OrderTypeOverviewProps) {
       ...w.byStatus
     }))
   }, [data.warehouseBars])
+
+  const filteredOrdersTotal = filteredAndSortedOrders.length
+  const datasetOrdersTotal = data.orders.length
+  const ordersCountLabel = (
+    <>
+      {filteredOrdersTotal.toLocaleString()}{' '}
+      {filteredOrdersTotal === 1 ? 'order' : 'orders'}
+      {filteredOrdersTotal !== datasetOrdersTotal ? (
+        <>
+          {' '}
+          <span style={{ color: 'var(--wh-text-muted)' }}>
+            ({datasetOrdersTotal.toLocaleString()} total)
+          </span>
+        </>
+      ) : null}
+    </>
+  )
 
   const subtitle = (
     <>
@@ -278,7 +391,7 @@ export function OrderTypeOverview({ data }: OrderTypeOverviewProps) {
                 border: '1px solid var(--wh-border)'
               }}
             >
-              <div className="h-75 w-full min-w-0">
+              <div className="h-[300px] w-full min-w-0 shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={warehouseBarData}
@@ -305,7 +418,7 @@ export function OrderTypeOverview({ data }: OrderTypeOverviewProps) {
                     />
                     {ORDER_STATUS_SEQUENCE.map((st) => (
                       <Bar
-                        key={st}
+                        key={`wh-status:${st}`}
                         dataKey={st}
                         name={humanizeEnum(st)}
                         stackId="a"
@@ -330,10 +443,17 @@ export function OrderTypeOverview({ data }: OrderTypeOverviewProps) {
         <DashboardSection
           title="Orders"
           action={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
               <span className="text-[11px] xl:text-xs" style={{ color: 'var(--wh-text-muted)' }}>
-                {data.orders.length.toLocaleString()} {data.orders.length === 1 ? 'order' : 'orders'}
+                {ordersCountLabel}
               </span>
+              {purchaseListActions ? (
+                <CreatePurchaseOrderModal
+                  orderType="purchase"
+                  existingOrderCount={purchaseListActions.existingOrderCount}
+                  onCreated={purchaseListActions.onPurchaseCreated}
+                />
+              ) : null}
               {ordersHiddenCount > 0 ? (
                 <Button type="button" variant="secondary" size="sm" onClick={() => setOrdersSheetOpen(true)}>
                   Show all
@@ -342,12 +462,24 @@ export function OrderTypeOverview({ data }: OrderTypeOverviewProps) {
             </div>
           }
         >
-          {data.orders.length === 0 ? (
+          {datasetOrdersTotal === 0 ? (
             <p className="text-sm" style={{ color: 'var(--wh-text-muted)' }}>
               No orders to display.
             </p>
+          ) : filteredOrdersTotal === 0 ? (
+            <p className="text-sm" style={{ color: 'var(--wh-text-muted)' }}>
+              No orders match the selected status.
+            </p>
           ) : (
             <div className="space-y-3">
+              <OrderCardsFilterBar
+                idPrefix={`${filterDomId}-main`}
+                statusSelectAriaLabel="Order status filter (overview)"
+                statusFilter={orderStatusFilter}
+                onStatusChange={setOrderStatusFilter}
+                sortByCompletionPercent={sortOrdersByCompletionPercent}
+                onSortByCompletionPercentChange={setSortOrdersByCompletionPercent}
+              />
               {previewOrders.map((order) => (
                 <OrderTypePreviewOrderCard key={order.orderId} order={order} />
               ))}
@@ -390,16 +522,35 @@ export function OrderTypeOverview({ data }: OrderTypeOverviewProps) {
           <SheetHeader className="border-b border-wh-border px-4 py-4 text-left">
             <SheetTitle className="text-wh-text-primary">All orders</SheetTitle>
             <SheetDescription className="text-wh-text-muted">
-              {data.title} · {data.orders.length.toLocaleString()}{' '}
-              {data.orders.length === 1 ? 'order' : 'orders'}
+              {data.title} · {ordersCountLabel}
             </SheetDescription>
           </SheetHeader>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-            <div className="space-y-3">
-              {data.orders.map((order) => (
-                <OrderTypePreviewOrderCard key={`sheet-${order.orderId}`} order={order} />
-              ))}
-            </div>
+            {datasetOrdersTotal === 0 ? (
+              <p className="text-sm" style={{ color: 'var(--wh-text-muted)' }}>
+                No orders to display.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <OrderCardsFilterBar
+                  idPrefix={`${filterDomId}-sheet`}
+                  statusSelectAriaLabel="Order status filter (all orders)"
+                  statusFilter={orderStatusFilter}
+                  onStatusChange={setOrderStatusFilter}
+                  sortByCompletionPercent={sortOrdersByCompletionPercent}
+                  onSortByCompletionPercentChange={setSortOrdersByCompletionPercent}
+                />
+                {filteredOrdersTotal === 0 ? (
+                  <p className="text-sm" style={{ color: 'var(--wh-text-muted)' }}>
+                    No orders match the selected status.
+                  </p>
+                ) : (
+                  filteredAndSortedOrders.map((order) => (
+                    <OrderTypePreviewOrderCard key={`sheet-${order.orderId}`} order={order} />
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </SheetContent>
       </Sheet>

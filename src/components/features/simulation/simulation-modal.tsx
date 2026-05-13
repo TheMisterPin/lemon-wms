@@ -9,9 +9,9 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 
-import { SimulationSetupForm } from './simulation-setup-form'
-import { SimulationRunner } from './simulation-runner'
 import { SimulationResults } from './simulation-results'
+import { SimulationRunner } from './simulation-runner'
+import { SimulationSetupForm } from './simulation-setup-form'
 
 export type SimulationPhase = 'setup' | 'running' | 'complete' | 'error'
 
@@ -28,6 +28,9 @@ export type SimulationConfig = {
   orderId: string
   toBinId: string
   orderReference: string
+  partialExecute: boolean
+  /** Random target count before pause; only when partialExecute */
+  linesToCompleteBeforePause?: number
 }
 
 export type SimulationResult = {
@@ -35,6 +38,8 @@ export type SimulationResult = {
   orderReference: string
   binId: string
   orderStatus: string
+  /** Receipt lines successfully handled before pause (partial simulation only) */
+  partialStoppedAfterLines?: number
 }
 
 type Props = {
@@ -56,7 +61,9 @@ export function SimulationModal({ open, onOpenChange }: Props) {
   }
 
   function handleOpenChange(val: boolean) {
-    if (!val) handleReset()
+    if (!val) {
+      handleReset()
+    }
     onOpenChange(val)
   }
 
@@ -78,7 +85,7 @@ export function SimulationModal({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className={phase === 'complete' ? 'max-w-xl' : 'max-w-lg'}>
         <DialogHeader>
           <DialogTitle>Purchase Order Simulation</DialogTitle>
         </DialogHeader>
@@ -98,7 +105,6 @@ export function SimulationModal({ open, onOpenChange }: Props) {
         {(phase === 'complete' || phase === 'error') && result && (
           <SimulationResults
             result={result}
-            steps={steps}
             onReset={handleReset}
           />
         )}
@@ -127,21 +133,40 @@ export function SimulationModal({ open, onOpenChange }: Props) {
 function StepRow({ step }: { step: SimulationStep }) {
   const icon =
     step.status === 'done' ? '✓' :
-    step.status === 'error' ? '✗' :
-    step.status === 'running' ? '…' : '○'
+      step.status === 'error' ? '✗' :
+        step.status === 'running' ? '…' : '○'
 
-  const color =
-    step.status === 'done' ? 'text-green-600' :
-    step.status === 'error' ? 'text-red-500' :
-    step.status === 'running' ? 'text-blue-500' : 'text-dash-muted'
+  const iconColor =
+    step.status === 'done' ? 'text-green-600 dark:text-green-400' :
+      step.status === 'error' ? 'text-red-500' :
+        step.status === 'running' ? 'text-blue-500' : 'text-dash-muted'
+
+  const rowTint =
+    step.status === 'done'
+      ? 'rounded-md border border-green-200 bg-green-50 px-2 py-1.5 dark:border-green-900/60 dark:bg-green-950/35'
+      : step.status === 'error'
+        ? 'rounded-md border border-red-200 bg-red-50 px-2 py-1.5 dark:border-red-900/60 dark:bg-red-950/35'
+        : step.status === 'running'
+          ? 'rounded-md border border-blue-200 bg-blue-50 px-2 py-1.5 dark:border-blue-900/60 dark:bg-blue-950/35'
+          : ''
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <span className={`w-4 shrink-0 text-center ${color}`}>{icon}</span>
-      <span className={step.status === 'pending' ? 'text-dash-muted' : 'text-dash-text'}>{step.label}</span>
-      {step.detail && <span className="ml-auto text-xs text-dash-muted">{step.detail}</span>}
+    <div className={`flex items-center gap-2 text-sm ${rowTint}`}>
+      <span className={`w-4 shrink-0 text-center font-mono ${iconColor}`}>{icon}</span>
+      <span
+        className={
+          step.status === 'pending'
+            ? 'flex-1 text-dash-muted'
+            : step.status === 'done'
+              ? 'flex-1 font-medium text-green-900 dark:text-green-100'
+              : 'flex-1 text-dash-text'
+        }
+      >
+        {step.label}
+      </span>
+      {step.detail && <span className="text-xs text-dash-muted">{step.detail}</span>}
       {step.durationMs !== undefined && (
-        <span className="ml-auto text-xs text-dash-muted">{step.durationMs}ms</span>
+        <span className="text-xs text-dash-muted">{step.durationMs}ms</span>
       )}
     </div>
   )

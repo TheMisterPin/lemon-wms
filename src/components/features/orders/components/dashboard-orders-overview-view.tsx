@@ -331,7 +331,7 @@ export function DashboardOrdersOverviewView() {
 
   const donutRows = useMemo(() => {
     return focusSlices.map((slice, index) => ({
-      id: slice.type,
+      id: `${slice.type}-${index}`,
       label: humanizeEnum(slice.type),
       value: slice.count,
       color: DONUT_COLORS[index % DONUT_COLORS.length]
@@ -478,7 +478,7 @@ export function DashboardOrdersOverviewView() {
                 border: '1px solid var(--wh-border)'
               }}
             >
-              <div className="h-75 w-full min-w-0">
+              <div className="h-[300px] w-full min-w-0 shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={stackRows}

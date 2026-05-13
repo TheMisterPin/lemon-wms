@@ -23,13 +23,17 @@ export function DashboardDonutBreakdown({
 }: DashboardDonutBreakdownProps) {
   return (
     <DashboardChartPanel>
-      <div className="flex min-h-75 w-full min-w-0 flex-col gap-4 md:flex-row">
+      <div className="flex min-h-[300px] w-full min-w-0 flex-col gap-4 md:flex-row">
         <div className="flex flex-col justify-center gap-3 md:w-1/3 md:pr-3">
-          {rows.map((row) => {
+          {rows.map((row, rowIndex) => {
             const pct = total > 0 ? ((row.value / total) * 100).toFixed(1) : '0'
 
             return (
-              <div key={row.id} className="text-sm" style={{ color: 'var(--wh-text-primary)' }}>
+              <div
+                key={`${row.id}-${rowIndex}`}
+                className="text-sm"
+                style={{ color: 'var(--wh-text-primary)' }}
+              >
                 <div className="flex items-center gap-2">
                   <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: row.color }} />
                   <span className="min-w-0 truncate">{row.label}</span>
@@ -42,18 +46,19 @@ export function DashboardDonutBreakdown({
           })}
         </div>
 
-        <div className="relative h-65 w-full min-w-0 md:w-2/3">
+        <div className="relative h-[260px] w-full min-w-0 md:w-2/3">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
+                id="dashboard-donut-breakdown-pie"
                 data={rows}
                 dataKey="value"
                 nameKey="label"
                 innerRadius={64}
                 outerRadius={100}
               >
-                {rows.map((entry) => (
-                  <Cell key={entry.id} fill={entry.color} />
+                {rows.map((entry, entryIndex) => (
+                  <Cell key={`${entry.id}-${entryIndex}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip {...warehouseOverviewRechartsTooltipProps} />
@@ -87,7 +92,7 @@ type DashboardStatusBreakdownProps = {
 export function DashboardStatusBreakdown({ rows }: DashboardStatusBreakdownProps) {
   return (
     <DashboardChartPanel>
-      <div className="h-75 w-full min-w-0">
+      <div className="h-[300px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={rows}

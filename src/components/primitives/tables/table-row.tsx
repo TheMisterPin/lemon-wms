@@ -15,7 +15,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { resolveRowStyleClassNames } from '@/lib/utils/table'
+import { getStableColumnConfigKey, resolveRowStyleClassNames } from '@/lib/utils/table'
 import type { ColumnConfig } from '@/types/components/table/column.types'
 import type { RowAction, RowStyleIfConfig } from '@/types/components/table/generic-table.types'
 
@@ -51,7 +51,7 @@ export function TableDataRow<T extends { id: string }>({
     >
       {visibleColumns.map((column, index) => (
         <TableCell
-          key={index}
+          key={getStableColumnConfigKey(column, index)}
           className="text-center text-dash-text/90 text-sm select-none"
         >
           <CellRenderer row={row} column={column} />
@@ -75,7 +75,7 @@ export function TableDataRow<T extends { id: string }>({
                     : action.className
 
               return (
-                <Tooltip key={index}>
+                <Tooltip key={`${row.id}-${index}`}>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"

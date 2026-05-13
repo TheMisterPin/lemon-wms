@@ -99,6 +99,7 @@ export function ZoneBinsSection({ bins }: ZoneBinsSectionProps) {
       emptyMessage="No bins found in this zone."
       renderItem={(bin) => (
         <Link
+          prefetch={false}
           href={`/dashboard/locations/bins/${bin.binId}`}
           className="block transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wh-border)]"
         >

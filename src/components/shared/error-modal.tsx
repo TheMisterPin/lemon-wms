@@ -224,7 +224,10 @@ export function ErrorModal({
               style={{ background: '#120b04', border: '1px solid #3d2208' }}
             >
               {parsedDetails.map((d, i) => (
-                <div key={i} className="flex gap-2 text-xs">
+                <div
+                  key={`error-detail:${i}:${d.field ?? 'msg'}:${d.message.slice(0, 64)}`}
+                  className="flex gap-2 text-xs"
+                >
                   {d.field && (
                     <span
                       className="shrink-0 font-mono font-medium"

@@ -13,10 +13,20 @@ export async function GET() {
       reference: true,
       warehouseId: true,
       supplierNameSnapshot: true,
-      totalLines: true
+      _count: {
+        select: { lines: true }
+      }
     },
     orderBy: { createdAt: 'desc' }
   })
 
-  return ok(orders, 'Released orders retrieved.')
+  const payload = orders.map((o) => ({
+    id: o.id,
+    reference: o.reference,
+    warehouseId: o.warehouseId,
+    supplierNameSnapshot: o.supplierNameSnapshot,
+    totalLines: o._count.lines
+  }))
+
+  return ok(payload, 'Released orders retrieved.')
 }

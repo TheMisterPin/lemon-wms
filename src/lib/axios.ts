@@ -214,15 +214,59 @@ export const apiClient = {
     authenticatedCall<T>(url, { method: 'DELETE', data })
 }
 
-/**
- * createTypedClient.
- * @param instance - Parameter for createTypedClient.
- * @returns Result from createTypedClient.
- */
+/** Stable stringify for Axios GET params so coalescing keys match regardless of property order. */
+function stableSerializeRequestParams(params: unknown): string {
+  if (params === undefined || params === null) {
+    return ''
+  }
+
+  const sortRecursive = (value: unknown): unknown => {
+    if (Array.isArray(value)) {
+      return value.map(sortRecursive)
+    }
+    if (value !== null && typeof value === 'object') {
+      const entries = Object.entries(value as Record<string, unknown>)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([k, v]) => [k, sortRecursive(v)])
+
+      return Object.fromEntries(entries)
+    }
+
+    return value
+  }
+
+  try {
+    return JSON.stringify(sortRecursive(params))
+  } catch {
+    return String(params)
+  }
+}
+
+/** Coalesce identical in-flight dashboard/warehouse GETs (Strict Mode double effects, sibling hooks). */
 function createTypedClient(instance: typeof sharedApi) {
+  const inFlightGets = new Map<string, Promise<unknown>>()
+
   return {
-    get: <T = any>(url: string, params?: any) =>
-      instance.request<T>({ method: 'GET', url, params }).then((response) => response.data),
+    get: <T = any>(url: string, params?: any) => {
+      const dedupeKey = `GET:${url}:${stableSerializeRequestParams(params)}`
+      const existing = inFlightGets.get(dedupeKey)
+
+      if (existing !== undefined) {
+        // Same dedupeKey guarantees same Axios response generic; callers share one in-flight GET
+        return existing as Promise<T>
+      }
+
+      const request = instance
+        .request<T>({ method: 'GET', url, params })
+        .then((response) => response.data)
+        .finally(() => {
+          inFlightGets.delete(dedupeKey)
+        })
+
+      inFlightGets.set(dedupeKey, request)
+
+      return request
+    },
     post: <T = any>(url: string, data?: any) =>
       instance.request<T>({ method: 'POST', url, data }).then((response) => response.data),
     put: <T = any>(url: string, data?: any) =>

@@ -33,7 +33,7 @@ const accentClassesByLabel: Record<string, { color: string; soft: string }> = {
 export function DashboardInfoCards({ cards }: DashboardInfoCardsProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 min-h-1/8 max-h-1/8">
-      {cards.map((card) => {
+      {cards.map((card, cardIndex) => {
         const Icon = card.icon
         const accent = accentClassesByLabel[card.label.toLowerCase()] ?? {
           color: 'var(--brand-primary)',
@@ -42,7 +42,7 @@ export function DashboardInfoCards({ cards }: DashboardInfoCardsProps) {
 
         return (
           <div
-            key={card.label}
+            key={`${card.label}:${cardIndex}`}
             className="relative overflow-hidden rounded-md bg-dash-card px-6 pb-5 pt-6 shadow-none"
           >
             <div
