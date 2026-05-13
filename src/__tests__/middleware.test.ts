@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { resetApiRateLimitStore } from '@/lib/api/rate-limit'
 import { signAccessToken } from '@/lib/auth/jwt'
 
 import { middleware } from '../../middleware'
@@ -9,12 +10,25 @@ import { middleware } from '../../middleware'
 const SECRET = 'test-secret-for-unit-tests-at-least-32-chars'
 const BASE = 'http://localhost:3000'
 
+beforeEach(() => {
+  resetApiRateLimitStore()
+})
+
+afterEach(() => {
+  resetApiRateLimitStore()
+  vi.unstubAllEnvs()
+})
+
 function makeRequest(
   pathname: string,
-  opts?: { cookie?: { name: string; value: string }; bearer?: string }
+  opts?: {
+    cookie?: { name: string; value: string }
+    bearer?: string
+    headers?: Record<string, string>
+  }
 ): NextRequest {
   const url = `${BASE}${pathname}`
-  const req = new NextRequest(url)
+  const req = new NextRequest(url, { headers: opts?.headers })
 
   if (opts?.cookie) {
     req.cookies.set(opts.cookie.name, opts.cookie.value)
@@ -62,6 +76,44 @@ describe('middleware — api paths', () => {
       expect(res.status).toBe(200)
     }
   )
+
+  it('rate blocks repeated API requests from the same IP', async () => {
+    vi.stubEnv('API_RATE_LIMIT_MAX_REQUESTS', '2')
+    vi.stubEnv('API_RATE_LIMIT_WINDOW_MS', '60000')
+
+    const headers = { 'x-forwarded-for': '203.0.113.25' }
+
+    expect(middleware(makeRequest('/api/dashboard/warehouses', { headers })).status).toBe(200)
+    expect(middleware(makeRequest('/api/dashboard/items', { headers })).status).toBe(200)
+
+    const blocked = middleware(makeRequest('/api/dashboard/bins', { headers }))
+    expect(blocked.status).toBe(429)
+    expect(blocked.headers.get('Retry-After')).toBe('60')
+    expect(blocked.headers.get('X-RateLimit-Limit')).toBe('2')
+    expect(blocked.headers.get('X-RateLimit-Remaining')).toBe('0')
+    await expect(blocked.json()).resolves.toEqual({
+      error: 'Too many requests. Please try again later.'
+    })
+  })
+
+  it('tracks API limits separately by IP address', () => {
+    vi.stubEnv('API_RATE_LIMIT_MAX_REQUESTS', '1')
+
+    expect(
+      middleware(
+        makeRequest('/api/dashboard/warehouses', {
+          headers: { 'x-forwarded-for': '203.0.113.30' }
+        })
+      ).status
+    ).toBe(200)
+    expect(
+      middleware(
+        makeRequest('/api/dashboard/warehouses', {
+          headers: { 'x-forwarded-for': '203.0.113.31' }
+        })
+      ).status
+    ).toBe(200)
+  })
 })
 
 // ---------------------------------------------------------------------------

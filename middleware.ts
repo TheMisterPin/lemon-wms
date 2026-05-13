@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+import { checkApiRateLimit } from '@/lib/api/rate-limit'
 import { verifyToken, type AccessTokenPayload } from '@/lib/auth/jwt'
 import {
   isFloorRole,
@@ -81,6 +82,23 @@ export function middleware(request: NextRequest) {
   // API routes authenticate inside their own Node handlers. Skipping auth here
   // avoids duplicate verification in Edge middleware on Vercel previews.
   if (pathname.startsWith('/api/')) {
+    const rateLimit = checkApiRateLimit(request)
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimit.retryAfterSeconds),
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': String(rateLimit.remaining),
+            'X-RateLimit-Reset': String(Math.ceil(rateLimit.resetAt / 1000))
+          }
+        }
+      )
+    }
+
     return NextResponse.next()
   }
   const hasRefreshToken = hasRefreshTokenCookie(request)
