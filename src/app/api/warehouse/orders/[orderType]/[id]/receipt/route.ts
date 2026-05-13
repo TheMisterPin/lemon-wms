@@ -1,43 +1,29 @@
 import { NextRequest } from 'next/server'
 
-import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
+import { fail, forbidden, notFound, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isFloorRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
 import { logAppError } from '@/lib/logs/app-logger'
-import { startPurchaseOrder } from '@/lib/orders/purchase'
+import { getActiveReceiptForPurchaseOrder } from '@/lib/orders/purchase/receipt/receipt-order-queries'
 import prisma from '@/lib/prisma'
 
 type RouteParams = { params: Promise<{ orderType: string; id: string }> }
 
 /**
  * @swagger
- * /api/warehouse/orders/{orderType}/{id}/start:
- *   post:
- *     summary: POST /api/warehouse/orders/{orderType}/{id}/start
+ * /api/warehouse/orders/{orderType}/{id}/receipt:
+ *   get:
+ *     summary: GET /api/warehouse/orders/{orderType}/{id}/receipt
  *     tags: [Warehouse]
- *     parameters:
- *       - in: path
- *         name: orderType
- *         required: true
- *         schema:
- *           type: string
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Successful response
  */
-export async function POST(_req: NextRequest, { params }: RouteParams) {
+export async function GET(_req: NextRequest, { params }: RouteParams) {
   const payload = verifyAccessTokenFromRequest(_req)
   if (!payload) {
     return unauthorized()
   }
 
   if (!isFloorRole(payload.role)) {
-    return forbidden('Only warehouse users can start purchase orders.')
+    return forbidden('Only warehouse users can access receipts.')
   }
 
   const { orderType, id: rawId } = await params
@@ -55,16 +41,20 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const data = await startPurchaseOrder(prisma, id, payload.warehouseId, payload.userId, payload.zoneId ?? null)
+    const receipt = await getActiveReceiptForPurchaseOrder(prisma, id, payload.warehouseId)
 
-    return ok(data, 'Purchase order execution started.')
+    if (!receipt) {
+      return notFound('Receipt')
+    }
+
+    return ok(receipt, 'Receipt retrieved.')
   } catch (error) {
     if (error instanceof DomainError) {
       return fail(error.message, error.code, error.status)
     }
 
-    logAppError('[POST /api/warehouse/orders/[orderType]/[id]/start]', error)
+    logAppError('[GET /api/warehouse/orders/[orderType]/[id]/receipt]', error)
 
-    return fail('Failed to start purchase order.')
+    return fail('Failed to retrieve receipt.')
   }
 }
