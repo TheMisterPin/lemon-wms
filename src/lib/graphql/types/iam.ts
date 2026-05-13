@@ -13,7 +13,7 @@ import { getDevicesDashboardData } from '@/lib/pages/dashboard/get-devices-dashb
 import { getUsersDashboardData } from '@/lib/pages/dashboard/get-users-dashboard-data'
 
 import { builder } from '../schema'
-import { DashboardHeaderType, DashboardKpiType } from './shared'
+import { DashboardHeaderType, DashboardKpiType } from './_base'
 
 // ─── Devices ─────────────────────────────────────────────────────────────────
 

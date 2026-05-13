@@ -9,7 +9,7 @@ import type {
 import { getOrdersDashboardData } from '@/lib/pages/dashboard/get-orders-dashboard-data'
 
 import { builder } from '../schema'
-import { DashboardHeaderType, DashboardKpiType } from './shared'
+import { DashboardHeaderType, DashboardKpiType } from './_base'
 
 const OrderTypeSliceType = builder.objectRef<OrderTypeSlice>('OrderTypeSlice').implement({
   fields: (t) => ({

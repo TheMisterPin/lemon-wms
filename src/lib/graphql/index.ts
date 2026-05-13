@@ -1,10 +1,9 @@
 import { builder } from './schema'
 
-import './types/shared'
+import './types/_base'
 import './types/orders'
 import './types/stock'
-import './types/inventory-health'
-import './types/warehouses'
+import './types/locations'
 import './types/iam'
 
 export const schema = builder.toSchema()
