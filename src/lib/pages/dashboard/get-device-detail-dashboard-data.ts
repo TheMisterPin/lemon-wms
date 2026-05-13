@@ -2,8 +2,7 @@ import type { OrderType, PrismaClient } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
 import { getDeviceDetailRecord } from '@/lib/iam/devices/devices-dashboard-queries'
-import { computePickLineProgressPercent } from '@/lib/orders/shared/pick-line-progress'
-import { computePurchaseOrderProgressPercentFromMasterLines } from '@/lib/orders/shared/order-progress'
+import { getOrderProgressSnapshot } from '@/lib/orders/shared/order-execution-progress-queries'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
 import type { DeviceDetailDashboardDTO, DeviceCurrentWorkRow, DeviceActivityRow } from '@/types/device-detail-dashboard.types'
 
@@ -24,107 +23,7 @@ async function resolveOrderProgress(
   orderId: string,
   orderType: OrderType
 ): Promise<{ reference: string; progressPercent: number }> {
-  if (orderType === 'PURCHASE') {
-    const order = await prisma.purchaseOrder.findFirst({
-      where: { id: orderId },
-      select: {
-        reference: true,
-        lines: {
-          select: {
-            orderedQuantity: true,
-            receiptLines: { select: { quantity: true } }
-          }
-        }
-      }
-    })
-
-    if (!order) {
-      return { reference: orderId, progressPercent: 0 }
-    }
-
-    return {
-      reference: order.reference,
-      progressPercent: computePurchaseOrderProgressPercentFromMasterLines(order.lines)
-    }
-  }
-
-  if (orderType === 'SALES') {
-    const order = await prisma.salesOrder.findFirst({
-      where: { id: orderId },
-      select: {
-        reference: true,
-        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
-      }
-    })
-
-    if (!order) {
-      return { reference: orderId, progressPercent: 0 }
-    }
-
-    return {
-      reference: order.reference,
-      progressPercent: computePickLineProgressPercent(order.lines)
-    }
-  }
-
-  if (orderType === 'TRANSFER') {
-    const order = await prisma.transferOrder.findFirst({
-      where: { id: orderId },
-      select: {
-        reference: true,
-        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
-      }
-    })
-
-    if (!order) {
-      return { reference: orderId, progressPercent: 0 }
-    }
-
-    return {
-      reference: order.reference,
-      progressPercent: computePickLineProgressPercent(order.lines)
-    }
-  }
-
-  if (orderType === 'RETURN') {
-    const order = await prisma.returnOrder.findFirst({
-      where: { id: orderId },
-      select: {
-        reference: true,
-        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
-      }
-    })
-
-    if (!order) {
-      return { reference: orderId, progressPercent: 0 }
-    }
-
-    return {
-      reference: order.reference,
-      progressPercent: computePickLineProgressPercent(order.lines)
-    }
-  }
-
-  if (orderType === 'ADJUSTMENT') {
-    const order = await prisma.adjustmentOrder.findFirst({
-      where: { id: orderId },
-      select: {
-        reference: true,
-        lines: { select: { baseQuantity: true, pickLines: { select: { quantity: true } } } }
-      }
-    })
-
-    if (!order) {
-      return { reference: orderId, progressPercent: 0 }
-    }
-
-    return {
-      reference: order.reference,
-      progressPercent: computePickLineProgressPercent(order.lines)
-    }
-  }
-
-  return { reference: orderId, progressPercent: 0 }
+  return getOrderProgressSnapshot(prisma, orderId, orderType)
 }
 
 async function getDeviceDetailDashboardData(

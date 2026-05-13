@@ -160,7 +160,7 @@ export async function seedOrderAssignments(prisma: PrismaClient) {
     let releasedAt: Date | null = null
     let isActive = true
 
-    if (order.status === 'EXECUTING') {
+    if (order.status === 'RELEASED' || order.status === 'EXECUTING') {
       status = AssignmentLifecycle.STARTED
     }
 

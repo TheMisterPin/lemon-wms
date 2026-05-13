@@ -1,6 +1,7 @@
 import type { OrderType, PrismaClient } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
+import { getOrderProgressSnapshot } from '@/lib/orders/shared/order-execution-progress-queries'
 import type { DashboardKpi } from '@/types/bin-detail-dashboard.types'
 import type { DeviceCurrentWorkRow } from '@/types/device-detail-dashboard.types'
 import type { OrderSummaryRow } from '@/types/orders-dashboard.types'
@@ -8,33 +9,6 @@ import type { UserActivityRow, UserDetailDashboardDTO, UserSessionRow } from '@/
 
 function orderHref(type: OrderType, orderId: string): string {
   return `/dashboard/orders/${type.toLowerCase()}/${orderId}`
-}
-
-async function getOrderReference(prisma: PrismaClient, orderType: OrderType, orderId: string): Promise<string> {
-  if (orderType === 'PURCHASE') {
-    const order = await prisma.purchaseOrder.findFirst({ where: { id: orderId }, select: { reference: true } })
-
-    return order?.reference ?? orderId
-  }
-  if (orderType === 'SALES') {
-    const order = await prisma.salesOrder.findFirst({ where: { id: orderId }, select: { reference: true } })
-
-    return order?.reference ?? orderId
-  }
-  if (orderType === 'TRANSFER') {
-    const order = await prisma.transferOrder.findFirst({ where: { id: orderId }, select: { reference: true } })
-
-    return order?.reference ?? orderId
-  }
-  if (orderType === 'RETURN') {
-    const order = await prisma.returnOrder.findFirst({ where: { id: orderId }, select: { reference: true } })
-
-    return order?.reference ?? orderId
-  }
-
-  const order = await prisma.adjustmentOrder.findFirst({ where: { id: orderId }, select: { reference: true } })
-
-  return order?.reference ?? orderId
 }
 
 async function getOrderStatus(prisma: PrismaClient, orderType: OrderType, orderId: string): Promise<string> {
@@ -161,16 +135,24 @@ export async function getUserDetailDashboardData(
     .filter((assignment) => assignment.isActive)
     .slice(0, 20)
 
-  const currentWork: DeviceCurrentWorkRow[] = await Promise.all(currentAssignments.map(async (assignment) => ({
-    orderId: assignment.orderId,
-    orderLabel: await getOrderReference(prisma, assignment.orderType, assignment.orderId),
-    orderType: assignment.orderType,
-    progressPercent: assignment.status === 'COMPLETED' ? 100 : assignment.status === 'STARTED' || assignment.status === 'RESUMED' ? 60 : assignment.status === 'PAUSED' ? 40 : 20,
-    userId: user.id,
-    userName: user.fullName,
-    startedAt: assignment.startedAt?.toISOString() ?? assignment.assignedAt.toISOString(),
-    href: orderHref(assignment.orderType, assignment.orderId)
-  })))
+  const currentWorkSnapshots = await Promise.all(
+    currentAssignments.map((a) => getOrderProgressSnapshot(prisma, a.orderId, a.orderType))
+  )
+
+  const currentWork: DeviceCurrentWorkRow[] = currentAssignments.map((assignment, idx) => {
+    const snap = currentWorkSnapshots[idx]
+
+    return {
+      orderId: assignment.orderId,
+      orderLabel: snap.reference,
+      orderType: assignment.orderType,
+      progressPercent: snap.progressPercent,
+      userId: user.id,
+      userName: user.fullName,
+      startedAt: assignment.startedAt?.toISOString() ?? assignment.assignedAt.toISOString(),
+      href: orderHref(assignment.orderType, assignment.orderId)
+    }
+  })
 
   const uniqueOrders = new Map<string, { orderId: string; orderType: OrderType; startedAt: Date }>()
   for (const assignment of user.orderAssignments) {
@@ -184,18 +166,43 @@ export async function getUserDetailDashboardData(
     }
   }
 
-  const orders: OrderSummaryRow[] = await Promise.all([...uniqueOrders.values()].map(async (entry) => ({
-    orderId: entry.orderId,
-    orderLabel: await getOrderReference(prisma, entry.orderType, entry.orderId),
-    type: entry.orderType,
-    warehouseId: user.warehouseAssignments[0]?.warehouse?.name ?? '',
-    warehouseName: user.warehouseAssignments[0]?.warehouse?.name ?? 'Unassigned',
-    status: await getOrderStatus(prisma, entry.orderType, entry.orderId),
-    progressPercent: 0,
-    assignedUserName: user.fullName,
-    startedAt: entry.startedAt.toISOString(),
-    href: orderHref(entry.orderType, entry.orderId)
-  })))
+  const orderSnapshots = await Promise.all(
+    [...uniqueOrders.values()].map((entry) => getOrderProgressSnapshot(prisma, entry.orderId, entry.orderType))
+  )
+
+  const orderWhIds = [
+    ...new Set(orderSnapshots.map((s) => s.warehouseId).filter((id) => id.length > 0))
+  ]
+
+  const orderWarehouses = orderWhIds.length
+    ? await prisma.warehouse.findMany({
+      where: { id: { in: orderWhIds } },
+      select: { id: true, name: true }
+    })
+    : []
+
+  const orderWarehouseNameById = new Map(orderWarehouses.map((w) => [w.id, w.name]))
+
+  const orders: OrderSummaryRow[] = await Promise.all(
+    [...uniqueOrders.values()].map(async (entry, idx) => {
+      const snap = orderSnapshots[idx]
+      const whName = orderWarehouseNameById.get(snap.warehouseId) ?? ''
+      const status = await getOrderStatus(prisma, entry.orderType, entry.orderId)
+
+      return {
+        orderId: entry.orderId,
+        orderLabel: snap.reference,
+        type: entry.orderType,
+        warehouseId: snap.warehouseId,
+        warehouseName: whName || '—',
+        status,
+        progressPercent: snap.progressPercent,
+        assignedUserName: user.fullName,
+        startedAt: entry.startedAt.toISOString(),
+        href: orderHref(entry.orderType, entry.orderId)
+      }
+    })
+  )
 
   const activity: UserActivityRow[] = user.userActivityEntries.map((entry) => ({
     activityId: entry.id,

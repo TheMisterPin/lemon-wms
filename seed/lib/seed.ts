@@ -10,6 +10,7 @@ import { seedBinOperations } from './seed-bin-operations'
 import { seedBinStockItems } from './seed-bin-stock-items'
 import { seedDemoDevice } from './seed-devices'
 import { seedOrderAssignments } from './seed-order-assignments'
+import { seedOrderExecutionActivities } from './seed-order-execution-activities'
 import { seedReceiptOrders } from './seed-receipt-orders'
 import { seedSalesOrders } from './seed-sales-order'
 import { seedTransferOrders } from './seed-transfer-orders'
@@ -182,6 +183,12 @@ export async function seedDB(prisma: PrismaClient) {
   const orderAssignments = await seedOrderAssignments(prisma)
   console.warn(`Seeded ${orderAssignments.assignmentsCount} order assignments and ${orderAssignments.userActivitiesCount} assignment activities.\n`)
 
+  console.warn('Seeding order execution activities (line progress + execution trail)...')
+  const executionSeed = await seedOrderExecutionActivities(prisma)
+  console.warn(
+    `Seeded ${executionSeed.linesTouched} execution lines (${executionSeed.mutationCalls} via mutations, ${executionSeed.directWrites} direct).\n`
+  )
+
   console.warn('Seeding auth user activities...')
   const userActivities = await seedUserActivities(prisma)
   console.warn(`Seeded ${userActivities.count} auth user activities.\n`)
@@ -200,6 +207,7 @@ export async function seedDB(prisma: PrismaClient) {
     transferOrdersSeeded: transferOrders.count,
     orderAssignmentsSeeded: orderAssignments.assignmentsCount,
     assignmentActivitiesSeeded: orderAssignments.userActivitiesCount,
+    orderExecutionLinesSeeded: executionSeed.linesTouched,
     userActivitiesSeeded: userActivities.count,
     usersSeeded: users.count,
     businessPartiesSeeded: businessParties.partiesCount,
