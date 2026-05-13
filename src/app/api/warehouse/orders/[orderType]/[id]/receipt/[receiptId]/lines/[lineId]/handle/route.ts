@@ -7,14 +7,16 @@ import { DomainError } from '@/lib/errors'
 import { logAppError } from '@/lib/logs/app-logger'
 import { confirmPurchaseReceiptLineHandled } from '@/lib/orders/purchase/receipt/receipt-order-mutations'
 import prisma from '@/lib/prisma'
-import { Prisma, ReceiptOutcome, ReceiptStatus } from '@/generated/prisma'
+import { BinOperationType, FiscalInventoryEventType, OrderType, Prisma, ReceiptOutcome, ReceiptStatus } from '@/generated/prisma'
+import { updateBinCapacityBy, upsertAvailableStockItem } from '@/lib/stock/stock-mutations'
 
 const handleLineSchema = z.object({
   quantity: z.number().positive(),
   disposition: z.nativeEnum(ReceiptOutcome),
   notes: z.string().optional().nullable(),
   orderAssignmentId: z.string().min(1),
-  activityNotes: z.string().optional().nullable()
+  activityNotes: z.string().optional().nullable(),
+  toBinId: z.string().optional().nullable()
 })
 
 type RouteParams = {
@@ -59,13 +61,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return fail('Validation failed.', 'VALIDATION_ERROR', 400)
   }
 
-  const { quantity, disposition, notes, orderAssignmentId, activityNotes } = parsed.data
+  const { quantity, disposition, notes, orderAssignmentId, activityNotes, toBinId } = parsed.data
 
   try {
     const receiptLine = await prisma.purchaseOrderReceiptLine.findUnique({
       where: { id: lineId },
       select: {
         purchaseOrderLineId: true,
+        itemId: true,
+        uom: true,
+        itemNameSnapshot: true,
         receiptLine: { select: { id: true, warehouseId: true, purchaseOrderId: true, status: true } }
       }
     })
@@ -99,6 +104,17 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       })
     }
 
+    let destBin: { zoneId: string } | null = null
+    if (toBinId) {
+      destBin = await prisma.bin.findUnique({
+        where: { id: toBinId },
+        select: { zoneId: true }
+      })
+      if (!destBin) {
+        return fail('Destination bin not found.', 'NOT_FOUND', 404)
+      }
+    }
+
     const result = await confirmPurchaseReceiptLineHandled(prisma, {
       receiptLineId: lineId,
       quantity: new Prisma.Decimal(quantity),
@@ -109,11 +125,64 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       warehouseId: payload.warehouseId,
       orderId: id,
       orderLineRefId: receiptLine.purchaseOrderLineId,
-      activityNotes: activityNotes ?? null
+      activityNotes: activityNotes ?? null,
+      ...(toBinId && destBin && {
+        stockMove: {
+          binOperation: {
+            userId: payload.userId,
+            warehouseId: payload.warehouseId,
+            zoneId: destBin.zoneId,
+            type: BinOperationType.RECEIVE,
+            toBinId,
+            warItemId: receiptLine.itemId,
+            quantity: new Prisma.Decimal(quantity),
+            uom: receiptLine.uom,
+            orderId: id,
+            orderType: OrderType.PURCHASE,
+            affectsFiscalStock: true
+          }
+        }
+      })
     })
 
     if (!result.success) {
       return fail(result.error, result.code ?? 'DOMAIN_ERROR', 409)
+    }
+
+    if (result.binOperationEntryId && toBinId && destBin) {
+      const catalogItem = await prisma.item.findUnique({
+        where: { id: receiptLine.itemId },
+        select: { sku: true }
+      })
+      const sku = catalogItem?.sku ?? ''
+
+      await prisma.$transaction(async (tx) => {
+        await upsertAvailableStockItem(tx, {
+          warehouseId: payload.warehouseId,
+          binId: toBinId,
+          itemId: receiptLine.itemId,
+          name: receiptLine.itemNameSnapshot,
+          sku,
+          uom: receiptLine.uom,
+          quantity,
+          boeId: result.binOperationEntryId!
+        })
+        await updateBinCapacityBy(tx, toBinId, quantity)
+        await tx.itemLedgerEntry.create({
+          data: {
+            warehouseId: payload.warehouseId,
+            zoneId: destBin!.zoneId,
+            warItemId: receiptLine.itemId,
+            orderId: id,
+            orderType: OrderType.PURCHASE,
+            boeId: result.binOperationEntryId!,
+            eventType: FiscalInventoryEventType.RECEIPT,
+            performedByUserId: payload.userId,
+            quantityDelta: new Prisma.Decimal(quantity),
+            uom: receiptLine.uom
+          }
+        })
+      })
     }
 
     const updatedReceipt = await prisma.purchaseOrderReceipt.findUnique({
