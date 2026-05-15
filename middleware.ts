@@ -9,7 +9,7 @@ import {
   verifyAccessTokenFromRequest
 } from '@/lib/auth/middleware'
 
-const PUBLIC_PATHS = ['/login', '/floor']
+const PUBLIC_PATHS = ['/', '/login', '/floor']
 
 const getTokenFromCookie = (request: NextRequest): string | null => {
   return request.cookies.get('access_token')?.value ?? null
