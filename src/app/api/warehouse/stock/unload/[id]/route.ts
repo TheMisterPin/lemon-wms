@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { fail, ok, unauthorized, validationFail } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
+import { resolveFloorDeviceContext } from '@/lib/iam/resolve-floor-device-context'
 import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { unloadItemsFromTrolley } from '@/lib/stock/bin-stock-items/bin-stock-items-mutations'
@@ -39,20 +40,22 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!payload) {
     return unauthorized()
   }
-  if (!payload.warehouseId) {
-    return fail('Warehouse context is required for transit.', 'BAD_REQUEST', 400)
-  }
 
   const { id: toBinId } = await params
 
   try {
+    const context = await resolveFloorDeviceContext(prisma, req, payload)
+    if (!context) {
+      return fail('Warehouse and device context are required for transit.', 'BAD_REQUEST', 400)
+    }
+
     const body = await req.json()
     const parsed = unloadSchema.parse(body)
 
     const toBin = await prisma.bin.findFirst({
       where: {
         id: toBinId,
-        warehouseId: payload.warehouseId,
+        warehouseId: context.warehouseId,
         deletedAt: null
       },
       select: { id: true }
@@ -64,7 +67,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const result = await unloadItemsFromTrolley({
       prisma,
       userId: payload.userId,
-      warehouseId: payload.warehouseId,
+      warehouseId: context.warehouseId,
       toBinId,
       selections: parsed.selections
     })

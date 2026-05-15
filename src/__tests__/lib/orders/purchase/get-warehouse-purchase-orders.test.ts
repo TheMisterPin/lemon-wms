@@ -1,15 +1,19 @@
 import { describe, expect, it, vi } from 'vitest'
-import { OrderStatus } from '@/generated/prisma'
+import { OrderStatus, OrderType } from '@/generated/prisma'
 import { getWarehousePurchaseOrders } from '@/lib/orders/purchase/get-warehouse-purchase-orders'
 
 describe('getWarehousePurchaseOrders', () => {
-  it('queries with operational statuses and warehouse scope', async () => {
-    const findMany = vi.fn().mockResolvedValue([])
-    const prisma = { purchaseOrder: { findMany } } as never
+  it('queries purchase orders and active assignments in parallel', async () => {
+    const findManyOrders = vi.fn().mockResolvedValue([])
+    const findManyAssignments = vi.fn().mockResolvedValue([])
+    const prisma = {
+      purchaseOrder: { findMany: findManyOrders },
+      orderAssignment: { findMany: findManyAssignments }
+    } as never
 
     await getWarehousePurchaseOrders(prisma, 'wh-1')
 
-    expect(findMany).toHaveBeenCalledWith({
+    expect(findManyOrders).toHaveBeenCalledWith({
       where: {
         deletedAt: null,
         warehouseId: 'wh-1',
@@ -33,6 +37,28 @@ describe('getWarehousePurchaseOrders', () => {
         }
       },
       orderBy: { createdAt: 'desc' }
+    })
+
+    expect(findManyAssignments).toHaveBeenCalledWith({
+      where: {
+        warehouseId: 'wh-1',
+        orderType: { in: [OrderType.PURCHASE] },
+        isActive: true
+      },
+      select: {
+        id: true,
+        orderId: true,
+        orderType: true,
+        userId: true,
+        assignedAt: true,
+        startedAt: true,
+        pausedAt: true,
+        releasedAt: true,
+        completedAt: true,
+        cancelledAt: true,
+        timedOutAt: true
+      },
+      orderBy: { assignedAt: 'desc' }
     })
   })
 })

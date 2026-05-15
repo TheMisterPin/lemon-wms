@@ -31,6 +31,8 @@ type FloorLoginResult = {
     id: string
     role: string
     badgeNumber: string
+    fullName: string
+    email: string | null
   }
   location: {
     warehouseId?: string
@@ -165,7 +167,9 @@ export async function floorLogin(
     user: {
       id: user.id,
       role: user.role,
-      badgeNumber: user.badgeNumber
+      badgeNumber: user.badgeNumber,
+      fullName: user.fullName,
+      email: user.email
     },
     location: {
       warehouseId: device.warehouseId ?? undefined,

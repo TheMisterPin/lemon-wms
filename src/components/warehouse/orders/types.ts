@@ -9,10 +9,23 @@ import type { DashboardRecordListItem } from '@/components/dashboard/primitives/
 
 export type WarehouseOrderRecord = {
   id: string
-  status: string
-  type: string
+  reference: string
+  status: 'RELEASED' | 'EXECUTING' | 'PAUSED'
+  type: 'PURCHASE' | 'SALES' | 'TRANSFER'
+  infoLabel: string
+  infoValue: string
   assignedTo: string
+  assignedUserId: string | null
+  lastActiveAt: string | null
+  pausedAt: string | null
   progress: number
+  createdAt: string
+}
+
+export type WarehouseHomeUser = {
+  userId: string
+  name: string
+  role: string
 }
 
 export type WarehouseInfo = {
@@ -25,8 +38,10 @@ export type WarehouseInfo = {
 }
 
 export type WarehouseHomeData = {
+  user: WarehouseHomeUser
   warehouseInfo: WarehouseInfo
   orders: WarehouseOrderRecord[]
+  activeExecutingOrder: WarehouseOrderRecord | null
   bins: BinDirectoryRow[]
 }
 

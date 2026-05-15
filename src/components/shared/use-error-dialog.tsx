@@ -19,8 +19,39 @@ export interface AppError {
   timestamp: string
 }
 
+export type AppDialogState =
+  | {
+      kind: 'error'
+      id: string
+      title: string
+      message: string
+      code?: string
+      details?: unknown
+      severity: ErrorSeverity
+      source?: string
+      timestamp: string
+      onRetry?: () => void
+    }
+  | {
+      kind: 'notice'
+      title: string
+      message: string
+      code?: string
+      onRetry?: () => void
+      retryLabel?: string
+    }
+  | {
+      kind: 'confirm'
+      title: string
+      message: string
+      code?: string
+      confirmLabel?: string
+      cancelLabel?: string
+      onConfirm: () => void | Promise<void>
+    }
+
 interface ErrorDialogContextValue {
-  currentError: AppError | null
+  currentDialog: AppDialogState | null
   isOpen: boolean
   history: AppError[]
   reportError: (
@@ -32,8 +63,24 @@ interface ErrorDialogContextValue {
       code?: string
       details?: unknown
       messageOverride?: string
+      onRetry?: () => void
     }
   ) => void
+  reportNotice: (opts: {
+    title?: string
+    message: string
+    code?: string
+    onRetry?: () => void
+    retryLabel?: string
+  }) => void
+  requestConfirm: (opts: {
+    title?: string
+    message: string
+    code?: string
+    confirmLabel?: string
+    cancelLabel?: string
+    onConfirm: () => void | Promise<void>
+  }) => void
   clearError: () => void
 }
 
@@ -44,7 +91,7 @@ const ErrorDialogContext = createContext<ErrorDialogContextValue | undefined>(
 export const ErrorDialogProvider: React.FC<
   React.PropsWithChildren
 > = ({ children }) => {
-  const [currentError, setCurrentError] = useState<AppError | null>(null)
+  const [currentDialog, setCurrentDialog] = useState<AppDialogState | null>(null)
   const [history, setHistory] = useState<AppError[]>([])
   const [isOpen, setIsOpen] = useState(false)
 
@@ -73,18 +120,37 @@ export const ErrorDialogProvider: React.FC<
         }
       }
 
-      const appError: AppError = {
-        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        title: options?.title ?? 'Qualcosa è andato storto',
+      const severity = options?.severity ?? 'error'
+      const title =
+        options?.title ?? (severity === 'warning' ? 'Attention' : 'Qualcosa è andato storto')
+
+      const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+      const dialog: AppDialogState = {
+        kind: 'error',
+        id,
+        title,
         message,
         code,
         details,
-        severity: options?.severity ?? 'error',
+        severity,
+        source: options?.source,
+        timestamp: now,
+        onRetry: options?.onRetry
+      }
+
+      const appError: AppError = {
+        id,
+        title,
+        message,
+        code,
+        details,
+        severity,
         source: options?.source,
         timestamp: now
       }
 
-      setCurrentError(appError)
+      setCurrentDialog(dialog)
       setIsOpen(true)
       setHistory((prev) => [appError, ...prev].slice(0, 50))
       console.error('[AppError]', appError)
@@ -92,20 +158,47 @@ export const ErrorDialogProvider: React.FC<
     []
   )
 
+  const reportNotice = useCallback<ErrorDialogContextValue['reportNotice']>((opts) => {
+    setCurrentDialog({
+      kind: 'notice',
+      title: opts.title ?? 'Notice',
+      message: opts.message,
+      code: opts.code,
+      onRetry: opts.onRetry,
+      retryLabel: opts.retryLabel
+    })
+    setIsOpen(true)
+  }, [])
+
+  const requestConfirm = useCallback<ErrorDialogContextValue['requestConfirm']>((opts) => {
+    setCurrentDialog({
+      kind: 'confirm',
+      title: opts.title ?? 'Confirm',
+      message: opts.message,
+      code: opts.code,
+      confirmLabel: opts.confirmLabel,
+      cancelLabel: opts.cancelLabel,
+      onConfirm: opts.onConfirm
+    })
+    setIsOpen(true)
+  }, [])
+
   const clearError = useCallback(() => {
     setIsOpen(false)
-    setCurrentError(null)
+    setCurrentDialog(null)
   }, [])
 
   const value = useMemo<ErrorDialogContextValue>(
     () => ({
-      currentError,
+      currentDialog,
       isOpen,
       history,
       reportError,
+      reportNotice,
+      requestConfirm,
       clearError
     }),
-    [currentError, isOpen, history, reportError, clearError]
+    [currentDialog, isOpen, history, reportError, reportNotice, requestConfirm, clearError]
   )
 
   return (

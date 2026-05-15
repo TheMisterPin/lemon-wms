@@ -6,6 +6,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import axios from 'axios'
 
 import { warehouseApiClient } from '@/lib/axios'
 import type { ApiResponse } from '@/types/responses/basic-response'
@@ -42,6 +43,18 @@ type MoveItemsContextValue = {
 }
 
 const MoveItemsContext = createContext<MoveItemsContextValue | null>(null)
+
+function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as ApiResponse<unknown> | undefined
+
+    if (typeof data?.message === 'string' && data.message.trim()) {
+      return data.message
+    }
+  }
+
+  return error instanceof Error ? error.message : fallback
+}
 
 export function MoveItemsProvider({ children }: { children: ReactNode }) {
   const [trolleyItems, setTrolleyItems] = useState<TrolleyItem[]>([])
@@ -85,9 +98,9 @@ export function MoveItemsProvider({ children }: { children: ReactNode }) {
       await refreshTrolley()
     } catch (submitError) {
       console.error('[MoveItems] Failed to load item:', submitError)
-      const message = submitError instanceof Error ? submitError.message : 'Unable to load item.'
+      const message = getApiErrorMessage(submitError, 'Unable to load item.')
       setError(message)
-      throw submitError
+      throw new Error(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -124,9 +137,9 @@ export function MoveItemsProvider({ children }: { children: ReactNode }) {
       setSelectedIds([])
     } catch (submitError) {
       console.error('[MoveItems] Failed to unload items:', submitError)
-      const message = submitError instanceof Error ? submitError.message : 'Unable to unload selected items.'
+      const message = getApiErrorMessage(submitError, 'Unable to unload selected items.')
       setError(message)
-      throw submitError
+      throw new Error(message)
     } finally {
       setIsSubmitting(false)
     }

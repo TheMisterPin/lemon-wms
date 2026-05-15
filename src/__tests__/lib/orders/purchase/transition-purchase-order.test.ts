@@ -24,6 +24,12 @@ function prismaWith(
     },
     userActivityEntry: {
       create: vi.fn().mockResolvedValue({ id: 'uae-1' })
+    },
+    orderAssignment: {
+      findFirst: vi.fn().mockResolvedValue(null),
+      update: vi.fn().mockResolvedValue({ id: 'asg-upd' }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      create: vi.fn().mockResolvedValue({ id: 'asg-new' })
     }
   }
 
@@ -34,6 +40,12 @@ function prismaWith(
     },
     userActivityEntry: {
       create: vi.fn().mockResolvedValue({ id: 'uae-1' })
+    },
+    orderAssignment: {
+      findFirst: vi.fn().mockResolvedValue(null),
+      update: vi.fn().mockResolvedValue({ id: 'asg-upd' }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      create: vi.fn().mockResolvedValue({ id: 'asg-new' })
     },
     __tx: tx,
     $transaction: vi.fn().mockImplementation(async (callback) => callback(tx))
@@ -121,7 +133,7 @@ describe('startPurchaseOrder', () => {
       warehouseId: whA
     })
     const out = await startPurchaseOrder(prisma, poId, whA, userId)
-    expect(out).toEqual({ id: poId, status: OrderStatus.EXECUTING })
+    expect(out).toEqual({ id: poId, status: OrderStatus.EXECUTING, orderAssignmentId: 'asg-new' })
   })
 
   it('throws FORBIDDEN on warehouse mismatch', async () => {
@@ -180,7 +192,7 @@ describe('resumePurchaseOrder', () => {
       deletedAt: null,
       warehouseId: whA
     })
-    const out = await resumePurchaseOrder(prisma, poId, whA)
-    expect(out).toEqual({ id: poId, status: OrderStatus.EXECUTING })
+    const out = await resumePurchaseOrder(prisma, poId, whA, userId, null)
+    expect(out).toEqual({ id: poId, status: OrderStatus.EXECUTING, orderAssignmentId: 'asg-new' })
   })
 })

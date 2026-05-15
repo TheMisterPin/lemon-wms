@@ -4,6 +4,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 // Module mocks
 // ---------------------------------------------------------------------------
 
+const prismaMocks = vi.hoisted(() => ({
+  userFindUnique: vi.fn(),
+  deviceFindUnique: vi.fn()
+}))
+
+vi.mock('@/lib/prisma', () => ({
+  default: {
+    user: { findUnique: prismaMocks.userFindUnique },
+    device: { findUnique: prismaMocks.deviceFindUnique }
+  }
+}))
+
 vi.mock('@/lib/auth/session', () => ({
   readRefreshTokenCookie: vi.fn(),
   findValidRefreshToken: vi.fn(),
@@ -54,6 +66,8 @@ const validTokenRecord = {
 describe('POST /api/auth/refresh', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    prismaMocks.userFindUnique.mockResolvedValue(null)
+    prismaMocks.deviceFindUnique.mockResolvedValue(null)
   })
 
   it('returns 401 when no refresh token cookie is present', async () => {
@@ -110,6 +124,27 @@ describe('POST /api/auth/refresh', () => {
 
     expect(mockRevoke()).toHaveBeenCalledOnce()
     expect(mockRevoke()).toHaveBeenCalledWith(validTokenRecord.id)
+  })
+
+  it('new access token payload carries floor device context when linked device has a warehouse', async () => {
+    mockReadCookie().mockResolvedValue('raw-token-xyz')
+    mockFindToken().mockResolvedValue(validTokenRecord)
+    prismaMocks.deviceFindUnique.mockResolvedValue({
+      warehouseId: 'wh-99',
+      zoneId: 'z-88'
+    })
+
+    const res = await POST()
+    const body = await res.json()
+
+    const payloadBase64 = body.accessToken.split('.')[1]
+    const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString())
+
+    expect(payload.userId).toBe(activeUser.id)
+    expect(payload.role).toBe(activeUser.role)
+    expect(payload.deviceId).toBe('dev-1')
+    expect(payload.warehouseId).toBe('wh-99')
+    expect(payload.zoneId).toBe('z-88')
   })
 
   it('new access token payload matches the user', async () => {

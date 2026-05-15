@@ -5,6 +5,9 @@ import { verifyAccessTokenFromRequest, isFloorRole } from '@/lib/auth/middleware
 import { DomainError } from '@/lib/errors'
 import { logAppError } from '@/lib/logs/app-logger'
 import { pausePurchaseOrder } from '@/lib/orders/purchase'
+import { pauseSalesOrder } from '@/lib/orders/shared/transition-sales-order'
+import { pauseTransferOrder } from '@/lib/orders/shared/transition-transfer-order'
+import { parseWarehouseOperationalOrderKind } from '@/lib/orders/shared/warehouse-operational-route-kind'
 import prisma from '@/lib/prisma'
 
 type RouteParams = { params: Promise<{ orderType: string; id: string }> }
@@ -37,17 +40,18 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
   }
 
   if (!isFloorRole(payload.role)) {
-    return forbidden('Only warehouse users can pause purchase orders.')
+    return forbidden('Only warehouse users can pause orders.')
   }
 
-  const { orderType, id: rawId } = await params
-  if (orderType !== 'purchase') {
+  const { orderType: rawOrderType, id: rawId } = await params
+  const kind = parseWarehouseOperationalOrderKind(rawOrderType)
+  if (!kind) {
     return fail('Unsupported order type.', 'VALIDATION_ERROR', 400)
   }
 
   const id = rawId?.trim()
   if (!id) {
-    return fail('Purchase order id is required.', 'VALIDATION_ERROR', 400)
+    return fail('Order id is required.', 'VALIDATION_ERROR', 400)
   }
 
   if (!payload.warehouseId) {
@@ -55,9 +59,14 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const data = await pausePurchaseOrder(prisma, id, payload.warehouseId, payload.userId)
+    const data =
+      kind === 'purchase'
+        ? await pausePurchaseOrder(prisma, id, payload.warehouseId, payload.userId)
+        : kind === 'sales'
+          ? await pauseSalesOrder(prisma, id, payload.warehouseId, payload.userId)
+          : await pauseTransferOrder(prisma, id, payload.warehouseId, payload.userId)
 
-    return ok(data, 'Purchase order paused.')
+    return ok(data, 'Order paused.')
   } catch (error) {
     if (error instanceof DomainError) {
       return fail(error.message, error.code, error.status)
@@ -65,6 +74,6 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
 
     logAppError('[POST /api/warehouse/orders/[orderType]/[id]/pause]', error)
 
-    return fail('Failed to pause purchase order.')
+    return fail('Failed to pause order.')
   }
 }

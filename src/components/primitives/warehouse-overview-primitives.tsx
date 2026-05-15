@@ -97,16 +97,20 @@ export function WarehouseOverviewShellSection({
       }}
     >
       <div
-        className="flex items-center justify-between gap-2 border-b px-4 py-3 xl:px-5"
+        className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 border-b px-4 py-3 xl:px-5"
         style={{ borderColor: 'var(--wh-border, rgba(148,163,184,0.16))' }}
       >
         <div
-          className="min-w-0 text-sm font-semibold xl:text-base"
+          className="min-w-0 flex-1 text-sm font-semibold xl:text-base"
           style={{ color: 'var(--wh-text-primary, #f8fafc)' }}
         >
           {title}
         </div>
-        {action ? <div className="shrink-0">{action}</div> : null}
+        {action ? (
+          <div className="flex min-w-0 w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap">
+            {action}
+          </div>
+        ) : null}
       </div>
       <div className="p-4 xl:p-5">{children}</div>
     </section>

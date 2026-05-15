@@ -39,6 +39,9 @@ model BinStockItem {
   quantityBlocked           Decimal                    @default(0) @db.Decimal(18, 4)
   uom                       String
   status                    BinItemStatus              @default(AVAILABLE)
+  blockedReason             String?
+  blockedAt                 DateTime?
+  
   transitDeviceId           String? // Set during IN_TRANSIT operations
   transitTrolleyId          String?
   expiryDate                DateTime? // For perishables — drives expiry alert

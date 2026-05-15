@@ -38,6 +38,8 @@ type MutableStock = {
   uom: string
   quantityAvailable: number
   quantityReserved: number
+  reservedByOrderId: string | null
+  reservedByOrderLineId: string | null
 }
 
 export async function seedSalesOrders(prisma: PrismaClient) {
@@ -102,7 +104,9 @@ export async function seedSalesOrders(prisma: PrismaClient) {
     itemName: row.name,
     uom: row.uom,
     quantityAvailable: Number(row.quantityAvailable),
-    quantityReserved: Number(row.quantityReserved)
+    quantityReserved: Number(row.quantityReserved),
+    reservedByOrderId: null,
+    reservedByOrderLineId: null
   }))
 
   let created = 0
@@ -190,6 +194,16 @@ export async function seedSalesOrders(prisma: PrismaClient) {
         }
       })
 
+      selected.forEach((stockRow, lineIdx) => {
+        const line = order.lines[lineIdx]
+        if (!line) {
+          return
+        }
+
+        stockRow.reservedByOrderId = order.id
+        stockRow.reservedByOrderLineId = line.id
+      })
+
       await prisma.salesOrderPick.create({
         data: {
           reference: `${reference}/PICK-001`,
@@ -202,14 +216,24 @@ export async function seedSalesOrders(prisma: PrismaClient) {
           openLines: order.lines.length,
           completedLines: 0,
           lines: {
-            create: order.lines.map((line) => ({
-              salesOrderLineId: line.id,
-              quantity: new Prisma.Decimal(0),
-              orderedQuantity: line.baseQuantity,
-              uom: line.uom,
-              itemId: line.itemId,
-              itemNameSnapshot: line.itemNameSnapshot
-            }))
+            create: order.lines.map((line, lineIdx) => {
+              const stock = selected[lineIdx]
+              if (!stock) {
+                throw new Error('Seed sales order: pick line missing matching bin stock row.')
+              }
+
+              return {
+                salesOrderLineId: line.id,
+                quantity: new Prisma.Decimal(0),
+                orderedQuantity: line.baseQuantity,
+                uom: line.uom,
+                itemId: line.itemId,
+                itemNameSnapshot: line.itemNameSnapshot,
+                stockItems: {
+                  connect: [{ id: stock.id }]
+                }
+              }
+            })
           }
         }
       })
@@ -226,7 +250,9 @@ export async function seedSalesOrders(prisma: PrismaClient) {
       id: row.id,
       quantityAvailable: row.quantityAvailable,
       quantityReserved: row.quantityReserved,
-      status: row.quantityReserved > 0 ? BinItemStatus.RESERVED : BinItemStatus.AVAILABLE
+      status: row.quantityReserved > 0 ? BinItemStatus.RESERVED : BinItemStatus.AVAILABLE,
+      reservedByOrderId: row.reservedByOrderId,
+      reservedByOrderLineId: row.reservedByOrderLineId
     }))
     .filter((row) => row.quantityReserved > 0)
 
@@ -240,7 +266,9 @@ export async function seedSalesOrders(prisma: PrismaClient) {
           data: {
             quantityAvailable: new Prisma.Decimal(row.quantityAvailable),
             quantityReserved: new Prisma.Decimal(row.quantityReserved),
-            status: row.status
+            status: row.status,
+            reservedByOrderId: row.reservedByOrderId,
+            reservedByOrderLineId: row.reservedByOrderLineId
           }
         })
       )

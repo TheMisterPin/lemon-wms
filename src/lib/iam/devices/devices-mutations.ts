@@ -1,4 +1,4 @@
-import type { PrismaClient, DeviceType } from '@/generated/prisma'
+import type { Device, PrismaClient, DeviceType } from '@/generated/prisma'
 
 interface DeviceFormValues {
   id?: string
@@ -18,13 +18,44 @@ interface AuthorizeDeviceParams {
   userId: string
 }
 
-async function upsertDevice(prisma: PrismaClient, name: string) {
-  await prisma.device.upsert({
-    where: { name },
-    update: {},
-    create: {
-      name,
-      code: name,
+/**
+ * Floor login sends deviceCode — schema treats `code` as the typed/scanned identifier.
+ * Resolve by code or display name so login works when the two differ.
+ */
+async function upsertDevice(prisma: PrismaClient, identifier: string): Promise<Device | null> {
+  const trimmed = identifier.trim()
+  if (!trimmed) {
+    return null
+  }
+
+  const exactMatch = await prisma.device.findFirst({
+    where: {
+      OR: [{ code: trimmed }, { name: trimmed }]
+    }
+  })
+
+  if (exactMatch) {
+    return exactMatch
+  }
+
+  const existing = await prisma.device.findFirst({
+    where: {
+      OR: [
+        { code: { equals: trimmed, mode: 'insensitive' as const } },
+        { name: { equals: trimmed, mode: 'insensitive' as const } }
+      ]
+    },
+    orderBy: [{ authorized: 'desc' }, { code: 'asc' }]
+  })
+
+  if (existing) {
+    return existing
+  }
+
+  await prisma.device.create({
+    data: {
+      name: trimmed,
+      code: trimmed,
       warehouseId: null,
       zoneId: null,
       authorized: false,
@@ -33,7 +64,7 @@ async function upsertDevice(prisma: PrismaClient, name: string) {
     }
   })
 
-  return prisma.device.findUnique({ where: { name } })
+  return prisma.device.findUnique({ where: { code: trimmed } })
 }
 
 async function createDevice(prisma: PrismaClient, data: DeviceFormValues) {

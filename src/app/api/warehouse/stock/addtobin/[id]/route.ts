@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 
-import { fail, ok, unauthorized } from '@/lib/api/response'
+import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { logAppError } from '@/lib/logs/app-logger'
 import { createBinOperationsFromItem } from '@/lib/logs/bin-operation-entries/create-from-item'
@@ -29,6 +29,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (!payload) {
     return unauthorized()
+  }
+
+  if (payload.role !== 'OWNER' && payload.role !== 'WAREHOUSE_MANAGER') {
+    return forbidden('Only owners and warehouse managers can manually add items to bins.')
   }
 
   const { id } = await params

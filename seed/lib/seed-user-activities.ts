@@ -31,6 +31,9 @@ function buildTimestamp(daysAgo: number, hour: number, minute: number) {
 /**
  * Seeds believable auth activity (LOGIN, LOGIN_FAILED, LOGOUT, TOKEN_REVOKED)
  * for both office and floor login flows.
+ *
+ * Bin stock reservations and pick-line ↔ bin-stock links are owned by
+ * `seed-sales-order` and `seed-transfer-orders`, not this module.
  */
 export async function seedUserActivities(prisma: PrismaClient) {
   const [users, zones, devices] = await Promise.all([

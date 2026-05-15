@@ -5,11 +5,11 @@ import '@testing-library/jest-dom/vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePurchaseOrders } from '@/components/warehouse/orders/use-purchase-orders'
-import { WarehouseOrdersPageView } from '@/components/warehouse/orders/warehouse-orders-page-view'
+import { WarehouseOrdersPageView } from '@/components/warehouse/orders/warehouse-order-type-page-view'
 import { OrderStatus } from '@/generated/prisma'
 
 const mockLoadOrders = vi.fn()
-const mockToggleStatusFilter = vi.fn()
+const mockToggleStatusInFilter = vi.fn()
 const mockRunAction = vi.fn()
 
 vi.mock('@/components/warehouse/orders/use-purchase-orders', () => ({
@@ -18,63 +18,75 @@ vi.mock('@/components/warehouse/orders/use-purchase-orders', () => ({
 
 const mockUsePurchaseOrders = vi.mocked(usePurchaseOrders)
 
+const baseHook = {
+  rows: [],
+  cards: [],
+  totalOperational: 0,
+  isLoading: false,
+  loadOutcome: 'ok' as const,
+  actingId: null,
+  loadOrders: mockLoadOrders,
+  runAction: mockRunAction,
+  paginatedRows: [],
+  filteredCount: 0,
+  ordersPage: 0,
+  ordersTotalPages: 1,
+  ordersPrev: vi.fn(),
+  ordersNext: vi.fn(),
+  searchText: '',
+  setSearchText: vi.fn(),
+  sortBaseline: 'last-active' as const,
+  setSortBaseline: vi.fn(),
+  selectedStatuses: [OrderStatus.RELEASED, OrderStatus.EXECUTING, OrderStatus.PAUSED],
+  toggleStatusInFilter: mockToggleStatusInFilter
+}
+
 describe('WarehouseOrdersPageView', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('shows non-purchase placeholder', () => {
+  it('shows unsupported segment placeholder', () => {
     mockUsePurchaseOrders.mockReturnValue({
-      isPurchase: false,
-      rows: [],
-      filteredRows: [],
-      cards: [],
-      isLoading: false,
-      listError: null,
-      actionError: null,
-      statusFilter: null,
-      actingId: null,
-      loadOrders: mockLoadOrders,
-      toggleStatusFilter: mockToggleStatusFilter,
-      runAction: mockRunAction
+      ...baseHook,
+      segment: null,
+      loadOutcome: 'idle'
     })
 
-    render(<WarehouseOrdersPageView orderType="sales" />)
+    render(<WarehouseOrdersPageView orderType="unknown" />)
 
-    expect(screen.getByText(/not available on the floor yet/i)).toBeInTheDocument()
+    expect(screen.getByText(/not supported on the floor/i)).toBeInTheDocument()
   })
 
-  it('renders cards and toggles filter click', () => {
+  it('renders summary chips and toggles status filter click', () => {
     mockUsePurchaseOrders.mockReturnValue({
-      isPurchase: true,
-      rows: [],
-      filteredRows: [{
+      ...baseHook,
+      segment: 'purchase',
+      cards: [
+        { status: OrderStatus.RELEASED, label: 'Released', count: 1 },
+        { status: OrderStatus.EXECUTING, label: 'Executing', count: 0 },
+        { status: OrderStatus.PAUSED, label: 'Paused', count: 0 }
+      ],
+      totalOperational: 1,
+      paginatedRows: [{
         id: 'po-1',
         reference: 'PO-001',
         status: OrderStatus.RELEASED,
         supplier: 'Acme',
         warehouseId: 'WH-1',
         createdAt: '2026-01-01T00:00:00.000Z',
-        businessPartyId: null
+        businessPartyId: null,
+        assignedUserId: null,
+        activeOrderAssignmentId: null,
+        lastActiveAt: null,
+        pausedAt: null
       }],
-      cards: [
-        { status: OrderStatus.RELEASED, label: 'RELEASED', count: 1 },
-        { status: OrderStatus.EXECUTING, label: 'EXECUTING', count: 0 },
-        { status: OrderStatus.PAUSED, label: 'PAUSED', count: 0 }
-      ],
-      isLoading: false,
-      listError: null,
-      actionError: null,
-      statusFilter: null,
-      actingId: null,
-      loadOrders: mockLoadOrders,
-      toggleStatusFilter: mockToggleStatusFilter,
-      runAction: mockRunAction
+      filteredCount: 1
     })
 
     render(<WarehouseOrdersPageView orderType="purchase" />)
 
     fireEvent.click(screen.getByRole('button', { name: /released/i }))
-    expect(mockToggleStatusFilter).toHaveBeenCalledWith(OrderStatus.RELEASED)
+    expect(mockToggleStatusInFilter).toHaveBeenCalledWith(OrderStatus.RELEASED)
   })
 })

@@ -7,9 +7,9 @@ import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 
 const loginSchema = z.object({
-  deviceCode: z.string().min(1),
-  badgeNumber: z.string().min(3),
-  pin: z.string().regex(/^\d{4}$/)
+  deviceCode: z.string().trim().min(1),
+  badgeNumber: z.string().trim().min(3),
+  pin: z.string().trim().regex(/^\d{4}$/)
 })
 
 /**

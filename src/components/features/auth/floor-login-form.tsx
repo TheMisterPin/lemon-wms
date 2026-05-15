@@ -9,7 +9,6 @@ import { useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 
 import NumericKeypad from '@/components/shared/numeric-keypad'
-import ScanInput from '@/components/shared/scan-input'
 import { useIsMobile } from '@/components/shared/use-mobile'
 import { useFloorLoginFlow } from '@/hooks/dashboard/iam/use-floor-login-flow'
 
@@ -78,7 +77,7 @@ export default function FloorLoginForm() {
               autoFocus
               value={deviceCode}
               onChange={(e) => setDeviceCode(e.target.value)}
-              placeholder="e.g. ZONE-3-TERMINAL"
+              placeholder="e.g. DEMO or DEV-WH-0001-01"
               autoComplete="off"
               className="rounded-lg border border-brand-input bg-brand-surface px-4 py-3 text-lg text-brand-text placeholder-brand-subtle outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
             />
@@ -95,11 +94,38 @@ export default function FloorLoginForm() {
 
       {/* Step 2: Badge scan */}
       {step === 'badge' && (
-        <div className="flex flex-col gap-4">
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const fd = new FormData(e.currentTarget)
+            const raw = fd.get('badge')
+            const value = typeof raw === 'string' ? raw.trim() : ''
+            if (value.length >= 3) {
+              handleBadgeScan(value)
+            }
+          }}
+        >
           <p className="text-sm text-brand-muted">
-            Scan your badge or type your badge number
+            Scan your badge or type your badge number, then tap Continue (Enter also works).
           </p>
-          <ScanInput placeholder="Scan badge…" onScan={handleBadgeScan} autoFocus />
+          <input
+            name="badge"
+            type="text"
+            placeholder="e.g. USR-0000"
+            autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            className="w-full rounded-lg border border-brand-input bg-brand-surface px-4 py-3 text-lg text-brand-text placeholder-brand-subtle outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-linear-to-r from-brand-primary to-brand-primary-end px-4 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            Continue
+          </button>
           <button
             type="button"
             onClick={goBackToDevice}
@@ -107,7 +133,7 @@ export default function FloorLoginForm() {
           >
             ← Change device name
           </button>
-        </div>
+        </form>
       )}
 
       {/* Step 3: PIN */}

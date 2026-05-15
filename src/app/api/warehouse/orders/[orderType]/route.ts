@@ -3,6 +3,10 @@ import { NextRequest } from 'next/server'
 import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isFloorRole } from '@/lib/auth/middleware'
 import { getWarehousePurchaseOrders } from '@/lib/orders/purchase'
+import { getWarehouseSalesOrders } from '@/lib/orders/sales/get-warehouse-sales-orders'
+import type { WarehouseOperationalOrderListRow } from '@/lib/orders/shared/warehouse-operational-order-list-row'
+import { parseWarehouseOperationalOrderKind } from '@/lib/orders/shared/warehouse-operational-route-kind'
+import { getWarehouseTransferOrders } from '@/lib/orders/transfer/get-warehouse-transfer-orders'
 import prisma from '@/lib/prisma'
 
 type RouteParams = { params: Promise<{ orderType: string }> }
@@ -30,11 +34,12 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   }
 
   if (!isFloorRole(payload.role)) {
-    return forbidden('Only warehouse users can list operational purchase orders.')
+    return forbidden('Only warehouse users can list operational orders.')
   }
 
-  const { orderType } = await params
-  if (orderType !== 'purchase') {
+  const { orderType: rawOrderType } = await params
+  const kind = parseWarehouseOperationalOrderKind(rawOrderType)
+  if (!kind) {
     return fail('Unsupported order type.', 'VALIDATION_ERROR', 400)
   }
 
@@ -42,7 +47,19 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return fail('Warehouse context is required.', 'VALIDATION_ERROR', 400)
   }
 
-  const rows = await getWarehousePurchaseOrders(prisma, payload.warehouseId)
+  let rows: WarehouseOperationalOrderListRow[]
+  let message: string
 
-  return ok(rows, 'Purchase orders retrieved successfully.')
+  if (kind === 'purchase') {
+    rows = await getWarehousePurchaseOrders(prisma, payload.warehouseId)
+    message = 'Purchase orders retrieved successfully.'
+  } else if (kind === 'sales') {
+    rows = await getWarehouseSalesOrders(prisma, payload.warehouseId)
+    message = 'Sales orders retrieved successfully.'
+  } else {
+    rows = await getWarehouseTransferOrders(prisma, payload.warehouseId)
+    message = 'Transfer orders retrieved successfully.'
+  }
+
+  return ok(rows, message)
 }

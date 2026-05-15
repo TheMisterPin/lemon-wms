@@ -113,12 +113,12 @@ export async function demoLogin(
   const accessToken = signAccessToken(
     device
       ? {
-          userId: user.id,
-          role: user.role,
-          deviceId: device.id,
-          warehouseId: device.warehouseId ?? undefined,
-          zoneId: device.zoneId ?? undefined
-        }
+        userId: user.id,
+        role: user.role,
+        deviceId: device.id,
+        warehouseId: device.warehouseId ?? undefined,
+        zoneId: device.zoneId ?? undefined
+      }
       : { userId: user.id, role: user.role }
   )
   const refreshToken = signRefreshToken({ userId: user.id })
@@ -133,7 +133,7 @@ export async function demoLogin(
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   })
 
-  await Promise.all([
+  const postLoginWrites: Promise<unknown>[] = [
     setRefreshTokenCookie(refreshToken),
     setAccessTokenCookie(accessToken),
     createUserActivityEntry({
@@ -150,7 +150,18 @@ export async function demoLogin(
       },
       notes: 'Demo mode instant login'
     })
-  ])
+  ]
+
+  if (device) {
+    postLoginWrites.push(
+      prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginDeviceId: device.id }
+      })
+    )
+  }
+
+  await Promise.all(postLoginWrites)
 
   await syncTodaysBinHistorySnapshotsAfterLogin(prisma)
 

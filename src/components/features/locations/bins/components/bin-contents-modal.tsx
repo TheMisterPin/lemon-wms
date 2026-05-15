@@ -6,6 +6,7 @@
 
 import { Package } from 'lucide-react'
 
+import { BIN_CONTENT_TABLE_COLUMNS } from '@/components/features/locations/bins/lib/bin-contents-table-columns'
 import { TableShell } from '@/components/primitives/tables/table-shell'
 import { useTableShellController } from '@/components/primitives/tables/use-table-shell-controller'
 import { Button } from '@/components/ui/button'
@@ -17,35 +18,7 @@ import {
 } from '@/components/ui/dialog'
 import { useBinContents } from '@/hooks/dashboard/locations/use-bin-contents'
 import { cn } from '@/lib/utils'
-import type { ColumnConfig } from '@/types/components/table/column.types'
 import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'
-import type { BinContentTableRowDto } from '@/types/dto/locations/bin-contents'
-
-const contentColumns: ColumnConfig<BinContentTableRowDto>[] = [
-  { label: 'SKU', accessor: 'sku' },
-  { label: 'Name', accessor: 'name' },
-  {
-    label: 'Status',
-    accessor: 'status',
-    type: 'indicator',
-    typeValues: {
-      syncBlink: true,
-      conditions: {
-        available: '#16a34a',
-        reserved: '#d97706',
-        blocked: '#dc2626',
-        in_transit: '#2563eb'
-      },
-      defaultColor: '#64748b'
-    }
-  },
-  {
-    label: 'Quantity',
-    accessor: 'statusQuantity',
-    type: 'joinValues',
-    typeValues: { values: ['statusQuantity', 'uom'] }
-  }
-]
 
 export type BinContentsModalProps = {
   binId: string | null
@@ -68,7 +41,7 @@ export function BinContentsModal({ binId, open, onOpenChange }: BinContentsModal
     sortDirection,
     handleSortColumnClick
   } = useTableShellController({
-    columns: contentColumns,
+    columns: BIN_CONTENT_TABLE_COLUMNS,
     records: tableRows,
     pageSize: DEFAULT_GENERIC_TABLE_PAGE_SIZE,
     builtInPaginationPosition: 'header',

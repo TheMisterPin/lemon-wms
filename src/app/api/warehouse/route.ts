@@ -4,11 +4,23 @@ import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
 import { getBinList, getBins } from '@/lib/locations'
 import { logAppError } from '@/lib/logs/app-logger'
+import { getWarehouseOrderPoolRecords, resolveWarehouseActiveExecutingPoolRecord } from '@/lib/orders/shared/warehouse-order-pool-queries'
 import prisma from '@/lib/prisma'
 
 function toNumberOrZero(value: unknown): number {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value
+  }
+
+  if (
+    value !== null
+    && typeof value === 'object'
+    && 'toNumber' in value
+    && typeof value.toNumber === 'function'
+  ) {
+    const parsed = value.toNumber()
+
+    return Number.isFinite(parsed) ? parsed : 0
   }
 
   if (typeof value === 'string' && value.trim() !== '') {
@@ -22,39 +34,6 @@ function toNumberOrZero(value: unknown): number {
   return 0
 }
 
-async function getOrdersForWarehouseHomePage(warehouseId: string) {
-  const purchaseOrders = await prisma.purchaseOrder.findMany({
-    where: { warehouseId },
-    select: {
-      id: true,
-      status: true
-    },
-    orderBy: { createdAt: 'desc' }
-  })
-  const transferOrders = await prisma.transferOrder.findMany({
-    where: { warehouseId },
-    select: {
-      id: true,
-      status: true
-    },
-    orderBy: { createdAt: 'desc' }
-  })
-  const salesOrders = await prisma.salesOrder.findMany({
-    where: { warehouseId },
-    select: {
-      id: true,
-      status: true
-    },
-    orderBy: { createdAt: 'desc' }
-  })
-  const mappedPurchaseOrders = purchaseOrders.map(order => ({ ...order, type: 'PURCHASE', assignedTo: 'Unassigned' }))
-  const mappedTransferOrders = transferOrders.map(order => ({ ...order, type: 'TRANSFER', assignedTo: 'Unassigned' }))
-  const mappedSalesOrders = salesOrders.map(order => ({ ...order, type: 'SALES', assignedTo: 'Unassigned' }))
-  const rawOrders = [...mappedPurchaseOrders, ...mappedTransferOrders, ...mappedSalesOrders]
-  const afterAllOrders = rawOrders.map(order => ({ ...order, progress: Math.floor(Math.random() * 101) }))
-
-  return afterAllOrders
-}
 /**
  * @swagger
  * /api/warehouse:
@@ -108,9 +87,41 @@ export async function GET(req: NextRequest) {
     }
     const binList = await getBinList(prisma, device?.zoneId ?? '')
     const bins = await getBins(prisma, { zoneId: device?.zoneId ?? '' })
+    const binIds = bins.map((bin) => bin.id)
+    const binStockRows =
+      binIds.length === 0
+        ? []
+        : await prisma.binStockItem.findMany({
+          where: { binId: { in: binIds } },
+          select: {
+            binId: true,
+            status: true,
+            quantityAvailable: true,
+            quantityReserved: true,
+            quantityBlocked: true
+          }
+        })
+    const stockCapacityByBin = new Map<string, number>()
+
+    for (const row of binStockRows) {
+      if (row.status === 'IN_TRANSIT') {
+        continue
+      }
+
+      const total = row.status === 'RESERVED'
+        ? toNumberOrZero(row.quantityReserved)
+        : row.status === 'BLOCKED'
+          ? toNumberOrZero(row.quantityBlocked)
+          : toNumberOrZero(row.quantityAvailable)
+
+      stockCapacityByBin.set(row.binId, (stockCapacityByBin.get(row.binId) ?? 0) + total)
+    }
+
     const normalizedBins = bins.map((bin) => {
       const maxCapacity = toNumberOrZero(bin.maxCapacity)
-      const currentCapacity = toNumberOrZero(bin.currentCapacity)
+      const stockCapacity = stockCapacityByBin.get(bin.id) ?? 0
+      const storedCapacity = toNumberOrZero(bin.currentCapacity)
+      const currentCapacity = stockCapacity > 0 ? stockCapacity : storedCapacity
       const filledPercentage =
         maxCapacity > 0 ? (currentCapacity / maxCapacity) * 100 : null
 
@@ -129,11 +140,18 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    const orders = await getOrdersForWarehouseHomePage(device?.warehouseId ?? '')
+    const warehouseIdForPool = payload.warehouseId ?? device?.warehouseId ?? ''
+
+    const orders = await getWarehouseOrderPoolRecords(prisma, warehouseIdForPool)
+    const activeExecutingOrder =
+      warehouseIdForPool.trim() !== ''
+        ? await resolveWarehouseActiveExecutingPoolRecord(prisma, warehouseIdForPool, user.id, orders)
+        : null
     const warehouseHomePageData = {
       user: userData,
       warehouseInfo,
       orders,
+      activeExecutingOrder,
       bins: normalizedBins,
       binList
     }

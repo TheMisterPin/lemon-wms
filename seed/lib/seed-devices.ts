@@ -32,6 +32,44 @@ export async function seedDemoDevice(prisma: PrismaClient) {
     return { count: 0 }
   }
 
+  /**
+   * README “Seeded demo access” expects device code/name DEMO + owner badge/PIN.
+   * Without this row, floor login using documented credentials always fails.
+   */
+  if (owner) {
+    const warehouse = warehouses[0]
+    const zoneId =
+      zones.find((z) => z.warehouseId === warehouse.id)?.id ?? null
+
+    await prisma.device.upsert({
+      where: { code: 'DEMO' },
+      create: {
+        name: 'DEMO',
+        code: 'DEMO',
+        warehouseId: warehouse.id,
+        zoneId,
+        authorized: true,
+        isActive: true,
+        type: 'FLOOR',
+        registeredAt: new Date(),
+        lastSeenAt: new Date(),
+        loginMode: 'PIN',
+        lastUserId: owner.id
+      },
+      update: {
+        name: 'DEMO',
+        warehouseId: warehouse.id,
+        zoneId,
+        authorized: true,
+        isActive: true,
+        type: 'FLOOR',
+        loginMode: 'PIN',
+        lastUserId: owner.id,
+        lastSeenAt: new Date()
+      }
+    })
+  }
+
   const zonesByWarehouse = new Map<string, string[]>()
   for (const zone of zones) {
     const current = zonesByWarehouse.get(zone.warehouseId) ?? []
@@ -42,7 +80,7 @@ export async function seedDemoDevice(prisma: PrismaClient) {
 
   let managerCursor = 0
   let workerCursor = 0
-  let created = 0
+  let created = owner ? 1 : 0
 
   for (let warehouseIndex = 0; warehouseIndex < warehouses.length; warehouseIndex += 1) {
     const warehouse = warehouses[warehouseIndex]

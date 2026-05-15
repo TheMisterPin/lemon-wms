@@ -52,6 +52,14 @@ function normalizeBinStockItem(row: BinStockItem): IBinItem {
   }
 }
 
+function getBinFillQuantity(row: BinStockItem): number {
+  if (row.status === 'IN_TRANSIT') {
+    return 0
+  }
+
+  return getDisplayQuantities(row).quantity
+}
+
 async function getBinList(prisma: PrismaClient, zoneId: string) {
   return prisma.bin.findMany({
     where: { deletedAt: null, zoneId },
@@ -77,7 +85,7 @@ async function getBinWithContent(prisma: PrismaClient, id: string): Promise<IBin
   }
 
   const currentCapacity = bin.binStockItems.reduce(
-    (acc, item) => acc + item.quantityAvailable.toNumber(),
+    (acc, item) => acc + getBinFillQuantity(item),
     0
   )
   const maxCapacity = bin.maxCapacity?.toNumber() ?? null

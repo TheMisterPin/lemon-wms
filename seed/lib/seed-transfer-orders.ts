@@ -29,14 +29,16 @@ function pickStatus(index: number): OrderStatus {
 }
 
 type TransferCandidate = {
-	id: string
-	warehouseId: string
-	binId: string
-	itemId: string
-	itemName: string
-	uom: string
-	quantityAvailable: number
-	quantityReserved: number
+  id: string
+  warehouseId: string
+  binId: string
+  itemId: string
+  itemName: string
+  uom: string
+  quantityAvailable: number
+  quantityReserved: number
+  reservedByOrderId: string | null
+  reservedByOrderLineId: string | null
 }
 
 export async function seedTransferOrders(prisma: PrismaClient) {
@@ -109,7 +111,9 @@ export async function seedTransferOrders(prisma: PrismaClient) {
     itemName: row.name,
     uom: row.uom,
     quantityAvailable: Number(row.quantityAvailable),
-    quantityReserved: Number(row.quantityReserved)
+    quantityReserved: Number(row.quantityReserved),
+    reservedByOrderId: null,
+    reservedByOrderLineId: null
   }))
 
   let created = 0
@@ -190,6 +194,9 @@ export async function seedTransferOrders(prisma: PrismaClient) {
 
       const line = transfer.lines[0]
       if (line) {
+        source.reservedByOrderId = transfer.id
+        source.reservedByOrderLineId = line.id
+
         await prisma.transferOrderPick.create({
           data: {
             reference: `${reference}/PICK-001`,
@@ -207,7 +214,10 @@ export async function seedTransferOrders(prisma: PrismaClient) {
                 orderedQuantity: line.baseQuantity,
                 uom: line.uom,
                 itemId: line.itemId,
-                itemNameSnapshot: line.itemNameSnapshot
+                itemNameSnapshot: line.itemNameSnapshot,
+                stockItems: {
+                  connect: [{ id: source.id }]
+                }
               }]
             }
           }
@@ -226,7 +236,9 @@ export async function seedTransferOrders(prisma: PrismaClient) {
       id: row.id,
       quantityAvailable: row.quantityAvailable,
       quantityReserved: row.quantityReserved,
-      status: row.quantityReserved > 0 ? BinItemStatus.RESERVED : BinItemStatus.AVAILABLE
+      status: row.quantityReserved > 0 ? BinItemStatus.RESERVED : BinItemStatus.AVAILABLE,
+      reservedByOrderId: row.reservedByOrderId,
+      reservedByOrderLineId: row.reservedByOrderLineId
     }))
     .filter((row) => row.quantityReserved > 0)
 
@@ -240,7 +252,9 @@ export async function seedTransferOrders(prisma: PrismaClient) {
           data: {
             quantityAvailable: new Prisma.Decimal(row.quantityAvailable),
             quantityReserved: new Prisma.Decimal(row.quantityReserved),
-            status: row.status
+            status: row.status,
+            reservedByOrderId: row.reservedByOrderId,
+            reservedByOrderLineId: row.reservedByOrderLineId
           }
         })
       )

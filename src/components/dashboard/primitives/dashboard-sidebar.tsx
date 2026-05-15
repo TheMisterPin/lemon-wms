@@ -7,10 +7,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import axios from 'axios'
 import {
   ChevronDown,
   FlaskConical,
   Moon,
+  PanelLeftClose,
   Sun
 } from 'lucide-react'
 
@@ -28,14 +30,24 @@ import { SelectStockSubcategoryModal } from '@/components/features/stock/shared/
 import { useTheme } from '@/components/shared/use-theme'
 import { useStockCategoryTree } from '@/hooks/dashboard/stock/use-stock-category-tree'
 import { useAuth } from '@/lib/auth/use-auth'
+import type { SimulateActiveFloorUsersResult } from '@/lib/simulation/simulate-active-floor-users'
+import { closeSidebarIfMobile } from '@/lib/utils'
 import type { SelectLocationModalConfirmPayload, SelectLocationModalVariant } from '@/types/dto/locations/select-location-modal.types'
+import type { ApiResponse } from '@/types/responses/basic-response'
 
 interface DashboardSidebarProps {
   onClose?: () => void
   isDemoEnabled?: boolean
+  onToggleCollapse?: () => void
+  isExpanded?: boolean
 }
 
-export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSidebarProps) {
+export default function DashboardSidebar({
+  onClose,
+  isDemoEnabled,
+  onToggleCollapse,
+  isExpanded
+}: DashboardSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { theme, toggleTheme } = useTheme()
@@ -52,6 +64,8 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
 
   const [simulationOpen, setSimulationOpen] = useState(false)
   const [simulationSectionOpen, setSimulationSectionOpen] = useState(false)
+  const [simulateActiveUsersBusy, setSimulateActiveUsersBusy] = useState(false)
+  const [simulateActiveUsersNotice, setSimulateActiveUsersNotice] = useState<string | null>(null)
   const [addProgressModalOpen, setAddProgressModalOpen] = useState(false)
   const [addProgressSession, setAddProgressSession] = useState(0)
   const [locationPickerOpen, setLocationPickerOpen] = useState(false)
@@ -85,7 +99,6 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(activeGroups)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync open nav groups from route
     setOpenGroups((current) => {
       let changed = false
       const next = { ...current }
@@ -108,7 +121,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
   }
 
   const handleLocationConfirmed = (payload: SelectLocationModalConfirmPayload) => {
-    onClose?.()
+    closeSidebarIfMobile(onClose)
 
     if (payload.variant === 'warehouse') {
       router.push(`/dashboard/locations/warehouses/${payload.warehouseId}`)
@@ -128,9 +141,21 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
   return (
     <div className="flex h-full w-64 flex-col border-r border-dash-border bg-dash-shell">
       <nav className="flex flex-1 flex-col gap-0.5 p-4 pt-6">
-        <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-dash-muted">
-          Navigation
-        </p>
+        <div className="mb-3 flex items-center justify-between gap-2 px-3">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-dash-muted">
+            Navigation
+          </p>
+          {isExpanded && onToggleCollapse ? (
+            <button
+              type="button"
+              aria-label="Collapse sidebar"
+              className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-dash-muted transition-colors hover:bg-dash-border hover:text-dash-text"
+              onClick={onToggleCollapse}
+            >
+              <PanelLeftClose className="size-5" />
+            </button>
+          ) : null}
+        </div>
         {DASHBOARD_NAV_GROUPS.map((group) => {
           const Icon = group.icon
           const links = group.links ?? []
@@ -155,7 +180,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                 <Link
                   prefetch={false}
                   href={group.href}
-                  onClick={() => onClose?.()}
+                  onClick={() => closeSidebarIfMobile(onClose)}
                   className={[
                     'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-200',
                     groupActive
@@ -183,7 +208,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                             onClick={() => {
                               setManageLocationsSession((s) => s + 1)
                               setManageLocationsOpen(true)
-                              onClose?.()
+                              closeSidebarIfMobile(onClose)
                             }}
                             className={[
                               'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
@@ -205,7 +230,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                             type="button"
                             onClick={() => {
                               openLocationPicker(link.selectLocationVariant!)
-                              onClose?.()
+                              closeSidebarIfMobile(onClose)
                             }}
                             className={[
                               'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
@@ -228,7 +253,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                             onClick={() => {
                               setStockCategoryModalSession((s) => s + 1)
                               setStockCategoryModalOpen(true)
-                              onClose?.()
+                              closeSidebarIfMobile(onClose)
                             }}
                             className={[
                               'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
@@ -251,7 +276,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                             onClick={() => {
                               setStockSubcategoryModalSession((s) => s + 1)
                               setStockSubcategoryModalOpen(true)
-                              onClose?.()
+                              closeSidebarIfMobile(onClose)
                             }}
                             className={[
                               'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
@@ -277,7 +302,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                           key={`${group.label}:lnk:${linkIndex}:${link.href}`}
                           prefetch={false}
                           href={link.href}
-                          onClick={() => onClose?.()}
+                          onClick={() => closeSidebarIfMobile(onClose)}
                           className={[
                             'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors duration-200',
                             linkActive
@@ -304,7 +329,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                 key={group.label}
                 prefetch={false}
                 href={group.href}
-                onClick={() => onClose?.()}
+                onClick={() => closeSidebarIfMobile(onClose)}
                 className={[
                   'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-200',
                   groupActive
@@ -366,7 +391,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                           onClick={() => {
                             setManageLocationsSession((s) => s + 1)
                             setManageLocationsOpen(true)
-                            onClose?.()
+                            closeSidebarIfMobile(onClose)
                           }}
                           className={[
                             'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
@@ -388,7 +413,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                           type="button"
                           onClick={() => {
                             openLocationPicker(link.selectLocationVariant!)
-                            onClose?.()
+                            closeSidebarIfMobile(onClose)
                           }}
                           className={[
                             'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
@@ -411,7 +436,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                           onClick={() => {
                             setStockCategoryModalSession((s) => s + 1)
                             setStockCategoryModalOpen(true)
-                            onClose?.()
+                            closeSidebarIfMobile(onClose)
                           }}
                           className={[
                             'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
@@ -434,7 +459,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                           onClick={() => {
                             setStockSubcategoryModalSession((s) => s + 1)
                             setStockSubcategoryModalOpen(true)
-                            onClose?.()
+                            closeSidebarIfMobile(onClose)
                           }}
                           className={[
                             'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
@@ -460,7 +485,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                         key={`${group.label}:lnk:${linkIndex}:${link.href}`}
                         prefetch={false}
                         href={link.href}
-                        onClick={() => onClose?.()}
+                        onClick={() => closeSidebarIfMobile(onClose)}
                         className={[
                           'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors duration-200',
                           linkActive
@@ -516,7 +541,7 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                     type="button"
                     onClick={() => {
                       setSimulationOpen(true)
-                      onClose?.()
+                      closeSidebarIfMobile(onClose)
                     }}
                     className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
                   >
@@ -527,12 +552,63 @@ export default function DashboardSidebar({ onClose, isDemoEnabled }: DashboardSi
                     onClick={() => {
                       setAddProgressSession((s) => s + 1)
                       setAddProgressModalOpen(true)
-                      onClose?.()
+                      closeSidebarIfMobile(onClose)
                     }}
                     className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
                   >
                     Add progress
                   </button>
+                  <button
+                    type="button"
+                    disabled={simulateActiveUsersBusy}
+                    onClick={() => {
+                      void (async () => {
+                        setSimulateActiveUsersBusy(true)
+                        setSimulateActiveUsersNotice(null)
+                        try {
+                          const res = await axios.post<ApiResponse<SimulateActiveFloorUsersResult>>(
+                            '/api/simulation/active-floor-users'
+                          )
+                          if (!res.data.success || !res.data.data) {
+                            setSimulateActiveUsersNotice(res.data.message ?? 'Simulation failed.')
+
+                            return
+                          }
+
+                          const rows = res.data.data.warehouses
+                          const updated = rows.filter((w) => w.action === 'updated')
+                          const skipped = rows.filter((w) => w.action === 'skipped_had_active')
+                          const usersActivated = updated.reduce(
+                            (sum, w) => sum + w.userIdsActivated.length,
+                            0
+                          )
+
+                          setSimulateActiveUsersNotice(
+                            usersActivated > 0
+                              ? `Marked ${usersActivated} user(s) logged in across ${updated.length} warehouse(s). Skipped ${skipped.length} warehouse(s) that already had active users.`
+                              : `No users activated (${skipped.length} warehouse(s) already had active floor users, or no eligible assignments).`
+                          )
+                        } catch {
+                          setSimulateActiveUsersNotice('Request failed.')
+                        } finally {
+                          setSimulateActiveUsersBusy(false)
+                        }
+                      })()
+                    }}
+                    className={[
+                      'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-200',
+                      simulateActiveUsersBusy
+                        ? 'cursor-not-allowed text-dash-muted opacity-60'
+                        : 'text-dash-muted hover:bg-dash-card2 hover:text-dash-text'
+                    ].join(' ')}
+                  >
+                    Simulate Active Users
+                  </button>
+                  {simulateActiveUsersNotice ? (
+                    <p className="px-3 pb-1 text-xs leading-snug text-dash-muted">
+                      {simulateActiveUsersNotice}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </div>

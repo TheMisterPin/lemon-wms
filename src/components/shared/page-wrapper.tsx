@@ -5,11 +5,14 @@
 
 import type { ReactNode } from 'react'
 
+import { cn } from '@/lib/utils'
+
 interface PageWrapperProps {
   header?: ReactNode
   footer?: ReactNode
   sidebar?: ReactNode
   sidebarOpen?: boolean
+  contentClassName?: string
   children: ReactNode
 }
 
@@ -18,6 +21,7 @@ export default function PageWrapper({
   footer,
   sidebar,
   sidebarOpen = false,
+  contentClassName,
   children
 }: PageWrapperProps) {
   return (
@@ -35,7 +39,7 @@ export default function PageWrapper({
           </div>
         )}
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className={cn('min-w-0 flex-1 overflow-y-auto', contentClassName)}>
           {children}
         </main>
       </div>

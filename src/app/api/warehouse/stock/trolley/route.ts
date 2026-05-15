@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 
 import { fail, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest } from '@/lib/auth/middleware'
+import { resolveFloorDeviceContext } from '@/lib/iam/resolve-floor-device-context'
 import { logAppError } from '@/lib/logs/app-logger'
 import prisma from '@/lib/prisma'
 import { getTrolleyItems } from '@/lib/stock/bin-stock-items/bin-stock-items-queries'
@@ -21,15 +22,14 @@ export async function GET(req: NextRequest) {
   if (!payload) {
     return unauthorized()
   }
-  if (!payload.warehouseId) {
-    return fail('Warehouse context is required for transit.', 'BAD_REQUEST', 400)
-  }
-  if (!payload.deviceId) {
-    return fail('Device context is required for transit.', 'BAD_REQUEST', 400)
-  }
 
   try {
-    const items = await getTrolleyItems(prisma, payload.warehouseId, payload.deviceId)
+    const context = await resolveFloorDeviceContext(prisma, req, payload)
+    if (!context) {
+      return fail('Warehouse and device context are required for transit.', 'BAD_REQUEST', 400)
+    }
+
+    const items = await getTrolleyItems(prisma, context.warehouseId, context.deviceId)
 
     return ok(
       { items },

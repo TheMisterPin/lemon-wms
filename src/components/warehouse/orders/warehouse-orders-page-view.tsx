@@ -1,164 +1,182 @@
 'use client'
 /**
  * @generated-doc-link
- * @doc .docs/developer/refactors/components/component/warehouse/orders/warehouse-orders-page-view.md
+ * @doc .docs/developer/refactors/components/component/warehouse/home/warehouse-home-page-view.md
  */
 
-import { useEffect, useMemo } from 'react'
-import { ClipboardList, Pause, Play } from 'lucide-react'
-import { GenericTable } from '@/components/primitives/tables/generic-table'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { usePurchaseOrders } from '@/components/warehouse/orders/use-purchase-orders'
-import { OrderStatus } from '@/generated/prisma'
-import type { ColumnConfig } from '@/types/components/table/column.types'
-import type { RowAction } from '@/types/components/table/generic-table.types'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
+import {
+  typeLabel,
+  WarehouseOrderPoolHeader,
+  WarehouseOrderPoolHeaderActions,
+  WarehouseOrderPoolKpis,
+  WarehouseOrderPoolSection,
+  WarehouseOrderPoolToolbar
+} from '@/components/warehouse/orders/order-pool-components'
+import { useWarehouseHome } from '@/components/warehouse/orders/use-warehouse-home'
+import { useWarehouseOrderPool } from '@/components/warehouse/orders/use-warehouse-order-pool'
+import { WarehouseHomePageSkeleton } from '@/components/warehouse/orders/warehouse-home-page-skeleton'
 
-type Props = { orderType: string }
-
-export function WarehouseOrdersPageView({ orderType }: Props) {
+export function WarehouseOrdersPageView() {
   const {
-    isPurchase,
-    filteredRows,
-    cards,
     isLoading,
-    listError,
-    actionError,
-    statusFilter,
-    actingId,
-    loadOrders,
-    toggleStatusFilter,
-    runAction
-  } = usePurchaseOrders(orderType)
+    error,
+    refetch,
+    orders,
+    summary,
+    warehouseInfo,
+    user,
+    activeExecutingOrder
+  } = useWarehouseHome()
+  const pool = useWarehouseOrderPool({
+    activeExecutingOrder,
+    currentUserId: user?.userId ?? null,
+    orders: orders.rawRecords,
+    onActionComplete: () => refetch()
+  })
 
-  useEffect(() => {
-    void loadOrders()
-  }, [loadOrders])
+  if (isLoading) {
+    return <WarehouseHomePageSkeleton />
+  }
 
-  const columns = useMemo<ColumnConfig<(typeof filteredRows)[number]>[]>(() => ([
-    { label: 'Reference', accessor: 'reference', sortable: true },
-    {
-      label: 'Status',
-      accessor: 'status',
-      type: 'indicator',
-      typeValues: {
-        conditions: {
-          released: '#94a3b8',
-          executing: '#4ade80',
-          paused: '#f59e0b'
-        },
-        defaultColor: '#94a3b8'
-      },
-      sortable: true
-    },
-    { label: 'Supplier', accessor: 'supplier', sortable: true },
-    { label: 'Warehouse', accessor: 'warehouseId', sortable: true },
-    { label: 'Created', accessor: 'createdAt', type: 'date', sortable: true }
-  ]), [])
-
-  const rowActions = useMemo<RowAction<(typeof filteredRows)[number]>[]>(() => ([
-    {
-      icon: (row) =>
-        row.status === OrderStatus.EXECUTING ? (
-          <Pause className="size-4" />
-        ) : (
-          <Play className="size-4" />
-        ),
-      tooltip: (row) =>
-        row.status === OrderStatus.EXECUTING ? 'Pause' : 'Start / Resume',
-      className: (row) =>
-        row.status === OrderStatus.EXECUTING ? 'text-amber-300' : 'text-emerald-300',
-      onClick: (row) => {
-        if (actingId !== null) {
-          return
-        }
-        void runAction(row)
-      }
-    }
-  ]), [actingId, runAction])
-
-  if (!isPurchase) {
+  if (error) {
     return (
-      <main className="select-none flex flex-col h-full bg-linear-50 from-slate-800 to-slate-900 p-6 gap-4 overflow-hidden">
-        <Card className="glass flex-1 overflow-y-auto py-12 px-8">
-          <h1 className="text-2xl font-semibold">Warehouse orders</h1>
-          <p className="mt-4 text-sm text-brand-muted">
-            This order type is not available on the floor yet. Use purchase orders.
-          </p>
-        </Card>
+      <main className="min-h-full p-4 pb-20 xl:p-6 xl:pb-20" style={{ background: 'var(--wh-page-bg)' }}>
+        <div
+          className="mx-auto max-w-lg rounded-xl border px-6 py-10 text-center"
+          style={{ background: 'var(--wh-card-bg-soft)', borderColor: 'var(--wh-border)' }}
+        >
+          <p className="text-sm" style={{ color: 'var(--wh-status-blocked)' }}>{error}</p>
+          <Button type="button" className="mt-4" onClick={refetch}>
+            Retry
+          </Button>
+        </div>
       </main>
     )
   }
 
+  const replaceTarget = pool.pendingReplaceStartOrder
+
   return (
-    <main className="select-none flex flex-col h-full bg-linear-50 from-slate-800 to-slate-900 p-6 gap-4 overflow-hidden">
-      <Card className="glass flex-1 overflow-y-auto py-12 px-8">
-        <h1 className="text-2xl font-semibold">Warehouse purchase orders</h1>
-
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {cards.map(card => (
-            <button
-              key={card.status}
-              type="button"
-              className={[
-                'rounded-lg border px-4 py-4 text-left transition-colors',
-                statusFilter === card.status
-                  ? 'border-brand-primary bg-brand-primary/10'
-                  : 'border-slate-500 bg-brand-glass/75 hover:bg-brand-glass-hover'
-              ].join(' ')}
-              onClick={() => toggleStatusFilter(card.status)}
-            >
-              <p className="text-xs text-brand-muted">{card.label}</p>
-              <p className="text-3xl font-bold text-brand-text">{card.count}</p>
-            </button>
-          ))}
+    <>
+      <main
+        className="min-h-full p-3 pb-20 md:h-full md:overflow-hidden md:p-4 xl:p-5"
+        style={{ background: 'var(--wh-page-bg)', color: 'var(--wh-text-primary)' }}
+      >
+        <div className="mx-auto flex h-full max-w-7xl flex-col gap-3 md:gap-4">
+          <WarehouseOrderPoolHeader warehouseName={warehouseInfo?.warehouseName ?? ''} />
+          <WarehouseOrderPoolKpis
+            activeExecutingOrder={activeExecutingOrder}
+            activeOrders={summary.activeOrders}
+            lastUserOrder={pool.lastUserOrder}
+            nextReadyOrder={pool.nextReadyOrder}
+            pausedOrders={summary.pausedOrders}
+            readyOrders={summary.releasedOrders}
+            totalOrders={summary.totalOrders}
+            onPauseActive={
+              activeExecutingOrder
+              && activeExecutingOrder.status === 'EXECUTING'
+              && activeExecutingOrder.assignedUserId === user?.userId
+                ? () => void pool.runAction(activeExecutingOrder)
+                : undefined
+            }
+            onStatusClick={pool.filterBySingleStatus}
+            onStartOrder={(order) => void pool.runAction(order)}
+          />
+          <WarehouseOrderPoolSection
+            actingId={pool.actingId}
+            currentUserId={user?.userId ?? null}
+            onClearFilters={pool.clearFilters}
+            headerActions={
+              <WarehouseOrderPoolHeaderActions
+                page={pool.safePage}
+                searchText={pool.searchText}
+                totalPages={pool.totalPages}
+                onNext={pool.onNext}
+                onPrev={pool.onPrev}
+                onSearchChange={pool.setSearchText}
+              />
+            }
+            orderCount={pool.visibleOrders.length}
+            pageOrders={pool.pageOrders}
+            onAction={(order) => void pool.runAction(order)}
+            toolbar={
+              <WarehouseOrderPoolToolbar
+                availablePoolOnly={pool.availablePoolOnly}
+                completionSort={pool.completionSort}
+                myOrdersOnly={pool.myOrdersOnly}
+                searchText={pool.searchText}
+                selectedStatuses={pool.selectedStatuses}
+                selectedTypes={pool.selectedTypes}
+                sortBaseline={pool.sortBaseline}
+                onAvailablePoolToggle={pool.toggleAvailablePool}
+                onCompletionSortCycle={pool.cycleCompletionSort}
+                onEnableAvailablePoolOnly={pool.enableAvailablePoolOnly}
+                onMyOrdersToggle={pool.toggleMyOrdersOnly}
+                onResetCompletionSort={pool.resetCompletionSort}
+                onSearchClear={() => pool.setSearchText('')}
+                onSortBaselineChange={pool.setSortBaseline}
+                onStatusToggle={pool.toggleStatus}
+                onTypeToggle={pool.toggleType}
+              />
+            }
+          />
         </div>
+      </main>
 
-        {isLoading ? (
-          <div className="mt-6 rounded-lg border border-slate-500 bg-brand-glass/75 p-6 text-sm text-brand-muted">
-            Loading purchase orders...
-          </div>
-        ) : null}
-
-        {!isLoading && listError ? (
-          <div className="mt-6 rounded-lg border border-rose-500/40 bg-rose-500/10 p-6 text-sm text-rose-200">
-            <p>{listError}</p>
+      <Dialog
+        open={replaceTarget !== null && activeExecutingOrder !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            pool.cancelReplaceStartOrder()
+          }
+        }}
+      >
+        <DialogContent className="border-dash-border bg-dash-shell text-dash-text sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Switch active order?</DialogTitle>
+            <DialogDescription className="text-dash-muted">
+              {activeExecutingOrder ? (
+                <>
+                  You are currently assigned to the{' '}
+                  <span className="font-medium text-dash-text">{typeLabel(activeExecutingOrder.type)}</span>{' '}
+                  order ({activeExecutingOrder.reference}). Starting{' '}
+                  {replaceTarget ? (
+                    <span className="font-medium text-dash-text">{replaceTarget.reference}</span>
+                  ) : (
+                    'this order'
+                  )}
+                  {' '}will pause the current assignment. Would you like to proceed?
+                </>
+              ) : (
+                'Starting this order may pause another assignment. Proceed?'
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button type="button" variant="outline" className="cursor-pointer" onClick={pool.cancelReplaceStartOrder}>
+              Cancel
+            </Button>
             <Button
               type="button"
-              variant="outline"
-              size="sm"
-              className="mt-3 border-rose-500/40 text-rose-100 hover:bg-rose-500/20"
-              onClick={() => void loadOrders()}
+              variant="brand"
+              className="cursor-pointer"
+              disabled={pool.actingId !== null}
+              onClick={() => void pool.confirmReplaceStartOrder()}
             >
-              Retry
+              Proceed
             </Button>
-          </div>
-        ) : null}
-
-        {actionError ? (
-          <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-100">
-            {actionError}
-          </div>
-        ) : null}
-
-        {!isLoading && !listError ? (
-          <section className="mt-6 rounded-lg border border-slate-500 bg-brand-glass/75 p-6">
-            <GenericTable
-              columns={columns}
-              records={filteredRows}
-              title="Operational orders"
-              titleIcon={ClipboardList}
-              entityTone="order"
-              actions={rowActions}
-              search={{
-                fields: ['reference', 'supplier', 'status'],
-                placeholder: 'Search purchase orders...'
-              }}
-              emptyMessage="No orders in this status."
-            />
-          </section>
-        ) : null}
-      </Card>
-    </main>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

@@ -4,9 +4,13 @@
  * @doc .docs/developer/refactors/components/hook/warehouse/items/use-bin-details.md
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { warehouseApiClient } from '@/lib/axios'
+import type { BinContentTableRowDto } from '@/types/dto/locations/bin-contents'
+import type { IBin } from '@/types/models/bin'
+import type { IBinItem } from '@/types/models/bin-item'
+import type { BinItemStatus } from '@/types/models/enums'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
 export type BinStockRecord = {
@@ -20,6 +24,7 @@ export type BinStockRecord = {
   quantityAvailable: number | string
   quantityReserved: number | string
   quantityBlocked: number | string
+  status: BinItemStatus
 }
 
 export type BinDetails = {
@@ -35,63 +40,124 @@ export type BinDetails = {
   blockReason: string | null
 }
 
-type BinDetailsResponse = {
-  bin: BinDetails
-  items: BinStockRecord[]
+function binItemToStockRecord(item: IBinItem): BinStockRecord {
+  return {
+    id: item.id,
+    name: item.name,
+    sku: item.sku,
+    lotId: item.lotId,
+    serialNumberId: item.serialNumberId,
+    boxId: item.boxId,
+    uom: item.uom,
+    quantityAvailable: item.quantityAvailable,
+    quantityReserved: item.quantityReserved,
+    quantityBlocked: item.quantityBlocked,
+    status: item.status as BinItemStatus
+  }
+}
+
+function binToDetails(bin: IBin): BinDetails {
+  return {
+    id: bin.id,
+    code: bin.code,
+    name: bin.name,
+    type: bin.type,
+    zoneId: bin.zoneId,
+    warehouseId: bin.warehouseId,
+    currentCapacity: bin.currentCapacity ?? 0,
+    maxCapacity: bin.maxCapacity ?? 0,
+    isBlocked: bin.isBlocked,
+    blockReason: bin.blockReason
+  }
+}
+
+function quantityForBinItemStatus(line: IBinItem): number {
+  switch (line.status as BinItemStatus) {
+  case 'AVAILABLE':
+    return line.quantityAvailable
+  case 'RESERVED':
+    return line.quantityReserved
+  case 'BLOCKED':
+    return line.quantityBlocked
+  case 'IN_TRANSIT':
+    return line.quantityAvailable
+  default:
+    return line.quantityAvailable
+  }
+}
+
+function toContentTableRows(lines: IBinItem[]): BinContentTableRowDto[] {
+  return lines.map((line) => ({
+    ...line,
+    statusQuantity: quantityForBinItemStatus(line)
+  }))
 }
 
 export function useBinDetails(binId: string) {
-  const [data, setData] = useState<BinDetailsResponse | null>(null)
+  const [binData, setBinData] = useState<IBin | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [refreshKey, setRefreshKey] = useState(0)
 
-  useEffect(() => {
+  const fetchBinDetails = useCallback(async () => {
     if (!binId) {
       return
     }
 
-    let cancelled = false
+    setIsLoading(true)
+    setError(null)
 
-    async function fetchBinDetails() {
-      try {
-        setIsLoading(true)
-        const response = await warehouseApiClient.get<ApiResponse<BinDetailsResponse>>(`/warehouse/bins/${binId}`)
-        if (!cancelled && response.success && response.data) {
-          setData(response.data)
-        }
-      } catch (error) {
-        console.error('[useBinDetails] Failed to fetch:', error)
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false)
-        }
+    try {
+      const response = await warehouseApiClient.get<ApiResponse<IBin>>(`/warehouse/bins/${binId}`)
+      if (response.success && response.data) {
+        setBinData(response.data)
+      } else {
+        setBinData(null)
+        setError(response.message ?? 'Unable to load bin.')
       }
+    } catch {
+      setBinData(null)
+      setError('Could not reach the server. Check your connection and try again.')
+    } finally {
+      setIsLoading(false)
     }
+  }, [binId])
 
+  useEffect(() => {
     void fetchBinDetails()
+  }, [fetchBinDetails, refreshKey])
 
-    return () => {
-      cancelled = true
-    }
-  }, [binId, refreshKey])
+  const bin = useMemo(() => (binData ? binToDetails(binData) : null), [binData])
+
+  const items = useMemo(
+    () => (binData ? binData.content.map(binItemToStockRecord) : []),
+    [binData]
+  )
+
+  const contentRows = useMemo(
+    () => (binData ? toContentTableRows(binData.content) : []),
+    [binData]
+  )
 
   const occupancy = useMemo(() => {
-    if (!data?.bin) {
+    if (!binData) {
       return '0%'
     }
-    const current = Number(data.bin.currentCapacity) || 0
-    const max = Number(data.bin.maxCapacity) || 0
+    const current = Number(binData.currentCapacity) || 0
+    const max = Number(binData.maxCapacity) || 0
     if (max <= 0) {
       return '0%'
     }
 
     return `${Math.round((current / max) * 100)}%`
-  }, [data])
+  }, [binData])
 
   return {
-    bin: data?.bin ?? null,
-    items: data?.items ?? [],
+    bin,
+    items,
+    contentRows,
     isLoading,
+    error,
     occupancy,
     refresh: () => setRefreshKey((k) => k + 1)
   }

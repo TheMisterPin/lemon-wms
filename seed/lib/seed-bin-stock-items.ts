@@ -80,40 +80,39 @@ function getFillRatioForBinType(binType: BinType): number {
   }
 }
 
+/**
+ * Stock seed keeps all quantity in available or blocked buckets only.
+ * Reservations are created later by order pick seeds (sales / transfer).
+ */
 function getStatusForBinType(binType: BinType): BinItemStatus {
   switch (binType) {
   case BinType.GENERAL:
     return pickWeighted([
-      { value: BinItemStatus.AVAILABLE, weight: 75 },
-      { value: BinItemStatus.RESERVED, weight: 15 },
+      { value: BinItemStatus.AVAILABLE, weight: 90 },
       { value: BinItemStatus.BLOCKED, weight: 10 }
     ])
 
   case BinType.RECEIVING:
     return pickWeighted([
-      { value: BinItemStatus.AVAILABLE, weight: 60 },
-      { value: BinItemStatus.RESERVED, weight: 5 },
+      { value: BinItemStatus.AVAILABLE, weight: 65 },
       { value: BinItemStatus.BLOCKED, weight: 35 }
     ])
 
   case BinType.OUTGOING:
     return pickWeighted([
-      { value: BinItemStatus.AVAILABLE, weight: 25 },
-      { value: BinItemStatus.RESERVED, weight: 65 },
+      { value: BinItemStatus.AVAILABLE, weight: 90 },
       { value: BinItemStatus.BLOCKED, weight: 10 }
     ])
 
   case BinType.QUARANTINE:
     return pickWeighted([
-      { value: BinItemStatus.AVAILABLE, weight: 5 },
-      { value: BinItemStatus.RESERVED, weight: 5 },
+      { value: BinItemStatus.AVAILABLE, weight: 10 },
       { value: BinItemStatus.BLOCKED, weight: 90 }
     ])
 
   case BinType.STAGING:
     return pickWeighted([
-      { value: BinItemStatus.AVAILABLE, weight: 50 },
-      { value: BinItemStatus.RESERVED, weight: 35 },
+      { value: BinItemStatus.AVAILABLE, weight: 85 },
       { value: BinItemStatus.BLOCKED, weight: 15 }
     ])
 
@@ -481,7 +480,7 @@ export async function seedBinStockItems(prisma: PrismaClient) {
           : randomInt(1, Math.min(15, maxQuantityForThisRow))
 
       const quantityAvailable = status === BinItemStatus.AVAILABLE ? quantity : 0
-      const quantityReserved = status === BinItemStatus.RESERVED ? quantity : 0
+      const quantityReserved = 0
       const quantityBlocked = status === BinItemStatus.BLOCKED ? quantity : 0
 
       stockItems.push({
@@ -529,6 +528,14 @@ export async function seedBinStockItems(prisma: PrismaClient) {
       await tx.binStockItem.createMany({
         data: stockItems,
         skipDuplicates: true
+      })
+
+      await tx.binStockItem.updateMany({
+        where: { status: BinItemStatus.BLOCKED },
+        data: {
+          blockedReason: 'Seeded quantity on hold (blocked)',
+          blockedAt: new Date()
+        }
       })
 
       for (const [binId, capacity] of capacityByBinId.entries()) {

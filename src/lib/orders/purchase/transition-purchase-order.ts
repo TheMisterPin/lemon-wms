@@ -1,8 +1,14 @@
-import type { Prisma, PrismaClient } from '@/generated/prisma'
-import { AssignmentLifecycle, OrderStatus, OrderType } from '@/generated/prisma'
+import type { PrismaClient } from '@/generated/prisma'
+import { OrderStatus, OrderType } from '@/generated/prisma'
 
 import { DomainError } from '@/lib/errors'
-import { createUserActivityEntry, LOG_ACTION_TYPES } from '@/lib/logs'
+import { LOG_ACTION_TYPES } from '@/lib/logs'
+import {
+  activateOperationalOrderAssignmentForUserInTx,
+  assertOperationalWarehouseMatch,
+  type OperationalOrderScopeRow,
+  writeOperationalOrderLifecycleLog
+} from '@/lib/orders/shared/operational-order-transition-helpers'
 
 const PO_NOT_FOUND = 'Purchase order not found.'
 
@@ -15,21 +21,8 @@ const INVALID_PAUSE =
 const INVALID_RESUME =
   'Purchase order cannot be resumed in its current state.'
 
-const WAREHOUSE_MISMATCH =
-  'This purchase order does not belong to your warehouse.'
+type PoScopeRow = OperationalOrderScopeRow
 
-type PoScopeRow = {
-  id: string
-  reference: string
-  status: OrderStatus
-  deletedAt: Date | null
-  warehouseId: string
-}
-
-/**
- * Loads a single purchase order and rejects soft-deleted/missing records.
- * This gives all transition operations a shared, consistent starting point.
- */
 async function loadActivePurchaseOrder(
   prisma: PrismaClient,
   id: string
@@ -51,16 +44,6 @@ async function loadActivePurchaseOrder(
   return row
 }
 
-/**
- * Enforces warehouse ownership for floor-side transitions.
- * Warehouse users can only control orders belonging to their own warehouse.
- */
-function assertWarehouseMatch(row: PoScopeRow, tokenWarehouseId: string) {
-  if (row.warehouseId !== tokenWarehouseId) {
-    throw new DomainError(WAREHOUSE_MISMATCH, 'FORBIDDEN', 403)
-  }
-}
-
 export type TransitionedPurchaseOrder = {
   id: string
   status: OrderStatus
@@ -72,35 +55,6 @@ export type StartedPurchaseOrder = {
   orderAssignmentId: string
 }
 
-async function writeOrderLifecycleLog(
-  prisma: PrismaClient | Prisma.TransactionClient,
-  params: {
-    userId: string
-    actionType: (typeof LOG_ACTION_TYPES)[keyof typeof LOG_ACTION_TYPES]
-    row: Pick<PoScopeRow, 'id' | 'reference' | 'warehouseId'>
-  }
-) {
-  const { userId, actionType, row } = params
-  await createUserActivityEntry({
-    prisma,
-    userId,
-    actionType,
-    entityType: 'ORDER',
-    entityId: row.id,
-    warehouseId: row.warehouseId,
-    orderId: row.id,
-    orderType: 'PURCHASE',
-    metadata: {
-      orderType: 'PURCHASE',
-      reference: row.reference
-    }
-  })
-}
-
-/**
- * Releases a draft purchase order so warehouse teams can see and act on it.
- * Allowed transition: DRAFT -> RELEASED.
- */
 export async function releasePurchaseOrder(
   prisma: PrismaClient,
   id: string,
@@ -119,10 +73,11 @@ export async function releasePurchaseOrder(
       return updated
     }
 
-    await writeOrderLifecycleLog(tx, {
+    await writeOperationalOrderLifecycleLog(tx, {
       userId,
       actionType: LOG_ACTION_TYPES.ORDER_CONFIRMED,
-      row
+      row,
+      orderType: OrderType.PURCHASE
     })
 
     return updated
@@ -134,12 +89,6 @@ export async function releasePurchaseOrder(
   return { id, status: OrderStatus.RELEASED }
 }
 
-/**
- * Starts operational execution of a released purchase order.
- * Allowed transition: RELEASED -> EXECUTING.
- * Also creates or re-activates the OrderAssignment for this worker so that
- * subsequent line-handling mutations have a valid assignment context.
- */
 export async function startPurchaseOrder(
   prisma: PrismaClient,
   id: string,
@@ -148,7 +97,7 @@ export async function startPurchaseOrder(
   zoneId?: string | null
 ): Promise<StartedPurchaseOrder> {
   const row = await loadActivePurchaseOrder(prisma, id)
-  assertWarehouseMatch(row, tokenWarehouseId)
+  assertOperationalWarehouseMatch(row, tokenWarehouseId)
   if (row.status !== OrderStatus.RELEASED) {
     throw new DomainError(INVALID_START, 'INVALID_TRANSITION', 409)
   }
@@ -161,51 +110,20 @@ export async function startPurchaseOrder(
       return null
     }
 
-    await writeOrderLifecycleLog(tx, {
+    await writeOperationalOrderLifecycleLog(tx, {
       userId,
       actionType: LOG_ACTION_TYPES.ORDER_STARTED,
-      row
+      row,
+      orderType: OrderType.PURCHASE
     })
 
-    const now = new Date()
-    const existing = await tx.orderAssignment.findFirst({
-      where: { orderType: OrderType.PURCHASE, orderId: id, userId }
+    const assignmentId = await activateOperationalOrderAssignmentForUserInTx(tx, {
+      orderType: OrderType.PURCHASE,
+      orderId: id,
+      tokenWarehouseId,
+      userId,
+      zoneId
     })
-
-    let assignmentId: string
-    if (existing) {
-      const refreshed = await tx.orderAssignment.update({
-        where: { id: existing.id },
-        data: {
-          status: AssignmentLifecycle.STARTED,
-          warehouseId: tokenWarehouseId,
-          zoneId: zoneId ?? existing.zoneId,
-          isActive: true,
-          assignedAt: now,
-          startedAt: now,
-          pausedAt: null,
-          releasedAt: null,
-          completedAt: null,
-          cancelledAt: null,
-          timedOutAt: null
-        }
-      })
-      assignmentId = refreshed.id
-    } else {
-      const created = await tx.orderAssignment.create({
-        data: {
-          orderId: id,
-          orderType: OrderType.PURCHASE,
-          warehouseId: tokenWarehouseId,
-          userId,
-          zoneId: zoneId ?? null,
-          status: AssignmentLifecycle.STARTED,
-          isActive: true,
-          startedAt: now
-        }
-      })
-      assignmentId = created.id
-    }
 
     return { assignmentId }
   })
@@ -217,10 +135,6 @@ export async function startPurchaseOrder(
   return { id, status: OrderStatus.EXECUTING, orderAssignmentId: result.assignmentId }
 }
 
-/**
- * Pauses an order that is currently being executed on the floor.
- * Allowed transition: EXECUTING -> PAUSED.
- */
 export async function pausePurchaseOrder(
   prisma: PrismaClient,
   id: string,
@@ -228,7 +142,7 @@ export async function pausePurchaseOrder(
   userId: string
 ): Promise<TransitionedPurchaseOrder> {
   const row = await loadActivePurchaseOrder(prisma, id)
-  assertWarehouseMatch(row, tokenWarehouseId)
+  assertOperationalWarehouseMatch(row, tokenWarehouseId)
   if (row.status !== OrderStatus.EXECUTING) {
     throw new DomainError(INVALID_PAUSE, 'INVALID_TRANSITION', 409)
   }
@@ -241,10 +155,11 @@ export async function pausePurchaseOrder(
       return updated
     }
 
-    await writeOrderLifecycleLog(tx, {
+    await writeOperationalOrderLifecycleLog(tx, {
       userId,
       actionType: LOG_ACTION_TYPES.ORDER_PAUSED,
-      row
+      row,
+      orderType: OrderType.PURCHASE
     })
 
     return updated
@@ -256,27 +171,53 @@ export async function pausePurchaseOrder(
   return { id, status: OrderStatus.PAUSED }
 }
 
-/**
- * Resumes a previously paused warehouse execution flow.
- * Allowed transition: PAUSED -> EXECUTING.
- */
 export async function resumePurchaseOrder(
   prisma: PrismaClient,
   id: string,
-  tokenWarehouseId: string
-): Promise<TransitionedPurchaseOrder> {
+  tokenWarehouseId: string,
+  userId: string,
+  zoneId?: string | null
+): Promise<StartedPurchaseOrder> {
   const row = await loadActivePurchaseOrder(prisma, id)
-  assertWarehouseMatch(row, tokenWarehouseId)
+  assertOperationalWarehouseMatch(row, tokenWarehouseId)
   if (row.status !== OrderStatus.PAUSED) {
     throw new DomainError(INVALID_RESUME, 'INVALID_TRANSITION', 409)
   }
-  const result = await prisma.purchaseOrder.updateMany({
-    where: { id, status: OrderStatus.PAUSED, deletedAt: null },
-    data: { status: OrderStatus.EXECUTING }
+  const result = await prisma.$transaction(async (tx) => {
+    const updated = await tx.purchaseOrder.updateMany({
+      where: { id, status: OrderStatus.PAUSED, deletedAt: null },
+      data: { status: OrderStatus.EXECUTING }
+    })
+    if (updated.count === 0) {
+      return null
+    }
+
+    await tx.orderAssignment.updateMany({
+      where: { orderType: OrderType.PURCHASE, orderId: id },
+      data: { isActive: false }
+    })
+
+    await writeOperationalOrderLifecycleLog(tx, {
+      userId,
+      actionType: LOG_ACTION_TYPES.ORDER_RESUMED,
+      row,
+      orderType: OrderType.PURCHASE
+    })
+
+    const assignmentId = await activateOperationalOrderAssignmentForUserInTx(tx, {
+      orderType: OrderType.PURCHASE,
+      orderId: id,
+      tokenWarehouseId,
+      userId,
+      zoneId
+    })
+
+    return { assignmentId }
   })
-  if (result.count === 0) {
+
+  if (result === null) {
     throw new DomainError(INVALID_RESUME, 'INVALID_TRANSITION', 409)
   }
 
-  return { id, status: OrderStatus.EXECUTING }
+  return { id, status: OrderStatus.EXECUTING, orderAssignmentId: result.assignmentId }
 }

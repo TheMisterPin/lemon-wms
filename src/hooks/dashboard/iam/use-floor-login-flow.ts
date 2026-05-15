@@ -101,7 +101,11 @@ export function useFloorLoginFlow() {
       const res = await fetch('/api/auth/floor/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deviceCode: deviceCode.trim(), badgeNumber, pin: currentPin })
+        body: JSON.stringify({
+          deviceCode: deviceCode.trim(),
+          badgeNumber: badgeNumber.trim(),
+          pin: currentPin
+        })
       })
 
       const data: LoginResponse = await res.json()

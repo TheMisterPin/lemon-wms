@@ -117,6 +117,61 @@ function StockChartPanel({ children }: { children: ReactNode }) {
   )
 }
 
+function formatStockQuantity(value: number): string {
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
+}
+
+function StockItemSummaryCardLink({
+  item,
+  accentColor
+}: {
+  item: StockItemSummaryRow
+  accentColor: string
+}) {
+  return (
+    <Link
+      href={item.href}
+      className="block rounded-xl border px-4 py-4 transition-opacity hover:opacity-90"
+      style={{
+        background: 'var(--wh-card-bg)',
+        borderColor: 'var(--wh-border)',
+        borderLeft: `4px solid ${accentColor}`
+      }}
+    >
+      <p className="text-[10px] font-medium uppercase tracking-wide sm:text-xs" style={{ color: 'var(--wh-text-muted)' }}>
+        {item.sku}
+      </p>
+      <p className="mt-1 line-clamp-2 text-base font-semibold leading-snug sm:text-lg" style={{ color: 'var(--wh-text-primary)' }}>
+        {item.name}
+      </p>
+      <div className="mt-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+        <div>
+          <p className="text-[10px] font-medium uppercase tracking-wide sm:text-xs" style={{ color: 'var(--wh-text-muted)' }}>
+            On hand
+          </p>
+          <p className="mt-0.5 text-3xl font-semibold tabular-nums">{formatStockQuantity(item.quantity)}</p>
+        </div>
+        <div className="flex min-w-0 flex-1 flex-wrap justify-end gap-x-4 gap-y-2 sm:gap-x-6">
+          {([
+            ['Available', item.available, 'var(--wh-status-available)'] as const,
+            ['Reserved', item.reserved, 'var(--wh-status-full)'] as const,
+            ['Blocked', item.blocked, 'var(--wh-status-blocked)'] as const
+          ]).map(([label, value, color]) => (
+            <div key={label} className="text-right">
+              <p className="text-[10px] font-medium uppercase tracking-wide sm:text-xs" style={{ color: 'var(--wh-text-muted)' }}>
+                {label}
+              </p>
+              <p className="mt-0.5 text-lg font-semibold tabular-nums sm:text-xl" style={{ color }}>
+                {formatStockQuantity(value)}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Link>
+  )
+}
+
 export function CategoryStockPageClient({ categoryId }: { categoryId?: string }) {
   const { data, isLoading, error, refetch } = useCategoryStockDashboard(categoryId)
   const [showSubcategoriesSheet, setShowSubcategoriesSheet] = useState(false)
@@ -166,19 +221,6 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
       totalAvailable: row.available,
       totalReserved: row.reserved,
       totalBlocked: row.blocked
-    }))
-  }, [subcategoriesForCards])
-
-  const subcategoryTableRows = useMemo(() => {
-    return subcategoriesForCards.map((row) => ({
-      categoryId: row.categoryId,
-      name: row.label,
-      iconUrl: row.iconUrl,
-      onHand: row.onHand,
-      available: row.available,
-      reserved: row.reserved,
-      blocked: row.blocked,
-      href: row.href
     }))
   }, [subcategoriesForCards])
 
@@ -481,7 +523,7 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
             </div>
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-5">
-              <StockSection title={`Sub categories (${subcategoryTableRows.length})`}>
+              {/* <StockSection title={`Sub categories (${subcategoryTableRows.length})`}>
                 <StockChartPanel>
                   <div className="mb-2 grid grid-cols-5 gap-1 text-[11px] font-medium" style={{ color: 'var(--wh-text-muted)' }}>
                     <span>Sub category</span>
@@ -511,7 +553,7 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
                     ))}
                   </div>
                 </StockChartPanel>
-              </StockSection>
+              </StockSection> */}
             </div>
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-5">
@@ -531,39 +573,16 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
                     action={`${group.items.length} items`}
                   >
                     <StockChartPanel>
-                      <div className="mb-2 grid grid-cols-6 gap-1 text-[11px] font-medium" style={{ color: 'var(--wh-text-muted)' }}>
-                        <span>SKU</span>
-                        <span>Item</span>
-                        <span>On hand</span>
-                        <span>Available</span>
-                        <span>Reserved</span>
-                        <span>Blocked</span>
-                      </div>
-
-                      <div className="space-y-1.5 text-sm" style={{ color: 'var(--wh-text-primary)' }}>
+                      <div className="space-y-3">
                         {visibleItems.map((item, idx) => {
                           const rowColor = chartColors[(groupIndex * 37 + idx) % chartColors.length]
 
                           return (
-                            <Link
+                            <StockItemSummaryCardLink
                               key={item.itemId}
-                              href={item.href}
-                              className="grid grid-cols-6 gap-1 rounded-md py-0.5 pl-2 transition-opacity hover:opacity-90"
-                              style={{ borderLeft: `4px solid ${rowColor}` }}
-                            >
-                              <span className="min-w-0 truncate">{item.sku}</span>
-                              <span className="min-w-0 truncate">{item.name}</span>
-                              <span className="tabular-nums">{item.quantity.toLocaleString()}</span>
-                              <span className="tabular-nums" style={{ color: 'var(--wh-status-available)' }}>
-                                {item.available.toLocaleString()}
-                              </span>
-                              <span className="tabular-nums" style={{ color: 'var(--wh-status-full)' }}>
-                                {item.reserved.toLocaleString()}
-                              </span>
-                              <span className="tabular-nums" style={{ color: 'var(--wh-status-blocked)' }}>
-                                {item.blocked.toLocaleString()}
-                              </span>
-                            </Link>
+                              item={item}
+                              accentColor={rowColor}
+                            />
                           )
                         })}
                       </div>
@@ -656,39 +675,16 @@ export function CategoryStockPageClient({ categoryId }: { categoryId?: string })
             </SheetTitle>
           </SheetHeader>
 
-          <div className="mt-6 space-y-2 pr-6">
-            <div className="grid grid-cols-6 gap-1 text-[11px] font-medium" style={{ color: 'var(--wh-text-muted)' }}>
-              <span>SKU</span>
-              <span>Item</span>
-              <span>On hand</span>
-              <span>Available</span>
-              <span>Reserved</span>
-              <span>Blocked</span>
-            </div>
-
+          <div className="mt-6 space-y-3 pr-6">
             {activeItemsSheetGroup?.items.map((item, idx) => {
               const rowColor = chartColors[idx % chartColors.length]
 
               return (
-                <Link
+                <StockItemSummaryCardLink
                   key={`sheet-item-${item.itemId}`}
-                  href={item.href}
-                  className="grid grid-cols-6 gap-1 rounded-md py-0.5 pl-2 text-sm transition-opacity hover:opacity-90"
-                  style={{ color: 'var(--wh-text-primary)', borderLeft: `4px solid ${rowColor}` }}
-                >
-                  <span className="min-w-0 truncate">{item.sku}</span>
-                  <span className="min-w-0 truncate">{item.name}</span>
-                  <span className="tabular-nums">{item.quantity.toLocaleString()}</span>
-                  <span className="tabular-nums" style={{ color: 'var(--wh-status-available)' }}>
-                    {item.available.toLocaleString()}
-                  </span>
-                  <span className="tabular-nums" style={{ color: 'var(--wh-status-full)' }}>
-                    {item.reserved.toLocaleString()}
-                  </span>
-                  <span className="tabular-nums" style={{ color: 'var(--wh-status-blocked)' }}>
-                    {item.blocked.toLocaleString()}
-                  </span>
-                </Link>
+                  item={item}
+                  accentColor={rowColor}
+                />
               )
             })}
           </div>

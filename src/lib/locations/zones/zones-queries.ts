@@ -33,6 +33,22 @@ async function getZones(prisma: PrismaClient, filters?: { warehouseId?: string }
   })
 }
 
+type FloorZoneOption = {
+  id: string
+  name: string
+}
+
+async function listActiveZonesForWarehouse(
+  prisma: PrismaClient,
+  warehouseId: string
+): Promise<FloorZoneOption[]> {
+  return prisma.zone.findMany({
+    where: { warehouseId, deletedAt: null, isActive: true },
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' }
+  })
+}
+
 async function getZoneFromBin(prisma: LocationsDbClient, binId: string) {
   const result = await prisma.zone.findFirst({
     where: { bins: { some: { id: binId } }, deletedAt: null },
@@ -46,4 +62,4 @@ async function getZoneFromBin(prisma: LocationsDbClient, binId: string) {
   return result
 }
 
-export { getZone, getZones, getZoneFromBin }
+export { getZone, getZones, getZoneFromBin, listActiveZonesForWarehouse }
