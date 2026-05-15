@@ -73,7 +73,7 @@ const STATS = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-brand-bg text-brand-text">
+    <div className="h-full overflow-y-auto bg-brand-bg text-brand-text">
       {/* ── Nav ──────────────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-10 border-b border-brand-border bg-brand-surface/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
