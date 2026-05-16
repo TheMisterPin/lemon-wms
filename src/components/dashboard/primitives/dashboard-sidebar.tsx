@@ -10,10 +10,13 @@ import { usePathname, useRouter } from 'next/navigation'
 import axios from 'axios'
 import {
   ChevronDown,
+  Download,
   FlaskConical,
   Moon,
   PanelLeftClose,
-  Sun
+  Settings,
+  Sun,
+  Upload
 } from 'lucide-react'
 
 import {
@@ -23,6 +26,8 @@ import {
 import { ManageLocationsModal } from '@/components/features/locations/shared/components/manage-locations-modal'
 import { SelectLocationModal } from '@/components/features/locations/shared/components/select-location-modal'
 import { useSelectLocationModalData } from '@/components/features/locations/shared/hooks/use-select-location-modal-data'
+import { ExportModal } from '@/components/features/import-export/export-modal'
+import { ImportModal } from '@/components/features/import-export/import-modal'
 import { AddProgressModal } from '@/components/features/simulation/add-progress-modal'
 import { SimulationModal } from '@/components/features/simulation/simulation-modal'
 import { SelectStockCategoryModal } from '@/components/features/stock/shared/components/select-stock-category-modal'
@@ -80,6 +85,12 @@ export default function DashboardSidebar({
 
   const [manageLocationsOpen, setManageLocationsOpen] = useState(false)
   const [manageLocationsSession, setManageLocationsSession] = useState(0)
+
+  const [systemSectionOpen, setSystemSectionOpen] = useState(false)
+  const [importModalOpen, setImportModalOpen] = useState(false)
+  const [importSession, setImportSession] = useState(0)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
+  const [exportSession, setExportSession] = useState(0)
 
   const activeGroups = useMemo(() => {
     const entries: Array<[string, boolean]> = DASHBOARD_NAV_GROUPS.map((group) => {
@@ -617,6 +628,65 @@ export default function DashboardSidebar({
       )}
 
       <div className="border-t border-dash-border p-4">
+        <details
+          className="group/nav-section rounded-md"
+          open={systemSectionOpen}
+          onToggle={(event) => {
+            const target = event.currentTarget as HTMLDetailsElement
+            setSystemSectionOpen(target.open)
+          }}
+        >
+          <summary
+            className={[
+              'flex cursor-pointer list-none items-center justify-between gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-200 [&::-webkit-details-marker]:hidden',
+              systemSectionOpen
+                ? 'bg-dash-card2 text-dash-text'
+                : 'text-dash-muted hover:bg-dash-card2 hover:text-dash-text'
+            ].join(' ')}
+          >
+            <span className="flex items-center gap-3">
+              <Settings size={18} className="shrink-0 opacity-90" />
+              System
+            </span>
+            <ChevronDown
+              size={16}
+              className="shrink-0 opacity-70 transition-transform duration-200 group-open/nav-section:rotate-180"
+            />
+          </summary>
+          <div className="grid grid-rows-[0fr] transition-all duration-200 ease-out group-open/nav-section:grid-rows-[1fr]">
+            <div className="mt-1 overflow-hidden">
+              <div className="ml-4 space-y-0.5 border-l border-dash-border pl-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImportSession((s) => s + 1)
+                    setImportModalOpen(true)
+                    closeSidebarIfMobile(onClose)
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
+                >
+                  <Upload size={16} className="shrink-0 opacity-80" />
+                  Import Data
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExportSession((s) => s + 1)
+                    setExportModalOpen(true)
+                    closeSidebarIfMobile(onClose)
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
+                >
+                  <Download size={16} className="shrink-0 opacity-80" />
+                  Export Data
+                </button>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div className="border-t border-dash-border p-4">
         <button
           type="button"
           onClick={toggleTheme}
@@ -688,6 +758,18 @@ export default function DashboardSidebar({
         key={`dashboard-manage-locations-${manageLocationsSession}`}
         open={manageLocationsOpen}
         onOpenChange={setManageLocationsOpen}
+      />
+
+      <ImportModal
+        key={`dashboard-import-${importSession}`}
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+      />
+
+      <ExportModal
+        key={`dashboard-export-${exportSession}`}
+        open={exportModalOpen}
+        onOpenChange={setExportModalOpen}
       />
     </div>
   )
