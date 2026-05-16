@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import {
   ArrowRight,
+  ArrowUpDown,
   BarChart3,
   Building2,
-  Layers,
   Package,
   Scan,
   Shield,
@@ -61,6 +61,14 @@ const FEATURES = [
       'JWT sessions, device-bound floor logins, and scoped permissions at every layer.',
     iconBg: 'var(--dash-red-dim)',
     iconColor: 'var(--dash-red)',
+  },
+  {
+    icon: ArrowUpDown,
+    title: 'Bulk Import & Export',
+    description:
+      'Onboard master data in minutes. Import warehouses, zones, bins, users, and items from JSON or CSV — and export anytime for backups or migrations.',
+    iconBg: 'var(--entity-zone-soft)',
+    iconColor: 'var(--entity-zone)',
   },
 ] as const
 
@@ -196,6 +204,7 @@ export default function LandingPage() {
                   'User and role management',
                   'Inventory overview and reporting',
                   'Real-time utilization metrics',
+                  'Bulk data import & export',
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2.5">
                     <span className="size-1.5 shrink-0 rounded-full bg-brand-primary" />
