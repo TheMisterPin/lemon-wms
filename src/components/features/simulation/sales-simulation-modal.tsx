@@ -1,0 +1,159 @@
+'use client'
+
+import { useState } from 'react'
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
+
+import { SalesSimulationResults } from './sales-simulation-results'
+import { SalesSimulationRunner } from './sales-simulation-runner'
+import { SalesSimulationSetupForm } from './sales-simulation-setup-form'
+import type { SimulationStep } from './simulation-modal'
+
+export type SalesSimulationConfig = {
+  userId: string
+  orderId: string
+  orderReference: string
+  customerName: string
+}
+
+export type SalesSimulationResult = {
+  orderId: string
+  orderReference: string
+  stagingBinId: string
+  pickStatus: string
+}
+
+type Props = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function SalesSimulationModal({ open, onOpenChange }: Props) {
+  const [phase, setPhase] = useState<'setup' | 'running' | 'complete' | 'error'>('setup')
+  const [config, setConfig] = useState<SalesSimulationConfig | null>(null)
+  const [steps, setSteps] = useState<SimulationStep[]>([])
+  const [result, setResult] = useState<SalesSimulationResult | null>(null)
+
+  function handleReset() {
+    setPhase('setup')
+    setConfig(null)
+    setSteps([])
+    setResult(null)
+  }
+
+  function handleOpenChange(val: boolean) {
+    if (!val) {
+      handleReset()
+    }
+    onOpenChange(val)
+  }
+
+  function handleRun(cfg: SalesSimulationConfig) {
+    setConfig(cfg)
+    setPhase('running')
+  }
+
+  function handleComplete(res: SalesSimulationResult, finalSteps: SimulationStep[]) {
+    setResult(res)
+    setSteps(finalSteps)
+    setPhase('complete')
+  }
+
+  function handleError(finalSteps: SimulationStep[]) {
+    setSteps(finalSteps)
+    setPhase('error')
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className={phase === 'complete' ? 'max-w-xl' : 'max-w-lg'}>
+        <DialogHeader>
+          <DialogTitle>Sales Order Simulation</DialogTitle>
+        </DialogHeader>
+
+        {phase === 'setup' && (
+          <SalesSimulationSetupForm onRun={handleRun} />
+        )}
+
+        {phase === 'running' && config && (
+          <SalesSimulationRunner
+            config={config}
+            onComplete={handleComplete}
+            onError={handleError}
+          />
+        )}
+
+        {(phase === 'complete') && result && (
+          <SalesSimulationResults
+            result={result}
+            onReset={handleReset}
+          />
+        )}
+
+        {phase === 'error' && !result && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              {steps.map((step) => (
+                <StepRow key={step.id} step={step} />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="w-full rounded-md border border-dash-border px-4 py-2 text-sm text-dash-muted hover:bg-dash-card2"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function StepRow({ step }: { step: SimulationStep }) {
+  const icon =
+    step.status === 'done' ? '✓' :
+      step.status === 'error' ? '✗' :
+        step.status === 'running' ? '…' : '○'
+
+  const iconColor =
+    step.status === 'done' ? 'text-green-600 dark:text-green-400' :
+      step.status === 'error' ? 'text-red-500' :
+        step.status === 'running' ? 'text-blue-500' : 'text-dash-muted'
+
+  const rowTint =
+    step.status === 'done'
+      ? 'rounded-md border border-green-200 bg-green-50 px-2 py-1.5 dark:border-green-900/60 dark:bg-green-950/35'
+      : step.status === 'error'
+        ? 'rounded-md border border-red-200 bg-red-50 px-2 py-1.5 dark:border-red-900/60 dark:bg-red-950/35'
+        : step.status === 'running'
+          ? 'rounded-md border border-blue-200 bg-blue-50 px-2 py-1.5 dark:border-blue-900/60 dark:bg-blue-950/35'
+          : ''
+
+  return (
+    <div className={`flex items-center gap-2 text-sm ${rowTint}`}>
+      <span className={`w-4 shrink-0 text-center font-mono ${iconColor}`}>{icon}</span>
+      <span
+        className={
+          step.status === 'pending'
+            ? 'flex-1 text-dash-muted'
+            : step.status === 'done'
+              ? 'flex-1 font-medium text-green-900 dark:text-green-100'
+              : 'flex-1 text-dash-text'
+        }
+      >
+        {step.label}
+      </span>
+      {step.detail && <span className="text-xs text-dash-muted">{step.detail}</span>}
+      {step.durationMs !== undefined && (
+        <span className="text-xs text-dash-muted">{step.durationMs}ms</span>
+      )}
+    </div>
+  )
+}
