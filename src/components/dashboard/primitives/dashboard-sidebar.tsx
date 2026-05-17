@@ -29,6 +29,7 @@ import { useSelectLocationModalData } from '@/components/features/locations/shar
 import { ExportModal } from '@/components/features/import-export/export-modal'
 import { ImportModal } from '@/components/features/import-export/import-modal'
 import { AddProgressModal } from '@/components/features/simulation/add-progress-modal'
+import { SalesSimulationModal } from '@/components/features/simulation/sales-simulation-modal'
 import { SimulationModal } from '@/components/features/simulation/simulation-modal'
 import { SelectStockCategoryModal } from '@/components/features/stock/shared/components/select-stock-category-modal'
 import { SelectStockSubcategoryModal } from '@/components/features/stock/shared/components/select-stock-subcategory-modal'
@@ -68,6 +69,7 @@ export default function DashboardSidebar({
   } = useStockCategoryTree(stockAreaActive)
 
   const [simulationOpen, setSimulationOpen] = useState(false)
+  const [salesSimulationOpen, setSalesSimulationOpen] = useState(false)
   const [simulationSectionOpen, setSimulationSectionOpen] = useState(false)
   const [simulateActiveUsersBusy, setSimulateActiveUsersBusy] = useState(false)
   const [simulateActiveUsersNotice, setSimulateActiveUsersNotice] = useState<string | null>(null)
@@ -561,6 +563,16 @@ export default function DashboardSidebar({
                   <button
                     type="button"
                     onClick={() => {
+                      setSalesSimulationOpen(true)
+                      closeSidebarIfMobile(onClose)
+                    }}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-dash-muted transition-colors duration-200 hover:bg-dash-card2 hover:text-dash-text"
+                  >
+                    Sales Order
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
                       setAddProgressSession((s) => s + 1)
                       setAddProgressModalOpen(true)
                       closeSidebarIfMobile(onClose)
@@ -709,6 +721,7 @@ export default function DashboardSidebar({
             onOpenChange={setAddProgressModalOpen}
           />
           <SimulationModal key="dashboard-simulation" open={simulationOpen} onOpenChange={setSimulationOpen} />
+          <SalesSimulationModal key="dashboard-sales-simulation" open={salesSimulationOpen} onOpenChange={setSalesSimulationOpen} />
         </>
       )}
 

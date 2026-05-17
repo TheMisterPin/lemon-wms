@@ -7,7 +7,8 @@ import prisma from '@/lib/prisma'
 
 const floorTokenSchema = z.object({
   userId: z.string().min(1),
-  orderId: z.string().min(1)
+  orderId: z.string().min(1),
+  orderType: z.enum(['purchase', 'sales']).optional().default('purchase')
 })
 
 export async function POST(req: NextRequest) {
@@ -21,17 +22,19 @@ export async function POST(req: NextRequest) {
     return fail('userId and orderId are required.', 'VALIDATION_ERROR', 400)
   }
 
-  const { userId, orderId } = parsed.data
+  const { userId, orderId, orderType } = parsed.data
+
+  const orderQuery =
+    orderType === 'sales'
+      ? prisma.salesOrder.findUnique({ where: { id: orderId }, select: { warehouseId: true } })
+      : prisma.purchaseOrder.findUnique({ where: { id: orderId }, select: { warehouseId: true } })
 
   const [user, order] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, role: true, isActive: true, loginType: true }
     }),
-    prisma.purchaseOrder.findUnique({
-      where: { id: orderId },
-      select: { warehouseId: true }
-    })
+    orderQuery
   ])
 
   if (!user || !user.isActive) {

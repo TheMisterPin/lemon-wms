@@ -60,11 +60,17 @@ export async function POST(req: NextRequest, { params }: Params) {
       return fail('Source bin not found.', 'NOT_FOUND', 404)
     }
 
+    const trolley = await prisma.trolley.findFirst({
+      where: { currentDeviceId: context.deviceId, isActive: true },
+      select: { id: true }
+    })
+
     const result = await loadItemsToTrolley({
       prisma,
       userId: payload.userId,
       warehouseId: context.warehouseId,
       deviceId: context.deviceId,
+      trolleyId: trolley?.id,
       sourceBinStockItemId: parsed.sourceBinStockItemId,
       quantity: parsed.quantity
     })

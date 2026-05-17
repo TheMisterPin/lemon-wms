@@ -40,6 +40,7 @@ export type LoadItemsToTrolleyArgs = {
   userId: string
   warehouseId: string
   deviceId: string
+  trolleyId?: string
   sourceBinStockItemId: string
   quantity: number
 }

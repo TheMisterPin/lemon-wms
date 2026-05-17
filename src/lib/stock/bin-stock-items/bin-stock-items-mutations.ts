@@ -60,7 +60,7 @@ async function removeItemsFromBin(args: RemoveItemsFromBinArgs) {
  * @returns Result from loadItemsToTrolley.
  */
 async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
-  const { prisma, userId, warehouseId, deviceId, sourceBinStockItemId, quantity } = args
+  const { prisma, userId, warehouseId, deviceId, trolleyId, sourceBinStockItemId, quantity } = args
   const normalizedQuantity = normalizePositiveQuantity(quantity)
 
   return prisma.$transaction(async (tx) => {
@@ -68,10 +68,16 @@ async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
       where: { id: sourceBinStockItemId }
     })
 
-    if (!source || source.warehouseId !== warehouseId || source.status !== 'AVAILABLE') {
+    if (!source || source.warehouseId !== warehouseId) {
       throw new Error('Source bin stock item not found')
     }
-    if (source.quantityAvailable.lt(normalizedQuantity)) {
+    if (source.status !== 'AVAILABLE' && source.status !== 'RESERVED') {
+      throw new Error('Source bin stock item not found')
+    }
+
+    const isReserved = source.status === 'RESERVED'
+    const effectiveQty = isReserved ? source.quantityReserved : source.quantityAvailable
+    if (effectiveQty.lt(normalizedQuantity)) {
       throw new Error('Insufficient quantity in source bin stock item')
     }
 
@@ -89,9 +95,39 @@ async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
         quantity: new Prisma.Decimal(-normalizedQuantity),
         uom: source.uom,
         lotId: source.lotId,
-        serialNumberId: source.serialNumberId
+        serialNumberId: source.serialNumberId,
+        ...(trolleyId && { trolleyId })
       }
     })
+
+    // For RESERVED items: decrement quantityReserved now (source bin ownership is settled at load time)
+    if (isReserved) {
+      const nextReserved = decimalToNumber(source.quantityReserved) - normalizedQuantity
+      if (nextReserved <= 0) {
+        if (decimalToNumber(source.quantityAvailable) > 0) {
+          await tx.binStockItem.update({
+            where: { id: source.id },
+            data: {
+              quantityReserved: new Prisma.Decimal(0),
+              status: 'AVAILABLE',
+              reservedByOrderId: null,
+              reservedByOrderLineId: null,
+              lastOperationBoeId: transferLoadBoe.id
+            }
+          })
+        } else {
+          await tx.binStockItem.delete({ where: { id: source.id } })
+        }
+      } else {
+        await tx.binStockItem.update({
+          where: { id: source.id },
+          data: {
+            quantityReserved: new Prisma.Decimal(nextReserved),
+            lastOperationBoeId: transferLoadBoe.id
+          }
+        })
+      }
+    }
 
     const existingTransit = await tx.binStockItem.findFirst({
       where: {
@@ -101,6 +137,7 @@ async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
         lotId: source.lotId,
         serialNumberId: source.serialNumberId,
         transitDeviceId: deviceId,
+        transitTrolleyId: trolleyId ?? null,
         status: 'IN_TRANSIT'
       }
     })
@@ -126,6 +163,8 @@ async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
           uom: source.uom,
           status: 'IN_TRANSIT',
           transitDeviceId: deviceId,
+          transitTrolleyId: trolleyId ?? null,
+          reservedByOrderId: isReserved ? source.reservedByOrderId : null,
           createdByBoeId: transferLoadBoe.id,
           lastOperationBoeId: transferLoadBoe.id,
           name: source.name,
@@ -179,16 +218,23 @@ async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
         throw new Error('Insufficient quantity in transit item')
       }
 
-      const sourceAvailable = await findAvailableStockItem(
-        tx,
-        warehouseId,
-        transitItem.binId,
-        transitItem.itemId,
-        transitItem.lotId,
-        transitItem.serialNumberId
-      )
-      if (!sourceAvailable || sourceAvailable.quantityAvailable.lt(unloadQty)) {
-        throw new Error('Insufficient quantity in origin bin stock item')
+      // RESERVED-sourced transit items already had their source bin decremented at load time;
+      // only decrement the source AVAILABLE row for AVAILABLE-sourced items.
+      const sourceAvailable = !transitItem.reservedByOrderId
+        ? await findAvailableStockItem(
+          tx,
+          warehouseId,
+          transitItem.binId,
+          transitItem.itemId,
+          transitItem.lotId,
+          transitItem.serialNumberId
+        )
+        : null
+
+      if (!transitItem.reservedByOrderId) {
+        if (!sourceAvailable || sourceAvailable.quantityAvailable.lt(unloadQty)) {
+          throw new Error('Insufficient quantity in origin bin stock item')
+        }
       }
 
       const transferUnloadBoe = await tx.binOperationEntry.create({
@@ -207,7 +253,9 @@ async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
         }
       })
 
-      await decrementOrDeleteStockItem(tx, sourceAvailable.id, unloadQty, transferUnloadBoe.id)
+      if (sourceAvailable) {
+        await decrementOrDeleteStockItem(tx, sourceAvailable.id, unloadQty, transferUnloadBoe.id)
+      }
       await upsertAvailableStockItem(tx, {
         warehouseId,
         binId: toBinId,
