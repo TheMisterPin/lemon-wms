@@ -18,9 +18,15 @@ vi.mock('@/lib/orders/purchase/receipt/create-receipt-order', () => ({
   createPurchaseOrderReceipt: vi.fn()
 }))
 
+vi.mock('@/lib/logs/app-logger', () => ({
+  logAppError: vi.fn()
+}))
+
 import { POST } from '@/app/api/dashboard/orders/[orderType]/[id]/release/route'
 import { OrderStatus } from '@/generated/prisma'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
+import { DomainError } from '@/lib/errors'
+import { logAppError } from '@/lib/logs/app-logger'
 import { releasePurchaseOrder } from '@/lib/orders/purchase'
 import { createPurchaseOrderReceipt } from '@/lib/orders/purchase/receipt/create-receipt-order'
 
@@ -28,6 +34,7 @@ const mockAuth = verifyAccessTokenFromRequest as ReturnType<typeof vi.fn>
 const mockOffice = isOfficeRole as ReturnType<typeof vi.fn>
 const mockRelease = releasePurchaseOrder as ReturnType<typeof vi.fn>
 const mockCreateReceipt = createPurchaseOrderReceipt as ReturnType<typeof vi.fn>
+const mockLogAppError = logAppError as ReturnType<typeof vi.fn>
 
 describe('POST /api/dashboard/orders/[orderType]/[id]/release', () => {
   beforeEach(() => {
@@ -100,5 +107,63 @@ describe('POST /api/dashboard/orders/[orderType]/[id]/release', () => {
     expect(body.success).toBe(true)
     expect(body.data.status).toBe(OrderStatus.RELEASED)
     expect(mockRelease).toHaveBeenCalled()
+  })
+
+  it('returns 400 when receipt order cannot be attached', async () => {
+    mockAuth.mockReturnValue({ userId: 'u1', role: 'OWNER' })
+    mockOffice.mockReturnValue(true)
+    mockRelease.mockResolvedValue({ id: 'po-1', status: OrderStatus.RELEASED })
+    mockCreateReceipt.mockResolvedValue({
+      success: false,
+      message: 'Unable to create receipt order.',
+      code: 'VALIDATION_ERROR'
+    })
+
+    const req = new NextRequest('http://localhost/api/dashboard/orders/purchase/po-1/release')
+    const res = await POST(req, {
+      params: Promise.resolve({ orderType: 'purchase', id: 'po-1' })
+    })
+    const body = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(body.success).toBe(false)
+    expect(body.message).toBe('Unable to create receipt order.')
+  })
+
+  it('maps DomainError from releasePurchaseOrder', async () => {
+    mockAuth.mockReturnValue({ userId: 'u1', role: 'OWNER' })
+    mockOffice.mockReturnValue(true)
+    mockRelease.mockRejectedValue(
+      new DomainError('Purchase order not found.', 'NOT_FOUND', 404)
+    )
+
+    const req = new NextRequest('http://localhost/api/dashboard/orders/purchase/po-x/release')
+    const res = await POST(req, {
+      params: Promise.resolve({ orderType: 'purchase', id: 'po-x' })
+    })
+    const body = await res.json()
+
+    expect(res.status).toBe(404)
+    expect(body.error.code).toBe('NOT_FOUND')
+    expect(body.message).toBe('Purchase order not found.')
+  })
+
+  it('returns 500 and logs unexpected errors', async () => {
+    mockAuth.mockReturnValue({ userId: 'u1', role: 'OWNER' })
+    mockOffice.mockReturnValue(true)
+    mockRelease.mockRejectedValue(new Error('boom'))
+
+    const req = new NextRequest('http://localhost/api/dashboard/orders/purchase/po-1/release')
+    const res = await POST(req, {
+      params: Promise.resolve({ orderType: 'purchase', id: 'po-1' })
+    })
+    const body = await res.json()
+
+    expect(res.status).toBe(500)
+    expect(body.message).toBe('Failed to release purchase order.')
+    expect(mockLogAppError).toHaveBeenCalledWith(
+      '[POST /api/dashboard/orders/[orderType]/[id]/release]',
+      expect.any(Error)
+    )
   })
 })
