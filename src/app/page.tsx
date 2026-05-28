@@ -8,7 +8,7 @@ import {
   Scan,
   Shield,
   Users,
-  Zap,
+  Zap
 } from 'lucide-react'
 
 import LemonHeader from '@/components/primitives/typography/lemon-header'
@@ -20,7 +20,7 @@ const FEATURES = [
     description:
       'Organize your operation into warehouses, zones, and bins. Navigate any level of your floor at a glance.',
     iconBg: 'var(--entity-warehouse-soft)',
-    iconColor: 'var(--entity-warehouse)',
+    iconColor: 'var(--entity-warehouse)'
   },
   {
     icon: Package,
@@ -28,7 +28,7 @@ const FEATURES = [
     description:
       'Know exactly where every SKU lives. Real-time accuracy down to the individual bin.',
     iconBg: 'var(--entity-bin-soft)',
-    iconColor: 'var(--entity-bin)',
+    iconColor: 'var(--entity-bin)'
   },
   {
     icon: BarChart3,
@@ -36,7 +36,7 @@ const FEATURES = [
     description:
       'Managers see the full picture — utilization, activity, and warehouse health in one view.',
     iconBg: 'var(--dash-blue-dim)',
-    iconColor: 'var(--dash-blue)',
+    iconColor: 'var(--dash-blue)'
   },
   {
     icon: Scan,
@@ -44,7 +44,7 @@ const FEATURES = [
     description:
       'Workers sign in with badge + PIN on any terminal. A fast, task-focused UI built for the floor.',
     iconBg: 'var(--dash-green-dim)',
-    iconColor: 'var(--dash-green)',
+    iconColor: 'var(--dash-green)'
   },
   {
     icon: Users,
@@ -52,7 +52,7 @@ const FEATURES = [
     description:
       'Owners, office managers, and warehouse workers each see only what they need.',
     iconBg: 'var(--dash-amber-dim)',
-    iconColor: 'var(--dash-amber)',
+    iconColor: 'var(--dash-amber)'
   },
   {
     icon: Shield,
@@ -60,7 +60,7 @@ const FEATURES = [
     description:
       'JWT sessions, device-bound floor logins, and scoped permissions at every layer.',
     iconBg: 'var(--dash-red-dim)',
-    iconColor: 'var(--dash-red)',
+    iconColor: 'var(--dash-red)'
   },
   {
     icon: ArrowUpDown,
@@ -68,15 +68,15 @@ const FEATURES = [
     description:
       'Onboard master data in minutes. Import warehouses, zones, bins, users, and items from JSON or CSV — and export anytime for backups or migrations.',
     iconBg: 'var(--entity-zone-soft)',
-    iconColor: 'var(--entity-zone)',
-  },
+    iconColor: 'var(--entity-zone)'
+  }
 ] as const
 
 const STATS = [
   { value: '3-level', label: 'Location hierarchy' },
   { value: '5 roles', label: 'Access control tiers' },
   { value: 'Real-time', label: 'Inventory visibility' },
-  { value: 'Dual UX', label: 'Office + floor interfaces' },
+  { value: 'Dual UX', label: 'Office + floor interfaces' }
 ] as const
 
 export default function LandingPage() {
@@ -204,7 +204,7 @@ export default function LandingPage() {
                   'User and role management',
                   'Inventory overview and reporting',
                   'Real-time utilization metrics',
-                  'Bulk data import & export',
+                  'Bulk data import & export'
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2.5">
                     <span className="size-1.5 shrink-0 rounded-full bg-brand-primary" />
@@ -225,7 +225,7 @@ export default function LandingPage() {
               <span
                 className="inline-flex items-center rounded-full px-3 py-1 text-xs font-black uppercase tracking-widest text-white"
                 style={{
-                  background: 'linear-gradient(to bottom right, var(--entity-warehouse), var(--entity-warehouse-end))',
+                  background: 'linear-gradient(to bottom right, var(--entity-warehouse), var(--entity-warehouse-end))'
                 }}
               >
                 Warehouse
@@ -240,7 +240,7 @@ export default function LandingPage() {
                   'Badge + PIN authentication',
                   'Device-bound sessions',
                   'Fast bin lookup and scanning',
-                  'Task-focused, distraction-free UI',
+                  'Task-focused, distraction-free UI'
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-2.5">
                     <span

@@ -7,12 +7,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MapPin, Warehouse } from 'lucide-react'
 
+import type { BinRecord } from '@/components/features/locations/warehouses/components/dashboard-types'
 import type {
   DashboardInfoCardItem,
   DashboardRecordListItem,
-  WarehouseHomeData
+  WarehouseHomeData,
+  WarehouseOrderRecord
 } from '@/components/warehouse/orders/types'
+import { toWarehouseHomeBinGridRecords } from '@/components/warehouse/home/warehouse-home-bin-grid'
+import { resolveLastUserOrder } from '@/components/warehouse/home/warehouse-home-order-helpers'
 import { warehouseApiClient } from '@/lib/axios'
+import { DEFAULT_GENERIC_TABLE_PAGE_SIZE } from '@/types/components/table/generic-table.types'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
 const POLL_INTERVAL_MS = 30_000
@@ -92,8 +97,11 @@ export type UseWarehouseHomeReturn = {
   warehouseInfo: WarehouseHomeData['warehouseInfo'] | null
   bins: {
     records: WarehouseHomeData['bins']
+    gridRecords: BinRecord[]
     pageSize: number
   }
+  lastUserOrder: WarehouseOrderRecord | null
+  focusOrder: WarehouseOrderRecord | null
 }
 
 export function useWarehouseHome(): UseWarehouseHomeReturn {
@@ -179,6 +187,24 @@ export function useWarehouseHome(): UseWarehouseHomeReturn {
     () => getPriorityOrder(data?.orders ?? []),
     [data]
   )
+  const lastUserOrder = useMemo(
+    () => resolveLastUserOrder(data?.orders ?? [], data?.user.userId ?? null),
+    [data]
+  )
+  const focusOrder = useMemo(() => {
+    const userId = data?.user.userId ?? null
+    const active = data?.activeExecutingOrder ?? null
+
+    if (active && active.assignedUserId === userId) {
+      return active
+    }
+
+    return lastUserOrder
+  }, [data?.activeExecutingOrder, data?.user.userId, lastUserOrder])
+  const binGridRecords = useMemo(
+    () => toWarehouseHomeBinGridRecords(data?.bins ?? []),
+    [data?.bins]
+  )
 
   return {
     isLoading,
@@ -197,11 +223,14 @@ export function useWarehouseHome(): UseWarehouseHomeReturn {
     summary,
     priorityOrder,
     activeExecutingOrder: data?.activeExecutingOrder ?? null,
+    lastUserOrder,
+    focusOrder,
     user: data?.user ?? null,
     warehouseInfo: data?.warehouseInfo ?? null,
     bins: {
       records: data?.bins ?? [],
-      pageSize: PAGE_SIZE
+      gridRecords: binGridRecords,
+      pageSize: DEFAULT_GENERIC_TABLE_PAGE_SIZE
     }
   }
 }
