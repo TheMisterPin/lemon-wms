@@ -320,3 +320,13 @@ enum ErrorType {
   NETWORK
   UNKNOWN
 }
+
+// -----------------------------------------------------------------------------
+// Idempotency enums
+// -----------------------------------------------------------------------------
+
+enum IdempotencyStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}

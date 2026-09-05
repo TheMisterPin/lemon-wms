@@ -1,13 +1,14 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
+import { Prisma, ReceiptOutcome, ReceiptStatus } from '@/generated/prisma'
+import { withIdempotency } from '@/lib/api/idempotency'
 import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isFloorRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
 import { logAppError } from '@/lib/logs/app-logger'
 import { confirmSalesPickLineHandled } from '@/lib/orders/sales/sales-pick/sales-pick-mutations'
 import prisma from '@/lib/prisma'
-import { Prisma, ReceiptOutcome, ReceiptStatus } from '@/generated/prisma'
 
 const handleLineSchema = z.object({
   quantity: z.number().positive(),
@@ -63,86 +64,97 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
   const { quantity, disposition, notes, orderAssignmentId, activityNotes } = parsed.data
 
-  try {
-    const pickLine = await prisma.salesOrderPickLine.findUnique({
-      where: { id: lineId },
-      select: {
-        pick: {
-          select: {
-            id: true,
-            warehouseId: true,
-            salesOrderId: true,
-            status: true
-          }
-        }
-      }
-    })
-
-    if (!pickLine) {
-      return fail('Pick line not found.', 'NOT_FOUND', 404)
-    }
-
-    if (pickLine.pick.salesOrderId !== id) {
-      return fail('Pick line does not belong to this sales order.', 'INVALID_STATE', 400)
-    }
-
-    if (pickLine.pick.warehouseId !== warehouseId) {
-      return fail('Pick does not belong to your warehouse.', 'FORBIDDEN', 403)
-    }
-
-    if (
-      pickLine.pick.status === ReceiptStatus.COMPLETED ||
-      pickLine.pick.status === ReceiptStatus.COMPLETED_WITH_PROBLEMS
-    ) {
-      return fail('Pick is already completed.', 'INVALID_STATE', 409)
-    }
-
-    if (pickLine.pick.status === ReceiptStatus.OPEN) {
-      await prisma.salesOrderPick.updateMany({
-        where: { id: pickId, status: ReceiptStatus.OPEN },
-        data: {
-          status: ReceiptStatus.IN_PROGRESS,
-          startedById: payload.userId,
-          startedAt: new Date()
-        }
-      })
-    }
-
-    const result = await confirmSalesPickLineHandled(prisma, {
-      pickLineId: lineId,
-      quantity: new Prisma.Decimal(quantity),
-      disposition,
-      notes: notes ?? null,
-      orderAssignmentId,
-      userId: payload.userId,
-      warehouseId,
-      activityNotes: activityNotes ?? null
-    })
-
-    if (!result.success) {
-      return fail(result.error, result.code ?? 'DOMAIN_ERROR', 409)
-    }
-
-    const updatedPick = await prisma.salesOrderPick.findUnique({
-      where: { id: pickId },
-      select: { status: true }
-    })
-
-    return ok(
-      {
-        orderExecutionActivityId: result.orderExecutionActivityId,
-        pickLineId: lineId,
-        pickStatus: updatedPick?.status ?? null
-      },
-      'Pick line handled.'
-    )
-  } catch (error) {
-    if (error instanceof DomainError) {
-      return fail(error.message, error.code, error.status)
-    }
-
-    logAppError('[POST /api/warehouse/orders/[orderType]/[id]/pick/[pickId]/lines/[lineId]/handle]', error)
-
-    return fail('Failed to handle pick line.')
+  const idempotencyKey = req.headers.get('Idempotency-Key')?.trim()
+  if (!idempotencyKey) {
+    return fail('Idempotency-Key header is required.', 'IDEMPOTENCY_KEY_REQUIRED', 400)
   }
+
+  return withIdempotency(
+    prisma,
+    { scope: `pick-line:handle:${pickId}:${lineId}`, idempotencyKey, body: parsed.data, userId: payload.userId },
+    async () => {
+      try {
+        const pickLine = await prisma.salesOrderPickLine.findUnique({
+          where: { id: lineId },
+          select: {
+            pick: {
+              select: {
+                id: true,
+                warehouseId: true,
+                salesOrderId: true,
+                status: true
+              }
+            }
+          }
+        })
+
+        if (!pickLine) {
+          return fail('Pick line not found.', 'NOT_FOUND', 404)
+        }
+
+        if (pickLine.pick.salesOrderId !== id) {
+          return fail('Pick line does not belong to this sales order.', 'INVALID_STATE', 400)
+        }
+
+        if (pickLine.pick.warehouseId !== warehouseId) {
+          return fail('Pick does not belong to your warehouse.', 'FORBIDDEN', 403)
+        }
+
+        if (
+          pickLine.pick.status === ReceiptStatus.COMPLETED ||
+          pickLine.pick.status === ReceiptStatus.COMPLETED_WITH_PROBLEMS
+        ) {
+          return fail('Pick is already completed.', 'INVALID_STATE', 409)
+        }
+
+        if (pickLine.pick.status === ReceiptStatus.OPEN) {
+          await prisma.salesOrderPick.updateMany({
+            where: { id: pickId, status: ReceiptStatus.OPEN },
+            data: {
+              status: ReceiptStatus.IN_PROGRESS,
+              startedById: payload.userId,
+              startedAt: new Date()
+            }
+          })
+        }
+
+        const result = await confirmSalesPickLineHandled(prisma, {
+          pickLineId: lineId,
+          quantity: new Prisma.Decimal(quantity),
+          disposition,
+          notes: notes ?? null,
+          orderAssignmentId,
+          userId: payload.userId,
+          warehouseId,
+          activityNotes: activityNotes ?? null
+        })
+
+        if (!result.success) {
+          return fail(result.error, result.code ?? 'DOMAIN_ERROR', 409)
+        }
+
+        const updatedPick = await prisma.salesOrderPick.findUnique({
+          where: { id: pickId },
+          select: { status: true }
+        })
+
+        return ok(
+          {
+            orderExecutionActivityId: result.orderExecutionActivityId,
+            pickLineId: lineId,
+            pickStatus: updatedPick?.status ?? null
+          },
+          'Pick line handled.'
+        )
+      } catch (error) {
+        if (error instanceof DomainError) {
+          return fail(error.message, error.code, error.status)
+        }
+
+        logAppError('[POST /api/warehouse/orders/[orderType]/[id]/pick/[pickId]/lines/[lineId]/handle]', error)
+
+        return fail('Failed to handle pick line.')
+      }
+    }
+  )
 }

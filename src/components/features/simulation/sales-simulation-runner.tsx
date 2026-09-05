@@ -42,14 +42,20 @@ async function apiCall<T>(
   client: AxiosInstance,
   method: 'GET' | 'POST',
   path: string,
-  body?: unknown
+  body?: unknown,
+  headers?: Record<string, string>
 ): Promise<T> {
-  const res = await client.request<ApiResponse<T>>({ method, url: path, data: body })
+  const res = await client.request<ApiResponse<T>>({ method, url: path, data: body, headers })
   if (!res.data.success) {
     throw new Error(res.data.message ?? 'API error')
   }
 
   return res.data.data as T
+}
+
+/** Fresh Idempotency-Key for one mutating simulation step. */
+function idempotencyHeader(): Record<string, string> {
+  return { 'Idempotency-Key': crypto.randomUUID() }
 }
 
 const BASE_STEP_IDS = ['token', 'list', 'start', 'pick', 'targets']
@@ -156,7 +162,7 @@ export function SalesSimulationRunner({ config, onComplete, onError }: Props) {
 
         const startData = await timed<StartedOrder>(
           'start',
-          () => apiCall(client, 'POST', `/api/warehouse/orders/sales/${targetOrder.id}/start`),
+          () => apiCall(client, 'POST', `/api/warehouse/orders/sales/${targetOrder.id}/start`, undefined, idempotencyHeader()),
           (r) => `status=${r.status}`
         )
 
@@ -218,7 +224,8 @@ export function SalesSimulationRunner({ config, onComplete, onError }: Props) {
               disposition: 'ACCEPTED',
               orderAssignmentId: startData.orderAssignmentId,
               notes: `Simulation: picked ${target.orderedQuantity} ${target.uom} of ${target.itemNameSnapshot}`
-            }
+            },
+            idempotencyHeader()
           )
 
           lastPickStatus = handleResult.pickStatus

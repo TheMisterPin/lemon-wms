@@ -318,103 +318,124 @@ export type ConfirmPickLineHandledResult =
     }
   | { success: false; error: string; code?: string }
 
+export type ConfirmPickLineHandledSharedInTxResult = {
+  orderExecutionActivityId: string
+  binOperationEntryId?: string
+}
+
+/**
+ * confirmPickLineHandledSharedInTx.
+ * Core of confirmPickLineHandledShared, taking an already-open transaction so
+ * a caller can run it alongside other writes in one atomic transaction.
+ * Throws DomainError directly; no {success,...} envelope.
+ * @param tx - Parameter for confirmPickLineHandledSharedInTx.
+ * @param kind - Parameter for confirmPickLineHandledSharedInTx.
+ * @param input - Parameter for confirmPickLineHandledSharedInTx.
+ * @returns Result from confirmPickLineHandledSharedInTx.
+ */
+export async function confirmPickLineHandledSharedInTx(
+  tx: Tx,
+  kind: PickKind,
+  input: ConfirmPickLineHandledSharedInput
+): Promise<ConfirmPickLineHandledSharedInTxResult> {
+  const line = await loadPickLine(tx, kind, input.pickLineId)
+
+  if (!line) {
+    throw new DomainError('Pick line not found.', 'NOT_FOUND', 404)
+  }
+
+  if (line.correctionOfLineId) {
+    throw new DomainError('Cannot update a correction pick line in place.', 'INVALID_STATE', 400)
+  }
+
+  if (line.pick.deletedAt) {
+    throw new DomainError('Pick document has been deleted.', 'INVALID_STATE', 400)
+  }
+
+  const orderId = orderIdFromPick(line, kind)
+  const orderLineRefId = masterLineRefFromPickLine(line, kind)
+  const document = documentForPickKind(kind)
+  const activityType = pickActivityForQuantities(input.quantity, line.orderedQuantity)
+  const headerId = pickHeaderId(line)
+
+  const assignmentInput: OrderAssignmentActivityInput = {
+    orderAssignmentId: input.orderAssignmentId,
+    userId: input.userId,
+    warehouseId: input.warehouseId,
+    orderId,
+    orderType: orderTypeForPickKind(kind),
+    orderLineRefId,
+    notes: input.activityNotes ?? null
+  }
+
+  let orderExecutionActivityId: string
+  let binOperationEntryId: string | undefined
+
+  if (input.stockMove) {
+    const recorded = await recordOrderStockActivityInTx(tx, {
+      assignmentActivityInput: assignmentInput,
+      activityType,
+      executionLineDocument: document,
+      executionLineId: line.id,
+      notes: input.activityNotes ?? null,
+      userActivity:
+        typeof input.stockMove.logEntityId === 'string'
+          ? {
+            entityType: input.stockMove.logEntityType ?? 'PickLine',
+            entityId: input.stockMove.logEntityId,
+            metadata: input.stockMove.logMetadata
+          }
+          : undefined,
+      binOperation: input.stockMove.binOperation
+    })
+    orderExecutionActivityId = recorded.orderExecutionActivityId
+    binOperationEntryId = recorded.binOperationEntryId
+  } else {
+    const assignmentRow = await loadAssignmentForActivity(tx, assignmentInput)
+    const activityRow = await createExecutionActivityInTx(
+      tx,
+      assignmentRow,
+      assignmentInput,
+      activityType,
+      { executionLineDocument: document, executionLineId: line.id }
+    )
+    orderExecutionActivityId = activityRow.id
+  }
+
+  const updateData = {
+    quantity: input.quantity,
+    disposition: input.disposition,
+    notes: input.notes ?? null,
+    orderExecutionActivityId
+  }
+
+  switch (kind) {
+  case 'SALES':
+    await tx.salesOrderPickLine.update({ where: { id: line.id }, data: updateData })
+    break
+  case 'TRANSFER':
+    await tx.transferOrderPickLine.update({ where: { id: line.id }, data: updateData })
+    break
+  case 'RETURN':
+    await tx.returnOrderPickLine.update({ where: { id: line.id }, data: updateData })
+    break
+  case 'ADJUSTMENT':
+    await tx.adjustmentOrderPickLine.update({ where: { id: line.id }, data: updateData })
+    break
+  }
+
+  await recomputePickForKind(tx, kind, headerId)
+
+  return { orderExecutionActivityId, binOperationEntryId }
+}
+
 export async function confirmPickLineHandledShared(
   db: Db,
   kind: PickKind,
   input: ConfirmPickLineHandledSharedInput
 ): Promise<ConfirmPickLineHandledResult> {
   try {
-    const outcome = await db.$transaction(async (tx: Tx) => {
-      const line = await loadPickLine(tx, kind, input.pickLineId)
-
-      if (!line) {
-        throw new DomainError('Pick line not found.', 'NOT_FOUND', 404)
-      }
-
-      if (line.correctionOfLineId) {
-        throw new DomainError('Cannot update a correction pick line in place.', 'INVALID_STATE', 400)
-      }
-
-      if (line.pick.deletedAt) {
-        throw new DomainError('Pick document has been deleted.', 'INVALID_STATE', 400)
-      }
-
-      const orderId = orderIdFromPick(line, kind)
-      const orderLineRefId = masterLineRefFromPickLine(line, kind)
-      const document = documentForPickKind(kind)
-      const activityType = pickActivityForQuantities(input.quantity, line.orderedQuantity)
-      const headerId = pickHeaderId(line)
-
-      const assignmentInput: OrderAssignmentActivityInput = {
-        orderAssignmentId: input.orderAssignmentId,
-        userId: input.userId,
-        warehouseId: input.warehouseId,
-        orderId,
-        orderType: orderTypeForPickKind(kind),
-        orderLineRefId,
-        notes: input.activityNotes ?? null
-      }
-
-      let orderExecutionActivityId: string
-      let binOperationEntryId: string | undefined
-
-      if (input.stockMove) {
-        const recorded = await recordOrderStockActivityInTx(tx, {
-          assignmentActivityInput: assignmentInput,
-          activityType,
-          executionLineDocument: document,
-          executionLineId: line.id,
-          notes: input.activityNotes ?? null,
-          userActivity:
-            typeof input.stockMove.logEntityId === 'string'
-              ? {
-                entityType: input.stockMove.logEntityType ?? 'PickLine',
-                entityId: input.stockMove.logEntityId,
-                metadata: input.stockMove.logMetadata
-              }
-              : undefined,
-          binOperation: input.stockMove.binOperation
-        })
-        orderExecutionActivityId = recorded.orderExecutionActivityId
-        binOperationEntryId = recorded.binOperationEntryId
-      } else {
-        const assignmentRow = await loadAssignmentForActivity(tx, assignmentInput)
-        const activityRow = await createExecutionActivityInTx(
-          tx,
-          assignmentRow,
-          assignmentInput,
-          activityType,
-          { executionLineDocument: document, executionLineId: line.id }
-        )
-        orderExecutionActivityId = activityRow.id
-      }
-
-      const updateData = {
-        quantity: input.quantity,
-        disposition: input.disposition,
-        notes: input.notes ?? null,
-        orderExecutionActivityId
-      }
-
-      switch (kind) {
-      case 'SALES':
-        await tx.salesOrderPickLine.update({ where: { id: line.id }, data: updateData })
-        break
-      case 'TRANSFER':
-        await tx.transferOrderPickLine.update({ where: { id: line.id }, data: updateData })
-        break
-      case 'RETURN':
-        await tx.returnOrderPickLine.update({ where: { id: line.id }, data: updateData })
-        break
-      case 'ADJUSTMENT':
-        await tx.adjustmentOrderPickLine.update({ where: { id: line.id }, data: updateData })
-        break
-      }
-
-      await recomputePickForKind(tx, kind, headerId)
-
-      return { orderExecutionActivityId, binOperationEntryId }
-    })
+    const outcome = await db.$transaction((tx: Tx) => confirmPickLineHandledSharedInTx(tx, kind, input))
 
     return { success: true, ...outcome }
   } catch (err) {

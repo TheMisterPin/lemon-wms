@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 
+import { withIdempotency } from '@/lib/api/idempotency'
 import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isFloorRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
@@ -58,22 +59,35 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
     return fail('Warehouse context is required.', 'VALIDATION_ERROR', 400)
   }
 
-  try {
-    const data =
-      kind === 'purchase'
-        ? await pausePurchaseOrder(prisma, id, payload.warehouseId, payload.userId)
-        : kind === 'sales'
-          ? await pauseSalesOrder(prisma, id, payload.warehouseId, payload.userId)
-          : await pauseTransferOrder(prisma, id, payload.warehouseId, payload.userId)
-
-    return ok(data, 'Order paused.')
-  } catch (error) {
-    if (error instanceof DomainError) {
-      return fail(error.message, error.code, error.status)
-    }
-
-    logAppError('[POST /api/warehouse/orders/[orderType]/[id]/pause]', error)
-
-    return fail('Failed to pause order.')
+  const idempotencyKey = _req.headers.get('Idempotency-Key')?.trim()
+  if (!idempotencyKey) {
+    return fail('Idempotency-Key header is required.', 'IDEMPOTENCY_KEY_REQUIRED', 400)
   }
+
+  const warehouseId = payload.warehouseId
+
+  return withIdempotency(
+    prisma,
+    { scope: `${kind}:pause:${id}`, idempotencyKey, body: {}, userId: payload.userId },
+    async () => {
+      try {
+        const data =
+          kind === 'purchase'
+            ? await pausePurchaseOrder(prisma, id, warehouseId, payload.userId)
+            : kind === 'sales'
+              ? await pauseSalesOrder(prisma, id, warehouseId, payload.userId)
+              : await pauseTransferOrder(prisma, id, warehouseId, payload.userId)
+
+        return ok(data, 'Order paused.')
+      } catch (error) {
+        if (error instanceof DomainError) {
+          return fail(error.message, error.code, error.status)
+        }
+
+        logAppError('[POST /api/warehouse/orders/[orderType]/[id]/pause]', error)
+
+        return fail('Failed to pause order.')
+      }
+    }
+  )
 }

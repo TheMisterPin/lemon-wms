@@ -5,6 +5,7 @@ import {
   ZoneType,
   type PrismaClient
 } from '@/generated/prisma'
+import { computeBinStockItemBucketKey } from '@/lib/stock/stock-mutations'
 
 const MAX_UNIQUE_ITEMS_PER_BIN = 12
 const CATEGORY_SEED_DISTINCT_ITEMS_MIN = 3
@@ -380,7 +381,8 @@ export async function seedBinStockItems(prisma: PrismaClient) {
           quantityAvailable,
           quantityReserved,
           quantityBlocked,
-          status
+          status,
+          bucketKey: computeBinStockItemBucketKey({ binId: bin.id, itemId: item.id, status })
         })
 
         const currentCapacity = capacityByBinId.get(bin.id) ?? {
@@ -494,7 +496,8 @@ export async function seedBinStockItems(prisma: PrismaClient) {
         quantityAvailable,
         quantityReserved,
         quantityBlocked,
-        status
+        status,
+        bucketKey: computeBinStockItemBucketKey({ binId: bin.id, itemId: item.id, status })
       })
 
       const currentCapacity = capacityByBinId.get(bin.id) ?? {

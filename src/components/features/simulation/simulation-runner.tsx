@@ -30,14 +30,20 @@ async function apiCall<T>(
   client: AxiosInstance,
   method: 'GET' | 'POST',
   path: string,
-  body?: unknown
+  body?: unknown,
+  headers?: Record<string, string>
 ): Promise<T> {
-  const res = await client.request<ApiResponse<T>>({ method, url: path, data: body })
+  const res = await client.request<ApiResponse<T>>({ method, url: path, data: body, headers })
   if (!res.data.success) {
     throw new Error(res.data.message ?? 'API error')
   }
 
   return res.data.data as T
+}
+
+/** Fresh Idempotency-Key for one mutating simulation step. */
+function idempotencyHeader(): Record<string, string> {
+  return { 'Idempotency-Key': crypto.randomUUID() }
 }
 
 const BASE_STEP_IDS = ['token', 'list', 'start', 'receipt']
@@ -163,7 +169,7 @@ export function SimulationRunner({ config, onComplete, onError }: Props) {
 
         const startData = await timed<StartedOrder>(
           'start',
-          () => apiCall(client, 'POST', `/api/warehouse/orders/purchase/${targetOrder.id}/start`),
+          () => apiCall(client, 'POST', `/api/warehouse/orders/purchase/${targetOrder.id}/start`, undefined, idempotencyHeader()),
           (r) => `status=${r.status}`
         )
 
@@ -209,7 +215,8 @@ export function SimulationRunner({ config, onComplete, onError }: Props) {
               orderAssignmentId: startData.orderAssignmentId,
               toBinId: config.toBinId,
               notes: `Simulation: received ${line.orderedQuantity} ${line.uom} of ${line.itemNameSnapshot}`
-            }
+            },
+            idempotencyHeader()
           )
           setLineHandling({
             active: true,
@@ -233,7 +240,7 @@ export function SimulationRunner({ config, onComplete, onError }: Props) {
           const pauseData = await timed<PauseOrderResult>(
             'pause',
             () =>
-              apiCall(client, 'POST', `/api/warehouse/orders/purchase/${targetOrder.id}/pause`),
+              apiCall(client, 'POST', `/api/warehouse/orders/purchase/${targetOrder.id}/pause`, undefined, idempotencyHeader()),
             (r) => `status=${r.status}`
           )
 
@@ -253,10 +260,16 @@ export function SimulationRunner({ config, onComplete, onError }: Props) {
           const completeData = await timed<CompleteReceiptResult>(
             'complete',
             () =>
-              apiCall(client, 'POST', `/api/warehouse/orders/purchase/${targetOrder.id}/receipt/${receipt.id}/complete`, {
-                orderAssignmentId: startData.orderAssignmentId,
-                notes: 'Simulation complete'
-              }),
+              apiCall(
+                client,
+                'POST',
+                `/api/warehouse/orders/purchase/${targetOrder.id}/receipt/${receipt.id}/complete`,
+                {
+                  orderAssignmentId: startData.orderAssignmentId,
+                  notes: 'Simulation complete'
+                },
+                idempotencyHeader()
+              ),
             (r) => `status=${r.orderStatus}`
           )
 

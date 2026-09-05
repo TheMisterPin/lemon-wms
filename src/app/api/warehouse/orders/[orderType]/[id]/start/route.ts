@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
+import { withIdempotency } from '@/lib/api/idempotency'
 import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isFloorRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
@@ -68,30 +69,43 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return fail('Invalid request body.', 'VALIDATION_ERROR', 400)
   }
 
-  try {
-    const data = await startOperationalOrderForFloorUser(prisma, {
-      kind,
-      orderId: id,
-      warehouseId: payload.warehouseId,
-      userId: payload.userId,
-      zoneId: payload.zoneId ?? null,
-      forcePauseOthers: parsedBody.data.forcePauseOthers === true
-    })
-
-    return ok(data, 'Order execution started.')
-  } catch (error) {
-    if (error instanceof ActiveOrderConflictDomainError) {
-      return fail(error.message, error.code, error.status, {
-        conflictingOrders: error.conflictingOrders
-      })
-    }
-
-    if (error instanceof DomainError) {
-      return fail(error.message, error.code, error.status)
-    }
-
-    logAppError('[POST /api/warehouse/orders/[orderType]/[id]/start]', error)
-
-    return fail('Failed to start order.')
+  const idempotencyKey = req.headers.get('Idempotency-Key')?.trim()
+  if (!idempotencyKey) {
+    return fail('Idempotency-Key header is required.', 'IDEMPOTENCY_KEY_REQUIRED', 400)
   }
+
+  const warehouseId = payload.warehouseId
+
+  return withIdempotency(
+    prisma,
+    { scope: `${kind}:start:${id}`, idempotencyKey, body: parsedBody.data, userId: payload.userId },
+    async () => {
+      try {
+        const data = await startOperationalOrderForFloorUser(prisma, {
+          kind,
+          orderId: id,
+          warehouseId,
+          userId: payload.userId,
+          zoneId: payload.zoneId ?? null,
+          forcePauseOthers: parsedBody.data.forcePauseOthers === true
+        })
+
+        return ok(data, 'Order execution started.')
+      } catch (error) {
+        if (error instanceof ActiveOrderConflictDomainError) {
+          return fail(error.message, error.code, error.status, {
+            conflictingOrders: error.conflictingOrders
+          })
+        }
+
+        if (error instanceof DomainError) {
+          return fail(error.message, error.code, error.status)
+        }
+
+        logAppError('[POST /api/warehouse/orders/[orderType]/[id]/start]', error)
+
+        return fail('Failed to start order.')
+      }
+    }
+  )
 }

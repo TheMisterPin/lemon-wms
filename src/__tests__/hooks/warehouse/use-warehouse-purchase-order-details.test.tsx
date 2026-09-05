@@ -9,7 +9,8 @@ vi.mock('@/lib/axios', () => ({
   warehouseApiClient: {
     get: vi.fn(),
     post: vi.fn()
-  }
+  },
+  idempotencyKeyHeader: () => ({ 'Idempotency-Key': 'test-key' })
 }))
 
 const dialogMocks = vi.hoisted(() => ({
@@ -179,7 +180,8 @@ describe('useWarehousePurchaseOrderDetails', () => {
         disposition: ReceiptOutcome.ACCEPTED,
         orderAssignmentId: 'asg-1',
         notes: 'ok'
-      })
+      }),
+      { headers: { 'Idempotency-Key': 'test-key' } }
     )
     expect(mockGet.mock.calls.length).toBeGreaterThanOrEqual(3)
   })
@@ -259,7 +261,8 @@ describe('useWarehousePurchaseOrderDetails', () => {
 
     expect(mockPost).toHaveBeenCalledWith(
       '/warehouse/orders/purchase/po-99/receipt/rec-1/complete',
-      { orderAssignmentId: 'asg-1', notes: 'done' }
+      { orderAssignmentId: 'asg-1', notes: 'done' },
+      { headers: { 'Idempotency-Key': 'test-key' } }
     )
   })
 })

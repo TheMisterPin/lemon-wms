@@ -1,12 +1,18 @@
 import { Prisma } from '@/generated/prisma'
 
+import { DomainError } from '@/lib/errors'
 import { getZoneFromBin, updateBinCapacity } from '@/lib/locations'
 import { createBinOperationsFromItem } from '@/lib/logs/bin-operation-entries/create-from-item'
 import { updateBinCapacityBy } from '@/lib/stock/stock-mutations'
 import type { AddItemsToBinArgs, UnloadItemsFromTrolleyArgs } from '@/types/stock'
 import type { LoadItemsToTrolleyArgs } from '@/types/stock'
 import type { RemoveItemsFromBinArgs } from '@/types/stock'
-import { decrementOrDeleteStockItem, findAvailableStockItem, upsertAvailableStockItem } from '../stock-mutations'
+import {
+  computeBinStockItemBucketKey,
+  decrementOrDeleteStockItem,
+  findAvailableStockItem,
+  upsertAvailableStockItem
+} from '../stock-mutations'
 import { decimalToNumber, normalizePositiveQuantity } from '../stock-validators'
 
 /**
@@ -21,10 +27,7 @@ async function removeItemsFromBin(args: RemoveItemsFromBinArgs) {
   return prisma.$transaction(async (tx) => {
     const source = await tx.binStockItem.findUnique({ where: { id: binStockItemId } })
     if (!source || source.warehouseId !== warehouseId) {
-      throw new Error('Source bin stock item not found')
-    }
-    if (source.quantityAvailable.lt(normalizedQuantity)) {
-      throw new Error('Insufficient quantity in source bin stock item')
+      throw new DomainError('Source bin stock item not found.', 'NOT_FOUND', 404)
     }
 
     const { id: sourceZoneId } = await getZoneFromBin(tx, source.binId)
@@ -69,10 +72,10 @@ async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
     })
 
     if (!source || source.warehouseId !== warehouseId) {
-      throw new Error('Source bin stock item not found')
+      throw new DomainError('Source bin stock item not found.', 'NOT_FOUND', 404)
     }
     if (source.status !== 'AVAILABLE' && source.status !== 'RESERVED') {
-      throw new Error('Source bin stock item not found')
+      throw new DomainError('Source bin stock item not found.', 'NOT_FOUND', 404)
     }
 
     const isReserved = source.status === 'RESERVED'
@@ -100,13 +103,23 @@ async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
       }
     })
 
-    // For RESERVED items: decrement quantityReserved now (source bin ownership is settled at load time)
+    // For RESERVED items: decrement quantityReserved now (source bin ownership is settled at load time).
+    // Guarded conditional update — the `gte` check is re-evaluated at write time, not against the
+    // `source` snapshot read above, so two concurrent loads can't both succeed against the same reservation.
     if (isReserved) {
-      const nextReserved = decimalToNumber(source.quantityReserved) - normalizedQuantity
-      if (nextReserved <= 0) {
-        if (decimalToNumber(source.quantityAvailable) > 0) {
-          await tx.binStockItem.update({
-            where: { id: source.id },
+      const decremented = await tx.binStockItem.updateMany({
+        where: { id: source.id, quantityReserved: { gte: normalizedQuantity } },
+        data: { quantityReserved: { decrement: normalizedQuantity }, lastOperationBoeId: transferLoadBoe.id }
+      })
+      if (decremented.count === 0) {
+        throw new DomainError('Insufficient quantity in source bin stock item.', 'INSUFFICIENT_STOCK', 409)
+      }
+
+      const updatedSource = await tx.binStockItem.findUnique({ where: { id: source.id } })
+      if (updatedSource && updatedSource.quantityReserved.lte(0)) {
+        if (updatedSource.quantityAvailable.gt(0)) {
+          await tx.binStockItem.updateMany({
+            where: { id: source.id, quantityReserved: { lte: 0 } },
             data: {
               quantityReserved: new Prisma.Decimal(0),
               status: 'AVAILABLE',
@@ -116,61 +129,50 @@ async function loadItemsToTrolley(args: LoadItemsToTrolleyArgs) {
             }
           })
         } else {
-          await tx.binStockItem.delete({ where: { id: source.id } })
+          await tx.binStockItem.deleteMany({
+            where: { id: source.id, quantityReserved: { lte: 0 }, quantityAvailable: { lte: 0 } }
+          })
         }
-      } else {
-        await tx.binStockItem.update({
-          where: { id: source.id },
-          data: {
-            quantityReserved: new Prisma.Decimal(nextReserved),
-            lastOperationBoeId: transferLoadBoe.id
-          }
-        })
       }
     }
 
-    const existingTransit = await tx.binStockItem.findFirst({
-      where: {
+    const transitBucketKey = computeBinStockItemBucketKey({
+      binId: source.binId,
+      itemId: source.itemId,
+      lotId: source.lotId,
+      serialNumberId: source.serialNumberId,
+      status: 'IN_TRANSIT',
+      transitDeviceId: deviceId,
+      transitTrolleyId: trolleyId ?? null
+    })
+
+    const transitStockItem = await tx.binStockItem.upsert({
+      where: { bucketKey: transitBucketKey },
+      update: {
+        quantityAvailable: { increment: normalizedQuantity },
+        lastOperationBoeId: transferLoadBoe.id
+      },
+      create: {
         warehouseId,
         binId: source.binId,
         itemId: source.itemId,
         lotId: source.lotId,
         serialNumberId: source.serialNumberId,
+        bucketKey: transitBucketKey,
+        quantityAvailable: new Prisma.Decimal(normalizedQuantity),
+        quantityReserved: new Prisma.Decimal(0),
+        quantityBlocked: new Prisma.Decimal(0),
+        uom: source.uom,
+        status: 'IN_TRANSIT',
         transitDeviceId: deviceId,
         transitTrolleyId: trolleyId ?? null,
-        status: 'IN_TRANSIT'
+        reservedByOrderId: isReserved ? source.reservedByOrderId : null,
+        createdByBoeId: transferLoadBoe.id,
+        lastOperationBoeId: transferLoadBoe.id,
+        name: source.name,
+        sku: source.sku
       }
     })
-
-    const transitStockItem = existingTransit
-      ? await tx.binStockItem.update({
-        where: { id: existingTransit.id },
-        data: {
-          quantityAvailable: { increment: normalizedQuantity },
-          lastOperationBoeId: transferLoadBoe.id
-        }
-      })
-      : await tx.binStockItem.create({
-        data: {
-          warehouseId,
-          binId: source.binId,
-          itemId: source.itemId,
-          lotId: source.lotId,
-          serialNumberId: source.serialNumberId,
-          quantityAvailable: new Prisma.Decimal(normalizedQuantity),
-          quantityReserved: new Prisma.Decimal(0),
-          quantityBlocked: new Prisma.Decimal(0),
-          uom: source.uom,
-          status: 'IN_TRANSIT',
-          transitDeviceId: deviceId,
-          transitTrolleyId: trolleyId ?? null,
-          reservedByOrderId: isReserved ? source.reservedByOrderId : null,
-          createdByBoeId: transferLoadBoe.id,
-          lastOperationBoeId: transferLoadBoe.id,
-          name: source.name,
-          sku: source.sku
-        }
-      })
 
     return { boes: [transferLoadBoe], transitStockItem }
   })
@@ -193,7 +195,7 @@ async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
       select: { id: true }
     })
     if (!toBin) {
-      throw new Error('Destination bin not found')
+      throw new DomainError('Destination bin not found.', 'NOT_FOUND', 404)
     }
 
     const { id: destinationZoneId } = await getZoneFromBin(tx, toBinId)
@@ -209,14 +211,11 @@ async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
         transitItem.warehouseId !== warehouseId ||
         transitItem.status !== 'IN_TRANSIT'
       ) {
-        throw new Error('Transit item not found')
+        throw new DomainError('Transit item not found.', 'NOT_FOUND', 404)
       }
 
       const requestedQty = selection.quantity ?? decimalToNumber(transitItem.quantityAvailable)
       const unloadQty = normalizePositiveQuantity(requestedQty)
-      if (transitItem.quantityAvailable.lt(unloadQty)) {
-        throw new Error('Insufficient quantity in transit item')
-      }
 
       // RESERVED-sourced transit items already had their source bin decremented at load time;
       // only decrement the source AVAILABLE row for AVAILABLE-sourced items.
@@ -231,10 +230,8 @@ async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
         )
         : null
 
-      if (!transitItem.reservedByOrderId) {
-        if (!sourceAvailable || sourceAvailable.quantityAvailable.lt(unloadQty)) {
-          throw new Error('Insufficient quantity in origin bin stock item')
-        }
+      if (!transitItem.reservedByOrderId && !sourceAvailable) {
+        throw new DomainError('Origin bin stock item not found.', 'NOT_FOUND', 404)
       }
 
       const transferUnloadBoe = await tx.binOperationEntry.create({
@@ -269,18 +266,7 @@ async function unloadItemsFromTrolley(args: UnloadItemsFromTrolleyArgs) {
         boeId: transferUnloadBoe.id
       })
 
-      const nextTransitQty = decimalToNumber(transitItem.quantityAvailable) - unloadQty
-      if (nextTransitQty <= 0) {
-        await tx.binStockItem.delete({ where: { id: transitItem.id } })
-      } else {
-        await tx.binStockItem.update({
-          where: { id: transitItem.id },
-          data: {
-            quantityAvailable: new Prisma.Decimal(nextTransitQty),
-            lastOperationBoeId: transferUnloadBoe.id
-          }
-        })
-      }
+      await decrementOrDeleteStockItem(tx, transitItem.id, unloadQty, transferUnloadBoe.id)
 
       await updateBinCapacity(tx, transitItem.binId)
       await updateBinCapacity(tx, toBinId)

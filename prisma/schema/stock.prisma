@@ -15,9 +15,17 @@
 //   → iam.prisma (Device) — transit device tracking
 // =============================================================================
 
-// One row per unique combination of bin × item × lot (or × serial for serial-tracked).
-// Uniqueness is enforced by three partial unique indexes — see TESTING.md for the
-// raw SQL migrations that create them, as Prisma does not support conditional indexes.
+// One row per unique combination of bin × item × lot (or × serial for serial-tracked)
+// × status × transit device/trolley. The compound @@unique below documents that
+// intent and still protects genuinely lot/serial/transit-tagged rows, but
+// Postgres treats NULL as distinct from NULL in a unique index, so it does NOT
+// dedupe the common untracked case (lotId/serialNumberId/transitDeviceId/
+// transitTrolleyId all null). bucketKey is a single always-non-null column
+// (the same fields joined with ":", nulls normalized to "") that Prisma schema
+// can express as a real, always-effective @unique — mutations must upsert on
+// bucketKey rather than find-then-create, to avoid racing two concurrent
+// inserts into the same bucket. See computeBinStockItemBucketKey in
+// src/lib/stock/stock-mutations.ts.
 //
 // Quantity semantics:
 //   quantityAvailable — free stock, can be picked
@@ -25,8 +33,9 @@
 //   quantityBlocked   — quarantine hold, cannot be picked or reserved
 //   usable            = quantityAvailable - quantityReserved
 //
-// Check constraint (raw SQL migration required):
-//   quantityAvailable >= 0
+// quantityAvailable/quantityReserved are never allowed to go negative — this is
+// enforced at the application layer via guarded conditional updates (see
+// src/lib/stock/stock-mutations.ts), not a DB check constraint.
 model BinStockItem {
   id                        String                     @id @default(uuid())
   warehouseId               String
@@ -54,6 +63,7 @@ model BinStockItem {
   createdAt                 DateTime                   @default(now())
   updatedAt                 DateTime                   @updatedAt
   boxId                     String?
+  bucketKey                 String                     @unique
   purchaseOrderReceiptLines PurchaseOrderReceiptLine[] @relation("BinStockItemPurchaseOrderReceiptLines")
   salesOrderPickLines       SalesOrderPickLine[]       @relation("BinStockItemSalesOrderPickLines")
   transferOrderPickLines    TransferOrderPickLine[]    @relation("BinStockItemTransferOrderPickLines")
@@ -69,7 +79,7 @@ model BinStockItem {
   transitTrolley Trolley?      @relation("TransitTrolleyStockItems", fields: [transitTrolleyId], references: [id])
   boxLines       BoxLine[]
 
-  @@unique([binId, itemId, lotId, serialNumberId, status, transitDeviceId, transitTrolleyId])
+  @@unique([binId, itemId, lotId, serialNumberId, status, transitDeviceId, transitTrolleyId], name: "BinStockItem_bucket_key")
   @@index([warehouseId, itemId])
   @@index([binId, itemId])
   @@index([status])

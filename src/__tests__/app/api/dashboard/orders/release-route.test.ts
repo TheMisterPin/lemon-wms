@@ -18,6 +18,10 @@ vi.mock('@/lib/orders/purchase/receipt/create-receipt-order', () => ({
   createPurchaseOrderReceipt: vi.fn()
 }))
 
+vi.mock('@/lib/api/idempotency', () => ({
+  withIdempotency: vi.fn((_db: unknown, _args: unknown, handler: () => unknown) => handler())
+}))
+
 import { POST } from '@/app/api/dashboard/orders/[orderType]/[id]/release/route'
 import { OrderStatus } from '@/generated/prisma'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
@@ -87,11 +91,26 @@ describe('POST /api/dashboard/orders/[orderType]/[id]/release', () => {
     expect(mockRelease).not.toHaveBeenCalled()
   })
 
+  it('returns 400 when Idempotency-Key header missing', async () => {
+    mockAuth.mockReturnValue({ userId: 'u1', role: 'OWNER' })
+    mockOffice.mockReturnValue(true)
+    const req = new NextRequest('http://localhost/api/dashboard/orders/purchase/po-1/release')
+    const res = await POST(req, {
+      params: Promise.resolve({ orderType: 'purchase', id: 'po-1' })
+    })
+    const body = await res.json()
+    expect(res.status).toBe(400)
+    expect(body.error?.code).toBe('IDEMPOTENCY_KEY_REQUIRED')
+    expect(mockRelease).not.toHaveBeenCalled()
+  })
+
   it('returns 200 on success', async () => {
     mockAuth.mockReturnValue({ userId: 'u1', role: 'OWNER' })
     mockOffice.mockReturnValue(true)
     mockRelease.mockResolvedValue({ id: 'po-1', status: OrderStatus.RELEASED })
-    const req = new NextRequest('http://localhost/api/dashboard/orders/purchase/po-1/release')
+    const req = new NextRequest('http://localhost/api/dashboard/orders/purchase/po-1/release', {
+      headers: { 'Idempotency-Key': 'test-key' }
+    })
     const res = await POST(req, {
       params: Promise.resolve({ orderType: 'purchase', id: 'po-1' })
     })

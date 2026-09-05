@@ -16,7 +16,7 @@ import {
   PURCHASE_RECEIPT_DECLARE_OUTCOMES,
   type ReceiptLineProgress
 } from '@/components/warehouse/orders/warehouse-purchase-order-details-derive'
-import { warehouseApiClient } from '@/lib/axios'
+import { idempotencyKeyHeader, warehouseApiClient } from '@/lib/axios'
 import type { WarehousePurchaseOrderReceiptApi } from '@/types/api/warehouse-purchase-order-receipt'
 import type { ApiResponse } from '@/types/responses/basic-response'
 
@@ -269,7 +269,8 @@ export function useWarehousePurchaseOrderDetails(orderId: string) {
     ): Promise<ApiResponse<unknown>> => {
       return warehouseApiClient.post<ApiResponse<unknown>>(
         `/warehouse/orders/purchase/${encodeURIComponent(orderId.trim())}/${action}`,
-        body ?? {}
+        body ?? {},
+        { headers: idempotencyKeyHeader() }
       )
     },
     [orderId]
@@ -484,7 +485,8 @@ export function useWarehousePurchaseOrderDetails(orderId: string) {
             disposition: input.disposition,
             orderAssignmentId: resolvedAssignmentId,
             notes: input.notes
-          }
+          },
+          { headers: idempotencyKeyHeader() }
         )
 
         if (!res.success) {
@@ -548,7 +550,8 @@ export function useWarehousePurchaseOrderDetails(orderId: string) {
           {
             orderAssignmentId: resolvedAssignmentId,
             notes: notes ?? null
-          }
+          },
+          { headers: idempotencyKeyHeader() }
         )
 
         if (!res.success) {

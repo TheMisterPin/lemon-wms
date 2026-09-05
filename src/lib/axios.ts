@@ -267,8 +267,10 @@ function createTypedClient(instance: typeof sharedApi) {
 
       return request
     },
-    post: <T = any>(url: string, data?: any) =>
-      instance.request<T>({ method: 'POST', url, data }).then((response) => response.data),
+    post: <T = any>(url: string, data?: any, config?: { headers?: Record<string, string> }) =>
+      instance
+        .request<T>({ method: 'POST', url, data, headers: config?.headers })
+        .then((response) => response.data),
     put: <T = any>(url: string, data?: any) =>
       instance.request<T>({ method: 'PUT', url, data }).then((response) => response.data),
     patch: <T = any>(url: string, data?: any) =>
@@ -282,3 +284,12 @@ function createTypedClient(instance: typeof sharedApi) {
 export const dashboardApiClient = createTypedClient(dashboardApi)
 /** Warehouse floor client with bearer + floor context headers. */
 export const warehouseApiClient = createTypedClient(warehouseApi)
+
+/**
+ * A fresh Idempotency-Key header for one user-initiated mutating request.
+ * Generate a new one per attempt (button click, scan) — a retry of that exact
+ * attempt should reuse the same key, a new attempt should get a new one.
+ */
+export function idempotencyKeyHeader(): Record<string, string> {
+  return { 'Idempotency-Key': crypto.randomUUID() }
+}

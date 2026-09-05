@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
+import { withIdempotency } from '@/lib/api/idempotency'
 import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isFloorRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
@@ -55,28 +56,41 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return fail('Validation failed.', 'VALIDATION_ERROR', 400)
   }
 
-  try {
-    const result = await completePurchaseOrderReceipt(prisma, {
-      receiptId,
-      purchaseOrderId: id,
-      orderAssignmentId: parsed.data.orderAssignmentId,
-      userId: payload.userId,
-      warehouseId: payload.warehouseId,
-      notes: parsed.data.notes ?? null
-    })
-
-    if (!result.success) {
-      return fail(result.error, result.code ?? 'DOMAIN_ERROR', 409)
-    }
-
-    return ok(result, 'Purchase order executed.')
-  } catch (error) {
-    if (error instanceof DomainError) {
-      return fail(error.message, error.code, error.status)
-    }
-
-    logAppError('[POST /api/warehouse/orders/[orderType]/[id]/receipt/[receiptId]/complete]', error)
-
-    return fail('Failed to complete receipt.')
+  const idempotencyKey = req.headers.get('Idempotency-Key')?.trim()
+  if (!idempotencyKey) {
+    return fail('Idempotency-Key header is required.', 'IDEMPOTENCY_KEY_REQUIRED', 400)
   }
+
+  const warehouseId = payload.warehouseId
+
+  return withIdempotency(
+    prisma,
+    { scope: `receipt:complete:${receiptId}`, idempotencyKey, body: parsed.data, userId: payload.userId },
+    async () => {
+      try {
+        const result = await completePurchaseOrderReceipt(prisma, {
+          receiptId,
+          purchaseOrderId: id,
+          orderAssignmentId: parsed.data.orderAssignmentId,
+          userId: payload.userId,
+          warehouseId,
+          notes: parsed.data.notes ?? null
+        })
+
+        if (!result.success) {
+          return fail(result.error, result.code ?? 'DOMAIN_ERROR', 409)
+        }
+
+        return ok(result, 'Purchase order executed.')
+      } catch (error) {
+        if (error instanceof DomainError) {
+          return fail(error.message, error.code, error.status)
+        }
+
+        logAppError('[POST /api/warehouse/orders/[orderType]/[id]/receipt/[receiptId]/complete]', error)
+
+        return fail('Failed to complete receipt.')
+      }
+    }
+  )
 }

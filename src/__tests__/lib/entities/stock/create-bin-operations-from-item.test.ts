@@ -21,9 +21,12 @@ function createMockPrisma() {
       aggregate: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
       findFirst: vi.fn(),
       findUnique: vi.fn(),
-      delete: vi.fn()
+      delete: vi.fn(),
+      deleteMany: vi.fn()
     },
     itemLedgerEntry: {
       create: vi.fn(),
@@ -99,8 +102,7 @@ describe('createBinOperationsFromItem', () => {
     tx.binOperationEntry.create.mockResolvedValue({ id: 'boe-adj' })
     tx.bin.findUnique.mockResolvedValue({ id: 'bin-1', currentCapacity: new Prisma.Decimal(10) })
     tx.bin.update.mockResolvedValue({ id: 'bin-1' })
-    tx.binStockItem.findFirst.mockResolvedValue(null)
-    tx.binStockItem.create.mockResolvedValue({ id: 'bsi-adj' })
+    tx.binStockItem.upsert.mockResolvedValue({ id: 'bsi-adj' })
     tx.itemLedgerEntry.create.mockResolvedValue({ id: 1 })
 
     const result = await createBinOperationsFromItem({
@@ -125,7 +127,7 @@ describe('createBinOperationsFromItem', () => {
       })
     )
 
-    expect(tx.binStockItem.create).toHaveBeenCalledTimes(1)
+    expect(tx.binStockItem.upsert).toHaveBeenCalledTimes(1)
     expect(tx.binStockItem.update).not.toHaveBeenCalled()
     expect(tx.itemLedgerEntry.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -143,11 +145,7 @@ describe('createBinOperationsFromItem', () => {
     tx.binOperationEntry.create.mockResolvedValue({ id: 'boe-adj-existing' })
     tx.bin.findUnique.mockResolvedValue({ id: 'bin-1', currentCapacity: new Prisma.Decimal(7) })
     tx.bin.update.mockResolvedValue({ id: 'bin-1' })
-    tx.binStockItem.findFirst.mockResolvedValue({
-      id: 'bsi-existing',
-      quantityAvailable: new Prisma.Decimal(7)
-    })
-    tx.binStockItem.update.mockResolvedValue({ id: 'bsi-existing' })
+    tx.binStockItem.upsert.mockResolvedValue({ id: 'bsi-existing' })
     tx.itemLedgerEntry.create.mockResolvedValue({ id: 2 })
 
     const result = await createBinOperationsFromItem({
@@ -162,11 +160,11 @@ describe('createBinOperationsFromItem', () => {
 
     expect(tx.binOperationEntry.create).toHaveBeenCalledTimes(1)
     expect(tx.binStockItem.create).not.toHaveBeenCalled()
-    expect(tx.binStockItem.update).toHaveBeenCalledTimes(1)
-    expect(tx.binStockItem.update).toHaveBeenCalledWith(
+    expect(tx.binStockItem.update).not.toHaveBeenCalled()
+    expect(tx.binStockItem.upsert).toHaveBeenCalledTimes(1)
+    expect(tx.binStockItem.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'bsi-existing' },
-        data: expect.objectContaining({
+        update: expect.objectContaining({
           quantityAvailable: { increment: 5 },
           lastOperationBoeId: 'boe-adj-existing'
         })
@@ -185,23 +183,22 @@ describe('createBinOperationsFromItem', () => {
       .mockResolvedValueOnce({ id: 'zone-from', name: 'From' })
       .mockResolvedValueOnce({ id: 'zone-to', name: 'To' })
 
-    tx.binStockItem.findFirst
-      .mockResolvedValueOnce({
-        id: 'source-stock',
-        quantityAvailable: new Prisma.Decimal(10)
-      })
-      .mockResolvedValueOnce(null)
+    tx.binStockItem.findFirst.mockResolvedValueOnce({
+      id: 'source-stock',
+      quantityAvailable: new Prisma.Decimal(10)
+    })
 
     tx.binOperationEntry.create
       .mockResolvedValueOnce({ id: 'boe-neg' })
       .mockResolvedValueOnce({ id: 'boe-pos' })
 
-    tx.binStockItem.update.mockResolvedValueOnce({ id: 'source-stock-updated' })
+    tx.binStockItem.updateMany.mockResolvedValueOnce({ count: 1 })
+    // Post-decrement re-read inside decrementOrDeleteStockItem (10 - 4 = 6)
     tx.binStockItem.findUnique.mockResolvedValueOnce({
       id: 'source-stock',
-      quantityAvailable: new Prisma.Decimal(10)
+      quantityAvailable: new Prisma.Decimal(6)
     })
-    tx.binStockItem.create.mockResolvedValueOnce({ id: 'dest-stock-created' })
+    tx.binStockItem.upsert.mockResolvedValueOnce({ id: 'dest-stock-created' })
     tx.itemLedgerEntry.createMany.mockResolvedValue({ count: 2 })
 
     const result = await createBinOperationsFromItem({
@@ -225,19 +222,19 @@ describe('createBinOperationsFromItem', () => {
     expect(firstCreateCall.data.zoneId).toBe('zone-from')
     expect(secondCreateCall.data.zoneId).toBe('zone-to')
 
-    expect(tx.binStockItem.update).toHaveBeenCalledWith(
+    expect(tx.binStockItem.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'source-stock' },
+        where: expect.objectContaining({ id: 'source-stock', quantityAvailable: { gte: 4 } }),
         data: expect.objectContaining({
-          quantityAvailable: new Prisma.Decimal(6),
+          quantityAvailable: { decrement: 4 },
           lastOperationBoeId: 'boe-neg'
         })
       })
     )
 
-    expect(tx.binStockItem.create).toHaveBeenCalledWith(
+    expect(tx.binStockItem.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
+        create: expect.objectContaining({
           binId: 'bin-destination',
           quantityAvailable: new Prisma.Decimal(4)
         })

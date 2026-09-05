@@ -29,6 +29,10 @@ vi.mock('@/lib/prisma', () => ({
   default: {}
 }))
 
+vi.mock('@/lib/api/idempotency', () => ({
+  withIdempotency: vi.fn((_db: unknown, _args: unknown, handler: () => unknown) => handler())
+}))
+
 import { POST as POST_PAUSE } from '@/app/api/warehouse/orders/[orderType]/[id]/pause/route'
 import { POST as POST_RESUME } from '@/app/api/warehouse/orders/[orderType]/[id]/resume/route'
 import { POST as POST_START } from '@/app/api/warehouse/orders/[orderType]/[id]/start/route'
@@ -69,7 +73,9 @@ describe('warehouse operational order transition routes', () => {
     it('returns 400 when warehouseId missing on token', async () => {
       mockAuth.mockReturnValue({ userId: 'u1', role: 'WAREHOUSE_MANAGER' })
       mockFloor.mockReturnValue(true)
-      const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-1/start')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-1/start', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_START(req, {
         params: Promise.resolve({ orderType: 'purchase', id: 'po-1' })
       })
@@ -92,7 +98,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockStartOperational.mockResolvedValue({ id: 'po-1', status: OrderStatus.EXECUTING, orderAssignmentId: 'asg-1' })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-1/start')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-1/start', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_START(req, {
         params: Promise.resolve({ orderType: 'purchase', id: 'po-1' })
       })
@@ -116,7 +124,7 @@ describe('warehouse operational order transition routes', () => {
       const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-2/start', {
         method: 'POST',
         body: JSON.stringify({ forcePauseOthers: true }),
-        headers: { 'content-type': 'application/json' }
+        headers: { 'content-type': 'application/json', 'Idempotency-Key': 'test-key' }
       })
       const res = await POST_START(req, {
         params: Promise.resolve({ orderType: 'purchase', id: 'po-2' })
@@ -136,7 +144,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockStartOperational.mockResolvedValue({ id: 'so-1', status: OrderStatus.EXECUTING, orderAssignmentId: 'asg-2' })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/sales/so-1/start')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/sales/so-1/start', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_START(req, {
         params: Promise.resolve({ orderType: 'sales', id: 'so-1' })
       })
@@ -157,7 +167,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockStartOperational.mockResolvedValue({ id: 'to-1', status: OrderStatus.EXECUTING, orderAssignmentId: 'asg-3' })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/transfer/to-1/start')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/transfer/to-1/start', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_START(req, {
         params: Promise.resolve({ orderType: 'transfer', id: 'to-1' })
       })
@@ -180,7 +192,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockPausePurchase.mockResolvedValue({ id: 'po-1', status: OrderStatus.PAUSED })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-1/pause')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-1/pause', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_PAUSE(req, {
         params: Promise.resolve({ orderType: 'purchase', id: 'po-1' })
       })
@@ -194,7 +208,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockPauseSales.mockResolvedValue({ id: 'so-1', status: OrderStatus.PAUSED })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/sales/so-1/pause')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/sales/so-1/pause', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_PAUSE(req, {
         params: Promise.resolve({ orderType: 'sales', id: 'so-1' })
       })
@@ -208,7 +224,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockPauseTransfer.mockResolvedValue({ id: 'to-1', status: OrderStatus.PAUSED })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/transfer/to-1/pause')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/transfer/to-1/pause', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_PAUSE(req, {
         params: Promise.resolve({ orderType: 'transfer', id: 'to-1' })
       })
@@ -224,7 +242,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockResumePurchase.mockResolvedValue({ id: 'po-1', status: OrderStatus.EXECUTING, orderAssignmentId: 'asg-resume-po' })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-1/resume')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/purchase/po-1/resume', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_RESUME(req, {
         params: Promise.resolve({ orderType: 'purchase', id: 'po-1' })
       })
@@ -238,7 +258,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockResumeTransfer.mockResolvedValue({ id: 'to-1', status: OrderStatus.EXECUTING, orderAssignmentId: 'asg-resume-to' })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/transfer/to-1/resume')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/transfer/to-1/resume', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_RESUME(req, {
         params: Promise.resolve({ orderType: 'transfer', id: 'to-1' })
       })
@@ -252,7 +274,9 @@ describe('warehouse operational order transition routes', () => {
       mockAuth.mockReturnValue(floorUser)
       mockFloor.mockReturnValue(true)
       mockResumeSales.mockResolvedValue({ id: 'so-1', status: OrderStatus.EXECUTING, orderAssignmentId: 'asg-resume-so' })
-      const req = new NextRequest('http://localhost/api/warehouse/orders/sales/so-1/resume')
+      const req = new NextRequest('http://localhost/api/warehouse/orders/sales/so-1/resume', {
+        headers: { 'Idempotency-Key': 'test-key' }
+      })
       const res = await POST_RESUME(req, {
         params: Promise.resolve({ orderType: 'sales', id: 'so-1' })
       })

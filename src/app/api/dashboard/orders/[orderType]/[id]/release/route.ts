@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 
+import { withIdempotency } from '@/lib/api/idempotency'
 import { fail, forbidden, ok, unauthorized } from '@/lib/api/response'
 import { verifyAccessTokenFromRequest, isOfficeRole } from '@/lib/auth/middleware'
 import { DomainError } from '@/lib/errors'
@@ -51,24 +52,35 @@ export async function POST(_req: NextRequest, { params }: RouteParams) {
     return fail('Purchase order id is required.', 'VALIDATION_ERROR', 400)
   }
 
-  try {
-    const data = await releasePurchaseOrder(prisma, id, payload.userId)
-    const attachedRecieptOrder = await createPurchaseOrderReceipt(prisma, id)
-    if (!attachedRecieptOrder.success) {
-      return fail(attachedRecieptOrder.message, attachedRecieptOrder.code, 400)
-    }
-
-    return ok(
-      { ...attachedRecieptOrder.receiptOrder, ...data },
-      'Purchase order released successfully.'
-    )
-  } catch (error) {
-    if (error instanceof DomainError) {
-      return fail(error.message, error.code, error.status)
-    }
-
-    logAppError('[POST /api/dashboard/orders/[orderType]/[id]/release]', error)
-
-    return fail('Failed to release purchase order.')
+  const idempotencyKey = _req.headers.get('Idempotency-Key')?.trim()
+  if (!idempotencyKey) {
+    return fail('Idempotency-Key header is required.', 'IDEMPOTENCY_KEY_REQUIRED', 400)
   }
+
+  return withIdempotency(
+    prisma,
+    { scope: `po:release:${id}`, idempotencyKey, body: {}, userId: payload.userId },
+    async () => {
+      try {
+        const data = await releasePurchaseOrder(prisma, id, payload.userId)
+        const attachedRecieptOrder = await createPurchaseOrderReceipt(prisma, id)
+        if (!attachedRecieptOrder.success) {
+          return fail(attachedRecieptOrder.message, attachedRecieptOrder.code, 400)
+        }
+
+        return ok(
+          { ...attachedRecieptOrder.receiptOrder, ...data },
+          'Purchase order released successfully.'
+        )
+      } catch (error) {
+        if (error instanceof DomainError) {
+          return fail(error.message, error.code, error.status)
+        }
+
+        logAppError('[POST /api/dashboard/orders/[orderType]/[id]/release]', error)
+
+        return fail('Failed to release purchase order.')
+      }
+    }
+  )
 }

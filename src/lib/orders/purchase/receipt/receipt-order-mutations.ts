@@ -72,90 +72,111 @@ export type ConfirmPurchaseReceiptLineHandledResult =
       code?: string
     }
 
+export type ConfirmPurchaseReceiptLineHandledInTxResult = {
+  orderExecutionActivityId: string
+  binOperationEntryId?: string
+}
+
+/**
+ * confirmPurchaseReceiptLineHandledInTx.
+ * Core of confirmPurchaseReceiptLineHandled, taking an already-open
+ * transaction so a caller (e.g. the receipt-line-handle route) can run it
+ * alongside other writes — such as the actual stock-quantity mutation — in
+ * one atomic transaction instead of two. Throws DomainError directly; no
+ * {success,...} envelope.
+ * @param tx - Parameter for confirmPurchaseReceiptLineHandledInTx.
+ * @param input - Parameter for confirmPurchaseReceiptLineHandledInTx.
+ * @returns Result from confirmPurchaseReceiptLineHandledInTx.
+ */
+export async function confirmPurchaseReceiptLineHandledInTx(
+  tx: Tx,
+  input: ConfirmPurchaseReceiptLineHandledInput
+): Promise<ConfirmPurchaseReceiptLineHandledInTxResult> {
+  const line = await tx.purchaseOrderReceiptLine.findUnique({
+    where: { id: input.receiptLineId },
+    select: receiptLineScopedSelect
+  })
+
+  if (!line) {
+    throw new DomainError('Receipt line not found.', 'NOT_FOUND', 404)
+  }
+
+  if (line.correctionOfLineId) {
+    throw new DomainError('Cannot update a correction receipt line in place.', 'INVALID_STATE', 400)
+  }
+
+  if (line.receiptLine.deletedAt) {
+    throw new DomainError('Receipt has been deleted.', 'INVALID_STATE', 400)
+  }
+
+  const assignmentInput: OrderAssignmentActivityInput = {
+    orderAssignmentId: input.orderAssignmentId,
+    userId: input.userId,
+    warehouseId: input.warehouseId,
+    orderId: input.orderId,
+    orderType: OrderType.PURCHASE,
+    orderLineRefId: input.orderLineRefId,
+    notes: input.activityNotes ?? null
+  }
+
+  let orderExecutionActivityId: string
+  let binOperationEntryId: string | undefined
+
+  if (input.stockMove) {
+    const recorded = await recordOrderStockActivityInTx(tx, {
+      assignmentActivityInput: assignmentInput,
+      activityType: ExecutionActivity.LINE_RECEIVED,
+      executionLineDocument: OrderExecutionLineDocument.PURCHASE_RECEIPT_LINE,
+      executionLineId: line.id,
+      notes: input.activityNotes ?? null,
+      userActivity:
+        typeof input.stockMove.logEntityId === 'string'
+          ? {
+            entityType: input.stockMove.logEntityType ?? 'PurchaseOrderReceiptLine',
+            entityId: input.stockMove.logEntityId,
+            metadata: input.stockMove.logMetadata
+          }
+          : undefined,
+      binOperation: input.stockMove.binOperation
+    })
+    orderExecutionActivityId = recorded.orderExecutionActivityId
+    binOperationEntryId = recorded.binOperationEntryId
+  } else {
+    const assignmentRow = await loadAssignmentForActivity(tx, assignmentInput)
+    const activityRow = await createExecutionActivityInTx(
+      tx,
+      assignmentRow,
+      assignmentInput,
+      ExecutionActivity.LINE_RECEIVED,
+      {
+        executionLineDocument: OrderExecutionLineDocument.PURCHASE_RECEIPT_LINE,
+        executionLineId: line.id
+      }
+    )
+    orderExecutionActivityId = activityRow.id
+  }
+
+  await tx.purchaseOrderReceiptLine.update({
+    where: { id: line.id },
+    data: {
+      quantity: input.quantity,
+      disposition: input.disposition,
+      notes: input.notes ?? null,
+      orderExecutionActivityId
+    }
+  })
+
+  await recomputePurchaseOrderReceiptRollups(tx, line.purchaseOrderReceiptId)
+
+  return { orderExecutionActivityId, binOperationEntryId }
+}
+
 export async function confirmPurchaseReceiptLineHandled(
   db: Db,
   input: ConfirmPurchaseReceiptLineHandledInput
 ): Promise<ConfirmPurchaseReceiptLineHandledResult> {
   try {
-    const outcome = await db.$transaction(async (tx: Tx) => {
-      const line = await tx.purchaseOrderReceiptLine.findUnique({
-        where: { id: input.receiptLineId },
-        select: receiptLineScopedSelect
-      })
-
-      if (!line) {
-        throw new DomainError('Receipt line not found.', 'NOT_FOUND', 404)
-      }
-
-      if (line.correctionOfLineId) {
-        throw new DomainError('Cannot update a correction receipt line in place.', 'INVALID_STATE', 400)
-      }
-
-      if (line.receiptLine.deletedAt) {
-        throw new DomainError('Receipt has been deleted.', 'INVALID_STATE', 400)
-      }
-
-      const assignmentInput: OrderAssignmentActivityInput = {
-        orderAssignmentId: input.orderAssignmentId,
-        userId: input.userId,
-        warehouseId: input.warehouseId,
-        orderId: input.orderId,
-        orderType: OrderType.PURCHASE,
-        orderLineRefId: input.orderLineRefId,
-        notes: input.activityNotes ?? null
-      }
-
-      let orderExecutionActivityId: string
-      let binOperationEntryId: string | undefined
-
-      if (input.stockMove) {
-        const recorded = await recordOrderStockActivityInTx(tx, {
-          assignmentActivityInput: assignmentInput,
-          activityType: ExecutionActivity.LINE_RECEIVED,
-          executionLineDocument: OrderExecutionLineDocument.PURCHASE_RECEIPT_LINE,
-          executionLineId: line.id,
-          notes: input.activityNotes ?? null,
-          userActivity:
-            typeof input.stockMove.logEntityId === 'string'
-              ? {
-                entityType: input.stockMove.logEntityType ?? 'PurchaseOrderReceiptLine',
-                entityId: input.stockMove.logEntityId,
-                metadata: input.stockMove.logMetadata
-              }
-              : undefined,
-          binOperation: input.stockMove.binOperation
-        })
-        orderExecutionActivityId = recorded.orderExecutionActivityId
-        binOperationEntryId = recorded.binOperationEntryId
-      } else {
-        const assignmentRow = await loadAssignmentForActivity(tx, assignmentInput)
-        const activityRow = await createExecutionActivityInTx(
-          tx,
-          assignmentRow,
-          assignmentInput,
-          ExecutionActivity.LINE_RECEIVED,
-          {
-            executionLineDocument: OrderExecutionLineDocument.PURCHASE_RECEIPT_LINE,
-            executionLineId: line.id
-          }
-        )
-        orderExecutionActivityId = activityRow.id
-      }
-
-      await tx.purchaseOrderReceiptLine.update({
-        where: { id: line.id },
-        data: {
-          quantity: input.quantity,
-          disposition: input.disposition,
-          notes: input.notes ?? null,
-          orderExecutionActivityId
-        }
-      })
-
-      await recomputePurchaseOrderReceiptRollups(tx, line.purchaseOrderReceiptId)
-
-      return { orderExecutionActivityId, binOperationEntryId }
-    })
+    const outcome = await db.$transaction((tx: Tx) => confirmPurchaseReceiptLineHandledInTx(tx, input))
 
     return { success: true, ...outcome }
   } catch (err) {

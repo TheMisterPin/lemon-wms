@@ -19,7 +19,10 @@ function createMockPrisma() {
       findUnique: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
+      upsert: vi.fn(),
       delete: vi.fn(),
+      deleteMany: vi.fn(),
       findMany: vi.fn()
     },
     zone: {
@@ -64,8 +67,7 @@ describe('move-operations transit flow', () => {
       description: 'Widget A'
     })
     tx.binOperationEntry.create.mockResolvedValue({ id: 'boe-load' })
-    tx.binStockItem.findFirst.mockResolvedValue(null)
-    tx.binStockItem.create.mockResolvedValue({ id: 'transit-row-1' })
+    tx.binStockItem.upsert.mockResolvedValue({ id: 'transit-row-1' })
 
     const result = await loadItemsToTrolley({
       prisma: prisma as never,
@@ -88,9 +90,9 @@ describe('move-operations transit flow', () => {
       })
     )
 
-    expect(tx.binStockItem.create).toHaveBeenCalledWith(
+    expect(tx.binStockItem.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
+        create: expect.objectContaining({
           binId: 'bin-origin',
           status: 'IN_TRANSIT',
           transitDeviceId: 'device-1',
@@ -99,13 +101,8 @@ describe('move-operations transit flow', () => {
       })
     )
 
-    expect(tx.binStockItem.update).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          quantityAvailable: expect.objectContaining({ decrement: expect.anything() })
-        })
-      })
-    )
+    expect(tx.binStockItem.updateMany).not.toHaveBeenCalled()
+    expect(tx.binStockItem.deleteMany).not.toHaveBeenCalled()
     expect(result.transitStockItem.id).toBe('transit-row-1')
   })
 
@@ -127,27 +124,31 @@ describe('move-operations transit flow', () => {
         status: 'IN_TRANSIT',
         description: 'Widget A'
       })
+      // Post-decrement re-read inside decrementOrDeleteStockItem for source-avail-1 (10 - 3 = 7)
       .mockResolvedValueOnce({
         id: 'source-avail-1',
-        quantityAvailable: new Prisma.Decimal(10)
+        quantityAvailable: new Prisma.Decimal(7)
+      })
+      // Post-decrement re-read inside decrementOrDeleteStockItem for transit-row-1 (3 - 3 = 0)
+      .mockResolvedValueOnce({
+        id: 'transit-row-1',
+        quantityAvailable: new Prisma.Decimal(0)
       })
 
-    tx.binStockItem.findFirst
-      .mockResolvedValueOnce({
-        id: 'source-avail-1',
-        warehouseId: 'wh-1',
-        binId: 'bin-origin',
-        itemId: 'item-1',
-        lotId: null,
-        serialNumberId: null,
-        quantityAvailable: new Prisma.Decimal(10)
-      })
-      .mockResolvedValueOnce(null)
+    tx.binStockItem.findFirst.mockResolvedValueOnce({
+      id: 'source-avail-1',
+      warehouseId: 'wh-1',
+      binId: 'bin-origin',
+      itemId: 'item-1',
+      lotId: null,
+      serialNumberId: null,
+      quantityAvailable: new Prisma.Decimal(10)
+    })
 
     tx.binOperationEntry.create.mockResolvedValue({ id: 'boe-unload' })
-    tx.binStockItem.update.mockResolvedValue({ id: 'source-avail-1-updated' })
-    tx.binStockItem.create.mockResolvedValue({ id: 'dest-avail-created' })
-    tx.binStockItem.delete.mockResolvedValue({ id: 'transit-row-1' })
+    tx.binStockItem.updateMany.mockResolvedValue({ count: 1 })
+    tx.binStockItem.upsert.mockResolvedValue({ id: 'dest-avail-created' })
+    tx.binStockItem.deleteMany.mockResolvedValue({ count: 1 })
 
     tx.bin.findUnique
       .mockResolvedValueOnce({ currentCapacity: new Prisma.Decimal(20) })
@@ -174,18 +175,18 @@ describe('move-operations transit flow', () => {
       })
     )
 
-    expect(tx.binStockItem.update).toHaveBeenCalledWith(
+    expect(tx.binStockItem.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'source-avail-1' },
+        where: expect.objectContaining({ id: 'source-avail-1', quantityAvailable: { gte: 3 } }),
         data: expect.objectContaining({
-          quantityAvailable: new Prisma.Decimal(7)
+          quantityAvailable: { decrement: 3 }
         })
       })
     )
 
-    expect(tx.binStockItem.create).toHaveBeenCalledWith(
+    expect(tx.binStockItem.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
+        create: expect.objectContaining({
           binId: 'bin-destination',
           status: 'AVAILABLE',
           transitDeviceId: null,
@@ -194,7 +195,14 @@ describe('move-operations transit flow', () => {
       })
     )
 
-    expect(tx.binStockItem.delete).toHaveBeenCalledWith({ where: { id: 'transit-row-1' } })
+    expect(tx.binStockItem.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ id: 'transit-row-1', quantityAvailable: { gte: 3 } })
+      })
+    )
+    expect(tx.binStockItem.deleteMany).toHaveBeenCalledWith({
+      where: { id: 'transit-row-1', quantityAvailable: new Prisma.Decimal(0) }
+    })
     expect(result.results[0]).toMatchObject({
       boeId: 'boe-unload',
       transitBinStockItemId: 'transit-row-1',

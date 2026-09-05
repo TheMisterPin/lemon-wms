@@ -1,0 +1,31 @@
+// =============================================================================
+// idempotency.prisma
+// Persistent idempotency records for mutating API requests.
+//
+// One row per (scope, idempotencyKey) attempt. scope must disambiguate by the
+// concrete resource id (e.g. "po:release:<poId>"), never just a route name, so
+// two different resources can't collide on the same client-generated key.
+//
+// The @@unique below is the compare-and-set primitive: callers attempt a
+// create() and treat a unique-constraint violation as "an attempt already
+// exists for this key" (see src/lib/api/idempotency.ts).
+//
+// Models: IdempotencyRecord
+// =============================================================================
+
+model IdempotencyRecord {
+  id             String            @id @default(uuid())
+  scope          String
+  idempotencyKey String
+  requestHash    String
+  status         IdempotencyStatus @default(PENDING)
+  responseStatus Int?
+  responseBody   Json?
+  userId         String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  completedAt    DateTime?
+
+  @@unique([scope, idempotencyKey])
+  @@index([createdAt])
+}
